@@ -1,0 +1,5 @@
+/build/
+/dist/
+/src/META-INF/private.key
+/teste.h2.db
+/teste.trace.db

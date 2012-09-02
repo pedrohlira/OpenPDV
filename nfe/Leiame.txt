@@ -1,0 +1,7 @@
+## Leiame ##
+
+# Copie para esta pasta o arquivo .pfx (seu certificado digital modelo A1) com o nome de certificado.pfx
+# e a senha de acesso ao certificado voce deve criptografar usando o aplicativo AdmPDV, favor entrar em contato.
+
+# O retorno sera a senha criptografa usando a chave privada do sistema, agora voce coloca este senha no arquivo
+# config.properties dentro da pasta conf na propriedade nfe.senha, isso sera usado para emitir NFe

@@ -1,0 +1,5 @@
+## Leiame ##
+
+# Descompacte o zip correspondente da impressora que ira usar, e coloque todos os arquivos dentro da mesma pasta onde se encontra este arquivo.
+
+# Caso nao tenha um zip para sua impressora significa que o sistema ainda nao foi implementado para ela, entao se desejar entre em contato conosco em http://phdss.com.br
