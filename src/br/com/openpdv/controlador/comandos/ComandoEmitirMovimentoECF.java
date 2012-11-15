@@ -1,15 +1,15 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.controlador.permissao.Login;
-import br.com.openpdv.modelo.anexo.vi.*;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.*;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.controlador.PAF;
+import br.com.phdss.modelo.anexo.vi.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import org.apache.log4j.Logger;
@@ -46,10 +46,15 @@ public class ComandoEmitirMovimentoECF implements IComando {
     @Override
     public void executar() throws OpenPdvException {
         try {
-            AnexoVI anexoVI = new AnexoVI();
+            R01 r01 = new R01();
+            List<R02> listaR02 = new ArrayList<>();
+            List<R03> listaR03 = new ArrayList<>();
+            List<R04> listaR04 = new ArrayList<>();
+            List<R05> listaR05 = new ArrayList<>();
+            List<R06> listaR06 = new ArrayList<>();
+            List<R07> listaR07 = new ArrayList<>();
 
             // r01
-            R01 r01 = new R01();
             r01.setSerie(impressora.getEcfImpressoraSerie());
             r01.setMfAdicional(impressora.getEcfImpressoraMfadicional());
             r01.setModeloECF(impressora.getEcfImpressoraModelo());
@@ -73,20 +78,28 @@ public class ComandoEmitirMovimentoECF implements IComando {
             r01.setShRazao(PAF.AUXILIAR.getProperty("sh.razao"));
             r01.setPafNome(PAF.AUXILIAR.getProperty("paf.nome"));
             r01.setPafVersao(PAF.AUXILIAR.getProperty("paf.versao"));
-            r01.setPafMD5(PAF.AUXILIAR.getProperty("paf.md5"));
+            StringBuilder arquivoMD5 = new StringBuilder(System.getProperty("user.dir"));
+            arquivoMD5.append(System.getProperty("file.separator"));
+            arquivoMD5.append("arquivos");
+            arquivoMD5.append(System.getProperty("file.separator"));
+            arquivoMD5.append("arquivoMD5.txt");
+            r01.setPafMD5(PAF.gerarMD5(arquivoMD5.toString()));
             r01.setPafER(PAF.AUXILIAR.getProperty("paf.er"));
             r01.setInicio(inicio);
             r01.setFim(fim);
-            anexoVI.setR01(r01);
 
+            // ajustando a data fim para documento, pois o mesmo usa datetime
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(fim);
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            fim = cal.getTime();
+            
             // r02
             FiltroData dt1 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
-            FiltroData dt2 = new FiltroData("ecfZMovimento", ECompara.MENOR_IGUAL, fim);
+            FiltroData dt2 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
             FiltroObjeto fo1 = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, impressora);
             GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{dt1, dt2, fo1});
             List<EcfZ> ecfZs = service.selecionar(new EcfZ(), 0, 0, gf);
-
-            List<R02> listaR02 = new ArrayList<>();
             for (EcfZ ecfz : ecfZs) {
                 R02 r02 = new R02();
                 r02.setSerie(impressora.getEcfImpressoraSerie());
@@ -101,13 +114,8 @@ public class ComandoEmitirMovimentoECF implements IComando {
                 r02.setBruto(ecfz.getEcfZBruto());
                 r02.setIssqn(ecfz.getEcfZIssqn() ? 'S' : 'N');
                 listaR02.add(r02);
-            }
-            anexoVI.setListaR02(listaR02);
-
-            // r03
-            List<R03> listaR03 = new ArrayList<>();
-            Set<String> totalizadores = new HashSet<>();
-            for (EcfZ ecfz : ecfZs) {
+                // r03
+                Set<String> totalizadores = new HashSet<>();
                 for (EcfZTotais totais : ecfz.getEcfZTotais()) {
                     R03 r03 = new R03();
                     r03.setSerie(impressora.getEcfImpressoraSerie());
@@ -121,95 +129,95 @@ public class ComandoEmitirMovimentoECF implements IComando {
                     // para uso nos itens da venda
                     totalizadores.add(totais.getEcfZTotaisCodigo());
                 }
-            }
-            anexoVI.setListaR03(listaR03);
-
-            // r04
-            dt1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, inicio);
-            dt2 = new FiltroData("ecfVendaData", ECompara.MENOR_IGUAL, fim);
-            fo1 = new FiltroObjeto("ecfZ.ecfImpressora", ECompara.IGUAL, impressora);
-            gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{dt1, dt2, fo1});
-            List<EcfVenda> ecfVendas = service.selecionar(new EcfVenda(), 0, 0, gf);
-
-            List<R04> listaR04 = new ArrayList<>();
-            for (EcfVenda venda : ecfVendas) {
-                R04 r04 = new R04();
-                r04.setSerie(impressora.getEcfImpressoraSerie());
-                r04.setMfAdicional(impressora.getEcfImpressoraMfadicional());
-                r04.setModeloECF(impressora.getEcfImpressoraModelo());
-                r04.setUsuario(venda.getSisUsuario().getId());
-                r04.setDocumento(venda.getEcfVendaCcf());
-                r04.setCoo(venda.getEcfVendaCoo());
-                r04.setData(venda.getEcfVendaData());
-                r04.setBruto(venda.getEcfVendaFechada() ? venda.getEcfVendaBruto() : 0.00);
-                r04.setDesconto(venda.getEcfVendaDesconto());
-                r04.setTipoDesconto('V');
-                r04.setAcrescimo(venda.getEcfVendaAcrescimo());
-                r04.setTipoAcrescimo('V');
-                r04.setLiquido(venda.getEcfVendaFechada() ? venda.getEcfVendaLiquido() : 0.00);
-                r04.setCancelado(venda.getEcfVendaCancelada() ? 'S' : 'N');
-                r04.setCanceladoAcrescimo(venda.getEcfVendaAcrescimo());
-                r04.setOrdemAcresDesc('A');
-                if (venda.getSisCliente() != null) {
-                    r04.setClienteNome(venda.getSisCliente().getSisClienteNome());
-                    r04.setClienteCPF(venda.getSisCliente().getSisClienteDoc().replaceAll("[^0-9]", ""));
-                }
-                listaR04.add(r04);
-            }
-            anexoVI.setListaR04(listaR04);
-
-            // r05
-            List<R05> listaR05 = new ArrayList<>();
-            for (EcfVenda venda : ecfVendas) {
-                for (EcfVendaProduto vp : venda.getEcfVendaProdutos()) {
-                    R05 r05 = new R05();
-                    r05.setSerie(impressora.getEcfImpressoraSerie());
-                    r05.setMfAdicional(impressora.getEcfImpressoraMfadicional());
-                    r05.setModeloECF(impressora.getEcfImpressoraModelo());
-                    r05.setUsuario(venda.getSisUsuario().getId());
-                    r05.setDocumento(venda.getEcfVendaCcf());
-                    r05.setCoo(venda.getEcfVendaCoo());
-                    r05.setItem(vp.getEcfVendaProdutoOrdem());
-                    r05.setCodigo(vp.getEcfVendaProdutoCodigo());
-                    r05.setDescricao(vp.getProdProduto().getProdProdutoDescricao());
-                    r05.setQuantidade(vp.getEcfVendaProdutoQuantidade());
-                    r05.setUnidade(vp.getProdEmbalagem().getProdEmbalagemNome());
-                    r05.setBruto(vp.getEcfVendaProdutoBruto());
-                    r05.setDesconto(vp.getEcfVendaProdutoDesconto());
-                    r05.setAcrescimo(vp.getEcfVendaProdutoAcrescimo());
-                    r05.setTotal(vp.getEcfVendaProdutoTotal());
-                    if (vp.getEcfVendaProdutoTributacao() == 'T' || vp.getEcfVendaProdutoTributacao() == 'S') {
-                        String sufixo = vp.getEcfVendaProdutoTributacao() + Util.formataNumero(vp.getEcfVendaProdutoIcms(), 2, 2, false).replace(",", "");
-                        for (String tot : totalizadores) {
-                            if (tot.endsWith(sufixo)) {
-                                r05.setTotalizador(tot);
-                                break;
-                            }
-                        }
-                    } else {
-                        r05.setTotalizador(vp.getEcfVendaProdutoTributacao() + "1");
+                // r04
+                for (EcfVenda venda : ecfz.getEcfVendas()) {
+                    R04 r04 = new R04();
+                    r04.setSerie(impressora.getEcfImpressoraSerie());
+                    r04.setMfAdicional(impressora.getEcfImpressoraMfadicional());
+                    r04.setModeloECF(impressora.getEcfImpressoraModelo());
+                    r04.setUsuario(venda.getSisUsuario().getId());
+                    r04.setDocumento(venda.getEcfVendaCcf());
+                    r04.setCoo(venda.getEcfVendaCoo());
+                    r04.setData(venda.getEcfVendaData());
+                    r04.setBruto(venda.getEcfVendaFechada() ? venda.getEcfVendaBruto() : 0.00);
+                    r04.setDesconto(venda.getEcfVendaDesconto());
+                    r04.setTipoDesconto('V');
+                    r04.setAcrescimo(venda.getEcfVendaAcrescimo());
+                    r04.setTipoAcrescimo('V');
+                    r04.setLiquido(venda.getEcfVendaFechada() ? venda.getEcfVendaLiquido() : 0.00);
+                    r04.setCancelado(venda.getEcfVendaCancelada() ? 'S' : 'N');
+                    r04.setCanceladoAcrescimo(venda.getEcfVendaAcrescimo());
+                    r04.setOrdemAcresDesc('A');
+                    if (venda.getSisCliente() != null) {
+                        r04.setClienteNome(venda.getSisCliente().getSisClienteNome());
+                        r04.setClienteCPF(venda.getSisCliente().getSisClienteDoc().replaceAll("[^0-9]", ""));
                     }
-                    r05.setCancelado(vp.getEcfVendaProdutoCancelado() ? 'S' : 'N');
-                    r05.setCanceladoQtd(0.00);
-                    r05.setCanceladoValor(0.00);
-                    r05.setCanceladoAcrescimo(0.00);
-                    r05.setIat(vp.getProdProduto().getProdProdutoIat());
-                    r05.setIppt(vp.getProdProduto().getProdProdutoIppt());
-                    r05.setDecimalQuantidade(2);
-                    r05.setDecimalValor(2);
-                    listaR05.add(r05);
+                    listaR04.add(r04);
+                    // r05
+                    for (EcfVendaProduto vp : venda.getEcfVendaProdutos()) {
+                        R05 r05 = new R05();
+                        r05.setSerie(impressora.getEcfImpressoraSerie());
+                        r05.setMfAdicional(impressora.getEcfImpressoraMfadicional());
+                        r05.setModeloECF(impressora.getEcfImpressoraModelo());
+                        r05.setUsuario(venda.getSisUsuario().getId());
+                        r05.setDocumento(venda.getEcfVendaCcf());
+                        r05.setCoo(venda.getEcfVendaCoo());
+                        r05.setItem(vp.getEcfVendaProdutoOrdem());
+                        r05.setCodigo(vp.getEcfVendaProdutoCodigo());
+                        r05.setDescricao(vp.getProdProduto().getProdProdutoDescricao());
+                        r05.setQuantidade(vp.getEcfVendaProdutoQuantidade());
+                        r05.setUnidade(vp.getProdEmbalagem().getProdEmbalagemNome());
+                        r05.setBruto(vp.getEcfVendaProdutoBruto());
+                        r05.setDesconto(vp.getEcfVendaProdutoDesconto());
+                        r05.setAcrescimo(vp.getEcfVendaProdutoAcrescimo());
+                        r05.setTotal(vp.getEcfVendaProdutoTotal());
+                        if (vp.getEcfVendaProdutoTributacao() == 'T' || vp.getEcfVendaProdutoTributacao() == 'S') {
+                            String sufixo = vp.getEcfVendaProdutoTributacao() + Util.formataNumero(vp.getEcfVendaProdutoIcms(), 2, 2, false).replace(",", "");
+                            for (String tot : totalizadores) {
+                                if (tot.endsWith(sufixo)) {
+                                    r05.setTotalizador(tot);
+                                    break;
+                                }
+                            }
+                        } else {
+                            r05.setTotalizador(vp.getEcfVendaProdutoTributacao() + "1");
+                        }
+                        r05.setCancelado(vp.getEcfVendaProdutoCancelado() ? 'S' : 'N');
+                        r05.setCanceladoQtd(0.00);
+                        r05.setCanceladoValor(0.00);
+                        r05.setCanceladoAcrescimo(0.00);
+                        r05.setIat(vp.getProdProduto().getProdProdutoIat());
+                        r05.setIppt(vp.getProdProduto().getProdProdutoIppt());
+                        r05.setDecimalQuantidade(2);
+                        r05.setDecimalValor(2);
+                        listaR05.add(r05);
+                    }
+                    // r07
+                    for (EcfPagamento vp : venda.getEcfPagamentos()) {
+                        R07 r07 = new R07();
+                        r07.setSerie(impressora.getEcfImpressoraSerie());
+                        r07.setMfAdicional(impressora.getEcfImpressoraMfadicional());
+                        r07.setModeloECF(impressora.getEcfImpressoraModelo());
+                        r07.setUsuario(venda.getSisUsuario().getId());
+                        r07.setCoo(venda.getEcfVendaCoo());
+                        r07.setCcf(venda.getEcfVendaCcf());
+                        r07.setGnf(vp.getEcfPagamentoGnf());
+                        r07.setMeioPagamento(vp.getEcfPagamentoTipo().getEcfPagamentoTipoDescricao());
+                        r07.setValor(vp.getEcfPagamentoValor());
+                        r07.setData(venda.getEcfVendaData());
+                        r07.setEstorno(vp.getEcfPagamentoEstorno());
+                        r07.setValorEstorno(vp.getEcfPagamentoEstornoValor());
+                        listaR07.add(r07);
+                    }
                 }
             }
-            anexoVI.setListaR05(listaR05);
 
             // r06
             dt1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, inicio);
-            dt2 = new FiltroData("ecfDocumentoData", ECompara.MENOR_IGUAL, fim);
+            dt2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, fim);
             fo1 = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, impressora);
             gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{dt1, dt2, fo1});
             List<EcfDocumento> ecfDocumentos = service.selecionar(new EcfDocumento(), 0, 0, gf);
-
-            List<R06> listaR06 = new ArrayList<>();
             for (EcfDocumento doc : ecfDocumentos) {
                 R06 r06 = new R06();
                 r06.setSerie(impressora.getEcfImpressoraSerie());
@@ -224,39 +232,21 @@ public class ComandoEmitirMovimentoECF implements IComando {
                 r06.setData(doc.getEcfDocumentoData());
                 listaR06.add(r06);
             }
-            anexoVI.setListaR06(listaR06);
 
-            // r07
-            List<R07> listaR07 = new ArrayList<>();
-            for (EcfVenda venda : ecfVendas) {
-                for (EcfPagamento vp : venda.getEcfPagamentos()) {
-                    R07 r07 = new R07();
-                    r07.setSerie(impressora.getEcfImpressoraSerie());
-                    r07.setMfAdicional(impressora.getEcfImpressoraMfadicional());
-                    r07.setModeloECF(impressora.getEcfImpressoraModelo());
-                    r07.setUsuario(venda.getSisUsuario().getId());
-                    r07.setCoo(venda.getEcfVendaCoo());
-                    r07.setCcf(venda.getEcfVendaCcf());
-                    r07.setGnf(vp.getEcfPagamentoGnf());
-                    r07.setMeioPagamento(vp.getEcfPagamentoTipo().getEcfPagamentoTipoDescricao());
-                    r07.setValor(vp.getEcfPagamentoValor());
-                    r07.setData(venda.getEcfVendaData());
-                    r07.setEstorno(vp.getEcfPagamentoEstorno());
-                    r07.setValorEstorno(vp.getEcfPagamentoEstornoValor());
-                    listaR07.add(r07);
-                }
-            }
+            // seta os dados
+            AnexoVI anexoVI = new AnexoVI();
+            anexoVI.setR01(r01);
+            anexoVI.setListaR02(listaR02);
+            anexoVI.setListaR03(listaR03);
+            anexoVI.setListaR04(listaR04);
+            anexoVI.setListaR05(listaR05);
+            anexoVI.setListaR06(listaR06);
             anexoVI.setListaR07(listaR07);
 
+            // formando o nome do arquivo
             String arquivo = impressora.getEcfImpressoraIdentificacao();
-            if (impressora.getEcfImpressoraSerie().length() > 14) {
-                arquivo += impressora.getEcfImpressoraSerie().substring(impressora.getEcfImpressoraSerie().length() - 14);
-            }
-            if (inicio.compareTo(fim) == 0) {
-                arquivo += new SimpleDateFormat("ddMMyyyy").format(inicio);
-            } else {
-                arquivo += new SimpleDateFormat("ddMMyyyy").format(new Date());
-            }
+            arquivo += impressora.getEcfImpressoraSerie().substring(impressora.getEcfImpressoraSerie().length() - 14);
+            arquivo += new SimpleDateFormat("ddMMyyyy").format(new Date());
             arquivo += ".txt";
             path = PAF.gerarMovimentosECF(anexoVI, arquivo);
         } catch (Exception ex) {

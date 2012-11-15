@@ -1,18 +1,18 @@
 package br.com.openpdv.visao.fiscal;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.comandos.ComandoSalvarDocumento;
+import br.com.openpdv.controlador.comandos.ComandoTotalizarPagamentos;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.modelo.anexo.vi.R07;
-import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.filtro.*;
-import br.com.openpdv.modelo.ecf.EcfPagamento;
-import br.com.openpdv.modelo.ecf.EcfVenda;
+import br.com.openpdv.modelo.ecf.EcfPagamentoTotais;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.controlador.PAF;
+import br.com.phdss.modelo.anexo.vi.R07;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
@@ -217,26 +217,42 @@ public class PAF_Pagamento extends JDialog {
                 @Override
                 public void run() {
                     try {
-                        // recupera todas as vendas do periodo
-                        CoreService<EcfVenda> service = new CoreService<>();
-                        FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, inicio);
-                        FiltroData fd2 = new FiltroData("ecfVendaData", ECompara.MENOR_IGUAL, fim);
-                        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
-                        EcfVenda dados = new EcfVenda();
-                        dados.setOrdemDirecao(EDirecao.ASC);
-                        List<EcfVenda> vendas = service.selecionar(dados, 0, 0, gf);
+                        // totaliza os pagamentos de hoje
+                        String shoje = Util.formataData(new Date(), "dd/MM/yyyy");
+                        Date dhoje = Util.formataData(shoje, "dd/MM/yyyy");
+                        ComandoTotalizarPagamentos totalizar = new ComandoTotalizarPagamentos(dhoje);
+                        totalizar.executar();
+                        
+                        // ajustando a data fim para documento, pois o mesmo usa datetime
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(fim);
+                        cal.add(Calendar.DAY_OF_MONTH, 1);
+                        fim = cal.getTime();
 
-                        // recupera todos pagamentos das vendas
+                        // recupera todos os pagamentos do periodo
+                        CoreService<EcfPagamentoTotais> service = new CoreService<>();
+                        FiltroData fd1 = new FiltroData("ecfPagamentoTotaisData", ECompara.MAIOR_IGUAL, inicio);
+                        FiltroData fd2 = new FiltroData("ecfPagamentoTotaisData", ECompara.MENOR, fim);
+                        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                        List<EcfPagamentoTotais> totais = service.selecionar(new EcfPagamentoTotais(), 0, 0, gf);
+
+                        // gera no formato aceito pelo PAF
                         List<R07> pagamentos = new ArrayList<>();
-                        for (EcfVenda venda : vendas) {
-                            for (EcfPagamento pag : venda.getEcfPagamentos()) {
-                                R07 r07 = new R07();
-                                r07.setMeioPagamento(pag.getEcfPagamentoTipo().getEcfPagamentoTipoDescricao());
-                                r07.setValor(pag.getEcfPagamentoValor());
-                                r07.setData(venda.getEcfVendaData());
-                                pagamentos.add(r07);
+                        for (EcfPagamentoTotais total : totais) {
+                            // em caso de cartao adiciona o modo
+                            String doc = total.getEcfPagamentoTipo().getEcfPagamentoTipoDescricao();
+                            if (total.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cartao"))) {
+                                doc = total.getEcfPagamentoTipo().isEcfPagamentoTipoDebito() ? "CARTAO DEBITO" : "CARTAO CREDITO";
                             }
+
+                            R07 r07 = new R07();
+                            r07.setData(total.getEcfPagamentoTotaisData());
+                            r07.setMeioPagamento(doc);
+                            r07.setSerie(total.getEcfPagamentoTotaisDocumento());
+                            r07.setValor(total.getEcfPagamentoTotaisValor());
+                            pagamentos.add(r07);
                         }
+                        
                         PAF.emitirMeiosPagamentos(txtDtInicio.getText(), txtDtFim.getText(), pagamentos, Util.getConfig().get("ecf.relpag"));
                         new ComandoSalvarDocumento("RG").executar();
                         Aguarde.getInstancia().setVisible(false);

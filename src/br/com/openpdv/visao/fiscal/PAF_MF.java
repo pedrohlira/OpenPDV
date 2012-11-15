@@ -1,11 +1,11 @@
 package br.com.openpdv.visao.fiscal;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.controlador.PAF;
 import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -65,7 +65,7 @@ public class PAF_MF extends JDialog {
         radCotepe = new javax.swing.JRadioButton();
         panFiltro = new javax.swing.JPanel();
         radData = new javax.swing.JRadioButton();
-        radCRZ = new javax.swing.JRadioButton();
+        radIntervalo = new javax.swing.JRadioButton();
         panPeriodo = new javax.swing.JPanel();
         lblDtInicio = new javax.swing.JLabel();
         txtDtInicio = new javax.swing.JFormattedTextField();
@@ -147,12 +147,12 @@ public class PAF_MF extends JDialog {
             }
         });
 
-        buttonGroup1.add(radCRZ);
-        radCRZ.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        radCRZ.setText("Intervalo de CRZ");
-        radCRZ.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup1.add(radIntervalo);
+        radIntervalo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        radIntervalo.setText("Intervalo de Contador");
+        radIntervalo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                radCRZActionPerformed(evt);
+                radIntervaloActionPerformed(evt);
             }
         });
 
@@ -163,14 +163,14 @@ public class PAF_MF extends JDialog {
             .addGroup(panFiltroLayout.createSequentialGroup()
                 .addGap(5, 5, 5)
                 .addComponent(radData)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 146, Short.MAX_VALUE)
-                .addComponent(radCRZ))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
+                .addComponent(radIntervalo))
         );
         panFiltroLayout.setVerticalGroup(
             panFiltroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panFiltroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(radData)
-                .addComponent(radCRZ))
+                .addComponent(radIntervalo))
         );
 
         panPeriodo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -282,22 +282,24 @@ public class PAF_MF extends JDialog {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(panOpcao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(panFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(panPeriodo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(separador, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(187, 187, 187)
-                .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(panOpcao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(separador, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(187, 187, 187)
+                        .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(6, 6, 6)
+                        .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(panFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(panPeriodo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(19, 19, 19))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -327,12 +329,12 @@ public class PAF_MF extends JDialog {
         txtDtFim.setEnabled(true);
     }//GEN-LAST:event_radDataActionPerformed
 
-    private void radCRZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCRZActionPerformed
+    private void radIntervaloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radIntervaloActionPerformed
         txtPrimeiro.setEnabled(true);
         txtUltimo.setEnabled(true);
         txtDtInicio.setEnabled(false);
         txtDtFim.setEnabled(false);
-    }//GEN-LAST:event_radCRZActionPerformed
+    }//GEN-LAST:event_radIntervaloActionPerformed
 
     private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
         botaoOK();
@@ -371,11 +373,11 @@ public class PAF_MF extends JDialog {
     private javax.swing.JPanel panFiltro;
     private javax.swing.JPanel panOpcao;
     private javax.swing.JPanel panPeriodo;
-    private javax.swing.JRadioButton radCRZ;
     private javax.swing.JRadioButton radCotepe;
     private javax.swing.JRadioButton radData;
     private javax.swing.JRadioButton radECF;
     private javax.swing.JRadioButton radEspelho;
+    private javax.swing.JRadioButton radIntervalo;
     private javax.swing.JSeparator separador;
     private javax.swing.JFormattedTextField txtDtFim;
     private javax.swing.JFormattedTextField txtDtInicio;
@@ -645,11 +647,11 @@ public class PAF_MF extends JDialog {
     }
 
     public JRadioButton getRadCRZ() {
-        return radCRZ;
+        return radIntervalo;
     }
 
     public void setRadCRZ(JRadioButton radCRZ) {
-        this.radCRZ = radCRZ;
+        this.radIntervalo = radCRZ;
     }
 
     public JRadioButton getRadCotepe() {

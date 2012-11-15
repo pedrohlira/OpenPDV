@@ -1,7 +1,5 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.EComandoSQL;
@@ -12,6 +10,8 @@ import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;

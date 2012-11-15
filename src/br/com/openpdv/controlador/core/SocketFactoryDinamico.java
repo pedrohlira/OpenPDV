@@ -13,6 +13,12 @@ import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.log4j.Logger;
 
+/**
+ * Classe responsavel pela geracao dinamica do acesso ao meio de comunicacao com
+ * a SEFAZ, para uso das operacoes de NFe.
+ *
+ * @author Pedro H. Lira
+ */
 public class SocketFactoryDinamico implements ProtocolSocketFactory {
 
     private Logger log;
@@ -21,6 +27,13 @@ public class SocketFactoryDinamico implements ProtocolSocketFactory {
     private PrivateKey privateKey;
     private String fileCacerts;
 
+    /**
+     * Construtor padrao.
+     *
+     * @param certificate o certificado.
+     * @param privateKey a chave privada.
+     * @param fileCacerts o path do arquivo cacerts.
+     */
     public SocketFactoryDinamico(X509Certificate certificate, PrivateKey privateKey, String fileCacerts) {
         log = Logger.getLogger(SocketFactoryDinamico.class);
         this.certificate = certificate;
@@ -28,6 +41,11 @@ public class SocketFactoryDinamico implements ProtocolSocketFactory {
         this.fileCacerts = fileCacerts;
     }
 
+    /**
+     * Metodo que recupera o contexto de segurancao.
+     *
+     * @return um objeto de contexto seguro.
+     */
     private SSLContext getSSLContext() {
         if (ssl == null) {
             try {
@@ -42,6 +60,20 @@ public class SocketFactoryDinamico implements ProtocolSocketFactory {
         return ssl;
     }
 
+    /**
+     * Metodo que cria/abre a conexao segura com a SEFAZ.
+     *
+     * @param host a url do servidor.
+     * @param port a porta de comunicacao.
+     * @param localAddress seu endereco local.
+     * @param localPort sua porta local.
+     * @param params parametros de conexao usados.
+     * @return um soctek de comunicao com o destino.
+     * @throws IOException em caso de erro na entrada ou saida.
+     * @throws UnknownHostException caso nao ache o destino ou seja negado.
+     * @throws ConnectTimeoutException caso a conexao demore muito tempo para
+     * conseguir.
+     */
     @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
         if (params == null) {
@@ -76,11 +108,25 @@ public class SocketFactoryDinamico implements ProtocolSocketFactory {
         return getSSLContext().getSocketFactory().createSocket(socket, host, port, autoClose);
     }
 
+    /**
+     * Metodo que cria o gerenciador de chaves.
+     *
+     * @return um array com as chaves.
+     */
     public KeyManager[] createKeyManagers() {
         HSKeyManager keyManager = new HSKeyManager(certificate, privateKey);
         return new KeyManager[]{keyManager};
     }
 
+    /**
+     * Metodo que criar um gerenciador confiavel.
+     *
+     * @return um array de permissoes confiaveis.
+     * @throws KeyStoreException caso tenha problemas na chave.
+     * @throws NoSuchAlgorithmException caso tenha problemas no algoritmo.
+     * @throws CertificateException caso tenha problemas no certificado
+     * @throws IOException caso tenha problemas de entrada e saida.
+     */
     public TrustManager[] createTrustManagers() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
         KeyStore trustStore = KeyStore.getInstance("JKS");
 

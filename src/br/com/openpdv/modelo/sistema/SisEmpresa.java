@@ -44,6 +44,8 @@ public class SisEmpresa extends Dados implements Serializable {
     private String sisEmpresaFone;
     @Column(name = "sis_empresa_email")
     private String sisEmpresaEmail;
+    @Column(name = "sis_empresa_contador")
+    private boolean sisEmpresaContador;
     @JoinColumn(name = "sis_municipio_id", referencedColumnName = "sis_municipio_id")
     @ManyToOne
     private SisMunicipio sisMunicipio;
@@ -194,5 +196,13 @@ public class SisEmpresa extends Dados implements Serializable {
 
     public void setSisMunicipio(SisMunicipio sisMunicipio) {
         this.sisMunicipio = sisMunicipio;
+    }
+
+    public boolean isSisEmpresaContador() {
+        return sisEmpresaContador;
+    }
+
+    public void setSisEmpresaContador(boolean sisEmpresaContador) {
+        this.sisEmpresaContador = sisEmpresaContador;
     }
 }

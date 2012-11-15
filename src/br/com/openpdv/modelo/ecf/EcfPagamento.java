@@ -66,7 +66,7 @@ public class EcfPagamento extends Dados implements Serializable {
      * @param ecfPagamentoId o id do registro.
      */
     public EcfPagamento(Integer ecfPagamentoId) {
-        super("ecfPagamento", "ecfPagamentoId", "ecfPagamentoId");
+        super("EcfPagamento", "ecfPagamentoId", "ecfPagamentoId");
         this.ecfPagamentoId = ecfPagamentoId;
     }
 

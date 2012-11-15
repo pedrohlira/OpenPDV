@@ -20,6 +20,7 @@
         <class>br.com.openpdv.modelo.ecf.EcfPagamento</class>
         <class>br.com.openpdv.modelo.ecf.EcfPagamentoTipo</class>
         <class>br.com.openpdv.modelo.ecf.EcfPagamentoParcela</class>
+        <class>br.com.openpdv.modelo.ecf.EcfPagamentoTotais</class>
         <class>br.com.openpdv.modelo.ecf.EcfNotaProduto</class>
         <class>br.com.openpdv.modelo.ecf.EcfNotaEletronica</class>
         <class>br.com.openpdv.modelo.ecf.EcfNota</class>

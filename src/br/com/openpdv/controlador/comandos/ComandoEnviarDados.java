@@ -1,6 +1,5 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
@@ -9,6 +8,7 @@ import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfZ;
+import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.WebResource;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,7 +44,7 @@ public class ComandoEnviarDados implements IComando {
             }
             List<EcfNota> notas = service.selecionar(new EcfNota(), 0, 0, filtro);
             if (!notas.isEmpty()) {
-                wr = Util.getRest(Util.getConfig().get("openpdv.server") + "/nota");
+                wr = Util.getRest(Util.getConfig().get("sinc.server") + "/nota");
                 for (EcfNota nota : notas) {
                     wr.type(MediaType.APPLICATION_JSON).put(nota);
                 }
@@ -57,7 +57,7 @@ public class ComandoEnviarDados implements IComando {
             }
             List<EcfNotaEletronica> nfes = service.selecionar(new EcfNotaEletronica(), 0, 0, filtro);
             if (!nfes.isEmpty()) {
-                wr = Util.getRest(Util.getConfig().get("openpdv.server") + "/nfe");
+                wr = Util.getRest(Util.getConfig().get("sinc.server") + "/nfe");
                 for (EcfNotaEletronica nfe : nfes) {
                     wr.type(MediaType.APPLICATION_JSON).put(nfe);
                 }
@@ -70,7 +70,7 @@ public class ComandoEnviarDados implements IComando {
             }
             List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, filtro);
             if (!zs.isEmpty()) {
-                wr = Util.getRest(Util.getConfig().get("openpdv.server") + "/reducaoZ");
+                wr = Util.getRest(Util.getConfig().get("sinc.server") + "/reducaoZ");
                 for (EcfZ z : zs) {
                     // seleciona os documentos desta Z
                     Date inicio = z.getEcfZMovimento();
@@ -92,7 +92,7 @@ public class ComandoEnviarDados implements IComando {
 
             // se sucesso atualiza no arquivo a data do ultimo envio
             PAF.AUXILIAR.setProperty("out.envio", Util.getDataHora(new Date()));
-            PAF.criptografarAuxiliar(null);
+            PAF.criptografar();
         } catch (Exception ex) {
             log.error("Erro no envio dos dados para sincronismo.", ex);
             throw new OpenPdvException("Erro no envio dos dados para sincronismo.", ex);

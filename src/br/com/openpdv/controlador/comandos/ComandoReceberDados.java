@@ -1,6 +1,5 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
@@ -18,6 +17,7 @@ import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.modelo.sistema.SisUsuario;
+import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -57,19 +57,25 @@ public class ComandoReceberDados implements IComando {
             WebResource wr;
 
             // atualiza os dados da empresa
-            wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/empresa/" + PAF.AUXILIAR.getProperty("cli.cnpj"));
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/empresa");
             SisEmpresa empresa = wr.accept(MediaType.APPLICATION_JSON).get(SisEmpresa.class);
             service.salvar(em, empresa);
             log.debug("Dados empresa recebidos");
+            
+            // atualiza os dados do contador
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/contador");
+            SisEmpresa contador = wr.accept(MediaType.APPLICATION_JSON).get(SisEmpresa.class);
+            service.salvar(em, contador);
+            log.debug("Dados contador recebidos");
 
             // atualiza os dados da impressora
-            wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/impressora/" + PAF.AUXILIAR.getProperty("ecf.serie"));
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/impressora");
             EcfImpressora impressora = wr.accept(MediaType.APPLICATION_JSON).get(EcfImpressora.class);
             service.salvar(em, impressora);
             log.debug("Dados impressora recebidos");
 
             // atualiza os usuarios
-            wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/usuario");
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/usuario");
             List<SisUsuario> usuarios = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<SisUsuario>>() {
             });
             for (SisUsuario usu : usuarios) {
@@ -78,7 +84,7 @@ public class ComandoReceberDados implements IComando {
             log.debug("Dados usuarios recebidos");
 
             // atualiza os tipos de pagamento
-            wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/tipo_pagamento/");
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/tipo_pagamento/");
             List<EcfPagamentoTipo> tiposPagamento = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<EcfPagamentoTipo>>() {
             });
             for (EcfPagamentoTipo tipo : tiposPagamento) {
@@ -87,7 +93,7 @@ public class ComandoReceberDados implements IComando {
             log.debug("Dados tipos pagamento recebidos");
 
             // atualiza as embalagens
-            wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/embalagem");
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/embalagem");
             List<ProdEmbalagem> embalagens = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<ProdEmbalagem>>() {
             });
             for (ProdEmbalagem emb : embalagens) {
@@ -97,7 +103,7 @@ public class ComandoReceberDados implements IComando {
             em.getTransaction().commit();
 
             // recupera os novos produtos
-            int limite = Integer.valueOf(Util.getConfig().get("openpdv.limite"));
+            int limite = Integer.valueOf(Util.getConfig().get("sinc.limite"));
             int pagina = 0;
             List<ProdProduto> novos;
             List<ProdPreco> precos = new ArrayList<>();
@@ -112,7 +118,7 @@ public class ComandoReceberDados implements IComando {
 
             do {
                 mm.putSingle("pagina", String.valueOf(pagina));
-                wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/produtoNovo");
+                wr = Util.getRest(Util.getConfig().get("sinc.host") + "/produtoNovo");
                 novos = wr.queryParams(mm).accept(MediaType.APPLICATION_JSON).get(new GenericType<List<ProdProduto>>() {
                 });
 
@@ -157,7 +163,7 @@ public class ComandoReceberDados implements IComando {
 
             do {
                 mm.putSingle("pagina", String.valueOf(pagina));
-                wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/produtoAtualizado");
+                wr = Util.getRest(Util.getConfig().get("sinc.host") + "/produtoAtualizado");
                 atualizados = wr.queryParams(mm).accept(MediaType.APPLICATION_JSON).get(new GenericType<List<ProdProduto>>() {
                 });
 
@@ -202,7 +208,7 @@ public class ComandoReceberDados implements IComando {
 
             // se sucesso atualiza no arquivo a data do ultimo recebimento
             PAF.AUXILIAR.setProperty("out.recebimento", Util.getDataHora(new Date()));
-            PAF.criptografarAuxiliar(null);
+            PAF.criptografar();
         } catch (Exception ex) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();

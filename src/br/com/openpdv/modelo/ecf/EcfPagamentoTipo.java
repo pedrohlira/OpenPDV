@@ -29,6 +29,8 @@ public class EcfPagamentoTipo extends Dados implements Serializable {
     private boolean ecfPagamentoTipoTef;
     @Column(name = "ecf_pagamento_tipo_vinculado")
     private boolean ecfPagamentoTipoVinculado;
+    @Column(name = "ecf_pagamento_tipo_debito")
+    private boolean ecfPagamentoTipoDebito;
     @Column(name = "ecf_pagamento_tipo_rede")
     private String ecfPagamentoTipoRede;
 
@@ -60,7 +62,6 @@ public class EcfPagamentoTipo extends Dados implements Serializable {
     }
 
     // GETs e SETs
-
     public String getEcfPagamentoTipoCodigo() {
         return ecfPagamentoTipoCodigo;
     }
@@ -107,5 +108,13 @@ public class EcfPagamentoTipo extends Dados implements Serializable {
 
     public void setEcfPagamentoTipoVinculado(boolean ecfPagamentoTipoVinculado) {
         this.ecfPagamentoTipoVinculado = ecfPagamentoTipoVinculado;
+    }
+
+    public boolean isEcfPagamentoTipoDebito() {
+        return ecfPagamentoTipoDebito;
+    }
+
+    public void setEcfPagamentoTipoDebito(boolean ecfPagamentoTipoDebito) {
+        this.ecfPagamentoTipoDebito = ecfPagamentoTipoDebito;
     }
 }

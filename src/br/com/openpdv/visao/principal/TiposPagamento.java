@@ -80,6 +80,7 @@ public class TiposPagamento extends javax.swing.JDialog {
         txtDescricao = new javax.swing.JTextField();
         chkTef = new javax.swing.JCheckBox();
         chkVinculado = new javax.swing.JCheckBox();
+        chkDebito = new javax.swing.JCheckBox();
         lblRede = new javax.swing.JLabel();
         txtRede = new javax.swing.JTextField();
         btnNovo = new javax.swing.JButton();
@@ -104,14 +105,14 @@ public class TiposPagamento extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Cod", "Código", "Descrição", "TEF", "Vinculado", "Rede"
+                "Cod", "Código", "Descrição", "TEF", "Vinculado", "Débito", "Rede"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -136,13 +137,15 @@ public class TiposPagamento extends javax.swing.JDialog {
         tabTipoPagamentos.getColumnModel().getColumn(1).setResizable(false);
         tabTipoPagamentos.getColumnModel().getColumn(1).setPreferredWidth(75);
         tabTipoPagamentos.getColumnModel().getColumn(2).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(2).setPreferredWidth(200);
+        tabTipoPagamentos.getColumnModel().getColumn(2).setPreferredWidth(175);
         tabTipoPagamentos.getColumnModel().getColumn(3).setResizable(false);
         tabTipoPagamentos.getColumnModel().getColumn(3).setPreferredWidth(50);
         tabTipoPagamentos.getColumnModel().getColumn(4).setResizable(false);
         tabTipoPagamentos.getColumnModel().getColumn(4).setPreferredWidth(75);
         tabTipoPagamentos.getColumnModel().getColumn(5).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(5).setPreferredWidth(150);
+        tabTipoPagamentos.getColumnModel().getColumn(5).setPreferredWidth(75);
+        tabTipoPagamentos.getColumnModel().getColumn(6).setResizable(false);
+        tabTipoPagamentos.getColumnModel().getColumn(6).setPreferredWidth(125);
 
         panTipoPagamentos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -162,6 +165,9 @@ public class TiposPagamento extends javax.swing.JDialog {
         chkVinculado.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         chkVinculado.setText("Vinculado");
 
+        chkDebito.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        chkDebito.setText("Débito");
+
         lblRede.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblRede.setText("Rede:");
 
@@ -173,26 +179,28 @@ public class TiposPagamento extends javax.swing.JDialog {
             panTipoPagamentosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(panTipoPagamentosLayout.createSequentialGroup()
                 .add(10, 10, 10)
+                .add(panTipoPagamentosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                    .add(lblCodigo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(txtCodigo))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(panTipoPagamentosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(panTipoPagamentosLayout.createSequentialGroup()
-                        .add(lblCodigo)
-                        .add(0, 0, Short.MAX_VALUE))
-                    .add(panTipoPagamentosLayout.createSequentialGroup()
-                        .add(txtCodigo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 69, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .add(panTipoPagamentosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(panTipoPagamentosLayout.createSequentialGroup()
-                        .add(txtDescricao, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 226, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(txtDescricao, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 196, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(chkTef)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(chkVinculado))
+                        .add(chkVinculado)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(chkDebito))
                     .add(lblDescricao))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(panTipoPagamentosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(lblRede)
-                    .add(txtRede, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 167, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                    .add(panTipoPagamentosLayout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 12, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(lblRede))
+                    .add(panTipoPagamentosLayout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(txtRede, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 144, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .add(12, 12, 12))
         );
         panTipoPagamentosLayout.setVerticalGroup(
             panTipoPagamentosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -208,7 +216,8 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(chkTef)
                     .add(chkVinculado)
                     .add(txtDescricao, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(txtRede, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(txtRede, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(chkDebito))
                 .add(1, 1, 1))
         );
 
@@ -298,7 +307,7 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(spTipoPagamentos)
                         .add(panTipoPagamentos, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -313,11 +322,11 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-661)/2, (screenSize.height-298)/2, 661, 298);
+        setBounds((screenSize.width-661)/2, (screenSize.height-307)/2, 661, 307);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
@@ -371,6 +380,7 @@ public class TiposPagamento extends javax.swing.JDialog {
     private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnNovo;
     private javax.swing.JButton btnSalvar;
+    private javax.swing.JCheckBox chkDebito;
     private javax.swing.JCheckBox chkTef;
     private javax.swing.JCheckBox chkVinculado;
     private javax.swing.JLabel lblCodigo;
@@ -406,6 +416,7 @@ public class TiposPagamento extends javax.swing.JDialog {
             pt.setEcfPagamentoTipoRede(txtRede.getText());
             pt.setEcfPagamentoTipoTef(chkTef.isSelected());
             pt.setEcfPagamentoTipoVinculado(chkVinculado.isSelected());
+            pt.setEcfPagamentoTipoDebito(chkDebito.isSelected());
 
             try {
                 service.salvar(pt);
@@ -452,7 +463,7 @@ public class TiposPagamento extends javax.swing.JDialog {
 
             for (EcfPagamentoTipo pt : lista) {
                 Object[] obj = new Object[]{pt.getId(), pt.getEcfPagamentoTipoCodigo(), pt.getEcfPagamentoTipoDescricao(),
-                    pt.isEcfPagamentoTipoTef(), pt.isEcfPagamentoTipoVinculado(), pt.getEcfPagamentoTipoRede()};
+                    pt.isEcfPagamentoTipoTef(), pt.isEcfPagamentoTipoVinculado(), pt.isEcfPagamentoTipoDebito(), pt.getEcfPagamentoTipoRede()};
                 dtm.addRow(obj);
             }
 
@@ -471,16 +482,19 @@ public class TiposPagamento extends javax.swing.JDialog {
             cod = 0;
             txtCodigo.setText("");
             txtDescricao.setText("");
-            txtRede.setText("");
             chkTef.setSelected(false);
             chkVinculado.setSelected(false);
+            chkDebito.setSelected(false);
+            txtRede.setText("");
         } else {
-            cod = Integer.valueOf(tabTipoPagamentos.getModel().getValueAt(row, 0).toString());
-            txtCodigo.setText(tabTipoPagamentos.getModel().getValueAt(row, 1).toString());
-            txtDescricao.setText(tabTipoPagamentos.getModel().getValueAt(row, 2).toString());
-            chkTef.setSelected(Boolean.valueOf(tabTipoPagamentos.getModel().getValueAt(row, 3).toString()));
-            chkVinculado.setSelected(Boolean.valueOf(tabTipoPagamentos.getModel().getValueAt(row, 4).toString()));
-            txtRede.setText(tabTipoPagamentos.getModel().getValueAt(row, 5).toString());
+            int rowModel = tabTipoPagamentos.convertRowIndexToModel(row);
+            cod = Integer.valueOf(tabTipoPagamentos.getModel().getValueAt(rowModel, 0).toString());
+            txtCodigo.setText(tabTipoPagamentos.getModel().getValueAt(rowModel, 1).toString());
+            txtDescricao.setText(tabTipoPagamentos.getModel().getValueAt(rowModel, 2).toString());
+            chkTef.setSelected(Boolean.valueOf(tabTipoPagamentos.getModel().getValueAt(rowModel, 3).toString()));
+            chkVinculado.setSelected(Boolean.valueOf(tabTipoPagamentos.getModel().getValueAt(rowModel, 4).toString()));
+            chkDebito.setSelected(Boolean.valueOf(tabTipoPagamentos.getModel().getValueAt(rowModel, 5).toString()));
+            txtRede.setText(tabTipoPagamentos.getModel().getValueAt(rowModel, 6).toString());
         }
     }
 
@@ -532,6 +546,14 @@ public class TiposPagamento extends javax.swing.JDialog {
 
     public void setChkVinculado(JCheckBox chkVinculado) {
         this.chkVinculado = chkVinculado;
+    }
+
+    public JCheckBox getChkDebito() {
+        return chkDebito;
+    }
+
+    public void setChkDebito(JCheckBox chkDebito) {
+        this.chkDebito = chkDebito;
     }
 
     public int getCod() {

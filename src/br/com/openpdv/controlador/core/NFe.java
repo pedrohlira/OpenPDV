@@ -1,8 +1,8 @@
 package br.com.openpdv.controlador.core;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
+import br.com.phdss.controlador.PAF;
 import br.inf.portalfiscal.www.nfe.wsdl.nfecancelamento2.NfeCancelamento2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.nfeinutilizacao2.NfeInutilizacao2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.nferecepcao2.NfeRecepcao2Stub;
@@ -55,19 +55,18 @@ import org.xml.sax.SAXException;
 public class NFe {
 
     // log do sistmea
-    private static Logger log;
+    private static final Logger log = Logger.getLogger(NFe.class);
     // conf de homologacao contendo as urls do WS
-    private static Properties HOMOLOGACAO = new Properties();
+    private static final Properties HOMOLOGACAO = new Properties();
     // conf de producao contendo as urls do WS
-    private static Properties PRODUCAO = new Properties();
+    private static final Properties PRODUCAO = new Properties();
     // colecao de estados do ambiente virual nacional
-    private static List<String> SVAN = new ArrayList<>();
+    private static final List<String> SVAN = new ArrayList<>();
     // colecao de estados do ambiente virual do RS
-    private static List<String> SVRS = new ArrayList<>();
+    private static final List<String> SVRS = new ArrayList<>();
 
     // setando os configs da sefaz
     static {
-        log = Logger.getLogger(NFe.class);
         try {
             // carrega a homologacao
             try (FileInputStream homo = new FileInputStream("nfe/sefazH.properties")) {

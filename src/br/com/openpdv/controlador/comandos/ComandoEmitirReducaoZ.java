@@ -1,9 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.EDirecao;
@@ -17,6 +15,9 @@ import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.ecf.EcfZTotais;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.controlador.PAF;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -54,9 +55,15 @@ public class ComandoEmitirReducaoZ implements IComando {
         // salva os dados no banco
         emitirReducaoZBanco();
         // gera o arquivo Movimento do ECF do dia
-        gerarMovimentoECF();
+        ComandoEmitirMovimentoECF movimento = new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento);
+        movimento.executar();
+        // gera os totais dos pagamentos
+        ComandoTotalizarPagamentos totalizar = new ComandoTotalizarPagamentos(dataMovimento);
+        totalizar.executar();
         // atualizando o servidor
-        new ComandoEnviarDados().executar();
+        if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+            new ComandoEnviarDados().executar();
+        }
     }
 
     @Override
@@ -114,7 +121,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 z.setEcfZEmissao(new Date());
                 z.setEcfZBruto(ini.get("Totalizadores", "VendaBruta", double.class));
                 z.setEcfZGt(ini.get("Totalizadores", "GrandeTotal", double.class));
-                z.setEcfZIssqn(false);
+                z.setEcfZIssqn(!Caixa.getInstancia().getEmpresa().getSisEmpresaIm().equals(""));
                 // salva EcfZ
                 z = (EcfZ) service.salvar(z);
                 dataMovimento = z.getEcfZMovimento();
@@ -131,11 +138,12 @@ public class ComandoEmitirReducaoZ implements IComando {
                 List<EcfZTotais> totais = new ArrayList<>();
                 Map<String, String> aliq = ini.get("Aliquotas");
                 for (String chave : aliq.keySet()) {
-                    if (!aliq.get(chave).equals("0")) {
+                    double valor = Double.valueOf(aliq.get(chave));
+                    if (valor > 0.00) {
                         EcfZTotais total = new EcfZTotais();
                         total.setEcfZ(z);
                         total.setEcfZTotaisCodigo(chave);
-                        total.setEcfZTotaisValor(Double.valueOf(aliq.get(chave)));
+                        total.setEcfZTotaisValor(valor);
                         totais.add(total);
                     }
                 }
@@ -143,7 +151,8 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // outros icms
                 Map<String, String> outras = ini.get("OutrasICMS");
                 for (String chave : outras.keySet()) {
-                    if (!outras.get(chave).equals("0")) {
+                    double valor = Double.valueOf(outras.get(chave));
+                    if (valor > 0.00) {
                         // valida qual o tipo
                         String codigo = "";
                         if (chave.contains("Substituicao")) {
@@ -159,7 +168,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                             EcfZTotais total = new EcfZTotais();
                             total.setEcfZ(z);
                             total.setEcfZTotaisCodigo(codigo);
-                            total.setEcfZTotaisValor(Double.valueOf(outras.get(chave)));
+                            total.setEcfZTotaisValor(valor);
                             totais.add(total);
                         }
                     }
@@ -167,7 +176,7 @@ public class ComandoEmitirReducaoZ implements IComando {
 
                 // operacao nao fiscal
                 double opnf = ini.get("Totalizadores", "TotalNaoFiscal", double.class);
-                if (opnf > 0) {
+                if (opnf > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("OPNF");
@@ -177,7 +186,7 @@ public class ComandoEmitirReducaoZ implements IComando {
 
                 // descontos
                 double descT = ini.get("Totalizadores", "TotalDescontos", double.class);
-                if (descT > 0) {
+                if (descT > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("DT");
@@ -185,7 +194,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                     totais.add(total);
                 }
                 double descS = ini.get("Totalizadores", "TotalDescontosISSQN", double.class);
-                if (descT > 0) {
+                if (descS > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("DS");
@@ -195,7 +204,7 @@ public class ComandoEmitirReducaoZ implements IComando {
 
                 // acrescimos
                 double acresT = ini.get("Totalizadores", "TotalAcrescimos", double.class);
-                if (acresT > 0) {
+                if (acresT > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("AT");
@@ -203,7 +212,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                     totais.add(total);
                 }
                 double acresS = ini.get("Totalizadores", "TotalAcrescimosISSQN", double.class);
-                if (acresS > 0) {
+                if (acresS > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("AS");
@@ -213,19 +222,19 @@ public class ComandoEmitirReducaoZ implements IComando {
 
                 // cancelamentos
                 double canT = ini.get("Totalizadores", "TotalCancelamentos", double.class);
-                if (canT > 0) {
+                if (canT > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("Can-T");
                     total.setEcfZTotaisValor(canT);
                     totais.add(total);
                 }
-                double cantS = ini.get("Totalizadores", "TotalCancelamentosISSQN", double.class);
-                if (cantS > 0) {
+                double canS = ini.get("Totalizadores", "TotalCancelamentosISSQN", double.class);
+                if (canS > 0.00) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("Can-S");
-                    total.setEcfZTotaisValor(cantS);
+                    total.setEcfZTotaisValor(canS);
                     totais.add(total);
                 }
 
@@ -233,22 +242,13 @@ public class ComandoEmitirReducaoZ implements IComando {
                 service.salvar(totais);
             } catch (Exception ex) {
                 log.error("Erro ao gerar ao salvar os dados da reducao Z.", ex);
+                log.error(resp);
                 throw new OpenPdvException(ex);
             }
         } else {
             log.error("Erro ao pegar os dados da ultima reducao Z -> " + resp[1]);
             throw new OpenPdvException(resp[1]);
         }
-    }
-
-    /**
-     * Metodo que emite o movimento do ECF logo apos a reducao Z.
-     *
-     * @exception OpenPdvException dispara caso nao consiga executar.
-     */
-    public void gerarMovimentoECF() throws OpenPdvException {
-        ComandoEmitirMovimentoECF movimento = new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento);
-        movimento.executar();
     }
 
     /**
@@ -282,11 +282,15 @@ public class ComandoEmitirReducaoZ implements IComando {
         FiltroData fd = new FiltroData("ecfZEmissao", ECompara.MAIOR_IGUAL, cal.getTime());
         List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, fd);
         if (zs.isEmpty()) {
-            cal.add(Calendar.MONTH, - 1);
-            String inicio = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
-            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-            String fim = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
-            PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
+            // somente gera caso tenha algum registro de Z.
+            zs = service.selecionar(new EcfZ(), 0, 0, null);
+            if (!zs.isEmpty()) {
+                cal.add(Calendar.MONTH, - 1);
+                String inicio = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
+                cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+                String fim = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
+                PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
+            }
         }
     }
 

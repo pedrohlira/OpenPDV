@@ -1,9 +1,6 @@
 package br.com.openpdv.controlador.core;
 
-import br.com.openpdv.controlador.PAF;
-import java.io.FileInputStream;
-import java.util.HashMap;
-import java.util.Map;
+import br.com.phdss.controlador.PAF;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -16,37 +13,21 @@ import org.apache.log4j.Logger;
  */
 public class Conexao {
 
-    private static Map<String, String> dados = new HashMap<>();
-    private static Logger log;
+    private static final Properties dados = new Properties();
+    private static final Logger log = Logger.getLogger(Conexao.class);
 
     /**
      * Lendo os dados do config externo.
      */
     static {
-        log = Logger.getLogger(Conexao.class);
-        String chaveSenha = "";
-        String usuarioSenha = "";
-        String arquivoSenha = "";
-
         // descriptografando os dados de acesso do BD
-        Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream("conf" + System.getProperty("file.separator") + "banco.properties")) {
-            props.load(fis);
-            for (String chave : props.stringPropertyNames()) {
-                if (chave.endsWith("user")) {
-                    dados.put(chave, PAF.descriptar(props.getProperty(chave)));
-                } else if (chave.endsWith("password")) {
-                    chaveSenha = chave;
-                    usuarioSenha = PAF.descriptar(props.getProperty(chave));
-                } else if (chave.endsWith("filepwd")) {
-                    arquivoSenha = PAF.descriptar(props.getProperty(chave));
-                } else {
-                    dados.put(chave, props.getProperty(chave));
-                }
-            }
-            dados.put(chaveSenha, arquivoSenha + " " + usuarioSenha);
+        try {
+            PAF.descriptografar("db" + System.getProperty("file.separator") + "banco.txt", dados);
+            // arrumando a url do banco
+            String url = dados.getProperty("eclipselink.jdbc.url", "").replace("+", "=");
+            dados.setProperty("eclipselink.jdbc.url", url);
         } catch (Exception ex) {
-            log.error("Nao carregou os dados de acesso ao banco de dados.", ex);
+            log.error(ex);
         }
     }
 
@@ -60,7 +41,6 @@ public class Conexao {
      * Metodo que retorna uma instancia do manipulador de entidades.
      *
      * @return um objeto que manipula as entidades no banco de dados.
-     * <p/>
      * @throws Exception dispara caso nao consiga conectar.
      */
     public static EntityManagerFactory getInstancia() throws Exception {
@@ -71,9 +51,7 @@ public class Conexao {
      * Metodo que retorna uma instancia do manipulador de entidades.
      *
      * @param pu o nome da unidade de persistência que deseja utilizar.
-     * <p/>
      * @return um objeto que manipula as entidades no banco de dados.
-     * <p/>
      * @throws Exception dispara caso nao consiga conectar.
      */
     public static EntityManagerFactory getInstancia(String pu) throws Exception {
@@ -83,14 +61,16 @@ public class Conexao {
     /**
      * Metodo que retorna uma instancia do manipulador de entidades.
      *
-     * @param pu    o nome da unidade de persistência que deseja utilizar.
+     * @param pu o nome da unidade de persistência que deseja utilizar.
      * @param dados conjunto de informacoes para acesso ao banco.
-     * <p/>
      * @return um objeto que manipula as entidades no banco de dados.
-     * <p/>
      * @throws Exception dispara caso nao consiga conectar.
      */
-    public static EntityManagerFactory getInstancia(String pu, Map<String, String> dados) throws Exception {
-        return Persistence.createEntityManagerFactory(pu, dados);
+    public static EntityManagerFactory getInstancia(String pu, Properties dados) throws Exception {
+        if (!dados.isEmpty()) {
+            return Persistence.createEntityManagerFactory(pu, dados);
+        } else {
+            throw new Exception("Dados vazios, verificar arquivo db/banco.txt");
+        }
     }
 }

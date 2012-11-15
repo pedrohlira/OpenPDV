@@ -2,6 +2,7 @@ package br.com.openpdv.visao.core;
 
 import br.com.openpdv.modelo.core.EModo;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JSeparator;
@@ -68,7 +69,7 @@ public class Aguarde extends javax.swing.JDialog {
                     .add(lblMensagem, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
                     .add(separador)
                     .add(pgbBarra, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -79,11 +80,10 @@ public class Aguarde extends javax.swing.JDialog {
                 .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(pgbBarra, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-225)/2, (screenSize.height-106)/2, 225, 106);
+        pack();
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblMensagem;
@@ -100,7 +100,12 @@ public class Aguarde extends javax.swing.JDialog {
         } else {
             caixa.statusMenus(caixa.getModo());
             caixa.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            lblMensagem.setText("Aguarde o processamento...");
         }
+
+        Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        aguarde.pack();
+        aguarde.setBounds((d.width - aguarde.getWidth()) / 2, (d.height - aguarde.getHeight()) / 2, aguarde.getWidth(), aguarde.getHeight());
         super.setVisible(b);
     }
 

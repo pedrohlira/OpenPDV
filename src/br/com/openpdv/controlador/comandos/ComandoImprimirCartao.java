@@ -1,14 +1,14 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.TEF;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
 import br.com.openpdv.modelo.ecf.EcfPagamentoParcela;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.TEF;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,7 +45,9 @@ public class ComandoImprimirCartao implements IComando {
     @Override
     public void executar() throws OpenPdvException {
         EComandoECF comando = null;
+        List<File> impressos = new ArrayList<>();
 
+        // percorre os pagamentos para inserir no banco e imprimir cartoes
         for (int i = 0; i < pagamentos.size(); i++) {
             EcfPagamento pag = pagamentos.get(i);
             List<EcfPagamentoParcela> parcelas;
@@ -64,6 +66,7 @@ public class ComandoImprimirCartao implements IComando {
                     String coo = pag.getEcfVenda().getEcfVendaCoo() + "";
                     String codigo = pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo();
                     String valor = Util.formataNumero(valCard, 1, 2, false).replace(",", ".");
+                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
                     ECF.enviar(EComandoECF.ECF_AbreCupomVinculado, coo, codigo, "", valor);
                     comando = EComandoECF.ECF_LinhaCupomVinculado;
                 }
@@ -83,8 +86,8 @@ public class ComandoImprimirCartao implements IComando {
                     // se for o pendente, precisa confirmar no GP e sera o ultimo cartao
                     if (pag.getArquivo().contains("pendente")) {
                         String id = pag.getArquivo().replaceAll("[^0-9]", "");
-                        TEF.confirmarTransacao(id, true);
                         ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                        TEF.confirmarTransacao(id, true);
 
                         // pega o numero GNF da impressao do cartao
                         String[] resp = ECF.enviar(EComandoECF.ECF_NumGNF);
@@ -96,8 +99,7 @@ public class ComandoImprimirCartao implements IComando {
 
                     // gerar as parcelas e deleta o arquivo
                     parcelas = gerarParcela(dados, pag);
-                    File arquivo = new File(pag.getArquivo());
-                    arquivo.delete();
+                    impressos.add(new File(pag.getArquivo()));
                 } catch (Exception ex) {
                     ECF.enviar(EComandoECF.ECF_FechaRelatorio);
                     throw new OpenPdvException(ex);
@@ -106,16 +108,19 @@ public class ComandoImprimirCartao implements IComando {
                 parcelas = new ArrayList<>();
                 EcfPagamentoParcela parcela = new EcfPagamentoParcela();
                 parcela.setEcfPagamentoParcelaData(pag.getEcfPagamentoData());
-                parcela.setEcfPagamentoParcelaValor(pag.getEcfPagamentoValor() - troco);
+                parcela.setEcfPagamentoParcelaValor(pag.getEcfPagamentoValor());
                 parcela.setEcfPagamentoParcelaNsu("");
                 parcelas.add(parcela);
-                // se tem dinheiro como parcela, entao discontar o troco do pagamento
-                pag.setEcfPagamentoValor(pag.getEcfPagamentoValor() - troco);
             }
 
             // salva o pagamento
             pag.setEcfPagamentoParcelas(parcelas);
             salvarPagamento(pag);
+        }
+
+        // caso todos os cartoes tenham todas as vias impressas, deleta os arquivos pendentes dos mesmos
+        for (File file : impressos) {
+            file.delete();
         }
     }
 

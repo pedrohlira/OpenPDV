@@ -1,6 +1,5 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.NFe;
 import br.com.openpdv.controlador.core.Util;
@@ -9,10 +8,11 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.*;
 import br.com.openpdv.modelo.produto.ProdProduto;
-import br.com.openpdv.modelo.sintegra.*;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.nfe.TNFe;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.controlador.PAF;
+import br.com.phdss.modelo.sintegra.*;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -44,9 +44,15 @@ public class ComandoGerarSintegra implements IComando {
 
     @Override
     public void executar() throws OpenPdvException {
+        // ajustando a data fim para documento, pois o mesmo usa datetime
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(fim);
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        fim = cal.getTime();
+
         // recupera as nfes emitidas no periodo
         FiltroData fd1 = new FiltroData("ecfNotaEletronicaData", ECompara.MAIOR_IGUAL, inicio);
-        FiltroData fd2 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR_IGUAL, fim);
+        FiltroData fd2 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR, fim);
         GrupoFiltro gp1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
         EcfNotaEletronica ene = new EcfNotaEletronica();
         ene.setOrdemDirecao(EDirecao.ASC);
@@ -54,7 +60,7 @@ public class ComandoGerarSintegra implements IComando {
 
         // recupera as notas emitidas no periodo
         FiltroData fd3 = new FiltroData("ecfNotaData", ECompara.MAIOR_IGUAL, inicio);
-        FiltroData fd4 = new FiltroData("ecfNotaData", ECompara.MENOR_IGUAL, fim);
+        FiltroData fd4 = new FiltroData("ecfNotaData", ECompara.MENOR, fim);
         GrupoFiltro gp2 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
         EcfNota en = new EcfNota();
         en.setOrdemDirecao(EDirecao.ASC);
@@ -62,14 +68,14 @@ public class ComandoGerarSintegra implements IComando {
 
         // recupera as leituras Z no periodo
         FiltroData fd7 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
-        FiltroData fd8 = new FiltroData("ecfZMovimento", ECompara.MENOR_IGUAL, fim);
+        FiltroData fd8 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
         GrupoFiltro gf4 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd7, fd8});
         EcfZ ez = new EcfZ();
         ez.setOrdemDirecao(EDirecao.ASC);
         zs = service.selecionar(ez, 0, 0, gf4);
 
         // recupera os produtos com estoque maior que zero
-        FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.MAIOR, 0);
+        FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.DIFERENTE, 0);
         ProdProduto pp = new ProdProduto();
         pp.setCampoOrdem("prodProdutoId");
         estoque = service.selecionar(pp, 0, 0, fn);
@@ -296,7 +302,8 @@ public class ComandoGerarSintegra implements IComando {
             Dados60A d60a = new Dados60A();
             d60a.setData(z.getEcfZMovimento());
             d60a.setSerie(z.getEcfImpressora().getEcfImpressoraSerie());
-            if (total.getEcfZTotaisCodigo().substring(2, 3).equals("T") || total.getEcfZTotaisCodigo().substring(2, 3).equals("S")) {
+            if (total.getEcfZTotaisCodigo().length() == 7 && 
+                    (total.getEcfZTotaisCodigo().substring(2, 3).equals("T") || total.getEcfZTotaisCodigo().substring(2, 3).equals("S"))) {
                 d60a.setTotalizador(total.getEcfZTotaisCodigo().substring(3));
             } else if (total.getEcfZTotaisCodigo().startsWith("C")) {
                 d60a.setTotalizador("CANC");

@@ -15,7 +15,6 @@ import org.eclipse.persistence.jaxb.rs.MOXyJsonProvider;
 /**
  * Classe que habilita o contexto do JAXB usando a implementacao do EclipseLink
  * moxy.
- * <p/>
  * @author Pedro H. Lira
  */
 @Provider
@@ -30,7 +29,6 @@ public class RestContexto extends MOXyJsonProvider implements ContextResolver<JA
 
     /**
      * Construtor padrao.
-     * <p/>
      * @throws Exception dispara caso nao consiga criar.
      */
     public RestContexto() throws Exception {
@@ -39,9 +37,7 @@ public class RestContexto extends MOXyJsonProvider implements ContextResolver<JA
 
     /**
      * Recupera o contexto atual da classe informada.
-     * <p/>
      * @param classe o tipo de classe informada.
-     * <p/>
      * @return o contexto atual.
      */
     @Override

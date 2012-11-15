@@ -1,7 +1,7 @@
 package br.com.openpdv.controlador.core;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.rest.RestContexto;
+import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.text.MaskFormatter;
 
 /**
@@ -44,7 +46,6 @@ public class Util {
      * Metodo que normaliza os caracteres removendo os acentos.
      *
      * @param texto o texto acentuado.
-     * <p/>
      * @return o texto sem acentos.
      */
     public static String normaliza(String texto) {
@@ -82,7 +83,6 @@ public class Util {
      * Metodo que informa se o metodo da classe é do tipo GET.
      *
      * @param method usando reflection para descrobrir os metodos.
-     * <p/>
      * @return verdadeiro se o metodo for GET, falso caso contrario.
      */
     public static boolean isGetter(Method method) {
@@ -102,7 +102,6 @@ public class Util {
      * Metodo que informa se o metodo da classe é do tipo SET.
      *
      * @param method usando reflection para descrobrir os metodos.
-     * <p/>
      * @return verdadeiro se o metodo for SET, falso caso contrario.
      */
     public static boolean isSetter(Method method) {
@@ -122,7 +121,6 @@ public class Util {
      * Metodo que formata um texto em data no padrao dd/MM/aaaa
      *
      * @param data o texto da data.
-     * <p/>
      * @return um objeto Date ou null caso nao consiga fazer o parser.
      */
     public static Date getData(String data) {
@@ -133,7 +131,6 @@ public class Util {
      * Metodo que formata uma data em texto no padrao dd/MM/aaaa
      *
      * @param data o objeto Date.
-     * <p/>
      * @return uma String formatada ou null caso a data nao seja valida.
      */
     public static String getData(Date data) {
@@ -144,7 +141,6 @@ public class Util {
      * Metodo que formata um texto em data no padrao dd/MM/aaaa HH:mm:ss
      *
      * @param data o texto da data.
-     * <p/>
      * @return um objeto Date ou null caso nao consiga fazer o parser.
      */
     public static Date getDataHora(String data) {
@@ -155,7 +151,6 @@ public class Util {
      * Metodo que formata uma data em texto no padrao dd/MM/aaaa HH:mm:ss
      *
      * @param data o objeto Date.
-     * <p/>
      * @return uma String formatada ou null caso a data nao seja valida.
      */
     public static String getDataHora(Date data) {
@@ -165,9 +160,8 @@ public class Util {
     /**
      * Metodo que formata a data.
      *
-     * @param data    a data do tipo Date.
+     * @param data a data do tipo Date.
      * @param formato o formado desejado.
-     * <p/>
      * @return a data formatada como solicidato.
      */
     public static String formataData(Date data, String formato) {
@@ -181,9 +175,8 @@ public class Util {
     /**
      * Metodo que formata a data.
      *
-     * @param data    a data em formato string.
+     * @param data a data em formato string.
      * @param formato o formado desejado.
-     * <p/>
      * @return a data como objeto ou null se tiver erro.
      */
     public static Date formataData(String data, String formato) {
@@ -204,13 +197,12 @@ public class Util {
     /**
      * Metodo que faz a formatacao de numeros com inteiros e fracoes
      *
-     * @param valor    o valor a ser formatado
+     * @param valor o valor a ser formatado
      * @param inteiros o minimo de inteiros, que serao completados com ZEROS se
      * preciso
-     * @param decimal  o minimo de decimais, que serao completados com ZEROS se
+     * @param decimal o minimo de decimais, que serao completados com ZEROS se
      * preciso
-     * @param grupo    se sera colocado separador de grupo de milhar
-     * <p/>
+     * @param grupo se sera colocado separador de grupo de milhar
      * @return uma String com o numero formatado
      */
     public static String formataNumero(double valor, int inteiros, int decimal, boolean grupo) {
@@ -225,11 +217,9 @@ public class Util {
     /**
      * Metodo que formata o texto usando a mascara passada.
      *
-     * @param texto   o texto a ser formatado.
+     * @param texto o texto a ser formatado.
      * @param mascara a mascara a ser usada.
-     * <p/>
      * @return o texto formatado.
-     * <p/>
      * @throws ParseException caso ocorra erro.
      */
     public static String formataTexto(String texto, String mascara) throws ParseException {
@@ -241,11 +231,10 @@ public class Util {
     /**
      * Metodo que formata o texto.
      *
-     * @param texto    o texto a ser formatado.
+     * @param texto o texto a ser formatado.
      * @param caracter o caracter que sera repetido.
-     * @param tamanho  o tamanho total do texto de resposta.
-     * @param direita  a direcao onde colocar os caracteres.
-     * <p/>
+     * @param tamanho o tamanho total do texto de resposta.
+     * @param direita a direcao onde colocar os caracteres.
      * @return o texto formatado.
      */
     public static String formataTexto(String texto, String caracter, int tamanho, boolean direita) {
@@ -260,9 +249,8 @@ public class Util {
     /**
      * Metodo que calcula o digito.
      *
-     * @param str  valor do texto.
+     * @param str valor do texto.
      * @param peso array de pesos.
-     * <p/>
      * @return um numero calculado.
      */
     private static int calcularDigito(String str, int[] peso) {
@@ -279,12 +267,17 @@ public class Util {
      * Metodo que valida se e CPF
      *
      * @param cpf o valor do texto.
-     * <p/>
      * @return verdadeiro se valido, falso caso contrario.
      */
     public static boolean isCPF(String cpf) {
         if ((cpf == null) || (cpf.length() != 11)) {
             return false;
+        } else {
+            Pattern p = Pattern.compile(cpf.charAt(0) + "{11}");
+            Matcher m = p.matcher(cpf);
+            if (m.find()) {
+                return false;
+            }
         }
 
         Integer digito1 = calcularDigito(cpf.substring(0, 9), pesoCPF);
@@ -296,12 +289,17 @@ public class Util {
      * Metodo que valida se e CNPJ
      *
      * @param cnpj o valor do texto.
-     * <p/>
      * @return verdadeiro se valido, falso caso contrario.
      */
     public static boolean isCNPJ(String cnpj) {
         if ((cnpj == null) || (cnpj.length() != 14)) {
             return false;
+        } else {
+            Pattern p = Pattern.compile(cnpj.charAt(0) + "{14}");
+            Matcher m = p.matcher(cnpj);
+            if (m.find()) {
+                return false;
+            }
         }
 
         Integer digito1 = calcularDigito(cnpj.substring(0, 12), pesoCNPJ);
@@ -334,32 +332,42 @@ public class Util {
      * Metodo que gera um objeto de comunicaxao com o RESTful do sistema.
      *
      * @param path o caminho especifico do comando no servidor.
-     * <p/>
      * @return um objeto de referencia web.
      */
     public static WebResource getRest(String path) {
+        Client c = getClientRest();
+
+        // set a url completa
+        StringBuilder sb = new StringBuilder();
+        sb.append(Util.getConfig().get("sinc.servidor")).append(":");
+        sb.append(Util.getConfig().get("sinc.porta")).append(path);
+        WebResource wr = c.resource(sb.toString());
+
+        return wr;
+    }
+
+    /**
+     * Metodo que gera um cliente rest usando os parametros padroes de
+     * comunicacao.
+     *
+     * @return um objeto de acesso ao RestFull.
+     */
+    public static Client getClientRest() {
         // seta o cliente
         ClientConfig cc = new DefaultClientConfig();
         cc.getClasses().add(RestContexto.class);
         Client c = Client.create(cc);
         c.setFollowRedirects(true);
-        c.setConnectTimeout(Integer.valueOf(config.get("openpdv.timeout")) * 1000);
-        c.setReadTimeout(Integer.valueOf(config.get("openpdv.timeout")) * 1000);
+        c.setConnectTimeout(Integer.valueOf(config.get("sinc.timeout")) * 1000);
+        c.setReadTimeout(Integer.valueOf(config.get("sinc.timeout")) * 1000);
 
         // cria a autenticacao
         String usuario = PAF.AUXILIAR.getProperty("cli.cnpj");
-        String senha = PAF.encriptar(PAF.AUXILIAR.getProperty("ecf.serie"));
+        String senha = PAF.encriptar(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
 
         // seta os filtros
         c.addFilter(new HTTPBasicAuthFilter(usuario, senha));
         c.addFilter(new GZIPContentEncodingFilter(true));
-
-        // set a url completa
-        StringBuilder sb = new StringBuilder();
-        sb.append(Util.getConfig().get("openpdv.servidor")).append(":");
-        sb.append(Util.getConfig().get("openpdv.porta")).append(path);
-        WebResource wr = c.resource(sb.toString());
-
-        return wr;
+        return c;
     }
 }

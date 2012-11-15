@@ -1,12 +1,12 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

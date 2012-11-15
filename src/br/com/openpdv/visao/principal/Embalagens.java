@@ -451,10 +451,11 @@ public class Embalagens extends javax.swing.JDialog {
             txtUnidades.setText("1");
             txtDescricao.setText("");
         } else {
-            cod = Integer.valueOf(tabEmbalagens.getModel().getValueAt(row, 0).toString());
-            txtNome.setText(tabEmbalagens.getModel().getValueAt(row, 1).toString());
-            txtUnidades.setText(tabEmbalagens.getModel().getValueAt(row, 2).toString());
-            txtDescricao.setText(tabEmbalagens.getModel().getValueAt(row, 3).toString());
+            int rowModel = tabEmbalagens.convertRowIndexToModel(row);
+            cod = Integer.valueOf(tabEmbalagens.getModel().getValueAt(rowModel, 0).toString());
+            txtNome.setText(tabEmbalagens.getModel().getValueAt(rowModel, 1).toString());
+            txtUnidades.setText(tabEmbalagens.getModel().getValueAt(rowModel, 2).toString());
+            txtDescricao.setText(tabEmbalagens.getModel().getValueAt(rowModel, 3).toString());
         }
     }
 

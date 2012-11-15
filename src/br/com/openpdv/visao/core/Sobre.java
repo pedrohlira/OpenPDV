@@ -1,6 +1,15 @@
 package br.com.openpdv.visao.core;
 
+import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.controlador.PAF;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import javax.swing.*;
+import javax.ws.rs.core.MediaType;
+import org.apache.log4j.Logger;
 
 /**
  * Classe que representa as informacoes do sistema.
@@ -10,6 +19,7 @@ import javax.swing.*;
 public class Sobre extends JDialog {
 
     private static Sobre sobre;
+    private static Logger log;
 
     /**
      * Construtor padrao.
@@ -26,8 +36,18 @@ public class Sobre extends JDialog {
      */
     public static Sobre getInstancia() {
         if (sobre == null) {
+            log = Logger.getLogger(Sobre.class);
             sobre = new Sobre();
         }
+
+        // seta a data de validade do sistema
+        String data = PAF.AUXILIAR.getProperty("out.validade", null);
+        if (data == null || data.equals("null") || data.equals("")) {
+            sobre.getLblValidadeNome().setText("Expirada");
+        } else {
+            sobre.getLblValidadeNome().setText(data);
+        }
+
         return sobre;
     }
 
@@ -39,9 +59,11 @@ public class Sobre extends JDialog {
         panSistema = new javax.swing.JPanel();
         lblSistema = new javax.swing.JLabel();
         lblEmpresa = new javax.swing.JLabel();
+        lblVersao = new javax.swing.JLabel();
         lblAutor = new javax.swing.JLabel();
         lblSistemaNome = new javax.swing.JLabel();
         lblEmpresaNome = new javax.swing.JLabel();
+        lblVersaoNome = new javax.swing.JLabel();
         lblAutorNome = new javax.swing.JLabel();
         separador = new javax.swing.JSeparator();
         lblSite = new javax.swing.JLabel();
@@ -52,6 +74,10 @@ public class Sobre extends JDialog {
         lblEmailNome = new javax.swing.JLabel();
         lblTelefoneNome = new javax.swing.JLabel();
         lblSkypeNome = new javax.swing.JLabel();
+        separador1 = new javax.swing.JSeparator();
+        lblValidade = new javax.swing.JLabel();
+        lblValidadeNome = new javax.swing.JLabel();
+        btnValidar = new javax.swing.JButton();
         lblLogo = new javax.swing.JLabel();
         panLicenca = new javax.swing.JPanel();
         spLicenca = new javax.swing.JScrollPane();
@@ -65,6 +91,9 @@ public class Sobre extends JDialog {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
             }
+            public void windowActivated(java.awt.event.WindowEvent evt) {
+                formWindowActivated(evt);
+            }
         });
 
         tabSobre.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -77,6 +106,9 @@ public class Sobre extends JDialog {
         lblEmpresa.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
         lblEmpresa.setText("Empresa:");
 
+        lblVersao.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
+        lblVersao.setText("Versão:");
+
         lblAutor.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
         lblAutor.setText("Autor:");
 
@@ -85,6 +117,9 @@ public class Sobre extends JDialog {
 
         lblEmpresaNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblEmpresaNome.setText("PhD - Systems Solutions");
+
+        lblVersaoNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
+        lblVersaoNome.setText("1.00");
 
         lblAutorNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblAutorNome.setText("Pedro Henrique de Lira");
@@ -113,6 +148,20 @@ public class Sobre extends JDialog {
         lblSkypeNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblSkypeNome.setText("pedroh.lira");
 
+        lblValidade.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
+        lblValidade.setText("Validade do sistema:");
+
+        lblValidadeNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
+
+        btnValidar.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
+        btnValidar.setText("Validar Sistema");
+        btnValidar.setToolTipText("Execute esta ação para validar o sistema, precisar ter acesso a INTERNET.");
+        btnValidar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnValidarActionPerformed(evt);
+            }
+        });
+
         lblLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/openpdv_logo.png"))); // NOI18N
         lblLogo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -133,37 +182,43 @@ public class Sobre extends JDialog {
                         .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(panSistemaLayout.createSequentialGroup()
                                 .add(lblSistemaNome)
-                                .add(0, 0, Short.MAX_VALUE))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .add(lblVersao)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblVersaoNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 46, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                             .add(panSistemaLayout.createSequentialGroup()
                                 .add(lblEmpresaNome)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 29, Short.MAX_VALUE)
                                 .add(lblAutor)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(lblAutorNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 168, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
                     .add(panSistemaLayout.createSequentialGroup()
                         .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(lblSite)
+                            .add(lblEmail))
+                        .add(18, 18, 18)
+                        .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                            .add(lblSiteNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(lblEmailNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(lblTelefone)
                             .add(panSistemaLayout.createSequentialGroup()
-                                .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(lblSite)
-                                    .add(lblEmail))
+                                .add(lblSkype)
                                 .add(18, 18, 18)
-                                .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                                    .add(lblSiteNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .add(lblEmailNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(lblTelefone)
-                                    .add(org.jdesktop.layout.GroupLayout.TRAILING, panSistemaLayout.createSequentialGroup()
-                                        .add(lblSkype)
-                                        .add(18, 18, 18)
-                                        .add(lblSkypeNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                            .add(panSistemaLayout.createSequentialGroup()
-                                .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                                    .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 443, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                    .add(lblTelefoneNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 165, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                                .add(0, 5, Short.MAX_VALUE))
-                            .add(lblLogo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .add(11, 11, 11)))
+                                .add(lblSkypeNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .add(lblLogo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(panSistemaLayout.createSequentialGroup()
+                        .add(278, 278, 278)
+                        .add(lblTelefoneNome, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, separador)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, separador1)
+                    .add(panSistemaLayout.createSequentialGroup()
+                        .add(lblValidade)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblValidadeNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 83, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(btnValidar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         panSistemaLayout.setVerticalGroup(
@@ -172,7 +227,9 @@ public class Sobre extends JDialog {
                 .addContainerGap()
                 .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(lblSistema)
-                    .add(lblSistemaNome))
+                    .add(lblSistemaNome)
+                    .add(lblVersao)
+                    .add(lblVersaoNome))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(lblEmpresa)
@@ -199,8 +256,16 @@ public class Sobre extends JDialog {
                         .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                             .add(lblSkype)
                             .add(lblSkypeNome))))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(lblLogo, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(separador1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(lblValidadeNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 18, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(panSistemaLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(lblValidade)
+                        .add(btnValidar)))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(lblLogo)
                 .addContainerGap())
         );
 
@@ -249,7 +314,7 @@ public class Sobre extends JDialog {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(12, 12, 12)
-                .add(tabSobre, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+                .add(tabSobre)
                 .addContainerGap())
         );
 
@@ -260,7 +325,59 @@ public class Sobre extends JDialog {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_formWindowClosing
+
+    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+        panSistema.requestFocus();
+    }//GEN-LAST:event_formWindowActivated
+
+    private void btnValidarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnValidarActionPerformed
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    // recuperando os dados do auxiliar local
+                    File aux = new File("conf" + System.getProperty("file.separator") + "auxiliar.txt");
+                    String local = null;
+                    byte[] bytes;
+
+                    if (aux.exists()) {
+                        try (FileInputStream inArquivo = new FileInputStream(aux)) {
+                            bytes = new byte[inArquivo.available()];
+                            inArquivo.read(bytes);
+                            local = new String(bytes);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(sobre, "Atenção: Arquivo nao existe -> " + aux.getAbsolutePath(), "Sobre", JOptionPane.WARNING_MESSAGE);
+                    }
+
+                    if (local != null && !local.equals("")) {
+                        // enviando o auxiliar local e recebendo o novo do servidor
+                        Client c = Util.getClientRest();
+                        WebResource wr = c.resource(Util.getConfig().get("openpdv.url"));
+                        String remoto = wr.type(MediaType.TEXT_PLAIN).accept(MediaType.TEXT_PLAIN).put(String.class, local);
+
+                        try (FileWriter fw = new FileWriter(aux, false)) {
+                            fw.write(remoto);
+                            fw.flush();
+
+                            Aguarde.getInstancia().setVisible(false);
+                            JOptionPane.showMessageDialog(sobre, "Arquivo salvo com sucesso, abra novamente o OpenPDV para ativá-lo,", "Sobre", JOptionPane.INFORMATION_MESSAGE);
+                            System.exit(0);
+                        }
+                    }
+                } catch (Exception ex) {
+                    Aguarde.getInstancia().setVisible(false);
+                    log.error("Problemas na validacao.", ex);
+                    JOptionPane.showMessageDialog(sobre, "Atenção: Problemas ao tentar atualizar a validade!", "Sobre", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }).start();
+
+        Aguarde.getInstancia().setVisible(true);
+    }//GEN-LAST:event_btnValidarActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnValidar;
     private javax.swing.JLabel lblAutor;
     private javax.swing.JLabel lblAutorNome;
     private javax.swing.JLabel lblEmail;
@@ -276,9 +393,14 @@ public class Sobre extends JDialog {
     private javax.swing.JLabel lblSkypeNome;
     private javax.swing.JLabel lblTelefone;
     private javax.swing.JLabel lblTelefoneNome;
+    private javax.swing.JLabel lblValidade;
+    private javax.swing.JLabel lblValidadeNome;
+    private javax.swing.JLabel lblVersao;
+    private javax.swing.JLabel lblVersaoNome;
     private javax.swing.JPanel panLicenca;
     private javax.swing.JPanel panSistema;
     private javax.swing.JSeparator separador;
+    private javax.swing.JSeparator separador1;
     private javax.swing.JScrollPane spLicenca;
     private javax.swing.JTabbedPane tabSobre;
     private javax.swing.JTextPane txtLicenca;
@@ -451,5 +573,53 @@ public class Sobre extends JDialog {
 
     public void setSeparador(JSeparator separador) {
         this.separador = separador;
+    }
+
+    public JButton getBtnValidar() {
+        return btnValidar;
+    }
+
+    public void setBtnValidar(JButton btnValidar) {
+        this.btnValidar = btnValidar;
+    }
+
+    public JLabel getLblValidade() {
+        return lblValidade;
+    }
+
+    public void setLblValidade(JLabel lblValidade) {
+        this.lblValidade = lblValidade;
+    }
+
+    public JLabel getLblValidadeNome() {
+        return lblValidadeNome;
+    }
+
+    public void setLblValidadeNome(JLabel lblValidadeNome) {
+        this.lblValidadeNome = lblValidadeNome;
+    }
+
+    public JLabel getLblVersao() {
+        return lblVersao;
+    }
+
+    public void setLblVersao(JLabel lblVersao) {
+        this.lblVersao = lblVersao;
+    }
+
+    public JLabel getLblVersaoNome() {
+        return lblVersaoNome;
+    }
+
+    public void setLblVersaoNome(JLabel lblVersaoNome) {
+        this.lblVersaoNome = lblVersaoNome;
+    }
+
+    public JSeparator getSeparador1() {
+        return separador1;
+    }
+
+    public void setSeparador1(JSeparator separador1) {
+        this.separador1 = separador1;
     }
 }

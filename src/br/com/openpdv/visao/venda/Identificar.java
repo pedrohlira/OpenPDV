@@ -236,21 +236,26 @@ public class Identificar extends javax.swing.JDialog {
     private void txtCPF_CNPJKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCPF_CNPJKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             txtNome.requestFocus();
+        } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            cancelar();
         }
     }//GEN-LAST:event_txtCPF_CNPJKeyPressed
 
     private void txtNomeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNomeKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             txtEndereco.requestFocus();
+        } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            cancelar();
         }
     }//GEN-LAST:event_txtNomeKeyPressed
 
     private void txtEnderecoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtEnderecoKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            btnOK.requestFocus();
+            salvar();
+        } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            cancelar();
         }
     }//GEN-LAST:event_txtEnderecoKeyPressed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnOK;

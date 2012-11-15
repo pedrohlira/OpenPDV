@@ -1,10 +1,10 @@
 package br.com.openpdv.visao.core;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.EEstadoECF;
 import br.com.openpdv.controlador.comandos.ComandoRecuperarVenda;
 import br.com.openpdv.controlador.permissao.Login;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.EEstadoECF;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
@@ -202,7 +202,7 @@ public class Autenticacao extends JDialog {
                         .add(btnSair, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 98, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(separador)
                     .add(panOperador, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -221,41 +221,41 @@ public class Autenticacao extends JDialog {
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-429)/2, (screenSize.height-175)/2, 429, 175);
+        setBounds((screenSize.width-455)/2, (screenSize.height-175)/2, 455, 175);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntrarActionPerformed
-        botaoEntrar();
+        entrar();
     }//GEN-LAST:event_btnEntrarActionPerformed
 
     private void btnConsultaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConsultaActionPerformed
-        botaoConsultar();
+        consultar();
     }//GEN-LAST:event_btnConsultaActionPerformed
 
     private void btnEntrarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnEntrarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            botaoEntrar();
+            entrar();
         }
     }//GEN-LAST:event_btnEntrarKeyPressed
 
     private void btnConsultaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnConsultaKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            botaoConsultar();
+            consultar();
         }
     }//GEN-LAST:event_btnConsultaKeyPressed
 
     private void btnFiscalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFiscalActionPerformed
-        botaoMenuFiscal();
+        fiscal();
     }//GEN-LAST:event_btnFiscalActionPerformed
 
     private void btnFiscalKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnFiscalKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            botaoMenuFiscal();
+            fiscal();
         }
     }//GEN-LAST:event_btnFiscalKeyPressed
 
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
-        Login.sair();
+        System.exit(0);
     }//GEN-LAST:event_btnSairActionPerformed
 
     private void btnSairKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnSairKeyPressed
@@ -272,7 +272,7 @@ public class Autenticacao extends JDialog {
 
     private void pswOperadorSenhaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pswOperadorSenhaKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            btnEntrar.requestFocus();
+            entrar();
         }
     }//GEN-LAST:event_pswOperadorSenhaKeyPressed
 
@@ -292,7 +292,7 @@ public class Autenticacao extends JDialog {
     /**
      * Metodo com a acao do botao entrar.
      */
-    private void botaoEntrar() {
+    private void entrar() {
         // valida se preencheu todos os campos
         if (txtOperadorUsuario.getText().equals("") || pswOperadorSenha.getPassword().length == 0) {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!", "Login", JOptionPane.INFORMATION_MESSAGE);
@@ -328,7 +328,7 @@ public class Autenticacao extends JDialog {
     /**
      * Metodo com a acao do botao consultar.
      */
-    private void botaoConsultar() {
+    private void consultar() {
         Caixa.getInstancia().modoConsulta();
         Caixa.getInstancia().setJanela(null);
         dispose();
@@ -337,8 +337,8 @@ public class Autenticacao extends JDialog {
     /**
      * Metodo com a acao do botao menu fiscal.
      */
-    private void botaoMenuFiscal() {
-        botaoConsultar();
+    private void fiscal() {
+        consultar();
         Caixa.getInstancia().getMnuFiscal().doClick();
     }
 

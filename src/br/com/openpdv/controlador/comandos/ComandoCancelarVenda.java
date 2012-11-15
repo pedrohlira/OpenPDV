@@ -1,20 +1,19 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.TEF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
+import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -30,16 +29,18 @@ public class ComandoCancelarVenda implements IComando {
     private Logger log;
     private CoreService service;
     private EcfVenda venda;
+    private boolean auto;
 
     /**
      * Construtor padrao.
      */
-    public ComandoCancelarVenda() {
+    public ComandoCancelarVenda(boolean auto) {
         this.log = Logger.getLogger(ComandoCancelarVenda.class);
-        service = new CoreService();
+        this.service = new CoreService();
+        this.auto = auto;
+
         try {
-            FiltroBinario fb = new FiltroBinario("ecfVendaCancelada", ECompara.IGUAL, false);
-            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, fb);
+            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
             if (!vendas.isEmpty()) {
                 venda = vendas.get(0);
             }
@@ -50,29 +51,35 @@ public class ComandoCancelarVenda implements IComando {
 
     @Override
     public void executar() throws OpenPdvException {
-        if (venda != null) {
-            // cancela a venda no cupom.
-            cancelarVendaECF();
-            // cancela a venda no BD.
-            cancelarVendaBanco();
+        if (venda != null && !venda.getEcfVendaCancelada()) {
+            try {
+                // cancela a venda no cupom.
+                cancelarVendaECF();
+                // cancela a venda no BD.
+                cancelarVendaBanco();
+            } catch (OpenPdvException ex) {
+                // caso o cancelamente nao seja automatico, dispara a excecao
+                if (!auto) {
+                    cancelarVendaTela();
+                    throw new OpenPdvException("A última venda já está cancelada.");
+                }
+            }
+
             // cancela os cartoes
             try {
-                TEF.blockInput(true);
-                // opera nos cartoes
-                new ComandoCancelarCartao(venda.getEcfPagamentos()).executar();
-                TEF.blockInput(false);
-                Caixa.getInstancia().getBobina().removeAllElements();
+                new ComandoCancelarCartao(venda.getEcfPagamentos(), auto).executar();
                 Caixa.getInstancia().modoDisponivel();
             } catch (OpenPdvException ex) {
                 log.error("Erro ao cancelar os cartoes.", ex);
-                TEF.blockInput(false);
-                Caixa.getInstancia().getBobina().removeAllElements();
                 Caixa.getInstancia().modoIndisponivel();
                 JOptionPane.showMessageDialog(null, "Ocorreram problemas ao cancelar os cartões!\nSistema ficará indisponível até resolver o problema!", "TEF", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             throw new OpenPdvException("A última venda já está cancelada.");
         }
+
+        // cancela a venda na tela
+        cancelarVendaTela();
     }
 
     @Override
@@ -124,5 +131,15 @@ public class ComandoCancelarVenda implements IComando {
             }
         }
         service.executar(sqls);
+    }
+
+    /**
+     * Metodo para cancelar uma venda na Tela.
+     *
+     * @throws OpenPdvException dispara caso nao consiga executar.
+     */
+    public void cancelarVendaTela() throws OpenPdvException {
+        Caixa.getInstancia().getBobina().removeAllElements();
+        Aguarde.getInstancia().setVisible(false);
     }
 }

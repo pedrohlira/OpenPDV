@@ -24,7 +24,6 @@ import org.apache.log4j.Logger;
  * dados.
  *
  * @param <E> o tipo de dados.
- * <p/>
  * @author Pedro H. Lira
  */
 public class CoreService<E extends Dados> {
@@ -32,14 +31,14 @@ public class CoreService<E extends Dados> {
     protected Logger log;
 
     /**
-     * Construtor padrao
+     * Construtor padrao.
      */
     public CoreService() {
         log = Logger.getLogger(CoreService.class);
     }
 
     /**
-     * Construtor padrao passando a classe de logger
+     * Construtor padrao passando a classe de logger.
      *
      * @param classe a classe que sera usada
      */
@@ -48,19 +47,17 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que seleciona os dados no BD.
      *
-     * @param dados
-     * param inicio
-     * param limite
-     * param
-     * filtro
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * @throws OpenPdvException
-* throws
-     * ParametroException
+     * @param dados param inicio param limite param filtro
+     * @param inicio a pagina de inicio de captura dos dados.
+     * @param limite a quantidade de registros maximos retornados.
+     * @param filtro o filtro utilizado para restringir o resultado.
+     * @return uma lista de elementos informado, encontrado no BD.
+     * @throws OpenPdvException dispara caso nao seja possivel selecionar os
+     * dados.
+     * @throws ParametroException dispara se algum parametro for passado
+     * incorreto.
      */
     public List<E> selecionar(E dados, int inicio, int limite, IFiltro filtro) throws OpenPdvException, ParametroException {
         // mosta a instrucao padrao
@@ -141,16 +138,16 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que seleciona somente um registro no BD.
      *
-     * @param dados
-     * param filtro
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * @throws OpenPdvException
-* throws
-     * ParametroException
+     * @param dados o tipo de dados solicitado.
+     * @param filtro o filtro de regsitracao de selecao.
+     * @return o objeto tipado solicitado retornado do BD, ou null se nao
+     * encontrar.
+     * @throws OpenPdvException dispara caso nao seja possivel selecionar os
+     * dados.
+     * @throws ParametroException dispara se algum parametro for passado
+     * incorreto.
      */
     public E selecionar(E dados, IFiltro filtro) throws OpenPdvException, ParametroException {
         // formata o sql
@@ -162,6 +159,19 @@ public class CoreService<E extends Dados> {
         return obj;
     }
 
+    /**
+     * Metodo que realiza um busca, usando condiciona matematico.
+     *
+     * @param dados o tipo de dados que deseja buscar.
+     * @param campo o nome do campo a ser usada na comparacao.
+     * @param busca o tipo de operacao matematica solicitada.
+     * @return um objeto tipado como solicitado encontrado no BD, ou null se nao
+     * encontrar.
+     * @throws OpenPdvException dispara caso nao seja possivel selecionar os
+     * dados.
+     * @throws ParametroException dispara se algum parametro for passado
+     * incorreto.
+     */
     public E buscar(E dados, String campo, EBusca busca) throws OpenPdvException, ParametroException {
         // formata o sql
         String sql = String.format("SELECT t FROM %s t WHERE t.%s = (SELECT %s(t1.%s) FROM %s t1)", dados.getTabela(), campo, busca.toString(), campo, dados.getTabela());
@@ -171,6 +181,21 @@ public class CoreService<E extends Dados> {
         return obj;
     }
 
+    /**
+     * Metodo que realiza um busca, usando condiciona matematico.
+     *
+     * @param dados o tipo de dados que deseja buscar.
+     * @param campo o nome do campo a ser usada na comparacao.
+     * @param busca o tipo de operacao matematica solicitada.
+     * @param filtro o filtro utilizado para restringir a massa de dados usada
+     * na comparacao.
+     * @return um objeto tipado como solicitado encontrado no BD, ou null se nao
+     * encontrar.
+     * @throws OpenPdvException dispara caso nao seja possivel selecionar os
+     * dados.
+     * @throws ParametroException dispara se algum parametro for passado
+     * incorreto.
+     */
     public Object buscar(E dados, String campo, EBusca busca, IFiltro filtro) throws OpenPdvException, ParametroException {
         Pattern pat = Pattern.compile("^t\\d*\\.");
         Matcher mat = pat.matcher(campo);
@@ -192,13 +217,13 @@ public class CoreService<E extends Dados> {
     /**
      * Metodo padrao para recuperar um registro.
      *
-     * @param sql    a instrucao em EQL formatada.
+     * @param sql a instrucao em EQL formatada.
      * @param filtro o filtro a ser usado.
-     * <p/>
      * @return um unidade de classe de acordo com a generic.
-     * <p/>
-     * @throws OpenPdvException   ocorre em erros no acesso aos dados.
-     * @throws ParametroException ocorre em caso de filtro incorreto.
+     * @throws OpenPdvException dispara caso nao seja possivel selecionar os
+     * dados.
+     * @throws ParametroException dispara se algum parametro for passado
+     * incorreto.
      */
     public Object getResultado(String sql, IFiltro filtro) throws OpenPdvException, ParametroException {
         EntityManagerFactory emf = null;
@@ -254,16 +279,11 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que salva a entidade usando a uma nova transacao.
      *
-     * @param unidades
-* <
-     * p/>
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * <p/>
-     * @throws OpenPdvException
+     * @param unidades cuma colecao de entidades.
+     * @return a entidade com valores salvos.
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public Collection<E> salvar(Collection<E> unidades) throws OpenPdvException {
         EntityManagerFactory emf = null;
@@ -292,14 +312,12 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que salva a entidade usando a mesma transacao passada.
      *
-     * @param em
-* param unidades
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * @throws OpenPdvException
+     * @param em o gerenciado de entidade.
+     * @param unidades cuma colecao de entidades.
+     * @return a entidade com valores salvos.
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public Collection<E> salvar(EntityManager em, Collection<E> unidades) throws OpenPdvException {
         if (unidades != null) {
@@ -311,16 +329,11 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que salva a entidade usando com uma nova transacao.
      *
-     * @param unidade
-* <
-     * p/>
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * <p/>
-     * @throws OpenPdvException
+     * @param unidade a entidade
+     * @return a entidade com valores salvos.
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public E salvar(E unidade) throws OpenPdvException {
         EntityManagerFactory emf = null;
@@ -351,11 +364,9 @@ public class CoreService<E extends Dados> {
     /**
      * Metodo que salva a entidade usando a mesma transacao passada.
      *
-     * @param em      o gerenciado de entidade.
+     * @param em o gerenciado de entidade.
      * @param unidade a entidade
-     * <p/>
      * @return a entidade com valores salvos.
-     * <p/>
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public E salvar(EntityManager em, E unidade) throws OpenPdvException {
@@ -376,11 +387,10 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que deleta uma colecao de entidades com uma nova transacao.
      *
-     * @param unidades
-* <
-     * p/>
-     * s OpenPdvException
+     * @param unidades a colecao de entidades.
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public void deletar(Collection<E> unidades) throws OpenPdvException {
         EntityManagerFactory emf = null;
@@ -413,9 +423,8 @@ public class CoreService<E extends Dados> {
     /**
      * Metodo que deleta uma colecao de entidades com a mesma transacao.
      *
-     * @param em       o gerenciador de entidades.
+     * @param em o gerenciador de entidades.
      * @param unidades a colecao de entidades.
-     * <p/>
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public void deletar(EntityManager em, Collection<E> unidades) throws OpenPdvException {
@@ -425,11 +434,10 @@ public class CoreService<E extends Dados> {
     }
 
     /**
+     * Metodo que deleta a entidade com uma nova transacao.
      *
-     * @param unidade
-* <
-     * p/>
-     * s OpenPdvException
+     * @param unidade a entidade
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public void deletar(E unidade) throws OpenPdvException {
         EntityManagerFactory emf = null;
@@ -459,9 +467,8 @@ public class CoreService<E extends Dados> {
     /**
      * Metodo que deleta a entidade com a mesma transacao passada.
      *
-     * @param em      o gerenciador de entidades.
+     * @param em o gerenciador de entidades.
      * @param unidade a entidade
-     * <p/>
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public void deletar(EntityManager em, E unidade) throws OpenPdvException {
@@ -474,17 +481,12 @@ public class CoreService<E extends Dados> {
         }
     }
 
-    /**
+   /**
+     * Metodo para executar instrucões diretas no BD com uma nova transacao.
      *
-     * @param sqls
-* <
-     * p/>
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * <p/>
-     * @throws OpenPdvException
+     * @param sql a instrucao Sql em formato de objeto.
+     * @return um inteiro informando a quantidade de registros afetados.
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public List<Integer> executar(Collection<Sql<E>> sqls) throws OpenPdvException {
         EntityManagerFactory emf = null;
@@ -522,11 +524,9 @@ public class CoreService<E extends Dados> {
     /**
      * Metodo para executar instrucões diretas no BD com a mesma transacao.
      *
-     * @param em  o gerenciador de entidades.
+     * @param em o gerenciador de entidades.
      * @param sql a instrucao Sql em formato de objeto.
-     * <p/>
      * @return um inteiro informando a quantidade de registros afetados.
-     * <p/>
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public Integer executar(EntityManager em, Sql<E> sql) throws OpenPdvException {
@@ -597,17 +597,12 @@ public class CoreService<E extends Dados> {
         return resultado;
     }
 
-    /**
+   /**
+     * Metodo para executar instrucões diretas no BD com uma nova transacao.
      *
-     * @param sql
-* <
-     * p/>
-     * <p/>
-     * @return
-     * <
-     * p/>
-     * <p/>
-     * @throws OpenPdvException
+     * @param sql a instrucao Sql em formato de objeto.
+     * @return um inteiro informando a quantidade de registros afetados.
+     * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     public Integer executar(String sql) throws OpenPdvException {
         EntityManagerFactory emf = null;
@@ -645,11 +640,9 @@ public class CoreService<E extends Dados> {
      * Metodo para executar instrucões de atualizacao diretas no BD com a mesma
      * transacao.
      *
-     * @param em  o gerenciador de entidades.
+     * @param em o gerenciador de entidades.
      * @param sql a instrucao Sql em formato de objeto.
-     * <p/>
      * @return um inteiro informando a quantidade de registros afetados.
-     * <p/>
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     protected Integer atualizar(EntityManager em, Sql<E> sql) throws OpenPdvException {
@@ -711,9 +704,8 @@ public class CoreService<E extends Dados> {
      * Metodo que faz o set do valor no objeto identificando o verdadeiro tipo.
      *
      * @param sMet o Metodo a ser chamado.
-     * @param obj  o objeto a ser atingindo.
-     * @param sql  a instrucao que contem o valor.
-     * <p/>
+     * @param obj o objeto a ser atingindo.
+     * @param sql a instrucao que contem o valor.
      * @throws Exception caso ocorra alguma excecao.
      */
     protected void setValor(Method sMet, E obj, Sql<E> sql) throws Exception {
@@ -748,11 +740,9 @@ public class CoreService<E extends Dados> {
      * Metodo para executar instrucões de exclusoes diretas no BD com a mesma
      * transacao.
      *
-     * @param em  o gerenciador de entidades.
+     * @param em o gerenciador de entidades.
      * @param sql a instrucao Sql em formato de objeto.
-     * <p/>
      * @return um inteiro informando a quantidade de registros afetados.
-     * <p/>
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
     protected Integer excluir(EntityManager em, Sql<E> sql) throws OpenPdvException {
@@ -768,7 +758,6 @@ public class CoreService<E extends Dados> {
      * Metodo que gera a instrucao de colecoes em JQL.
      *
      * @param colecao um array de colecoes de tabelas.
-     * <p/>
      * @return uma string no formato de busca.
      */
     protected String getColecao(Colecao[] colecao) {
@@ -785,7 +774,7 @@ public class CoreService<E extends Dados> {
      * Metodo que padrozina os tamanhos da letras ao salvar os dados.
      *
      * @param unidade o objeto a ser salvo.
-     * @param tipo    o tipo de letra padrao usado.
+     * @param tipo o tipo de letra padrao usado.
      */
     protected void padronizaLetras(Object unidade, ELetra tipo) {
         if (tipo != ELetra.NORMAL) {
@@ -815,7 +804,6 @@ public class CoreService<E extends Dados> {
      * Metodo que informa se o metodo da classe é do tipo GET.
      *
      * @param method usando reflection para descrobrir os metodos.
-     * <p/>
      * @return verdadeiro se o metodo for GET, falso caso contrario.
      */
     public static boolean isGetter(Method method) {
@@ -835,7 +823,6 @@ public class CoreService<E extends Dados> {
      * Metodo que informa se o metodo da classe é do tipo SET.
      *
      * @param method usando reflection para descrobrir os metodos.
-     * <p/>
      * @return verdadeiro se o metodo for SET, falso caso contrario.
      */
     public static boolean isSetter(Method method) {

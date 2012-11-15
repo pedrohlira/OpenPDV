@@ -1,18 +1,9 @@
 package br.com.openpdv.visao.core;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
-import br.com.openpdv.controlador.TEF;
 import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.controlador.permissao.Login;
-import br.com.openpdv.modelo.anexo.v.AnexoV;
-import br.com.openpdv.modelo.anexo.v.P1;
-import br.com.openpdv.modelo.anexo.v.P2;
-import br.com.openpdv.modelo.anexo.v.P9;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
@@ -34,13 +25,22 @@ import br.com.openpdv.visao.principal.*;
 import br.com.openpdv.visao.venda.Fechamento;
 import br.com.openpdv.visao.venda.Identificar;
 import br.com.openpdv.visao.venda.Precos;
-import java.awt.KeyEventDispatcher;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.TEF;
+import br.com.phdss.controlador.PAF;
+import br.com.phdss.modelo.anexo.v.AnexoV;
+import br.com.phdss.modelo.anexo.v.P1;
+import br.com.phdss.modelo.anexo.v.P2;
+import br.com.phdss.modelo.anexo.v.P9;
+import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.*;
 import org.apache.log4j.Logger;
@@ -62,7 +62,7 @@ public class Caixa extends JFrame {
     private JDialog janela;
     private JOptionPane option;
     private DefaultListModel bobina;
-    private KeyEventDispatcher teclas;
+    private KeyEventPostProcessor teclas;
     /**
      * Variavel que responde de modo assincrono a pesquisa de produto.
      */
@@ -192,10 +192,10 @@ public class Caixa extends JFrame {
         modo = EModo.OFF;
 
         // mapeando as teclas apertadas
-        teclas = new DefaultFocusManager() {
+        teclas = new KeyEventPostProcessor() {
 
             @Override
-            public boolean dispatchKeyEvent(KeyEvent e) {
+            public boolean postProcessKeyEvent(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_F1 && mnuSobre.isEnabled()) { // Sobre
                     mnuSobreMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F2 && mnuPrincipal.isEnabled() && janela == null) { // Menu Principal
@@ -209,6 +209,8 @@ public class Caixa extends JFrame {
                         janela = null;
                     }
                     mnuFiscal.doClick();
+                } else if (e.getKeyCode() == KeyEvent.VK_F4 && mnuNota.isEnabled()) { // Nota Fiscal
+                    mnuNota.doClick();
                 } else if (e.getKeyCode() == KeyEvent.VK_F5 && mnuPesquisa.isEnabled()) { // Pesquisa
                     mnuPesquisaMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F6 && mnuVenda.isEnabled() && janela == null) { // Menu Gaveta
@@ -231,28 +233,32 @@ public class Caixa extends JFrame {
                         janela = null;
                         statusMenus(modo);
                     }
-                } else if (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_Q && modo == EModo.ABERTO) { // quantidade
-                    String texto = JOptionPane.showInputDialog(caixa, "Digite o valor da quantidade.", "Venda", JOptionPane.OK_CANCEL_OPTION);
-                    if (texto != null) {
-                        texto = texto.replace(".", "").replace(",", ".");
+                } else if (e.getModifiers() == KeyEvent.CTRL_MASK && e.getKeyCode() == KeyEvent.VK_Q && modo == EModo.ABERTO && option == null) { // quantidade
+                    option = new JOptionPane();
+                    String texto = option.showInputDialog(caixa, "Digite o valor da quantidade.", "Venda", JOptionPane.OK_CANCEL_OPTION);
+                    if (texto != null && !texto.equals("")) {
+                        texto = texto.replaceAll("[^0-9],", "");
                         try {
-                            double valor = Double.valueOf(texto);
-                            txtQuantidade.setValue(valor);
+                            double valor = Double.valueOf(texto.replace(",", "."));
+                            if (valor > 0) {
+                                txtQuantidade.setValue(valor);
+                            } else {
+                                txtQuantidade.setValue(1.00);
+                            }
                         } catch (NumberFormatException nfe) {
-                            txtQuantidade.setValue("1");
+                            txtQuantidade.setValue(1.00);
                         }
                     }
-                } else { // Outras
-                    return super.dispatchKeyEvent(e);
+                    option = null;
                 }
-
-                return true;
+                return false;
             }
         };
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(teclas);
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor(teclas);
 
         // seta o icone
-        if (System.getProperty("os.name").contains("Windows")) {
+        if (System.getProperty(
+                "os.name").contains("Windows")) {
             setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/br/com/openpdv/imagens/logo.png")));
         }
     }
@@ -315,11 +321,11 @@ public class Caixa extends JFrame {
         mnuEstoque = new javax.swing.JMenuItem();
         mnuMovimento = new javax.swing.JMenuItem();
         mnuPagamentos = new javax.swing.JMenuItem();
-        mnuDav = new javax.swing.JMenuItem();
         mnuPAF = new javax.swing.JMenuItem();
         mnuVendas = new javax.swing.JMenuItem();
         mnuIndice = new javax.swing.JMenuItem();
         mnuParamConfiguracao = new javax.swing.JMenuItem();
+        mnuCartao = new javax.swing.JMenuItem();
         mnuNota = new javax.swing.JMenu();
         mnuNotaConsumidor = new javax.swing.JMenuItem();
         mnuNotaEletronica = new javax.swing.JMenuItem();
@@ -333,11 +339,13 @@ public class Caixa extends JFrame {
         mnuIdentificar = new javax.swing.JMenu();
         mnuSair = new javax.swing.JMenu();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("OpenPDV");
+        setMaximumSize(new java.awt.Dimension(1024, 746));
+        setMinimumSize(new java.awt.Dimension(1024, 746));
         setName("OpenPDV");
         setResizable(false);
-        setUndecorated(true);
+        setUndecorated(Boolean.valueOf(Util.getConfig().get("openpdv.semborda")));
 
         lblLivre.setBackground(new java.awt.Color(255, 255, 255));
         lblLivre.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -505,6 +513,7 @@ public class Caixa extends JFrame {
         mnuSobre.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sobre.png"))); // NOI18N
         mnuSobre.setText("Sobre - F1");
         mnuSobre.setToolTipText("Sobre o sistema");
+        mnuSobre.setEnabled(false);
         mnuSobre.setFocusable(false);
         mnuSobre.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuSobre.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -521,6 +530,7 @@ public class Caixa extends JFrame {
 
         mnuPrincipal.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/caixa.png"))); // NOI18N
         mnuPrincipal.setText("Principal - F2");
+        mnuPrincipal.setEnabled(false);
         mnuPrincipal.setFocusable(false);
         mnuPrincipal.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuPrincipal.setRolloverEnabled(true);
@@ -529,6 +539,7 @@ public class Caixa extends JFrame {
         mnuSuprimento.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/valor.png"))); // NOI18N
         mnuSuprimento.setText("Suprimento");
         mnuSuprimento.setToolTipText("Suprimento");
+        mnuSuprimento.setEnabled(false);
         mnuSuprimento.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuSuprimentoActionPerformed(evt);
@@ -540,6 +551,7 @@ public class Caixa extends JFrame {
         mnuSangria.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/receber.png"))); // NOI18N
         mnuSangria.setText("Sangria");
         mnuSangria.setToolTipText("Sangria");
+        mnuSangria.setEnabled(false);
         mnuSangria.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuSangriaActionPerformed(evt);
@@ -551,6 +563,7 @@ public class Caixa extends JFrame {
         mnuReducaoZ.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/ecfz.png"))); // NOI18N
         mnuReducaoZ.setText("Redução Z");
         mnuReducaoZ.setToolTipText("Redução Z");
+        mnuReducaoZ.setEnabled(false);
         mnuReducaoZ.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuReducaoZActionPerformed(evt);
@@ -563,6 +576,7 @@ public class Caixa extends JFrame {
         mnuProdutos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/produto.png"))); // NOI18N
         mnuProdutos.setText("Produtos");
         mnuProdutos.setToolTipText("Produtos");
+        mnuProdutos.setEnabled(false);
         mnuProdutos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuProdutosActionPerformed(evt);
@@ -574,6 +588,7 @@ public class Caixa extends JFrame {
         mnuEmbalagens.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/estoque.png"))); // NOI18N
         mnuEmbalagens.setText("Embalagens");
         mnuEmbalagens.setToolTipText("Embalagens");
+        mnuEmbalagens.setEnabled(false);
         mnuEmbalagens.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuEmbalagensActionPerformed(evt);
@@ -585,6 +600,7 @@ public class Caixa extends JFrame {
         mnuTipoPagamentos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/preco.png"))); // NOI18N
         mnuTipoPagamentos.setText("Tipo Pagamentos");
         mnuTipoPagamentos.setToolTipText("Tipo Pagamentos");
+        mnuTipoPagamentos.setEnabled(false);
         mnuTipoPagamentos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuTipoPagamentosActionPerformed(evt);
@@ -596,6 +612,7 @@ public class Caixa extends JFrame {
         mnuClientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cliente.png"))); // NOI18N
         mnuClientes.setText("Clientes");
         mnuClientes.setToolTipText("Clientes");
+        mnuClientes.setEnabled(false);
         mnuClientes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuClientesActionPerformed(evt);
@@ -607,6 +624,7 @@ public class Caixa extends JFrame {
         mnuUsuarios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/grupo.png"))); // NOI18N
         mnuUsuarios.setText("Usuários");
         mnuUsuarios.setToolTipText("Usuários");
+        mnuUsuarios.setEnabled(false);
         mnuUsuarios.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuUsuariosActionPerformed(evt);
@@ -618,6 +636,7 @@ public class Caixa extends JFrame {
         mnuTEF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuTEF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cartao.png"))); // NOI18N
         mnuTEF.setText("TEF");
+        mnuTEF.setEnabled(false);
         mnuTEF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuTEFActionPerformed(evt);
@@ -629,6 +648,7 @@ public class Caixa extends JFrame {
         mnuSincronizacao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sincroniza.png"))); // NOI18N
         mnuSincronizacao.setText("Sincronização");
         mnuSincronizacao.setToolTipText("Sincroniza os PDVs");
+        mnuSincronizacao.setEnabled(false);
         mnuSincronizacao.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuSincronizacaoActionPerformed(evt);
@@ -641,6 +661,7 @@ public class Caixa extends JFrame {
         mnuFiscal.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/fiscal.png"))); // NOI18N
         mnuFiscal.setText("Menu Fiscal - F3");
         mnuFiscal.setToolTipText("Menu Fiscal");
+        mnuFiscal.setEnabled(false);
         mnuFiscal.setFocusable(false);
         mnuFiscal.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuFiscal.setRolloverEnabled(true);
@@ -648,6 +669,7 @@ public class Caixa extends JFrame {
         mnuLX.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuLX.setText("LX");
         mnuLX.setToolTipText("Leitura X");
+        mnuLX.setEnabled(false);
         mnuLX.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuLXActionPerformed(evt);
@@ -658,6 +680,7 @@ public class Caixa extends JFrame {
         mnuLMFC.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuLMFC.setText("LMFC");
         mnuLMFC.setToolTipText("Leitura Memória Fiscal Completa");
+        mnuLMFC.setEnabled(false);
         mnuLMFC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuLMFCActionPerformed(evt);
@@ -668,6 +691,7 @@ public class Caixa extends JFrame {
         mnuLMFS.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuLMFS.setText("LMFS");
         mnuLMFS.setToolTipText("Leitura Memória Fiscal Simplificada");
+        mnuLMFS.setEnabled(false);
         mnuLMFS.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuLMFSActionPerformed(evt);
@@ -678,6 +702,7 @@ public class Caixa extends JFrame {
         mnuEspelho.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuEspelho.setText("Espelho MFD");
         mnuEspelho.setToolTipText("Espelho MFD");
+        mnuEspelho.setEnabled(false);
         mnuEspelho.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuEspelhoActionPerformed(evt);
@@ -688,6 +713,7 @@ public class Caixa extends JFrame {
         mnuArquivo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuArquivo.setText("Arquivo MFD");
         mnuArquivo.setToolTipText("Arquivo MFD");
+        mnuArquivo.setEnabled(false);
         mnuArquivo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuArquivoActionPerformed(evt);
@@ -698,6 +724,7 @@ public class Caixa extends JFrame {
         mnuTabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuTabProdutos.setText("Tabela de Produtos");
         mnuTabProdutos.setToolTipText("Tabela de Produtos");
+        mnuTabProdutos.setEnabled(false);
         mnuTabProdutos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuTabProdutosActionPerformed(evt);
@@ -708,6 +735,7 @@ public class Caixa extends JFrame {
         mnuEstoque.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuEstoque.setText("Estoque");
         mnuEstoque.setToolTipText("Estoque");
+        mnuEstoque.setEnabled(false);
         mnuEstoque.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuEstoqueActionPerformed(evt);
@@ -718,6 +746,7 @@ public class Caixa extends JFrame {
         mnuMovimento.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuMovimento.setText("Movimento por ECF");
         mnuMovimento.setToolTipText("Movimento por ECF");
+        mnuMovimento.setEnabled(false);
         mnuMovimento.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuMovimentoActionPerformed(evt);
@@ -728,6 +757,7 @@ public class Caixa extends JFrame {
         mnuPagamentos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuPagamentos.setText("Meios de Pagamento");
         mnuPagamentos.setToolTipText("Meios de Pagamento");
+        mnuPagamentos.setEnabled(false);
         mnuPagamentos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuPagamentosActionPerformed(evt);
@@ -735,19 +765,10 @@ public class Caixa extends JFrame {
         });
         mnuFiscal.add(mnuPagamentos);
 
-        mnuDav.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuDav.setText("DAV Emitidos");
-        mnuDav.setToolTipText("DAV Emitidos");
-        mnuDav.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuDavActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuDav);
-
         mnuPAF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuPAF.setText("Identificação do PAF-ECF");
         mnuPAF.setToolTipText("Identificação do PAF-ECF");
+        mnuPAF.setEnabled(false);
         mnuPAF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuPAFActionPerformed(evt);
@@ -758,6 +779,7 @@ public class Caixa extends JFrame {
         mnuVendas.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuVendas.setText("Vendas do Período");
         mnuVendas.setToolTipText("Vendas do Período");
+        mnuVendas.setEnabled(false);
         mnuVendas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuVendasActionPerformed(evt);
@@ -768,6 +790,7 @@ public class Caixa extends JFrame {
         mnuIndice.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuIndice.setText("Tabela Índice Técnico Produção");
         mnuIndice.setToolTipText("Tabela Índice Técnico Produção");
+        mnuIndice.setEnabled(false);
         mnuIndice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuIndiceActionPerformed(evt);
@@ -778,6 +801,7 @@ public class Caixa extends JFrame {
         mnuParamConfiguracao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuParamConfiguracao.setText("Parâmetros de Configuração");
         mnuParamConfiguracao.setToolTipText("Parâmetros de Configuração");
+        mnuParamConfiguracao.setEnabled(false);
         mnuParamConfiguracao.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuParamConfiguracaoActionPerformed(evt);
@@ -785,11 +809,23 @@ public class Caixa extends JFrame {
         });
         mnuFiscal.add(mnuParamConfiguracao);
 
+        mnuCartao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuCartao.setText("Troco em Cartão");
+        mnuCartao.setToolTipText("Tabela Índice Técnico Produção");
+        mnuCartao.setEnabled(false);
+        mnuCartao.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCartaoActionPerformed(evt);
+            }
+        });
+        mnuFiscal.add(mnuCartao);
+
         barMenu.add(mnuFiscal);
 
         mnuNota.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/padrao.png"))); // NOI18N
-        mnuNota.setText("Nota FIscal");
+        mnuNota.setText("Nota Fiscal - F4");
         mnuNota.setToolTipText("Nota Fiscal");
+        mnuNota.setEnabled(false);
         mnuNota.setFocusable(false);
         mnuNota.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -797,6 +833,7 @@ public class Caixa extends JFrame {
         mnuNotaConsumidor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/principal.png"))); // NOI18N
         mnuNotaConsumidor.setText("Consumidor");
         mnuNotaConsumidor.setToolTipText("Emissão de Nota Fiscal de Venda ao Consumidor");
+        mnuNotaConsumidor.setEnabled(false);
         mnuNotaConsumidor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuNotaConsumidorActionPerformed(evt);
@@ -808,6 +845,7 @@ public class Caixa extends JFrame {
         mnuNotaEletronica.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/nfe.png"))); // NOI18N
         mnuNotaEletronica.setText("Eletrônica");
         mnuNotaEletronica.setToolTipText("Emissão de Nota Fiscal Eletrônica");
+        mnuNotaEletronica.setEnabled(false);
         mnuNotaEletronica.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuNotaEletronicaActionPerformed(evt);
@@ -820,6 +858,7 @@ public class Caixa extends JFrame {
         mnuPesquisa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/pesquisa.png"))); // NOI18N
         mnuPesquisa.setText("Pesquisar - F5");
         mnuPesquisa.setToolTipText("Pesquisar Produto");
+        mnuPesquisa.setEnabled(false);
         mnuPesquisa.setFocusable(false);
         mnuPesquisa.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuPesquisa.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -837,6 +876,7 @@ public class Caixa extends JFrame {
         mnuGaveta.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/acesso.png"))); // NOI18N
         mnuGaveta.setText("Abrir Gaveta - F6");
         mnuGaveta.setToolTipText("Abre a gaveta do caixa.");
+        mnuGaveta.setEnabled(false);
         mnuGaveta.setFocusable(false);
         mnuGaveta.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuGaveta.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -854,12 +894,14 @@ public class Caixa extends JFrame {
         mnuVenda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/venda.png"))); // NOI18N
         mnuVenda.setText("Venda");
         mnuVenda.setToolTipText("Menu de operações de venda");
+        mnuVenda.setEnabled(false);
         mnuVenda.setFocusable(false);
         mnuVenda.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
         mnuAbrirVenda.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuAbrirVenda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/formulario.png"))); // NOI18N
         mnuAbrirVenda.setText("Abrir Venda - F7");
+        mnuAbrirVenda.setEnabled(false);
         mnuAbrirVenda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuAbrirVendaActionPerformed(evt);
@@ -871,6 +913,7 @@ public class Caixa extends JFrame {
         mnuFecharVenda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/fechar.png"))); // NOI18N
         mnuFecharVenda.setText("Fechar Venda - F8");
         mnuFecharVenda.setToolTipText("Fecha a venda atual");
+        mnuFecharVenda.setEnabled(false);
         mnuFecharVenda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuFecharVendaActionPerformed(evt);
@@ -882,6 +925,7 @@ public class Caixa extends JFrame {
         mnuCancelarItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/excluir.png"))); // NOI18N
         mnuCancelarItem.setText("Cancelar Item - F9");
         mnuCancelarItem.setToolTipText("Cancela um item da venda");
+        mnuCancelarItem.setEnabled(false);
         mnuCancelarItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuCancelarItemActionPerformed(evt);
@@ -893,6 +937,7 @@ public class Caixa extends JFrame {
         mnuCancelarVenda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cancelar.png"))); // NOI18N
         mnuCancelarVenda.setText("Cancelar Venda - F10");
         mnuCancelarVenda.setToolTipText("Cancela a venda atual ou ultima realizada");
+        mnuCancelarVenda.setEnabled(false);
         mnuCancelarVenda.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mnuCancelarVendaActionPerformed(evt);
@@ -905,6 +950,7 @@ public class Caixa extends JFrame {
         mnuIdentificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cliente.png"))); // NOI18N
         mnuIdentificar.setText("Identificar Cliente - F11");
         mnuIdentificar.setToolTipText("Identificar o Cliente no Cupom Fiscal");
+        mnuIdentificar.setEnabled(false);
         mnuIdentificar.setFocusable(false);
         mnuIdentificar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuIdentificar.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -922,6 +968,7 @@ public class Caixa extends JFrame {
         mnuSair.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sair.png"))); // NOI18N
         mnuSair.setText("Sair - F12");
         mnuSair.setToolTipText("Sai do sistema");
+        mnuSair.setEnabled(false);
         mnuSair.setFocusable(false);
         mnuSair.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuSair.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -950,7 +997,7 @@ public class Caixa extends JFrame {
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-1024)/2, (screenSize.height-746)/2, 1024, 746);
+        setBounds((screenSize.width-1024)/2, (screenSize.height-768)/2, 1024, 768);
     }// </editor-fold>//GEN-END:initComponents
 
     // Metodos dos menus.
@@ -997,7 +1044,16 @@ public class Caixa extends JFrame {
         int escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema?", "OpenPDV",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
         if (escolha == JOptionPane.YES_OPTION) {
-            Login.sair();
+            try {
+                String back = Util.getConfig().get("openpdv.backup");
+                if (back == null || back.equals("")) {
+                    back = "db/backup.zip";
+                }
+                service.executar("BACKUP TO '" + back + "'");
+            } catch (OpenPdvException ex) {
+                log.error("Nao gerou backup ao sair do sistema.", ex);
+            }
+            System.exit(0);
         }
         option = null;
     }//GEN-LAST:event_mnuSairMouseClicked
@@ -1013,10 +1069,6 @@ public class Caixa extends JFrame {
             mnuSobreMouseClicked(null);
         }
     }//GEN-LAST:event_mnuSobreKeyPressed
-
-    private void mnuDavActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDavActionPerformed
-        JOptionPane.showMessageDialog(this, "Função não suportada pelo modelo de ECF utilizado.", "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
-    }//GEN-LAST:event_mnuDavActionPerformed
 
     private void mnuLMFCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLMFCActionPerformed
         janela = PAF_MF.getInstancia(EComandoECF.ECF_PafMf_Lmfc_Impressao);
@@ -1120,13 +1172,22 @@ public class Caixa extends JFrame {
                 int escolha = JOptionPane.showOptionDialog(caixa, "Deseja emitir a ReduçãoZ?", "Redução Z",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
                 if (escolha == JOptionPane.YES_OPTION) {
-                    try {
-                        new ComandoEmitirReducaoZ().executar();
-                        modoIndisponivel();
-                    } catch (OpenPdvException ex) {
-                        log.error("Nao foi possivel realizar a ReducaoZ.", ex);
-                        JOptionPane.showMessageDialog(caixa, "Não foi possível realizar a Redução Z!", "Redução Z", JOptionPane.WARNING_MESSAGE);
-                    }
+                    new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                new ComandoEmitirReducaoZ().executar();
+                                Aguarde.getInstancia().setVisible(false);
+                                modoIndisponivel();
+                            } catch (OpenPdvException ex) {
+                                Aguarde.getInstancia().setVisible(false);
+                                log.error("Nao foi possivel realizar a ReducaoZ.", ex);
+                                JOptionPane.showMessageDialog(caixa, "Não foi possível realizar a Redução Z!", "Redução Z", JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
+                    }).start();
+                    Aguarde.getInstancia().setVisible(true);
                 }
             }
 
@@ -1222,7 +1283,7 @@ public class Caixa extends JFrame {
     private void mnuIndiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuIndiceActionPerformed
         JOptionPane.showMessageDialog(this, "Este PAF-ECF não executa funções de baixa de estoque\n"
                 + "com base em índices técnicos de produção, não podendo\n"
-                + "ser utilizando por estabelecimento que necessite deste.", "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                + "ser utilizado por estabelecimento que necessite deste.", "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_mnuIndiceActionPerformed
 
     private void mnuParamConfiguracaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuParamConfiguracaoActionPerformed
@@ -1345,7 +1406,7 @@ public class Caixa extends JFrame {
 
         // valida o serial do ECF
         try {
-            ECF.validarSerial();
+            ECF.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
         } catch (Exception ex) {
             permite = false;
             log.error("Problemas ao validar o serial.", ex);
@@ -1354,7 +1415,13 @@ public class Caixa extends JFrame {
 
         // valida o GT do ECF
         try {
-            ECF.validarGT();
+            double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
+            int cro = Integer.valueOf(PAF.AUXILIAR.getProperty("ecf.cro"));
+            double novoGT = ECF.validarGT(gt, cro);
+            if (novoGT > 0.00) {
+                PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
+                PAF.criptografar();
+            }
         } catch (Exception ex) {
             permite = false;
             log.error("Problemas ao validar o GT.", ex);
@@ -1408,8 +1475,7 @@ public class Caixa extends JFrame {
                     public void run() {
                         try {
                             statusMenus(EModo.OFF);
-                            new ComandoCancelarVenda().executar();
-                            Aguarde.getInstancia().setVisible(false);
+                            new ComandoCancelarVenda(false).executar();
                         } catch (OpenPdvException ex) {
                             log.error(ex);
                             Aguarde.getInstancia().setVisible(false);
@@ -1471,9 +1537,8 @@ public class Caixa extends JFrame {
 
     private void mnuFecharVendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuFecharVendaActionPerformed
         if (lblTotal.getText().equals("R$ 0,00")) {
-            mnuCancelarVendaActionPerformed(null);
+            JOptionPane.showMessageDialog(caixa, "Venda com valor R$ 0,00", "Fechar Venda", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            statusMenus(EModo.OFF);
             Fechamento.getInstancia(totalizar()).setVisible(true);
         }
     }//GEN-LAST:event_mnuFecharVendaActionPerformed
@@ -1517,16 +1582,10 @@ public class Caixa extends JFrame {
             @Override
             public void sucesso(SisCliente resultado) {
                 if (resultado != null) {
-                    String[] resp = ECF.enviar(EComandoECF.ECF_IdentificaConsumidor,
-                            resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
-                    if (ECF.OK.equals(resp[0])) {
-                        if (venda != null) {
-                            venda.setSisCliente(resultado);
-                        }
-                        mnuIdentificar.setEnabled(false);
-                    } else {
-                        falha(new Exception(resp[1]));
+                    if (venda != null) {
+                        venda.setSisCliente(resultado);
                     }
+                    mnuIdentificar.setEnabled(false);
                 }
                 statusMenus(modo);
             }
@@ -1570,7 +1629,38 @@ public class Caixa extends JFrame {
                     @Override
                     public void run() {
                         try {
-                            TEF.abrirADM();
+                            String id = TEF.gerarId();
+                            TEF.abrirADM(id);
+                            String msg = TEF.getDados().get("030-000");
+
+                            // imprime as vias
+                            if (TEF.getDados().get("028-000") != null && Integer.valueOf(TEF.getDados().get("028-000")) > 0) {
+                                // verifica se tem mensagem
+                                if (msg != null && !msg.equals("")) {
+                                    Aguarde.getInstancia().getLblMensagem().setText(msg);
+                                    Aguarde.getInstancia().setVisible(true);
+                                }
+
+                                try {
+                                    TEF.bloquear(true);
+                                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                                    ECF.enviar(EComandoECF.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.reltef"));
+                                    TEF.imprimirVias(TEF.getDados(), EComandoECF.ECF_LinhaRelatorioGerencial);
+                                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                                    TEF.bloquear(false);
+                                    TEF.confirmarTransacao(id, true);
+                                } catch (Exception ex) {
+                                    TEF.bloquear(false);
+                                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                                    TEF.confirmarTransacao(id, false);
+                                    throw new Exception("Impressora não responde!");
+                                } finally {
+                                    TEF.bloquear(false);
+                                }
+                            } else {
+                                TEF.confirmarTransacao(id, true);
+                                JOptionPane.showMessageDialog(caixa, msg, "TEF", JOptionPane.INFORMATION_MESSAGE);
+                            }
                             Aguarde.getInstancia().setVisible(false);
                         } catch (Exception ex) {
                             Aguarde.getInstancia().setVisible(false);
@@ -1639,6 +1729,10 @@ public class Caixa extends JFrame {
         });
         janela.setVisible(true);
     }//GEN-LAST:event_mnuTipoPagamentosActionPerformed
+
+    private void mnuCartaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCartaoActionPerformed
+        JOptionPane.showMessageDialog(caixa, "Este PAF-ECF não executa funções de Troco em Cartão", "Troco em Cartão", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_mnuCartaoActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
     private javax.swing.JLabel lblCaixa;
@@ -1655,8 +1749,8 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuArquivo;
     private javax.swing.JMenuItem mnuCancelarItem;
     private javax.swing.JMenuItem mnuCancelarVenda;
+    private javax.swing.JMenuItem mnuCartao;
     private javax.swing.JMenuItem mnuClientes;
-    private javax.swing.JMenuItem mnuDav;
     private javax.swing.JMenuItem mnuEmbalagens;
     private javax.swing.JMenuItem mnuEspelho;
     private javax.swing.JMenuItem mnuEstoque;
@@ -1841,7 +1935,7 @@ public class Caixa extends JFrame {
         }
 
         // somente habilita o sincronismo nas maquinas host
-        if (Util.getConfig().get("openpdv.servidor").endsWith("localhost")) {
+        if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
             mnuSincronizacao.setEnabled(false);
         } else {
             // somente habilita os menus de cadastros na maquina server
@@ -2013,14 +2107,6 @@ public class Caixa extends JFrame {
 
     public void setMnuClientes(JMenuItem mnuClientes) {
         this.mnuClientes = mnuClientes;
-    }
-
-    public JMenuItem getMnuDav() {
-        return mnuDav;
-    }
-
-    public void setMnuDav(JMenuItem mnuDav) {
-        this.mnuDav = mnuDav;
     }
 
     public JMenuItem getMnuEmbalagens() {
@@ -2303,11 +2389,11 @@ public class Caixa extends JFrame {
         this.service = service;
     }
 
-    public KeyEventDispatcher getTeclas() {
+    public KeyEventPostProcessor getTeclas() {
         return teclas;
     }
 
-    public void setTeclas(KeyEventDispatcher teclas) {
+    public void setTeclas(KeyEventPostProcessor teclas) {
         this.teclas = teclas;
     }
 

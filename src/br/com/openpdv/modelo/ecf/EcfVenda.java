@@ -59,6 +59,7 @@ public class EcfVenda extends Dados implements Serializable {
     @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<EcfPagamento> ecfPagamentos;
 
+    private transient boolean informouCliente;
     /**
      * Construtor padrao
      */
@@ -205,5 +206,13 @@ public class EcfVenda extends Dados implements Serializable {
 
     public void setSisUsuario(SisUsuario sisUsuario) {
         this.sisUsuario = sisUsuario;
+    }
+
+    public boolean isInformouCliente() {
+        return informouCliente;
+    }
+
+    public void setInformouCliente(boolean informouCliente) {
+        this.informouCliente = informouCliente;
     }
 }

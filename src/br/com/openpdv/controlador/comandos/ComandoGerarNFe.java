@@ -1,6 +1,5 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
@@ -42,6 +41,7 @@ import br.com.openpdv.nfe.TNFe.InfNFe.Total.ICMSTot;
 import br.com.openpdv.nfe.TNFe.InfNFe.Transp;
 import br.com.openpdv.nfe.*;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.WebResource;
 import java.util.Date;
 import java.util.List;
@@ -150,7 +150,7 @@ public class ComandoGerarNFe implements IComando {
      */
     private void getNumero() throws OpenPdvException {
         String numero = "";
-        if (Util.getConfig().get("openpdv.servidor").endsWith("localhost")) {
+        if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
             List<EcfNotaEletronica> nfes = servico.selecionar(new EcfNotaEletronica(), 0, 1, null);
             if (nfes != null && nfes.size() == 1) {
                 numero += nfes.get(0).getEcfNotaEletronicaNumero() + 1;
@@ -158,7 +158,7 @@ public class ComandoGerarNFe implements IComando {
                 numero += Integer.valueOf(Util.getConfig().get("nfe.numero")) + 1;
             }
         } else {
-            WebResource wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/nfe");
+            WebResource wr = Util.getRest(Util.getConfig().get("sinc.host") + "/nfe");
             numero += wr.accept(MediaType.TEXT_PLAIN_TYPE).get(String.class);
         }
 

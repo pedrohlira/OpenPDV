@@ -75,33 +75,30 @@
     <target name="-post-jar">
         <mkdir dir="${dist.jar.dir}/arquivos"/>
         <mkdir dir="${dist.jar.dir}/db"/>
+        <mkdir dir="${dist.jar.dir}/dlls"/>
         <mkdir dir="${dist.jar.dir}/logs"/>
         <mkdir dir="${dist.jar.dir}/conf"/>
-        <mkdir dir="${dist.jar.dir}/dlls"/>
         <mkdir dir="${dist.jar.dir}/nfe"/>
-
-        <copy todir="${dist.jar.dir}">
-            <fileset dir="conf" includes="OpenPDV.*"/>
-        </copy>
+        <mkdir dir="${dist.jar.dir}/ACBrMonitor"/>
 
         <copy todir="${dist.jar.dir}/db">
-            <fileset dir="db" includes="**"/>
+            <fileset dir="db" includes="openpdv.h2.db,banco.txt"/>
         </copy>
-
-        <copy todir="${dist.jar.dir}/conf">
-            <fileset dir="conf" includes="**"/>
-        </copy>
-
-        <copy todir="${dist.jar.dir}/nfe">
-            <fileset dir="nfe" includes="**"/>
-        </copy>
-
+        
         <copy todir="${dist.jar.dir}/dlls">
             <fileset dir="dlls" includes="**"/>
         </copy>
 
-        <copy todir="${dist.jar.dir}/lib">
-            <fileset dir="lib" includes="travar.sh"/>
+        <copy todir="${dist.jar.dir}/conf">
+            <fileset dir="conf" includes="**" excludes="auxiliar.properties"/>
+        </copy>
+
+        <copy todir="${dist.jar.dir}/nfe">
+            <fileset dir="nfe" includes="**" excludes="*.jrxml"/>
+        </copy>
+
+        <copy todir="${dist.jar.dir}/ACBrMonitor">
+            <fileset dir="ACBrMonitor" includes="**"/>
         </copy>
 
         <delete file="${dist.jar.dir}/README.TXT"/>

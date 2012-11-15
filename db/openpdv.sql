@@ -60,6 +60,7 @@ CREATE TABLE sis_empresa (
   sis_empresa_responsavel varchar(50) NOT NULL,
   sis_empresa_fone varchar(10) NOT NULL,
   sis_empresa_email varchar(100) NOT NULL,
+  sis_empresa_contador bit(1) NOT NULL,
   PRIMARY KEY (sis_empresa_id),
   CONSTRAINT FK_sis_empresa_1 FOREIGN KEY (sis_municipio_id) REFERENCES sis_municipio (sis_municipio_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
@@ -106,10 +107,18 @@ DROP INDEX IF EXISTS IK_prod_produto_1;
 DROP INDEX IF EXISTS IK_prod_produto_2;
 DROP INDEX IF EXISTS IK_prod_produto_3;
 DROP INDEX IF EXISTS IK_prod_produto_4;
+DROP INDEX IF EXISTS IK_prod_produto_5;
+DROP INDEX IF EXISTS IK_prod_produto_6;
+DROP INDEX IF EXISTS IK_prod_produto_7;
+DROP INDEX IF EXISTS IK_prod_produto_8;
 CREATE INDEX IK_prod_produto_1 ON prod_produto (prod_produto_barra);
 CREATE INDEX IK_prod_produto_2 ON prod_produto (prod_produto_descricao);
 CREATE INDEX IK_prod_produto_3 ON prod_produto (prod_produto_referencia);
-CREATE INDEX IK_prod_produto_4 ON prod_produto (prod_produto_ativo);
+CREATE INDEX IK_prod_produto_4 ON prod_produto (prod_produto_preco);
+CREATE INDEX IK_prod_produto_5 ON prod_produto (prod_produto_estoque);
+CREATE INDEX IK_prod_produto_6 ON prod_produto (prod_produto_cadastrado);
+CREATE INDEX IK_prod_produto_7 ON prod_produto (prod_produto_alterado);
+CREATE INDEX IK_prod_produto_8 ON prod_produto (prod_produto_ativo);
 
 DROP TABLE IF EXISTS prod_preco;
 CREATE TABLE prod_preco (
@@ -144,7 +153,7 @@ DROP TABLE IF EXISTS ecf_impressora;
 CREATE TABLE ecf_impressora (
   ecf_impressora_id int(11) NOT NULL AUTO_INCREMENT,
   ecf_impressora_codigo varchar(2) NOT NULL,
-  ecf_impressora_mfadicional char(1) NOT NULL,
+  ecf_impressora_mfadicional varchar(1) NOT NULL,
   ecf_impressora_identificacao varchar(6) NOT NULL,
   ecf_impressora_serie varchar(20) NOT NULL,
   ecf_impressora_tipo varchar(7) NOT NULL,
@@ -226,6 +235,8 @@ CREATE TABLE ecf_nota_produto (
   ecf_nota_produto_bruto decimal(10,2) NOT NULL,
   ecf_nota_produto_desconto decimal(10,2) NOT NULL,
   ecf_nota_produto_liquido decimal(10,2) NOT NULL,
+  ecf_nota_produto_icms decimal(4,2) NOT NULL,
+  ecf_nota_produto_ipi decimal(4,2) NOT NULL,
   ecf_nota_produto_ordem int(11) NOT NULL,
   PRIMARY KEY (ecf_nota_produto_id),
   CONSTRAINT FK_ecf_nota_produto_1 FOREIGN KEY (ecf_nota_id) REFERENCES ecf_nota (ecf_nota_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -276,7 +287,6 @@ CREATE TABLE ecf_venda (
   ecf_venda_fechada bit(1) NOT NULL,
   ecf_venda_cancelada bit(1) NOT NULL,
   PRIMARY KEY (ecf_venda_id),
-  CONSTRAINT UK_ecf_venda_1 UNIQUE (ecf_venda_coo),
   CONSTRAINT FK_ecf_venda_1 FOREIGN KEY (sis_usuario_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_ecf_venda_2 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_ecf_venda_3 FOREIGN KEY (sis_cliente_id) REFERENCES sis_cliente (sis_cliente_id) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -313,6 +323,7 @@ CREATE TABLE ecf_pagamento_tipo (
   ecf_pagamento_tipo_descricao varchar(20) NOT NULL,
   ecf_pagamento_tipo_tef bit(1) NOT NULL,
   ecf_pagamento_tipo_vinculado bit(1) NOT NULL,
+  ecf_pagamento_tipo_debito bit(1) NOT NULL,
   ecf_pagamento_tipo_rede varchar(20) NOT NULL,
   PRIMARY KEY (ecf_pagamento_tipo_id)
 );
@@ -345,6 +356,17 @@ CREATE TABLE ecf_pagamento_parcela (
   ecf_pagamento_parcela_nsu varchar(12) NOT NULL,
   PRIMARY KEY (ecf_pagamento_parcela_id),
   CONSTRAINT FK_ecf_pagamento_parcela_1 FOREIGN KEY (ecf_pagamento_id) REFERENCES ecf_pagamento (ecf_pagamento_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS ecf_pagamento_totais;
+CREATE TABLE ecf_pagamento_totais (
+  ecf_pagamento_totais_id int(11) NOT NULL AUTO_INCREMENT,
+  ecf_pagamento_tipo_id int(11) NOT NULL,
+  ecf_pagamento_totais_data date NOT NULL,
+  ecf_pagamento_totais_documento varchar(20) NOT NULL,
+  ecf_pagamento_totais_valor decimal(12,2) NOT NULL,
+  PRIMARY KEY (ecf_pagamento_totais_id),
+  CONSTRAINT FK_ecf_pagamento_totais_1 FOREIGN KEY (ecf_pagamento_tipo_id) REFERENCES ecf_pagamento_tipo (ecf_pagamento_tipo_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 /* inserindo dados padroes deve-se colocar o path completo dos arquivos

@@ -8,7 +8,6 @@ import br.com.openpdv.modelo.core.parametro.IParametro;
  * tabelas.
  *
  * @author Pedro H. Lira
- * @version 1.0
  */
 public class Sql<E extends Dados>{
 

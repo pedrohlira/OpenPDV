@@ -27,7 +27,7 @@ public class Pesquisa extends javax.swing.JDialog {
     private static Pesquisa pesquisa;
     private Logger log;
     private AsyncCallback<ProdProduto> async;
-    private IFiltro filtro;
+    private GrupoFiltro filtro;
     private CoreService<ProdProduto> service;
 
     /**
@@ -296,20 +296,17 @@ public class Pesquisa extends javax.swing.JDialog {
      */
     private void pesquisar() {
         String texto = txtFiltro.getText().trim().toUpperCase();
+        filtro = new GrupoFiltro();
+        FiltroBinario fb = new FiltroBinario("prodProdutoAtivo", ECompara.IGUAL, true);
+        filtro.add(fb, EJuncao.E);
 
-        if (texto.equals("")) {
-            filtro = null;
-        } else if (texto.equals("SIM") || texto.equals("TRUE")) {
-            filtro = new FiltroBinario("prodProdutoAtivo", ECompara.IGUAL, true);
-        } else if (texto.equals("NAO") || texto.equals("NÃO") || texto.equals("FALSE")) {
-            filtro = new FiltroBinario("prodProdutoAtivo", ECompara.IGUAL, false);
-        } else if (texto.contains("/")) {
+        if (texto.contains("/")) {
             // verifica se e data completa
             try {
                 Date data = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(texto);
                 FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.IGUAL, data);
                 FiltroData fd2 = new FiltroData("prodProdutoAlterado", ECompara.IGUAL, data);
-                filtro = new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2});
+                filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2}));
             } catch (ParseException ex) {
                 // verifica se e data simples
                 try {
@@ -330,7 +327,7 @@ public class Pesquisa extends javax.swing.JDialog {
                     FiltroData fd4 = new FiltroData("prodProdutoAlterado", ECompara.MENOR_IGUAL, fim);
                     GrupoFiltro alt = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
                     // combinando os filtros
-                    filtro = new GrupoFiltro(EJuncao.OU, new IFiltro[]{cad, alt});
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{cad, alt}));
                 } catch (ParseException ex1) {
                     log.debug("Nao filtrou por data.", ex);
                     JOptionPane.showMessageDialog(this, "O sistema não conseguiu filtrar pelos campos de data!", "Produtos", JOptionPane.WARNING_MESSAGE);
@@ -340,42 +337,41 @@ public class Pesquisa extends javax.swing.JDialog {
             // verifica se e longo
             try {
                 long valor = Long.valueOf(texto);
-                if (texto.length() >= 6) {
-                    // barra
-                    FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
+                if (texto.length() == 6) {
                     // codigo
                     FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, valor);
+                    // referencia
+                    FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft}));
+                } else if (texto.length() > 6) {
+                    // barra
+                    FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
                     // barra do preco
                     FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
                     ft1.setCampoPrefixo("t1.");
-                    filtro = new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, fn, ft1});
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, ft1}));
                 } else {
-                    FiltroTexto ft1 = new FiltroTexto("prodProdutoNcm", ECompara.IGUAL, texto);
-                    FiltroTexto ft2 = new FiltroTexto("prodProdutoDescricao", ECompara.CONTEM, texto);
-                    FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    FiltroNumero fn1 = new FiltroNumero("prodProdutoPreco", ECompara.IGUAL, valor);
-                    FiltroNumero fn2 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
-                    FiltroNumero fn3 = new FiltroNumero("prodProdutoIcms", ECompara.IGUAL, valor);
-                    FiltroNumero fn4 = new FiltroNumero("prodProdutoIssqn", ECompara.IGUAL, valor);
-                    filtro = new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2, ft3, fn1, fn2, fn3, fn4});
+                    // referencia
+                    FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                    // estoque
+                    FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, fn}));
                 }
             } catch (NumberFormatException ex) {
-                // veririfica se e decimal
+                // verifica se e decimal
                 try {
                     double valor = Double.valueOf(texto.replace(",", "."));
+                    // preco
                     FiltroNumero fn2 = new FiltroNumero("prodProdutoPreco", ECompara.IGUAL, valor);
+                    // estoque
                     FiltroNumero fn3 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
-                    FiltroNumero fn4 = new FiltroNumero("prodProdutoIcms", ECompara.IGUAL, valor);
-                    FiltroNumero fn5 = new FiltroNumero("prodProdutoIssqn", ECompara.IGUAL, valor);
-                    filtro = new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3, fn4, fn5});
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3}));
                 } catch (NumberFormatException ex1) {
-                    // faz como texto
+                    // descricao
                     FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", ECompara.CONTEM, texto);
+                    // referencia
                     FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    FiltroTexto ft3 = new FiltroTexto("prodProdutoTributacao", ECompara.IGUAL, texto);
-                    FiltroTexto ft4 = new FiltroTexto("prodProdutoIat", ECompara.IGUAL, texto);
-                    FiltroTexto ft5 = new FiltroTexto("prodProdutoIppt", ECompara.IGUAL, texto);
-                    filtro = new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2, ft3, ft4, ft5});
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2}));
                 }
             }
         }
@@ -469,11 +465,11 @@ public class Pesquisa extends javax.swing.JDialog {
         this.btnPesquisar = btnPesquisar;
     }
 
-    public IFiltro getFiltro() {
+    public GrupoFiltro getFiltro() {
         return filtro;
     }
 
-    public void setFiltro(IFiltro filtro) {
+    public void setFiltro(GrupoFiltro filtro) {
         this.filtro = filtro;
     }
 

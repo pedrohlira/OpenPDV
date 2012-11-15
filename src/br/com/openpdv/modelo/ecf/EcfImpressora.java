@@ -22,7 +22,7 @@ public class EcfImpressora extends Dados implements Serializable {
     @Column(name = "ecf_impressora_codigo")
     private String ecfImpressoraCodigo;
     @Column(name = "ecf_impressora_mfadicional")
-    private char ecfImpressoraMfadicional;
+    private String ecfImpressoraMfadicional;
     @Column(name = "ecf_impressora_identificacao")
     private String ecfImpressoraIdentificacao;
     @Column(name = "ecf_impressora_serie")
@@ -82,11 +82,11 @@ public class EcfImpressora extends Dados implements Serializable {
         this.ecfImpressoraCodigo = ecfImpressoraCodigo;
     }
 
-    public char getEcfImpressoraMfadicional() {
+    public String getEcfImpressoraMfadicional() {
         return ecfImpressoraMfadicional;
     }
 
-    public void setEcfImpressoraMfadicional(char ecfImpressoraMfadicional) {
+    public void setEcfImpressoraMfadicional(String ecfImpressoraMfadicional) {
         this.ecfImpressoraMfadicional = ecfImpressoraMfadicional;
     }
 

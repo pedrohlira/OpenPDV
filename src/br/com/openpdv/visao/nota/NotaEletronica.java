@@ -518,7 +518,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                                         .add(txtEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 301, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                         .add(lblNumero)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 26, Short.MAX_VALUE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 16, Short.MAX_VALUE)
                                         .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 54, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                                     .add(txtNome))
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -612,11 +612,11 @@ public class NotaEletronica extends javax.swing.JDialog {
                     .add(btnGerar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnInutilizar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(34, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-800)/2, (screenSize.height-552)/2, 800, 552);
+        setBounds((screenSize.width-790)/2, (screenSize.height-536)/2, 790, 536);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -634,6 +634,10 @@ public class NotaEletronica extends javax.swing.JDialog {
                 || txtNumero.getValue() == null || txtBairro.getText().equals("") || txtCEP.getValue() == null
                 || cmbUF.getSelectedIndex() == -1 || cmbMunicipio.getSelectedIndex() == -1 || lblTotal.getText().equals("R$ 0,00")) {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!\nAdicione também produtos com valor maior que zero.", "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
+            txtNome.requestFocus();
+        } else if (txtNome.getText().split(" ").length < 2 || txtEndereco.getText().split(" ").length < 2) {
+            JOptionPane.showMessageDialog(this, "O campo NOME de ter primeiro e ultimo nome pelo menos.\n"
+                    + "O campo ENDEREÇO deve ter pelo menos duas informações.", "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
             txtNome.requestFocus();
         } else {
             try {
@@ -1021,15 +1025,10 @@ public class NotaEletronica extends javax.swing.JDialog {
                     }
 
                     limpar();
-                    Aguarde.getInstancia().setVisible(false);
-                    Aguarde.getInstancia().getLblMensagem().setText("Aguarde o processamento...");
                     JOptionPane.showMessageDialog(notaEletronica, "NFe autorizada com sucesso.\nArquivos gerados abaixo:\n\n"
                             + xml.getAbsolutePath() + "\n" + danfe.getAbsolutePath(), "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     log.error("Erro na recuperacao do protocolo da NFe.", ex);
-                    Aguarde.getInstancia().getLblMensagem().setText("Aguarde o processamento...");
-                    Aguarde.getInstancia().setVisible(false);
-
                     // salva o erro no arquivo para analise.
                     File arquivo = new File("nfe/" + nota.getEcfNotaEletronicaChave() + ".err");
                     try (FileWriter fw = new FileWriter(arquivo)) {
@@ -1052,6 +1051,8 @@ public class NotaEletronica extends javax.swing.JDialog {
                             log.error("Erro ao deletar a nota salva e pendente.", ex);
                         }
                     }
+                } finally {
+                    Aguarde.getInstancia().setVisible(false);
                 }
             }
         }).start();
@@ -1086,6 +1087,8 @@ public class NotaEletronica extends javax.swing.JDialog {
                 }
                 np.setEcfNotaProdutoDesconto(desconto);
                 np.setEcfNotaProdutoLiquido((Double) dtmProdutos.getValueAt(i, 7));
+                np.setEcfNotaProdutoIcms(np.getEcfNotaProdutoLiquido() * np.getProdProduto().getProdProdutoIcms() / 100);
+                np.setEcfNotaProdutoIpi(0.00);
                 np.setEcfNotaProdutoOrdem((Integer) dtmProdutos.getValueAt(i, 9));
                 produtos.add(np);
             }

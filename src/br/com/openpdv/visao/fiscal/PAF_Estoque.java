@@ -1,14 +1,7 @@
 package br.com.openpdv.visao.fiscal;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.modelo.anexo.iv.AnexoIV;
-import br.com.openpdv.modelo.anexo.iv.E1;
-import br.com.openpdv.modelo.anexo.iv.E2;
-import br.com.openpdv.modelo.anexo.iv.E9;
 import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
@@ -17,6 +10,13 @@ import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.controlador.PAF;
+import br.com.phdss.modelo.anexo.iv.AnexoIV;
+import br.com.phdss.modelo.anexo.iv.E1;
+import br.com.phdss.modelo.anexo.iv.E2;
+import br.com.phdss.modelo.anexo.iv.E9;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Date;
@@ -418,8 +418,7 @@ public class PAF_Estoque extends JDialog {
                         // recupera a empresa
                         SisEmpresa empresa = Caixa.getInstancia().getEmpresa();
                         // recupera a impressora
-                        String[] resp = ECF.enviar(EComandoECF.ECF_NumSerie);
-                        FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, resp[1]);
+                        FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
                         EcfImpressora ecf = new EcfImpressora();
                         ecf = (EcfImpressora) service.selecionar(ecf, ft);
                         // recupera os produtos

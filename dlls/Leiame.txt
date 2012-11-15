@@ -1,5 +1,5 @@
 ## Leiame ##
 
-# Descompacte o zip correspondente da impressora que ira usar, e coloque todos os arquivos dentro da mesma pasta onde se encontra este arquivo.
+# Descompacte o zip correspondente da impressora que ira usar, e coloque todos os arquivos dentro da pasta ACBrMonitor.
 
-# Caso nao tenha um zip para sua impressora significa que o sistema ainda nao foi implementado para ela, entao se desejar entre em contato conosco em http://phdss.com.br
+# Caso nao tenha um zip para sua impressora entre no site do fabricante para fazer o download, ou melhor entre em contato conosco suporte@phdss.com.br

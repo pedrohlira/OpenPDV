@@ -30,6 +30,10 @@ public class EcfNotaProduto extends Dados implements Serializable {
     private Double ecfNotaProdutoDesconto;
     @Column(name = "ecf_nota_produto_liquido")
     private Double ecfNotaProdutoLiquido;
+    @Column(name = "ecf_nota_produto_icms")
+    private Double ecfNotaProdutoIcms;
+    @Column(name = "ecf_nota_produto_ipi")
+    private Double ecfNotaProdutoIpi;
     @Column(name = "ecf_nota_produto_ordem")
     private int ecfNotaProdutoOrdem;
     @ManyToOne
@@ -108,6 +112,22 @@ public class EcfNotaProduto extends Dados implements Serializable {
 
     public void setEcfNotaProdutoLiquido(Double ecfNotaProdutoLiquido) {
         this.ecfNotaProdutoLiquido = ecfNotaProdutoLiquido;
+    }
+
+    public Double getEcfNotaProdutoIcms() {
+        return ecfNotaProdutoIcms;
+    }
+
+    public void setEcfNotaProdutoIcms(Double ecfNotaProdutoIcms) {
+        this.ecfNotaProdutoIcms = ecfNotaProdutoIcms;
+    }
+
+    public Double getEcfNotaProdutoIpi() {
+        return ecfNotaProdutoIpi;
+    }
+
+    public void setEcfNotaProdutoIpi(Double ecfNotaProdutoIpi) {
+        this.ecfNotaProdutoIpi = ecfNotaProdutoIpi;
     }
 
     public int getEcfNotaProdutoOrdem() {

@@ -1,9 +1,9 @@
 package br.com.openpdv.rest;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
+import br.com.phdss.controlador.PAF;
 import com.sun.jersey.core.util.Base64;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -28,6 +28,14 @@ public abstract class ARest {
      */
     protected CoreService service;
     /**
+     * O cnpj informado na validacao.
+     */
+    protected String cnpj;
+    /**
+     * O serial do ECF informado na validacao.
+     */
+    protected String serie;
+    /**
      * O objeto de log do sistema.
      */
     protected Logger log;
@@ -40,15 +48,19 @@ public abstract class ARest {
     }
 
     /**
-     * Metodo que retorna os dados de ajuda para acessar o REST.
+     * Metodo que retorna o WADL para acessar o REST.
      *
-     * @return um texto em formato HTML.
+     * @return um texto em formato XML.
      *
      * @throws RestException dispara um erro caso nao consiga.
      */
     protected String ajuda() throws RestException {
-        //TODO fazer a pagina de ajuda dos comando.
-        return "ajuda geral";
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>");
+        sb.append("<center>Acesse a URL abaixo:</center><br>");
+        sb.append("<center><a href='/application.wadl'>WADL</a></center>");
+        sb.append("</html>");
+        return sb.toString();
     }
 
     /**
@@ -85,8 +97,8 @@ public abstract class ARest {
             String header = headers.getRequestHeader("authorization").get(0);
             header = header.substring("Basic ".length());
             String[] creds = Base64.base64Decode(header).split(":");
-            String cnpj = creds[0];
-            String serie = PAF.descriptar(creds[1]);
+            cnpj = creds[0];
+            serie = PAF.descriptar(creds[1]);
 
             // realiza a validacao
             if (cnpj.equals(PAF.AUXILIAR.getProperty("cli.cnpj"))) {

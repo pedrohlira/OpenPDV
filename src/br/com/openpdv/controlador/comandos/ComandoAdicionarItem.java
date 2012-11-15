@@ -1,13 +1,13 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.controlador.PAF;
 import org.apache.log4j.Logger;
 
 /**
@@ -76,7 +76,7 @@ public class ComandoAdicionarItem implements IComando {
                 resp = ECF.enviar(EComandoECF.ECF_GrandeTotal);
                 if (ECF.OK.equals(resp[0])) {
                     PAF.AUXILIAR.setProperty("ecf.gt", resp[1]);
-                    PAF.criptografarAuxiliar(null);
+                    PAF.criptografar();
                 } else {
                     throw new Exception(resp[1]);
                 }

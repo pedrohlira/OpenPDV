@@ -1,7 +1,6 @@
 package br.com.openpdv.controlador.permissao;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.sistema.SisUsuario;
@@ -11,7 +10,6 @@ import br.com.openpdv.modelo.sistema.SisUsuario;
  * acessando os dados para autenticar o usuário junto ao servidor.
  *
  * @param <E> o tipo de dados.
- * <p/>
  * @author Pedro H. Lira
  */
 public class PermissaoService extends CoreService<SisUsuario> {
@@ -28,9 +26,7 @@ public class PermissaoService extends CoreService<SisUsuario> {
      *
      * @param usuario login do usuario.
      * @param senha   senha do usuario.
-     * <p/>
      * @return Um objeto SisUsuario caso consiga logar.
-     * <p/>
      * @throws OpenPdvException dispara uma excecao caso nao consiga.
      */
     public SisUsuario validar(String usuario, String senha) throws OpenPdvException {

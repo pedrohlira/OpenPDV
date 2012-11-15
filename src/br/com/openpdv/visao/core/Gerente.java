@@ -212,7 +212,7 @@ public class Gerente extends javax.swing.JDialog {
 
     private void pswGerenteSenhaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_pswGerenteSenhaKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            btnOk.requestFocus();
+            ok();
         }
     }//GEN-LAST:event_pswGerenteSenhaKeyPressed
     // Variables declaration - do not modify//GEN-BEGIN:variables

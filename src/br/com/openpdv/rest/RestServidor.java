@@ -1,6 +1,5 @@
 package br.com.openpdv.rest;
 
-import br.com.openpdv.controlador.PAF;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.NFe;
 import br.com.openpdv.modelo.core.EComandoSQL;
@@ -18,6 +17,7 @@ import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.nfe.TNFe;
 import br.com.openpdv.nfe.TNfeProc;
+import br.com.phdss.controlador.PAF;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -29,8 +29,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.Provider;
 import org.apache.log4j.Logger;
 
+/**
+ * Classe que representa a comunicao do Cliente para o Servidor via Rest
+ *
+ * @author Pedro H. Lira
+ */
+@Provider
 @Path("/openpdv/server")
 public class RestServidor extends ARest {
 
@@ -49,6 +56,13 @@ public class RestServidor extends ARest {
         return super.ajuda();
     }
 
+    /**
+     * Metodo usado para cadastrar a empresa no BD atraves do sistema, onde sera
+     * validado com os dados contidos no arquivo criptografo auxiliar.
+     *
+     * @param sisEmpresa objeto do tipo empresa a ser cadastrado.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
     @Path("/empresa")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -66,6 +80,13 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo usado para cadastrar o ECF no BD atraves do sistema, onde sera
+     * validado com os dados contidos no arquivo criptografo auxiliar.
+     *
+     * @param ecfImpressora objeto do tipo impressora a ser cadastrado.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
     @Path("/impressora")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -78,6 +99,13 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que cadastra na base do server as notas de consumidor emitidas
+     * pelos sistemas em modo client.
+     *
+     * @param ecfNota um objeto do tipo Nota.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
     @Path("/nota")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -127,6 +155,13 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que cadastra na base do server as nfe emitidas pelos sistemas em
+     * modo client.
+     *
+     * @param ecfNfe um objeto do tipo NFe.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
     @Path("/nfe")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -246,6 +281,14 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que cadastra na base do server as reducoes Z, totais, vendas,
+     * produtos vendidos, pagamentos, documentos emitidos pelos sistemas em modo
+     * client.
+     *
+     * @param ecfZ um objeto do tipo ReducaoZ com a lista de documentos anexada.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
     @Path("/reducaoZ")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -311,6 +354,13 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que salva as vendas no sistema fazendo as validacoes.
+     *
+     * @param em um objeto de transacao.
+     * @param venda o objeto de venda.
+     * @throws OpenPdvException dispara em caso de erro ao salvar.
+     */
     private void salvarVenda(EntityManager em, EcfVenda venda) throws OpenPdvException {
         // identifica o cliente
         if (venda.getSisCliente() != null) {
@@ -346,6 +396,13 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que salva os pagamentos no sistema fazendo as validacoes.
+     *
+     * @param em um objeto de transacao.
+     * @param pag o objeto de pagamento.
+     * @throws OpenPdvException dispara em caso de erro ao salvar.
+     */
     private void salvarPagamento(EntityManager em, EcfPagamento pag) throws OpenPdvException {
         // guarda as parcelas
         List<EcfPagamentoParcela> parcelas = pag.getEcfPagamentoParcelas();
@@ -363,6 +420,15 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que encontra o cliente dentro do sistema usando os dados do
+     * cliente enviado, como o CNPJ.
+     *
+     * @param em um objeto de transacao.
+     * @param sisCliente o obejto de cliente.
+     * @return o cliente encontrado nesta base de dados.
+     * @throws OpenPdvException dispara em caso de erro ao selecionar.
+     */
     private SisCliente getCliente(EntityManager em, SisCliente sisCliente) throws OpenPdvException {
         FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, sisCliente.getSisClienteDoc().replaceAll("[^0-9]", ""));
         SisCliente aux = (SisCliente) service.selecionar(new SisCliente(), ft);
@@ -377,6 +443,16 @@ public class RestServidor extends ARest {
         }
     }
 
+    /**
+     * Metodo que gera o SQL de atualizacao do estoque para as vendas recebidas.
+     *
+     * @param qtd a quantidade de produtos vendidos.
+     * @param emb o tipo de embalagem usada na venda.
+     * @param prod o produto que foi vendido.
+     * @return uma instrucao de SQL no formato de objeto para ser executada.
+     * @throws OpenPdvException dispara caso nao consiga gerar o sql de
+     * atualizacao.
+     */
     private Sql getEstoque(double qtd, ProdEmbalagem emb, ProdProduto prod) throws OpenPdvException {
         // fatorando a quantida no estoque
         if (emb.getProdEmbalagemId() != prod.getProdEmbalagem().getProdEmbalagemId()) {

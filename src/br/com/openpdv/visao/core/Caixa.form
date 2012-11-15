@@ -17,6 +17,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Sobre - F1"/>
             <Property name="toolTipText" type="java.lang.String" value="Sobre o sistema"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -33,6 +34,7 @@
               <Image iconType="3" name="/br/com/openpdv/imagens/caixa.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Principal - F2"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -50,6 +52,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Suprimento"/>
                 <Property name="toolTipText" type="java.lang.String" value="Suprimento"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuSuprimentoActionPerformed"/>
@@ -65,6 +68,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Sangria"/>
                 <Property name="toolTipText" type="java.lang.String" value="Sangria"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuSangriaActionPerformed"/>
@@ -80,6 +84,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Redu&#xe7;&#xe3;o Z"/>
                 <Property name="toolTipText" type="java.lang.String" value="Redu&#xe7;&#xe3;o Z"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuReducaoZActionPerformed"/>
@@ -97,6 +102,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Produtos"/>
                 <Property name="toolTipText" type="java.lang.String" value="Produtos"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuProdutosActionPerformed"/>
@@ -112,6 +118,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Embalagens"/>
                 <Property name="toolTipText" type="java.lang.String" value="Embalagens"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuEmbalagensActionPerformed"/>
@@ -127,6 +134,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Tipo Pagamentos"/>
                 <Property name="toolTipText" type="java.lang.String" value="Tipo Pagamentos"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuTipoPagamentosActionPerformed"/>
@@ -142,6 +150,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Clientes"/>
                 <Property name="toolTipText" type="java.lang.String" value="Clientes"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuClientesActionPerformed"/>
@@ -157,6 +166,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Usu&#xe1;rios"/>
                 <Property name="toolTipText" type="java.lang.String" value="Usu&#xe1;rios"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuUsuariosActionPerformed"/>
@@ -173,6 +183,7 @@
                   <Image iconType="3" name="/br/com/openpdv/imagens/cartao.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="TEF"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuTEFActionPerformed"/>
@@ -188,6 +199,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Sincroniza&#xe7;&#xe3;o"/>
                 <Property name="toolTipText" type="java.lang.String" value="Sincroniza os PDVs"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuSincronizacaoActionPerformed"/>
@@ -202,6 +214,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Menu Fiscal - F3"/>
             <Property name="toolTipText" type="java.lang.String" value="Menu Fiscal"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -216,6 +229,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="LX"/>
                 <Property name="toolTipText" type="java.lang.String" value="Leitura X"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLXActionPerformed"/>
@@ -228,6 +242,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="LMFC"/>
                 <Property name="toolTipText" type="java.lang.String" value="Leitura Mem&#xf3;ria Fiscal Completa"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLMFCActionPerformed"/>
@@ -240,6 +255,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="LMFS"/>
                 <Property name="toolTipText" type="java.lang.String" value="Leitura Mem&#xf3;ria Fiscal Simplificada"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLMFSActionPerformed"/>
@@ -252,6 +268,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Espelho MFD"/>
                 <Property name="toolTipText" type="java.lang.String" value="Espelho MFD"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuEspelhoActionPerformed"/>
@@ -264,6 +281,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Arquivo MFD"/>
                 <Property name="toolTipText" type="java.lang.String" value="Arquivo MFD"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuArquivoActionPerformed"/>
@@ -276,6 +294,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Tabela de Produtos"/>
                 <Property name="toolTipText" type="java.lang.String" value="Tabela de Produtos"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuTabProdutosActionPerformed"/>
@@ -288,6 +307,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Estoque"/>
                 <Property name="toolTipText" type="java.lang.String" value="Estoque"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuEstoqueActionPerformed"/>
@@ -300,6 +320,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Movimento por ECF"/>
                 <Property name="toolTipText" type="java.lang.String" value="Movimento por ECF"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuMovimentoActionPerformed"/>
@@ -312,21 +333,10 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Meios de Pagamento"/>
                 <Property name="toolTipText" type="java.lang.String" value="Meios de Pagamento"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuPagamentosActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuDav">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="DAV Emitidos"/>
-                <Property name="toolTipText" type="java.lang.String" value="DAV Emitidos"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuDavActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mnuPAF">
@@ -336,6 +346,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Identifica&#xe7;&#xe3;o do PAF-ECF"/>
                 <Property name="toolTipText" type="java.lang.String" value="Identifica&#xe7;&#xe3;o do PAF-ECF"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuPAFActionPerformed"/>
@@ -348,6 +359,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Vendas do Per&#xed;odo"/>
                 <Property name="toolTipText" type="java.lang.String" value="Vendas do Per&#xed;odo"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuVendasActionPerformed"/>
@@ -360,6 +372,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Tabela &#xcd;ndice T&#xe9;cnico Produ&#xe7;&#xe3;o"/>
                 <Property name="toolTipText" type="java.lang.String" value="Tabela &#xcd;ndice T&#xe9;cnico Produ&#xe7;&#xe3;o"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuIndiceActionPerformed"/>
@@ -372,9 +385,23 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Par&#xe2;metros de Configura&#xe7;&#xe3;o"/>
                 <Property name="toolTipText" type="java.lang.String" value="Par&#xe2;metros de Configura&#xe7;&#xe3;o"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuParamConfiguracaoActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mnuCartao">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Serif" size="12" style="0"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Troco em Cart&#xe3;o"/>
+                <Property name="toolTipText" type="java.lang.String" value="Tabela &#xcd;ndice T&#xe9;cnico Produ&#xe7;&#xe3;o"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCartaoActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -384,8 +411,9 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/br/com/openpdv/imagens/padrao.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Nota FIscal"/>
+            <Property name="text" type="java.lang.String" value="Nota Fiscal - F4"/>
             <Property name="toolTipText" type="java.lang.String" value="Nota Fiscal"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -402,6 +430,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Consumidor"/>
                 <Property name="toolTipText" type="java.lang.String" value="Emiss&#xe3;o de Nota Fiscal de Venda ao Consumidor"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuNotaConsumidorActionPerformed"/>
@@ -417,6 +446,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Eletr&#xf4;nica"/>
                 <Property name="toolTipText" type="java.lang.String" value="Emiss&#xe3;o de Nota Fiscal Eletr&#xf4;nica"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuNotaEletronicaActionPerformed"/>
@@ -431,6 +461,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Pesquisar - F5"/>
             <Property name="toolTipText" type="java.lang.String" value="Pesquisar Produto"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -448,6 +479,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Abrir Gaveta - F6"/>
             <Property name="toolTipText" type="java.lang.String" value="Abre a gaveta do caixa."/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -465,6 +497,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Venda"/>
             <Property name="toolTipText" type="java.lang.String" value="Menu de opera&#xe7;&#xf5;es de venda"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -480,6 +513,7 @@
                   <Image iconType="3" name="/br/com/openpdv/imagens/formulario.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Abrir Venda - F7"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuAbrirVendaActionPerformed"/>
@@ -495,6 +529,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Fechar Venda - F8"/>
                 <Property name="toolTipText" type="java.lang.String" value="Fecha a venda atual"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuFecharVendaActionPerformed"/>
@@ -510,6 +545,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Cancelar Item - F9"/>
                 <Property name="toolTipText" type="java.lang.String" value="Cancela um item da venda"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCancelarItemActionPerformed"/>
@@ -525,6 +561,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Cancelar Venda - F10"/>
                 <Property name="toolTipText" type="java.lang.String" value="Cancela a venda atual ou ultima realizada"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCancelarVendaActionPerformed"/>
@@ -539,6 +576,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Identificar Cliente - F11"/>
             <Property name="toolTipText" type="java.lang.String" value="Identificar o Cliente no Cupom Fiscal"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -556,6 +594,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Sair - F12"/>
             <Property name="toolTipText" type="java.lang.String" value="Sai do sistema"/>
+            <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
@@ -570,15 +609,23 @@
     </Menu>
   </NonVisualComponents>
   <Properties>
-    <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="defaultCloseOperation" type="int" value="0"/>
     <Property name="title" type="java.lang.String" value="OpenPDV"/>
+    <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[1024, 746]"/>
+    </Property>
+    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[1024, 746]"/>
+    </Property>
     <Property name="name" type="java.lang.String" value="OpenPDV"/>
     <Property name="resizable" type="boolean" value="false"/>
-    <Property name="undecorated" type="boolean" value="true"/>
+    <Property name="undecorated" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+      <Connection code="Boolean.valueOf(Util.getConfig().get(&quot;openpdv.semborda&quot;))" type="code"/>
+    </Property>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="barMenu"/>
-    <SyntheticProperty name="formSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,-22,0,0,4,0"/>
+    <SyntheticProperty name="formSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,3,0,0,0,4,0"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="0"/>
     <SyntheticProperty name="generateSize" type="boolean" value="true"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="true"/>

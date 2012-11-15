@@ -1,28 +1,31 @@
 package br.com.openpdv.visao.core;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
-import br.com.openpdv.controlador.PAF;
-import br.com.openpdv.controlador.TEF;
+import br.com.openpdv.controlador.comandos.ComandoCancelarVenda;
 import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.controlador.permissao.Login;
-import br.com.openpdv.modelo.anexo.x.*;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
+import br.com.phdss.TEF;
+import br.com.phdss.controlador.PAF;
+import br.com.phdss.modelo.anexo.x.*;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.simple.container.SimpleServerFactory;
 import java.awt.Toolkit;
+import java.io.File;
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -164,25 +167,33 @@ public class Splash extends JFrame {
         // abre uma thread para carregar as validacoes da aplicacao
         new Thread(new Runnable() {
 
+            CoreService service;
+
             @Override
             public void run() {
                 // valida a conexao com o bando de dados
                 try {
                     splash.pgBarra.setString("Conectando ao banco de dados...");
                     Conexao.getInstancia();
+                    // cria um objeto de manipulacao de dados e faz um backup do BD.
+                    service = new CoreService();
+                    String back = Util.getConfig().get("openpdv.backup");
+                    if (back == null || back.equals("")) {
+                        back = "db/backup.zip";
+                    }
+                    service.executar("BACKUP TO '" + back + "'");
                     splash.pgBarra.setValue(10);
                 } catch (Exception ex) {
                     log.error("Nao conseguiu conectar ao banco de dados.", ex);
-                    JOptionPane.showMessageDialog(splash, "Problemas com acesso ao banco de dados.\n"
-                                                          + "Verifique os dados de acesso ou informe ao administrador!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                    Login.sair();
+                    JOptionPane.showMessageDialog(splash, "Problemas com acesso ao banco de dados.\nInforme ao administrador do sistema!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
+                    System.exit(0);
                 }
 
                 // ativando o RESTful server, caso esteja configurado como localhost
-                if (Util.getConfig().get("openpdv.servidor").endsWith("localhost")) {
+                if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
                     try {
                         splash.pgBarra.setString("Iniciando o serviço RESTful...");
-                        URI uri = UriBuilder.fromUri(Util.getConfig().get("openpdv.servidor")).port(Integer.valueOf(Util.getConfig().get("openpdv.porta"))).build();
+                        URI uri = UriBuilder.fromUri(Util.getConfig().get("sinc.servidor")).port(Integer.valueOf(Util.getConfig().get("sinc.porta"))).build();
                         ResourceConfig rc = new PackagesResourceConfig("br.com.openpdv.rest");
                         rc.getContainerRequestFilters().add(new GZIPContentEncodingFilter());
                         rc.getContainerResponseFilters().add(new GZIPContentEncodingFilter());
@@ -190,61 +201,68 @@ public class Splash extends JFrame {
                     } catch (Exception ex) {
                         log.error("Nao conseguiu iniciar o servico RESTful.", ex);
                         JOptionPane.showMessageDialog(splash, "Problemas com acesso ao serviço RESTful.\n"
-                                                              + "Verifique os dados do config ou informe ao administrador!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                        Login.sair();
+                                + "Informe ao administrador do sistema!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
+                        System.exit(0);
                     }
                 }
 
                 // validando arquivo auxiliar
+                boolean login = true;
                 try {
                     splash.pgBarra.setString("Lendo arquivo auxiliar...");
-                    PAF.descriptografarAuxiliar();
+                    PAF.descriptografar();
                     splash.pgBarra.setValue(20);
                 } catch (Exception ex) {
+                    login = false;
                     log.error("Problemas ao ler o auxiliar.txt", ex);
                     JOptionPane.showMessageDialog(splash, "Problemas com a leitura do arquivo auxiliar.\n"
-                                                          + "Informe ao administrador do sistema!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                    Login.sair();
+                            + "Informe ao administrador do sistema!", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                 }
 
                 // recupera a empresa
                 SisEmpresa empresa = null;
                 try {
-                    FiltroTexto ft = new FiltroTexto("sisEmpresaCnpj", ECompara.IGUAL, PAF.AUXILIAR.getProperty("cli.cnpj"));
-                    CoreService<SisEmpresa> service = new CoreService<>();
-                    empresa = service.selecionar(new SisEmpresa(), ft);
+                    FiltroBinario fb = new FiltroBinario("sisEmpresaContador", ECompara.IGUAL, false);
+                    empresa = (SisEmpresa) service.selecionar(new SisEmpresa(), fb);
 
                     // caso nao encontre a empresa, buscar no server
-                    if (empresa == null && !Util.getConfig().get("openpdv.servidor").endsWith("localhost")) {
+                    if (empresa == null && !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
                         splash.pgBarra.setString("Recuperando empresa do servidor...");
-                        WebResource wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/empresa/" + PAF.AUXILIAR.getProperty("cli.cnpj"));
+                        WebResource wr = Util.getRest(Util.getConfig().get("sinc.host") + "/empresa");
                         empresa = wr.accept(MediaType.APPLICATION_JSON_TYPE).get(SisEmpresa.class);
 
                         // salva no banco local
                         if (empresa != null) {
                             service.salvar(empresa);
                         }
+
+                        // aproveita e busca o contador no server tambem
+                        WebResource wr2 = Util.getRest(Util.getConfig().get("sinc.host") + "/contador");
+                        SisEmpresa contador = wr2.accept(MediaType.APPLICATION_JSON_TYPE).get(SisEmpresa.class);
+                        if (contador != null) {
+                            service.salvar(contador);
+                        }
                     }
 
                     if (empresa == null) {
-                        JOptionPane.showMessageDialog(splash, "Nenhuma empresa cadastrada no banco local e nem no servidor.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
-                        Login.sair();
+                        JOptionPane.showMessageDialog(splash, "Nenhuma empresa cadastrada no banco local e nem no servidor.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
+                        System.exit(0);
                     }
                 } catch (Exception ex) {
                     log.error("Nao conseguiu carregar os dados da empresa.", ex);
-                    JOptionPane.showMessageDialog(splash, "OpenPDV já está ativo.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
-                    Login.sair();
+                    JOptionPane.showMessageDialog(splash, "OpenPDV já está ativo.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    System.exit(0);
                 }
 
-                // gerando arquivos.txt
+                // gerando arquivoMD5.txt
                 try {
-                    splash.pgBarra.setString("Gerando arquivo com executaveis...");
+                    splash.pgBarra.setString("Gerando arquivoMD5.txt");
                     gerarArquivos(empresa);
                     splash.pgBarra.setValue(30);
                 } catch (Exception ex) {
-                    log.error("Problemas ao gerar o arquivos.txt", ex);
-                    JOptionPane.showMessageDialog(splash, "Problemas ao gerar o arquivos.txt", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                    Login.sair();
+                    log.error("Problemas ao gerar o arquivoMD5.txt", ex);
+                    JOptionPane.showMessageDialog(splash, "Problemas ao gerar o arquivoMD5.txt", "OpenPDV", JOptionPane.ERROR_MESSAGE);
+                    System.exit(0);
                 }
 
                 // valida a comunicao e ativacao com o ECF
@@ -263,28 +281,26 @@ public class Splash extends JFrame {
                     JOptionPane.showMessageDialog(splash, "Problemas ao conectar ou ativar o ECF.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                 }
 
-                // ativacao do TEF
-                boolean tefAtivo = false;
+                // validacao do TEF
                 TEF.setTEF(Util.getConfig());
-                try {
-                    splash.pgBarra.setString("Ativando o TEF...");
-                    tefAtivo = TEF.ativar();
-                    splash.pgBarra.setValue(60);
-                } catch (Exception ex) {
-                    log.error("Problemas ao conectar no TEF", ex);
-                    JOptionPane.showMessageDialog(splash, "Problemas ao ativar o TEF.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
-                }
-
-                // cancelando os pendentes do TEF
-                try {
-                    if (tefAtivo) {
-                        splash.pgBarra.setString("Cancelando os TEF pendentes...");
-                        TEF.cancelarPendentes();
+                splash.pgBarra.setString("Validando o TEF...");
+                splash.pgBarra.setValue(60);
+                if (Util.getConfig().get("tef.titulo") != null) {
+                    while (!TEF.gpAtivo()) {
+                        JOptionPane.showMessageDialog(splash, "Gerenciador Padrão não está ativo!\nPor favor ative-o para continuar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     }
-                } catch (Exception ex) {
-                    log.error("Problemas ao cancelar pendentes do TEF", ex);
-                    JOptionPane.showMessageDialog(splash, "Existe TEF pendentes, mas o sistema encontrou problemas ao executar.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                    Login.sair();
+                    // cancelando pendentes do TEF.
+                    try {
+                        splash.pgBarra.setString("Cancelando os TEF pendentes...");
+                        File resp = new File(TEF.getRespIntPos001());
+                        if (resp.exists() || TEF.getPathTmp().listFiles(TEF.getFiltro()).length > 0) {
+                            new ComandoCancelarVenda(true).executar();
+                        }
+                    } catch (Exception ex) {
+                        log.error("Problemas ao cancelar pendentes do TEF", ex);
+                        JOptionPane.showMessageDialog(splash, "Problemas ao cancelar pendentes do TEF.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        System.exit(0);
+                    }
                 }
 
                 // recupera a impressora
@@ -295,21 +311,22 @@ public class Splash extends JFrame {
                     GrupoFiltro gf = new GrupoFiltro();
                     if (ecfAtivo) {
                         String[] resp = ECF.enviar(EComandoECF.ECF_NumSerie);
-                        FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, resp[1]);
+                        if (ECF.OK.equals(resp[0])) {
+                            FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, resp[1]);
+                            gf.add(ft, EJuncao.E);
+                        }
+                    } else if (!PAF.AUXILIAR.isEmpty()) {
+                        FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
                         gf.add(ft, EJuncao.E);
-                    } else {
-                        FiltroNumero fn = new FiltroNumero("ecfImpressoraId", ECompara.IGUAL, 1);
-                        gf.add(fn, EJuncao.E);
                     }
                     FiltroBinario fb = new FiltroBinario("ecfImpressoraAtivo", ECompara.IGUAL, true);
                     gf.add(fb);
-                    CoreService<EcfImpressora> service = new CoreService<>();
-                    impressora = service.selecionar(new EcfImpressora(), gf);
+                    impressora = (EcfImpressora) service.selecionar(new EcfImpressora(), gf);
 
                     // caso nao encontre a impressora, buscar no server
-                    if (impressora == null && !Util.getConfig().get("openpdv.servidor").endsWith("localhost")) {
+                    if (impressora == null && !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
                         splash.pgBarra.setString("Recuperando impressora do servidor...");
-                        WebResource wr = Util.getRest(Util.getConfig().get("openpdv.host") + "/impressora/" + PAF.AUXILIAR.getProperty("ecf.serie"));
+                        WebResource wr = Util.getRest(Util.getConfig().get("sinc.host") + "/impressora");
                         impressora = wr.accept(MediaType.APPLICATION_JSON_TYPE).get(EcfImpressora.class);
 
                         // salva a impressora no banco local
@@ -320,36 +337,43 @@ public class Splash extends JFrame {
 
                     if (impressora == null) {
                         JOptionPane.showMessageDialog(splash, "Nenhuma impressora cadastrada no banco local e nem no servidor.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                        Login.sair();
+                        System.exit(0);
                     }
                 } catch (Exception ex) {
                     log.error("Problemas na impressora no banco.", ex);
                     JOptionPane.showMessageDialog(splash, "A impressora informada não corresponde a nenhuma cadastrada.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                    Login.sair();
+                    System.exit(0);
                 }
 
                 // se login verdadeiro tem acesso ao ECF
-                boolean login = true;
                 if (ecfAtivo) {
                     // valida o serial do ECF
                     try {
                         splash.pgBarra.setString("Validando Nº Série do ECF...");
                         splash.pgBarra.setValue(80);
-                        ECF.validarSerial();
+                        ECF.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
                     } catch (Exception ex) {
+                        String msg = PAF.AUXILIAR.size() == 0 ? "Número de Série do arquivo auxiliar não reconhecido!" : ex.getMessage();
                         login = false;
                         log.error("Problemas ao validar o serial.", ex);
-                        JOptionPane.showMessageDialog(splash, ex.getMessage(), "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, msg, "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     }
 
                     // valida o GT
                     try {
                         splash.pgBarra.setString("Validando GT do ECF...");
-                        ECF.validarGT();
+                        double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
+                        int cro = Integer.valueOf(PAF.AUXILIAR.getProperty("ecf.cro"));
+                        double novoGT = ECF.validarGT(gt, cro);
+                        if (novoGT > 0.00) {
+                            PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
+                            PAF.criptografar();
+                        }
                     } catch (Exception ex) {
+                        String msg = PAF.AUXILIAR.size() == 0 ? "Valor do GT do arquivo auxiliar não reconhecido!" : ex.getMessage();
                         login = false;
                         log.error("Problemas ao validar o GT.", ex);
-                        JOptionPane.showMessageDialog(splash, ex.getMessage(), "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, msg, "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     }
                 }
 
@@ -360,7 +384,40 @@ public class Splash extends JFrame {
                 caixa.setEmpresa(empresa);
                 caixa.setImpressora(impressora);
 
+                // recupera a data do ECF ou do sistema
+                Date atual = new Date();
                 if (ecfAtivo) {
+                    String[] resp = ECF.enviar(EComandoECF.ECF_DataHora);
+                    if (ECF.OK.equals(resp[0])) {
+                        try {
+                            atual = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]);
+                        } catch (ParseException ex) {
+                        }
+                    }
+                }
+                // recupera a data de validade do auxiliar
+                Date validade = null;
+                if (!PAF.AUXILIAR.isEmpty()) {
+                    validade = Util.formataData(PAF.AUXILIAR.getProperty("out.validade", null), "dd/MM/yyyy");
+                }
+
+                // compara as datas, para ver se pode usar o sistema
+                boolean autorizado = true;
+                if (validade == null || validade.compareTo(atual) < 0) {
+                    login = false;
+                    autorizado = false;
+                    caixa.modoIndisponivel();
+                    caixa.getMnuPrincipal().setEnabled(false);
+                    caixa.getMnuNota().setEnabled(false);
+                    caixa.getMnuPesquisa().setEnabled(false);
+                    JOptionPane.showMessageDialog(splash, "ATENCÃO: O OpenPDV está com a data de validade vencida!\n\n"
+                            + "Favor entre no menu Sobre - F1 e valide o sistema novamente.\n"
+                            + "Caso não consiga re-validar pela internet, entre em contato.\n\n"
+                            + "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                }
+
+                // verifica se ecf + login + autorizado ok
+                if (ecfAtivo && login && autorizado) {
                     // valida o estado do ECF
                     try {
                         switch (ECF.validarEstado()) {
@@ -387,51 +444,46 @@ public class Splash extends JFrame {
                                 Autenticacao.getInstancia().getBtnConsulta().setEnabled(false);
                                 Autenticacao.getInstancia().getBtnFiscal().setEnabled(false);
                                 JOptionPane.showMessageDialog(splash, "Atenção: Existe uma venda em aberto!\n\nPor favor efetue login para recuperar a venda\nou para cancelar a mesma.", "Venda Aberta", JOptionPane.WARNING_MESSAGE);
-
                         }
+
+                        caixa.statusMenus(EModo.OFF);
+                        caixa.setJanela(Autenticacao.getInstancia());
                     } catch (Exception ex) {
                         login = false;
                         log.error("Problemas ao validar o estado.", ex);
-                        JOptionPane.showMessageDialog(splash, ex.getMessage(), "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        caixa.modoConsulta();
+                        JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Consulta / PED.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
                     }
 
-                    if (login) {
-                        caixa.statusMenus(EModo.OFF);
-                        caixa.setJanela(Autenticacao.getInstancia());
+                    // verifica se precisa sincronizar
+                    splash.pgBarra.setValue(100);
+                    if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+                        splash.pgBarra.setString("Sincronizando com o servidor...");
+                        try {
+                            Date recebimento = Util.getDataHora(PAF.AUXILIAR.getProperty("out.recebimento", null)); // ultimo recebimento
+                            if (recebimento == null || (atual.getTime() - recebimento.getTime()) / 86400000 > 0) { // maior que 1 dia em milisegundos
+                                new ComandoReceberDados().executar();
+                            }
+                        } catch (OpenPdvException ex) {
+                            log.error("Nao conseguiu sincronizar com o servidor.", ex);
+                            JOptionPane.showMessageDialog(splash, ex.getMessage(), "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                        }
                     } else {
-                        caixa.modoConsulta();
-                        JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Consulta.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
+                        splash.pgBarra.setString("Finalizado");
                     }
-                } else {
+                } else if (autorizado) {
                     login = false;
                     caixa.modoIndisponivel();
-                    JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Indisponível.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
-                }
-
-                // verifica se precisa sincronizar
-                splash.pgBarra.setValue(100);
-                if (!Util.getConfig().get("openpdv.servidor").endsWith("localhost")) {
-                    splash.pgBarra.setString("Sincronizando com o servidor...");
-                    try {
-                        Date recebimento = Util.getDataHora(PAF.AUXILIAR.getProperty("out.recebimento", null)); // ultimo recebimento
-                        Date atual = new Date(); // data atual
-                        if (recebimento == null || (atual.getTime() - recebimento.getTime()) / 86400000 > 0) { // maior que 1 dia em milisegundos
-                            new ComandoReceberDados().executar();
-                        }
-                    } catch (OpenPdvException ex) {
-                        log.error("Nao conseguiu sincronizar com o servidor.", ex);
-                        JOptionPane.showMessageDialog(splash, ex.getMessage(), "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                } else {
-                    splash.pgBarra.setString("Finalizado");
+                    JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                 }
 
                 // abre a tela do caixa
+                splash.setVisible(false);
                 caixa.setVisible(true);
                 if (login) {
                     caixa.getJanela().setVisible(true);
                 }
-                dispose();
+                splash.dispose();
             }
         }).start();
     }
@@ -444,32 +496,36 @@ public class Splash extends JFrame {
     private void gerarArquivos(SisEmpresa empresa) throws Exception {
         // cria o objeto modelo n1
         N1 n1 = new N1();
-        n1.setCnpj(empresa.getSisEmpresaCnpj());
-        n1.setIe(empresa.getSisEmpresaIe());
-        n1.setIm(empresa.getSisEmpresaIm());
-        n1.setRazao(Util.normaliza(empresa.getSisEmpresaRazao()));
+        n1.setCnpj(PAF.AUXILIAR.getProperty("sh.cnpj"));
+        n1.setIe(PAF.AUXILIAR.getProperty("sh.ie"));
+        n1.setIm(PAF.AUXILIAR.getProperty("sh.im"));
+        n1.setRazao(PAF.AUXILIAR.getProperty("sh.razao"));
         // cria o objeto modelo n2
         N2 n2 = new N2();
         n2.setLaudo(PAF.AUXILIAR.getProperty("out.laudo"));
         n2.setNome(PAF.AUXILIAR.getProperty("paf.nome"));
         n2.setVersao(PAF.AUXILIAR.getProperty("paf.versao"));
         // binario principal
-        N3 principal = new N3();
-        principal.setNome("OpenPDV.jar");
-        principal.setMd5(PAF.AUXILIAR.getProperty("paf.md5"));
+        N3 n3 = new N3();
+        n3.setNome("OpenPDV.jar");
+        StringBuilder principal = new StringBuilder(System.getProperty("user.dir"));
+        principal.append(System.getProperty("file.separator")).append("OpenPDV.jar");
+        n3.setMd5(PAF.gerarMD5(principal.toString()));
         // cria a lista de n3
         List<N3> listaN3 = new ArrayList<>();
-        listaN3.add(principal);
+        listaN3.add(n3);
         // cria o objeto modelo n9
         N9 n9 = new N9();
-        n9.setCnpj(empresa.getSisEmpresaCnpj());
-        n9.setIe(empresa.getSisEmpresaIe());
+        n9.setCnpj(PAF.AUXILIAR.getProperty("sh.cnpj"));
+        n9.setIe(PAF.AUXILIAR.getProperty("sh.ie"));
         n9.setTotal(listaN3.size());
         // cria o modelo do anexo X
         AnexoX anexoX = new AnexoX(n1, n2, listaN3, n9);
         String md5Arquivo = PAF.gerarArquivos(anexoX);
-        PAF.AUXILIAR.setProperty("out.autenticado", md5Arquivo);
-        PAF.criptografarAuxiliar(null);
+        if (!PAF.AUXILIAR.isEmpty()) {
+            PAF.AUXILIAR.setProperty("out.autenticado", md5Arquivo);
+            PAF.criptografar();
+        }
     }
 
     public JLabel getLblOpenPDV() {

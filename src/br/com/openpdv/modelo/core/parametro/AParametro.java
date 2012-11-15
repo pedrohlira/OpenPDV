@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
  * com funcionalidades padronizadas.
  *
  * @param <E> usando generico para tipar o modelo de parametro usado.
- * <p/>
  * @author Pedro H. Lira
  */
 public abstract class AParametro<E> implements IParametro<E> {
@@ -48,7 +47,6 @@ public abstract class AParametro<E> implements IParametro<E> {
      *
      * @param campo o nome do campo.
      * @param valor o valor do filtro.
-     * <p/>
      * @throws ParametroException
      */
     public AParametro(String campo, String valor) {

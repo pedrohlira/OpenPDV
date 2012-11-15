@@ -301,7 +301,7 @@ public class Usuarios extends javax.swing.JDialog {
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(spUsuarios)
                         .add(panUsuarios, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(28, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -316,11 +316,11 @@ public class Usuarios extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-657)/2, (screenSize.height-298)/2, 657, 298);
+        setBounds((screenSize.width-669)/2, (screenSize.height-309)/2, 669, 309);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
@@ -507,12 +507,13 @@ public class Usuarios extends javax.swing.JDialog {
             chkAtivo.setSelected(false);
             chkGerente.setSelected(false);
         } else {
-            cod = Integer.valueOf(tabUsuarios.getModel().getValueAt(row, 0).toString());
-            txtLogin.setText(tabUsuarios.getModel().getValueAt(row, 1).toString());
+            int rowModel = tabUsuarios.convertRowIndexToModel(row);
+            cod = Integer.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 0).toString());
+            txtLogin.setText(tabUsuarios.getModel().getValueAt(rowModel, 1).toString());
             txtSenha.setText("");
-            txtDesconto.setText(tabUsuarios.getModel().getValueAt(row, 3).toString());
-            chkAtivo.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(row, 4).toString()));
-            chkGerente.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(row, 5).toString()));
+            txtDesconto.setText(tabUsuarios.getModel().getValueAt(rowModel, 3).toString());
+            chkAtivo.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 4).toString()));
+            chkGerente.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 5).toString()));
         }
     }
 

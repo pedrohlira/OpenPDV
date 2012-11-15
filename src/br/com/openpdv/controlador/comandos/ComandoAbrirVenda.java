@@ -1,7 +1,5 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.ECF;
-import br.com.openpdv.controlador.EComandoECF;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.controlador.permissao.Login;
@@ -10,6 +8,8 @@ import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.ECF;
+import br.com.phdss.EComandoECF;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,14 +49,19 @@ public class ComandoAbrirVenda implements IComando {
         // abre a venda no cupom
         abrirVendaECF();
         // salva no bd
-        AbrirVendaBanco();
+        try {
+            AbrirVendaBanco();
+        } catch (OpenPdvException ex) {
+            ECF.enviar(EComandoECF.ECF_CancelaCupom);
+            throw ex;
+        }
         // coloca na tela
         abrirVendaTela();
     }
 
     @Override
     public void desfazer() throws OpenPdvException {
-        new ComandoCancelarVenda().executar();
+        // comando nao aplicavel.
     }
 
     /**
@@ -65,6 +70,7 @@ public class ComandoAbrirVenda implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void abrirVendaECF() throws OpenPdvException {
+        ECF.enviar(EComandoECF.ECF_CorrigeEstadoErro);
         resp = ECF.enviar(EComandoECF.ECF_AbreCupom);
         if (ECF.ERRO.equals(resp[0])) {
             log.error("Erro ao abrir a venda no ECF. -> " + resp[1]);
@@ -81,6 +87,8 @@ public class ComandoAbrirVenda implements IComando {
         EcfVenda venda = new EcfVenda();
         venda.setSisUsuario(Login.getOperador());
         venda.setSisCliente(cliente);
+        venda.setInformouCliente(cliente != null);
+        
         venda.setEcfZ(null);
         // ccf
         resp = ECF.enviar(EComandoECF.ECF_NumCCF);

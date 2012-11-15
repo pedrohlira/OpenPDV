@@ -2,7 +2,7 @@ package br.com.openpdv.modelo.core;
 
 /**
  * Enumerador que define os meios de busca aritmética no banco de dados.
- * <p/>
+ *
  * @author Pedro H. Lira
  */
 public enum EBusca {
@@ -30,7 +30,7 @@ public enum EBusca {
 
     /**
      * Metodo que retorna no formato JQL a busca do enumerador.
-     * <p/>
+     *
      * @return uma string no padrao de JQL.
      */
     @Override
@@ -51,9 +51,8 @@ public enum EBusca {
 
     /**
      * Metodo que retorna o tipo de Busca pela string.
-     * <p/>
+     *
      * @param tipo a string que representa a busca.
-     * <p/>
      * @return o EBusca correspondente a string.
      */
     public static EBusca getBusca(String tipo) {
