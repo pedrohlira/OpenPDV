@@ -56,29 +56,12 @@ public class ComandoReceberDados implements IComando {
             em.getTransaction().begin();
             WebResource wr;
 
-            // atualiza os dados da empresa
-            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/empresa");
-            SisEmpresa empresa = wr.accept(MediaType.APPLICATION_JSON).get(SisEmpresa.class);
-            service.salvar(em, empresa);
-            log.debug("Dados empresa recebidos");
-            
-            // atualiza os dados do contador
-            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/contador");
-            SisEmpresa contador = wr.accept(MediaType.APPLICATION_JSON).get(SisEmpresa.class);
-            service.salvar(em, contador);
-            log.debug("Dados contador recebidos");
-
-            // atualiza os dados da impressora
-            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/impressora");
-            EcfImpressora impressora = wr.accept(MediaType.APPLICATION_JSON).get(EcfImpressora.class);
-            service.salvar(em, impressora);
-            log.debug("Dados impressora recebidos");
-
             // atualiza os usuarios
             wr = Util.getRest(Util.getConfig().get("sinc.host") + "/usuario");
             List<SisUsuario> usuarios = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<SisUsuario>>() {
             });
             for (SisUsuario usu : usuarios) {
+                usu.setSisUsuarioLogin(Util.normaliza(usu.getSisUsuarioLogin()));
                 service.salvar(em, usu);
             }
             log.debug("Dados usuarios recebidos");
@@ -88,7 +71,11 @@ public class ComandoReceberDados implements IComando {
             List<EcfPagamentoTipo> tiposPagamento = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<EcfPagamentoTipo>>() {
             });
             for (EcfPagamentoTipo tipo : tiposPagamento) {
-                service.salvar(em, tipo);
+                // Nao adicionar formas que tem o codigo 00
+                if (!tipo.getEcfPagamentoTipoCodigo().equals("00")) {
+                    tipo.setEcfPagamentoTipoDescricao(Util.normaliza(tipo.getEcfPagamentoTipoDescricao()));
+                    service.salvar(em, tipo);
+                }
             }
             log.debug("Dados tipos pagamento recebidos");
 
@@ -137,11 +124,12 @@ public class ComandoReceberDados implements IComando {
                     // salva o produto
                     prod.setProdPrecos(null);
                     prod.setProdComposicoes(null);
+                    prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
                     service.salvar(em, prod);
                 }
                 em.getTransaction().commit();
 
-                log.debug("Dados produtos novos recebidos da pagina " + pagina);
+                log.debug("Dados dos produtos novos recebidos da pagina " + pagina);
                 pagina++;
             } while (novos.size() == limite);
 
@@ -176,6 +164,7 @@ public class ComandoReceberDados implements IComando {
                     prod.setProdComposicoes(null);
 
                     // salva o produto
+                    prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
                     service.salvar(em, prod);
 
                     // salva os precos
@@ -202,7 +191,7 @@ public class ComandoReceberDados implements IComando {
                 }
                 em.getTransaction().commit();
 
-                log.debug("Dados produtos atualizaods recebidos da pagina " + pagina);
+                log.debug("Dados dos produtos atualizados recebidos da pagina " + pagina);
                 pagina++;
             } while (novos.size() == limite);
 

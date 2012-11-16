@@ -574,8 +574,8 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/br/com/openpdv/imagens/cliente.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Identificar Cliente - F11"/>
-            <Property name="toolTipText" type="java.lang.String" value="Identificar o Cliente no Cupom Fiscal"/>
+            <Property name="text" type="java.lang.String" value="Identificar - F11"/>
+            <Property name="toolTipText" type="java.lang.String" value="Identificar o Cliente e/ou Vendedor no Cupom Fiscal"/>
             <Property name="enabled" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">

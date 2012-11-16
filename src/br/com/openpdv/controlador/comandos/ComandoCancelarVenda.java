@@ -1,6 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
@@ -67,7 +68,9 @@ public class ComandoCancelarVenda implements IComando {
 
             // cancela os cartoes
             try {
-                new ComandoCancelarCartao(venda.getEcfPagamentos(), auto).executar();
+                if (Util.getConfig().get("tef.titulo") != null) {
+                    new ComandoCancelarCartao(venda.getEcfPagamentos(), auto).executar();
+                }
                 Caixa.getInstancia().modoDisponivel();
             } catch (OpenPdvException ex) {
                 log.error("Erro ao cancelar os cartoes.", ex);

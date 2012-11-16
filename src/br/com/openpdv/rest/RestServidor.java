@@ -130,16 +130,22 @@ public class RestServidor extends ARest {
             ecfNota.setEcfNotaProdutos(null);
             ecfNota.setId(0);
             ecfNota = (EcfNota) service.salvar(em, ecfNota);
+            em.getTransaction().commit();
 
-            // salva os produtos e atualiza o estoque
+            // salva os produtos vendidos
+            List<Sql> sqls = new ArrayList<Sql>();
             for (EcfNotaProduto np : nps) {
                 np.setId(0);
                 np.setEcfNota(ecfNota);
-                np = (EcfNotaProduto) service.salvar(em, np);
-                service.executar(em, getEstoque(np.getEcfNotaProdutoQuantidade(), np.getProdEmbalagem(), np.getProdProduto()));
+                Sql sql = getEstoque(np.getEcfNotaProdutoQuantidade(), np.getProdEmbalagem(), np.getProdProduto());
+                sqls.add(sql);
             }
+            service.salvar(nps);
 
-            em.getTransaction().commit();
+            // atualiza o estoque se nao cancelada
+            if (ecfNota.isEcfNotaCancelada() == false) {
+                service.executar(sqls);
+            }
         } catch (Exception ex) {
             if (em != null && em.getTransaction().isActive()) {
                 em.getTransaction().rollback();

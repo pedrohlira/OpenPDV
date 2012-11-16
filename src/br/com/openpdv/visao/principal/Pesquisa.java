@@ -2,6 +2,7 @@ package br.com.openpdv.visao.principal;
 
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.controlador.core.TableCellRendererNumber;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.produto.ProdProduto;
@@ -87,6 +88,7 @@ public class Pesquisa extends javax.swing.JDialog {
         lblFiltro.setText("Filtro:");
 
         txtFiltro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtFiltro.setToolTipText("Digite o texto de busca e precione ENTER. Use % após o texto para filtrar pelo inicio e % antes do texto para filtrar pelo fim.");
         txtFiltro.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtFiltroKeyPressed(evt);
@@ -133,11 +135,11 @@ public class Pesquisa extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Cod", "NCM", "Barra", "Descricao", "REF", "Preço", "EmbalagemID", "Embalagem", "Estoque", "Tipo", "Origem", "CST/CSON", "Tributação", "ICMS", "ISSQN", "IAT", "IPPT", "Cadastrado", "Alterado", "Ativo"
+                "Cod", "NCM", "Barra", "Descricao", "REF", "Preço", "EmbalagemID", "Embalagem", "Estoque", "Tipo", "Origem", "CST/CSON", "Tributação", "ICMS%", "ISSQN%", "IAT", "IPPT", "Cadastrado", "Alterado", "Ativo"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.String.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
@@ -153,9 +155,7 @@ public class Pesquisa extends javax.swing.JDialog {
         });
         tabProdutos.setAutoCreateRowSorter(true);
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabProdutos.setCellSelectionEnabled(false);
         tabProdutos.setRowHeight(20);
-        tabProdutos.setRowSelectionAllowed(true);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabProdutos.setShowGrid(true);
         tabProdutos.setShowVerticalLines(false);
@@ -178,17 +178,21 @@ public class Pesquisa extends javax.swing.JDialog {
         tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(300);
         tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(80);
+        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(6).setMinWidth(1);
         tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(1);
         tabProdutos.getColumnModel().getColumn(6).setMaxWidth(1);
         tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(80);
+        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(10).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(11).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(12).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(13).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(13).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(14).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(14).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(15).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(16).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(17).setPreferredWidth(150);
@@ -343,7 +347,7 @@ public class Pesquisa extends javax.swing.JDialog {
                     // referencia
                     FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft}));
-                } else if (texto.length() > 6) {
+                } else if (texto.length() == 8 || texto.length() >= 12) {
                     // barra
                     FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
                     // barra do preco
@@ -367,10 +371,18 @@ public class Pesquisa extends javax.swing.JDialog {
                     FiltroNumero fn3 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3}));
                 } catch (NumberFormatException ex1) {
+                    ECompara compara;
+                    if (texto.startsWith("%")) {
+                        compara = ECompara.CONTEM_FIM;
+                    } else if (texto.endsWith("%")) {
+                        compara = ECompara.CONTEM_INICIO;
+                    } else {
+                        compara = ECompara.CONTEM;
+                    }
                     // descricao
-                    FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", ECompara.CONTEM, texto);
+                    FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", compara, texto);
                     // referencia
-                    FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                    FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", compara, texto);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2}));
                 }
             }
@@ -394,14 +406,10 @@ public class Pesquisa extends javax.swing.JDialog {
                     String cadastrado = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(prod.getProdProdutoCadastrado());
                     String alterado = prod.getProdProdutoAlterado() == null ? "" : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(prod.getProdProdutoAlterado());
                     String barra = prod.getProdProdutoBarra() == null ? "" : prod.getProdProdutoBarra();
-                    String preco = DecimalFormat.getCurrencyInstance().format(prod.getProdProdutoPreco());
-                    String estoque = DecimalFormat.getNumberInstance().format(prod.getProdProdutoEstoque());
-                    String icms = new DecimalFormat("#0.00").format(prod.getProdProdutoIcms()) + "%";
-                    String issqn = new DecimalFormat("#0.00").format(prod.getProdProdutoIssqn()) + "%";
 
                     Object[] obj = new Object[]{prod.getId(), prod.getProdProdutoNcm(), barra, prod.getProdProdutoDescricao(), prod.getProdProdutoReferencia(),
-                        preco, prod.getProdEmbalagem().getId(), prod.getProdEmbalagem().getProdEmbalagemNome(), estoque, prod.getProdProdutoTipo(), "" + prod.getProdProdutoOrigem(),
-                        prod.getProdProdutoCstCson(), prod.getProdProdutoTributacao(), icms, issqn, "" + prod.getProdProdutoIat(), "" + prod.getProdProdutoIppt(),
+                        prod.getProdProdutoPreco(), prod.getProdEmbalagem().getId(), prod.getProdEmbalagem().getProdEmbalagemNome(), prod.getProdProdutoEstoque(), prod.getProdProdutoTipo(), "" + prod.getProdProdutoOrigem(),
+                        prod.getProdProdutoCstCson(), prod.getProdProdutoTributacao(), prod.getProdProdutoIcms(), prod.getProdProdutoIssqn(), "" + prod.getProdProdutoIat(), "" + prod.getProdProdutoIppt(),
                         cadastrado, alterado, prod.getProdProdutoAtivo()};
                     dtmProduto.addRow(obj);
                 }

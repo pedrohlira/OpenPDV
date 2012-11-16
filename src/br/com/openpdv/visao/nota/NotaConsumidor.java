@@ -858,6 +858,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
                     FiltroNumero fn = new FiltroNumero("ecfNotaId", ECompara.IGUAL, cod);
                     EcfNota nota = (EcfNota) service.selecionar(new EcfNota(), fn);
                     nota.setEcfNotaCancelada(true);
+                    nota.setEcfNotaData(new Date());
                     service.salvar(nota);
 
                     // atualiza o estoque

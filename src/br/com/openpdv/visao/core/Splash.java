@@ -1,5 +1,6 @@
 package br.com.openpdv.visao.core;
 
+import br.com.openpdv.controlador.comandos.ComandoCancelarCartao;
 import br.com.openpdv.controlador.comandos.ComandoCancelarVenda;
 import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
@@ -10,6 +11,7 @@ import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
+import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.phdss.ECF;
 import br.com.phdss.EComandoECF;
@@ -202,7 +204,6 @@ public class Splash extends JFrame {
                         log.error("Nao conseguiu iniciar o servico RESTful.", ex);
                         JOptionPane.showMessageDialog(splash, "Problemas com acesso ao serviço RESTful.\n"
                                 + "Informe ao administrador do sistema!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
-                        System.exit(0);
                     }
                 }
 
@@ -225,32 +226,13 @@ public class Splash extends JFrame {
                     FiltroBinario fb = new FiltroBinario("sisEmpresaContador", ECompara.IGUAL, false);
                     empresa = (SisEmpresa) service.selecionar(new SisEmpresa(), fb);
 
-                    // caso nao encontre a empresa, buscar no server
-                    if (empresa == null && !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
-                        splash.pgBarra.setString("Recuperando empresa do servidor...");
-                        WebResource wr = Util.getRest(Util.getConfig().get("sinc.host") + "/empresa");
-                        empresa = wr.accept(MediaType.APPLICATION_JSON_TYPE).get(SisEmpresa.class);
-
-                        // salva no banco local
-                        if (empresa != null) {
-                            service.salvar(empresa);
-                        }
-
-                        // aproveita e busca o contador no server tambem
-                        WebResource wr2 = Util.getRest(Util.getConfig().get("sinc.host") + "/contador");
-                        SisEmpresa contador = wr2.accept(MediaType.APPLICATION_JSON_TYPE).get(SisEmpresa.class);
-                        if (contador != null) {
-                            service.salvar(contador);
-                        }
-                    }
-
                     if (empresa == null) {
-                        JOptionPane.showMessageDialog(splash, "Nenhuma empresa cadastrada no banco local e nem no servidor.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, "Nenhuma empresa cadastrada no banco local.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
                         System.exit(0);
                     }
                 } catch (Exception ex) {
                     log.error("Nao conseguiu carregar os dados da empresa.", ex);
-                    JOptionPane.showMessageDialog(splash, "OpenPDV já está ativo.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(splash, "Nao conseguiu carregar os dados da empresa.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     System.exit(0);
                 }
 
@@ -294,11 +276,23 @@ public class Splash extends JFrame {
                         splash.pgBarra.setString("Cancelando os TEF pendentes...");
                         File resp = new File(TEF.getRespIntPos001());
                         if (resp.exists() || TEF.getPathTmp().listFiles(TEF.getFiltro()).length > 0) {
-                            new ComandoCancelarVenda(true).executar();
+                            // tenta cancelar a venda, caso ela já esteja cancelada, cancela somente o TEF
+                            try {
+                                new ComandoCancelarVenda(true).executar();
+                            } catch (Exception ex) {
+                                log.error("Venda ja estava cancelada.", ex);
+                                EcfVenda venda = null;
+                                List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
+                                if (!vendas.isEmpty()) {
+                                    venda = vendas.get(0);
+                                }
+                                new ComandoCancelarCartao(venda.getEcfPagamentos(), true).executar();
+                                Caixa.getInstancia().modoDisponivel();
+                            }
                         }
                     } catch (Exception ex) {
                         log.error("Problemas ao cancelar pendentes do TEF", ex);
-                        JOptionPane.showMessageDialog(splash, "Problemas ao cancelar pendentes do TEF.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, "Problemas ao cancelar pendentes do TEF.\nRemova os arquivos pendentes e estorne pelo ADM.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                         System.exit(0);
                     }
                 }
@@ -323,20 +317,8 @@ public class Splash extends JFrame {
                     gf.add(fb);
                     impressora = (EcfImpressora) service.selecionar(new EcfImpressora(), gf);
 
-                    // caso nao encontre a impressora, buscar no server
-                    if (impressora == null && !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
-                        splash.pgBarra.setString("Recuperando impressora do servidor...");
-                        WebResource wr = Util.getRest(Util.getConfig().get("sinc.host") + "/impressora");
-                        impressora = wr.accept(MediaType.APPLICATION_JSON_TYPE).get(EcfImpressora.class);
-
-                        // salva a impressora no banco local
-                        if (impressora != null) {
-                            service.salvar(impressora);
-                        }
-                    }
-
                     if (impressora == null) {
-                        JOptionPane.showMessageDialog(splash, "Nenhuma impressora cadastrada no banco local e nem no servidor.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, "Nenhuma impressora cadastrada e ativa no banco local.", "OpenPDV", JOptionPane.ERROR_MESSAGE);
                         System.exit(0);
                     }
                 } catch (Exception ex) {
@@ -398,7 +380,7 @@ public class Splash extends JFrame {
                 // recupera a data de validade do auxiliar
                 Date validade = null;
                 if (!PAF.AUXILIAR.isEmpty()) {
-                    validade = Util.formataData(PAF.AUXILIAR.getProperty("out.validade", null), "dd/MM/yyyy");
+                    validade = Util.formataData(PAF.AUXILIAR.getProperty("out.validade", null) + " 23:59:59", "dd/MM/yyyy HH:mm:ss");
                 }
 
                 // compara as datas, para ver se pode usar o sistema
@@ -420,6 +402,9 @@ public class Splash extends JFrame {
                 if (ecfAtivo && login && autorizado) {
                     // valida o estado do ECF
                     try {
+                        caixa.statusMenus(EModo.OFF);
+                        caixa.setJanela(Autenticacao.getInstancia());
+                        
                         switch (ECF.validarEstado()) {
                             case estNaoInicializada:
                             case estDesconhecido:
@@ -429,7 +414,8 @@ public class Splash extends JFrame {
                                 break;
                             case estBloqueada:
                                 login = false;
-                                JOptionPane.showMessageDialog(splash, "ECF bloqueado até as 00:00!", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                                caixa.modoIndisponivel();
+                                JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
                                 break;
                             case estRequerZ:
                                 splash.pgBarra.setString("Emitindo a redução Z...");
@@ -445,14 +431,11 @@ public class Splash extends JFrame {
                                 Autenticacao.getInstancia().getBtnFiscal().setEnabled(false);
                                 JOptionPane.showMessageDialog(splash, "Atenção: Existe uma venda em aberto!\n\nPor favor efetue login para recuperar a venda\nou para cancelar a mesma.", "Venda Aberta", JOptionPane.WARNING_MESSAGE);
                         }
-
-                        caixa.statusMenus(EModo.OFF);
-                        caixa.setJanela(Autenticacao.getInstancia());
                     } catch (Exception ex) {
                         login = false;
                         log.error("Problemas ao validar o estado.", ex);
                         caixa.modoConsulta();
-                        JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Consulta / PED.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Consulta.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
                     }
 
                     // verifica se precisa sincronizar
@@ -466,7 +449,7 @@ public class Splash extends JFrame {
                             }
                         } catch (OpenPdvException ex) {
                             log.error("Nao conseguiu sincronizar com o servidor.", ex);
-                            JOptionPane.showMessageDialog(splash, ex.getMessage(), "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(splash, "Nao conseguiu sincronizar com o servidor.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                         }
                     } else {
                         splash.pgBarra.setString("Finalizado");
@@ -474,7 +457,7 @@ public class Splash extends JFrame {
                 } else if (autorizado) {
                     login = false;
                     caixa.modoIndisponivel();
-                    JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
                 }
 
                 // abre a tela do caixa

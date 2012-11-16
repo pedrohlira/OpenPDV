@@ -40,7 +40,6 @@ import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.*;
 import org.apache.log4j.Logger;
@@ -223,7 +222,7 @@ public class Caixa extends JFrame {
                     mnuCancelarItemActionPerformed(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F10 && mnuCancelarVenda.isEnabled()) { // Cancelar Venda
                     mnuCancelarVendaActionPerformed(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F11 && mnuIdentificar.isEnabled()) { // Identificar Cliente
+                } else if (e.getKeyCode() == KeyEvent.VK_F11 && mnuIdentificar.isEnabled()) { // Identificar
                     mnuIdentificarMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F12 && mnuSair.isEnabled() && option == null) { // Sair
                     mnuSairMouseClicked(null);
@@ -948,8 +947,8 @@ public class Caixa extends JFrame {
         barMenu.add(mnuVenda);
 
         mnuIdentificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cliente.png"))); // NOI18N
-        mnuIdentificar.setText("Identificar Cliente - F11");
-        mnuIdentificar.setToolTipText("Identificar o Cliente no Cupom Fiscal");
+        mnuIdentificar.setText("Identificar - F11");
+        mnuIdentificar.setToolTipText("Identificar o Cliente e/ou Vendedor no Cupom Fiscal");
         mnuIdentificar.setEnabled(false);
         mnuIdentificar.setFocusable(false);
         mnuIdentificar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -1435,7 +1434,7 @@ public class Caixa extends JFrame {
 
                 @Override
                 public void sucesso(SisCliente resultado) {
-                    if (resultado != null) {
+                    if (resultado != null && resultado.getSisClienteId() > 0) {
                         String[] resp = ECF.enviar(EComandoECF.ECF_IdentificaConsumidor,
                                 resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
                         if (ECF.ERRO.equals(resp[0])) {
@@ -1582,10 +1581,11 @@ public class Caixa extends JFrame {
             @Override
             public void sucesso(SisCliente resultado) {
                 if (resultado != null) {
-                    if (venda != null) {
+                    if (resultado.getSisClienteId() > 0) {
                         venda.setSisCliente(resultado);
+                        mnuIdentificar.setEnabled(false);
                     }
-                    mnuIdentificar.setEnabled(false);
+                    venda.setSisVendedor(resultado.getVendedor());
                 }
                 statusMenus(modo);
             }
@@ -1594,7 +1594,7 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 statusMenus(modo);
                 log.error("Erro na identificacao do cliente.", excecao);
-                JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar Cliente", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar", JOptionPane.WARNING_MESSAGE);
             }
         }).setVisible(true);
     }//GEN-LAST:event_mnuIdentificarMouseClicked
@@ -1682,35 +1682,35 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuTEFActionPerformed
 
     private void mnuSincronizacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSincronizacaoActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        final int escolha = JOptionPane.showOptionDialog(this, "O que deseja sincronizar?", "OpenPDV",
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Receber", "Enviar", "Tudo"}, JOptionPane.YES_OPTION);
 
-            @Override
-            public void sucesso(Integer resultado) {
-                new Thread(new Runnable() {
+        if (escolha > -1) {
+            new Thread(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        try {
+                @Override
+                public void run() {
+                    try {
+                        if (escolha == JOptionPane.YES_OPTION) {
+                            new ComandoReceberDados().executar();
+                        } else if (escolha == JOptionPane.NO_OPTION) {
+                            new ComandoEnviarDados().executar();
+                        } else {
                             new ComandoEnviarDados().executar();
                             new ComandoReceberDados().executar();
-                            Aguarde.getInstancia().setVisible(false);
-                            JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
-                        } catch (Exception ex) {
-                            log.error("Nao conseguiu sincronizar com o servidor.", ex);
-                            Aguarde.getInstancia().setVisible(false);
-                            JOptionPane.showMessageDialog(caixa, ex.getMessage(), "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                         }
-                    }
-                }).start();
-                Aguarde.getInstancia().setVisible(true);
-            }
 
-            @Override
-            public void falha(Exception excecao) {
-                JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        janela.setVisible(true);
+                        Aguarde.getInstancia().setVisible(false);
+                        JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception ex) {
+                        log.error("Nao conseguiu sincronizar com o servidor.", ex);
+                        Aguarde.getInstancia().setVisible(false);
+                        JOptionPane.showMessageDialog(caixa, "Nao conseguiu sincronizar com o servidor.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+            }).start();
+            Aguarde.getInstancia().setVisible(true);
+        }
     }//GEN-LAST:event_mnuSincronizacaoActionPerformed
 
     private void mnuTipoPagamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoPagamentosActionPerformed
@@ -1850,7 +1850,7 @@ public class Caixa extends JFrame {
         statusMenus(modo);
 
         lblLivre.setVisible(false);
-        lblMensagem.setText("VENDA ABERTA");
+        lblMensagem.setText("F8 - FECHAR VENDA");
         txtCodigo.setEnabled(true);
         txtCodigo.requestFocus();
         totalizar();
@@ -1937,13 +1937,11 @@ public class Caixa extends JFrame {
         // somente habilita o sincronismo nas maquinas host
         if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
             mnuSincronizacao.setEnabled(false);
-        } else {
-            // somente habilita os menus de cadastros na maquina server
-            mnuProdutos.setEnabled(false);
-            mnuEmbalagens.setEnabled(false);
-            mnuTipoPagamentos.setEnabled(false);
-            mnuClientes.setEnabled(false);
-            mnuUsuarios.setEnabled(false);
+        }
+
+        // somente habilita o ADM do TEF se tiver no conf
+        if (Util.getConfig().get("tef.titulo") == null) {
+            mnuTEF.setEnabled(false);
         }
     }
 

@@ -96,13 +96,24 @@ public class ComandoFecharVenda implements IComando {
             StringBuilder sb = new StringBuilder();
             sb.append(Util.formataTexto("MD5: " + PAF.AUXILIAR.getProperty("out.autenticado"), " ", ECF.COL, true));
 
+            // identifica o operador do caixa e o vendedor
+            String operador = "OPERADOR: " + venda.getSisUsuario().getSisUsuarioLogin();
+            if (venda.getSisVendedor() != null) {
+                operador += " - VENDEDOR: " + venda.getSisVendedor().getSisUsuarioLogin();
+            }
+            sb.append(Util.formataTexto(operador, " ", ECF.COL, true));
+
             // caso nao tenha sido informado o cliente
-            if (Caixa.getInstancia().getVenda().getSisCliente() == null) {
+            if (venda.getSisCliente() == null) {
                 sb.append(Util.formataTexto("CONSUMIDOR NAO INFORMOU O CPF/CNPJ", " ", ECF.COL, true));
             } else if (Caixa.getInstancia().getVenda().isInformouCliente() == false) {
-                sb.append("CNPJ/CPF: ").append(Caixa.getInstancia().getVenda().getSisCliente().getSisClienteDoc()).append(ECF.SL);
-                sb.append("NOME:     ").append(Caixa.getInstancia().getVenda().getSisCliente().getSisClienteNome()).append(ECF.SL);
-                sb.append("ENDEREÇO: ").append(Caixa.getInstancia().getVenda().getSisCliente().getSisClienteEndereco()).append(ECF.SL);
+                sb.append("CNPJ/CPF: ").append(venda.getSisCliente().getSisClienteDoc()).append(ECF.SL);
+                if (!venda.getSisCliente().getSisClienteNome().equals("")) {
+                    sb.append("NOME:     ").append(venda.getSisCliente().getSisClienteNome()).append(ECF.SL);
+                }
+                if (!venda.getSisCliente().getSisClienteEndereco().equals("")) {
+                    sb.append("ENDEREÇO: ").append(venda.getSisCliente().getSisClienteEndereco()).append(ECF.SL);
+                }
             }
 
             // caso seja no estado de MG, colocar o minas legal
@@ -186,7 +197,9 @@ public class ComandoFecharVenda implements IComando {
         ParametroNumero pn2 = new ParametroNumero(acres_desc > 0 ? "ecfVendaAcrescimo" : "ecfVendaDesconto", Math.abs(acres_desc));
         ParametroNumero pn3 = new ParametroNumero("ecfVendaLiquido", bruto + acres_desc);
         ParametroBinario pb = new ParametroBinario("ecfVendaFechada", true);
-        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb});
+        ParametroObjeto po1 = new ParametroObjeto("sisCliente", venda.getSisCliente());
+        ParametroObjeto po2 = new ParametroObjeto("sisVendedor", venda.getSisVendedor());
+        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2});
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 

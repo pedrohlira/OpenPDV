@@ -86,9 +86,14 @@ public class ComandoAbrirVenda implements IComando {
     public void AbrirVendaBanco() throws OpenPdvException {
         EcfVenda venda = new EcfVenda();
         venda.setSisUsuario(Login.getOperador());
+        if (cliente != null) {
+            venda.setSisVendedor(cliente.getVendedor());
+            if (cliente.getSisClienteId() == 0) {
+                cliente = null;
+            }
+        }
         venda.setSisCliente(cliente);
         venda.setInformouCliente(cliente != null);
-        
         venda.setEcfZ(null);
         // ccf
         resp = ECF.enviar(EComandoECF.ECF_NumCCF);

@@ -47,6 +47,9 @@ public class EcfVenda extends Dados implements Serializable {
     @JoinColumn(name = "sis_usuario_id")
     @ManyToOne
     private SisUsuario sisUsuario;
+    @JoinColumn(name = "sis_vendedor_id", referencedColumnName = "sis_usuario_id")
+    @ManyToOne
+    private SisUsuario sisVendedor;
     @JoinColumn(name = "ecf_z_id")
     @ManyToOne
     @XmlInverseReference(mappedBy = "ecfVendas")
@@ -58,8 +61,8 @@ public class EcfVenda extends Dados implements Serializable {
     private List<EcfVendaProduto> ecfVendaProdutos;
     @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<EcfPagamento> ecfPagamentos;
-
     private transient boolean informouCliente;
+
     /**
      * Construtor padrao
      */
@@ -206,6 +209,14 @@ public class EcfVenda extends Dados implements Serializable {
 
     public void setSisUsuario(SisUsuario sisUsuario) {
         this.sisUsuario = sisUsuario;
+    }
+
+    public SisUsuario getSisVendedor() {
+        return sisVendedor;
+    }
+
+    public void setSisVendedor(SisUsuario sisVendedor) {
+        this.sisVendedor = sisVendedor;
     }
 
     public boolean isInformouCliente() {

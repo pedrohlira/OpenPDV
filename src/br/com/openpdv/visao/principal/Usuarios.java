@@ -82,6 +82,7 @@ public class Usuarios extends javax.swing.JDialog {
         lblDesconto = new javax.swing.JLabel();
         txtDesconto = new javax.swing.JFormattedTextField();
         chkAtivo = new javax.swing.JCheckBox();
+        chkCaixa = new javax.swing.JCheckBox();
         chkGerente = new javax.swing.JCheckBox();
         btnNovo = new javax.swing.JButton();
         btnSalvar = new javax.swing.JButton();
@@ -105,14 +106,14 @@ public class Usuarios extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Cod", "Login", "Senha", "Desconto", "Ativo", "Gerente"
+                "Cod", "Login", "Senha", "Desconto", "Ativo", "Caixa", "Gerente"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.Object.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Boolean.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Object.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -124,7 +125,9 @@ public class Usuarios extends javax.swing.JDialog {
             }
         });
         tabUsuarios.setAutoCreateRowSorter(true);
+        tabUsuarios.setCellSelectionEnabled(false);
         tabUsuarios.setRowHeight(20);
+        tabUsuarios.setRowSelectionAllowed(true);
         tabUsuarios.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabUsuarios.setShowGrid(true);
         tabUsuarios.setShowVerticalLines(false);
@@ -134,7 +137,7 @@ public class Usuarios extends javax.swing.JDialog {
         tabUsuarios.getColumnModel().getColumn(0).setResizable(false);
         tabUsuarios.getColumnModel().getColumn(0).setPreferredWidth(50);
         tabUsuarios.getColumnModel().getColumn(1).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tabUsuarios.getColumnModel().getColumn(1).setPreferredWidth(150);
         tabUsuarios.getColumnModel().getColumn(2).setMinWidth(1);
         tabUsuarios.getColumnModel().getColumn(2).setPreferredWidth(1);
         tabUsuarios.getColumnModel().getColumn(2).setMaxWidth(1);
@@ -144,6 +147,8 @@ public class Usuarios extends javax.swing.JDialog {
         tabUsuarios.getColumnModel().getColumn(4).setPreferredWidth(50);
         tabUsuarios.getColumnModel().getColumn(5).setResizable(false);
         tabUsuarios.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tabUsuarios.getColumnModel().getColumn(6).setResizable(false);
+        tabUsuarios.getColumnModel().getColumn(6).setPreferredWidth(50);
 
         panUsuarios.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -168,6 +173,9 @@ public class Usuarios extends javax.swing.JDialog {
         chkAtivo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         chkAtivo.setText("Ativo");
 
+        chkCaixa.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        chkCaixa.setText("Caixa");
+
         chkGerente.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         chkGerente.setText("Gerente");
 
@@ -176,43 +184,55 @@ public class Usuarios extends javax.swing.JDialog {
         panUsuariosLayout.setHorizontalGroup(
             panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(panUsuariosLayout.createSequentialGroup()
-                .add(10, 10, 10)
                 .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(panUsuariosLayout.createSequentialGroup()
-                        .add(lblUsuario)
-                        .add(225, 225, 225)
+                        .add(10, 10, 10)
+                        .add(lblUsuario))
+                    .add(panUsuariosLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(txtLogin, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 183, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(panUsuariosLayout.createSequentialGroup()
                         .add(lblSenha)
                         .add(113, 113, 113)
-                        .add(lblDesconto))
+                        .add(lblDesconto)
+                        .addContainerGap())
                     .add(panUsuariosLayout.createSequentialGroup()
-                        .add(txtLogin, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 250, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(6, 6, 6)
                         .add(txtSenha, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 139, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(6, 6, 6)
                         .add(txtDesconto, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(6, 6, 6)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(chkAtivo)
-                        .add(6, 6, 6)
-                        .add(chkGerente))))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(chkCaixa)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(chkGerente, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 75, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
         panUsuariosLayout.setVerticalGroup(
             panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(panUsuariosLayout.createSequentialGroup()
-                .add(8, 8, 8)
                 .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(lblUsuario)
-                    .add(lblSenha)
-                    .add(lblDesconto))
-                .add(3, 3, 3)
-                .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(txtLogin, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(txtSenha, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(txtDesconto, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(panUsuariosLayout.createSequentialGroup()
-                        .add(2, 2, 2)
+                        .add(8, 8, 8)
+                        .add(lblUsuario))
+                    .add(panUsuariosLayout.createSequentialGroup()
+                        .addContainerGap()
                         .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(chkAtivo)
-                            .add(chkGerente)))))
+                            .add(lblSenha)
+                            .add(lblDesconto))
+                        .add(3, 3, 3)
+                        .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(txtSenha, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(txtLogin, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(panUsuariosLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(txtDesconto, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(chkAtivo)
+                                .add(chkGerente)
+                                .add(chkCaixa)))))
+                .add(3, 3, 3))
         );
 
         btnNovo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -301,7 +321,7 @@ public class Usuarios extends javax.swing.JDialog {
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(spUsuarios)
                         .add(panUsuarios, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -368,13 +388,13 @@ public class Usuarios extends javax.swing.JDialog {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_formWindowClosing
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnNovo;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JCheckBox chkAtivo;
+    private javax.swing.JCheckBox chkCaixa;
     private javax.swing.JCheckBox chkGerente;
     private javax.swing.JLabel lblDesconto;
     private javax.swing.JLabel lblSenha;
@@ -437,6 +457,7 @@ public class Usuarios extends javax.swing.JDialog {
             usuario.setSisUsuarioLogin(txtLogin.getText());
             usuario.setSisUsuarioDesconto(Integer.valueOf(txtDesconto.getText()));
             usuario.setSisUsuarioAtivo(chkAtivo.isSelected());
+            usuario.setSisUsuarioCaixa(chkCaixa.isSelected());
             usuario.setSisUsuarioGerente(chkGerente.isSelected());
 
             try {
@@ -484,7 +505,7 @@ public class Usuarios extends javax.swing.JDialog {
 
             for (SisUsuario usuario : lista) {
                 Object[] obj = new Object[]{usuario.getId(), usuario.getSisUsuarioLogin(), usuario.getSisUsuarioSenha(),
-                    usuario.getSisUsuarioDesconto(), usuario.isSisUsuarioAtivo(), usuario.isSisUsuarioGerente()};
+                    usuario.getSisUsuarioDesconto(), usuario.isSisUsuarioAtivo(), usuario.isSisUsuarioCaixa(), usuario.isSisUsuarioGerente()};
                 dtm.addRow(obj);
             }
 
@@ -505,6 +526,7 @@ public class Usuarios extends javax.swing.JDialog {
             txtSenha.setText("");
             txtDesconto.setText("0");
             chkAtivo.setSelected(false);
+            chkCaixa.setSelected(false);
             chkGerente.setSelected(false);
         } else {
             int rowModel = tabUsuarios.convertRowIndexToModel(row);
@@ -513,7 +535,8 @@ public class Usuarios extends javax.swing.JDialog {
             txtSenha.setText("");
             txtDesconto.setText(tabUsuarios.getModel().getValueAt(rowModel, 3).toString());
             chkAtivo.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 4).toString()));
-            chkGerente.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 5).toString()));
+            chkCaixa.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 5).toString()));
+            chkGerente.setSelected(Boolean.valueOf(tabUsuarios.getModel().getValueAt(rowModel, 6).toString()));
         }
     }
 
@@ -556,6 +579,14 @@ public class Usuarios extends javax.swing.JDialog {
 
     public void setChkAtivo(JCheckBox chkAtivo) {
         this.chkAtivo = chkAtivo;
+    }
+
+    public JCheckBox getChkCaixa() {
+        return chkCaixa;
+    }
+
+    public void setChkCaixa(JCheckBox chkCaixa) {
+        this.chkCaixa = chkCaixa;
     }
 
     public JCheckBox getChkGerente() {

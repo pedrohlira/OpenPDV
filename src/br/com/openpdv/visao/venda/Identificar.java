@@ -5,9 +5,9 @@ import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.TextFieldLimit;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
-import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.FiltroTexto;
+import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.sistema.SisCliente;
+import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
 import java.util.Date;
@@ -25,7 +25,8 @@ public class Identificar extends javax.swing.JDialog {
     private Logger log;
     private AsyncCallback<SisCliente> async;
     private SisCliente cliente;
-    private CoreService<SisCliente> service;
+    private SisUsuario vendedor;
+    private CoreService service;
 
     /**
      * Construtor padrao.
@@ -40,6 +41,7 @@ public class Identificar extends javax.swing.JDialog {
         txtCPF_CNPJ.setDocument(new TextFieldLimit(18, true));
         txtNome.setDocument(new TextFieldLimit(100));
         txtEndereco.setDocument(new TextFieldLimit(255));
+        txtCodigo.setDocument(new TextFieldLimit(3, true));
     }
 
     /**
@@ -53,6 +55,7 @@ public class Identificar extends javax.swing.JDialog {
             identificar = new Identificar();
         }
 
+        identificar.limpar();
         identificar.async = async;
         return identificar;
     }
@@ -68,20 +71,22 @@ public class Identificar extends javax.swing.JDialog {
         lblEndereco = new javax.swing.JLabel();
         txtEndereco = new javax.swing.JTextField();
         separador = new javax.swing.JSeparator();
+        lblCodigo = new javax.swing.JLabel();
+        txtCodigo = new javax.swing.JTextField();
+        lblVendedor = new javax.swing.JLabel();
+        txtVendedor = new javax.swing.JTextField();
+        separador1 = new javax.swing.JSeparator();
         btnOK = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Identificar Cliente");
+        setTitle("Identificar Cliente e/ou Vendedor");
         setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         setModal(true);
         setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
-            }
-            public void windowActivated(java.awt.event.WindowEvent evt) {
-                formWindowActivated(evt);
             }
         });
 
@@ -114,6 +119,28 @@ public class Identificar extends javax.swing.JDialog {
                 txtEnderecoKeyPressed(evt);
             }
         });
+
+        lblCodigo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblCodigo.setText("Código:");
+
+        txtCodigo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtCodigo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtCodigoFocusLost(evt);
+            }
+        });
+        txtCodigo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtCodigoKeyPressed(evt);
+            }
+        });
+
+        lblVendedor.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblVendedor.setText("Vendedor:");
+
+        txtVendedor.setEditable(false);
+        txtVendedor.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtVendedor.setFocusable(false);
 
         btnOK.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnOK.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/salvar.png"))); // NOI18N
@@ -169,12 +196,22 @@ public class Identificar extends javax.swing.JDialog {
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(txtNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 246, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                             .add(txtEndereco)))
-                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                        .add(layout.createSequentialGroup()
-                            .add(btnOK, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                            .add(lblCodigo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 58, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                            .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                        .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 475, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                            .add(txtCodigo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 59, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                            .add(lblVendedor, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 58, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                            .add(txtVendedor))
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(layout.createSequentialGroup()
+                                .add(btnOK, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 475, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(separador1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 475, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -196,13 +233,21 @@ public class Identificar extends javax.swing.JDialog {
                 .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(lblCodigo)
+                    .add(txtCodigo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblVendedor)
+                    .add(txtVendedor, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(separador1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnOK, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-504)/2, (screenSize.height-160)/2, 504, 160);
+        setBounds((screenSize.width-504)/2, (screenSize.height-211)/2, 504, 211);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
@@ -229,10 +274,6 @@ public class Identificar extends javax.swing.JDialog {
         cancelar();
     }//GEN-LAST:event_formWindowClosing
 
-    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
-        limpar();
-    }//GEN-LAST:event_formWindowActivated
-
     private void txtCPF_CNPJKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCPF_CNPJKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             txtNome.requestFocus();
@@ -251,21 +292,38 @@ public class Identificar extends javax.swing.JDialog {
 
     private void txtEnderecoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtEnderecoKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            salvar();
+            txtCodigo.requestFocus();
         } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
             cancelar();
         }
     }//GEN-LAST:event_txtEnderecoKeyPressed
+
+    private void txtCodigoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodigoKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnOK.requestFocus();
+        } else if (evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            cancelar();
+        }
+    }//GEN-LAST:event_txtCodigoKeyPressed
+
+    private void txtCodigoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCodigoFocusLost
+        acharVendedor();
+    }//GEN-LAST:event_txtCodigoFocusLost
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnOK;
     private javax.swing.JLabel lblCPF;
+    private javax.swing.JLabel lblCodigo;
     private javax.swing.JLabel lblEndereco;
     private javax.swing.JLabel lblNome;
+    private javax.swing.JLabel lblVendedor;
     private javax.swing.JSeparator separador;
+    private javax.swing.JSeparator separador1;
     private javax.swing.JTextField txtCPF_CNPJ;
+    private javax.swing.JTextField txtCodigo;
     private javax.swing.JTextField txtEndereco;
     private javax.swing.JTextField txtNome;
+    private javax.swing.JTextField txtVendedor;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -276,7 +334,7 @@ public class Identificar extends javax.swing.JDialog {
             try {
                 String texto = txtCPF_CNPJ.getText().replaceAll("[^0-9]", "");
                 FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto);
-                cliente = service.selecionar(new SisCliente(), ft);
+                cliente = (SisCliente) service.selecionar(new SisCliente(), ft);
                 if (cliente == null) {
                     cliente = new SisCliente();
                 }
@@ -285,7 +343,8 @@ public class Identificar extends javax.swing.JDialog {
                 cliente.setSisClienteNome(txtNome.getText().replace(",", ""));
                 cliente.setSisClienteEndereco(txtEndereco.getText().replace(",", ""));
                 cliente.setSisClienteCadastrado(new Date());
-                cliente = service.salvar(cliente);
+                cliente = (SisCliente) service.salvar(cliente);
+                cliente.setVendedor(vendedor);
 
                 setVisible(false);
                 async.sucesso(cliente);
@@ -297,9 +356,12 @@ public class Identificar extends javax.swing.JDialog {
                 dispose();
             }
         } else if (txtCPF_CNPJ.getText().equals("")) {
-            cancelar();
+            cliente = new SisCliente();
+            cliente.setVendedor(vendedor);
+            setVisible(false);
+            async.sucesso(cliente);
         } else {
-            JOptionPane.showMessageDialog(this, "O CPF/CNPJ não é válido!", "Identificar Cliente", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "O CPF/CNPJ não é válido!", "Identificar", JOptionPane.INFORMATION_MESSAGE);
             txtCPF_CNPJ.requestFocus();
         }
     }
@@ -318,9 +380,12 @@ public class Identificar extends javax.swing.JDialog {
      */
     private void limpar() {
         cliente = null;
+        vendedor = null;
         txtCPF_CNPJ.setText("");
         txtNome.setText("");
         txtEndereco.setText("");
+        txtCodigo.setText("");
+        txtVendedor.setText("");
         txtCPF_CNPJ.requestFocus();
     }
 
@@ -341,6 +406,31 @@ public class Identificar extends javax.swing.JDialog {
         }
 
         return false;
+    }
+
+    /**
+     * Metodo que acha o vendedor pelo codigo.
+     */
+    private void acharVendedor() {
+        if (!txtCodigo.getText().equals("")) {
+            FiltroNumero fn = new FiltroNumero("sisUsuarioId", ECompara.IGUAL, txtCodigo.getText());
+            FiltroBinario fb1 = new FiltroBinario("sisUsuarioAtivo", ECompara.IGUAL, true);
+            FiltroBinario fb2 = new FiltroBinario("sisUsuarioCaixa", ECompara.IGUAL, false);
+            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fn, fb1, fb2});
+
+            try {
+                vendedor = (SisUsuario) service.selecionar(new SisUsuario(), gf);
+                if (vendedor != null) {
+                    txtVendedor.setText(vendedor.getSisUsuarioLogin());
+                } else {
+                    throw new OpenPdvException();
+                }
+            } catch (OpenPdvException ex) {
+                txtCodigo.setText("");
+                txtVendedor.setText("");
+                JOptionPane.showMessageDialog(this, "Vendedor não encontrado!", "Identificar", JOptionPane.WARNING_MESSAGE);
+            }
+        }
     }
 
     // GETs e SETs
@@ -366,6 +456,54 @@ public class Identificar extends javax.swing.JDialog {
 
     public void setCliente(SisCliente cliente) {
         this.cliente = cliente;
+    }
+
+    public JLabel getLblCodigo() {
+        return lblCodigo;
+    }
+
+    public void setLblCodigo(JLabel lblCodigo) {
+        this.lblCodigo = lblCodigo;
+    }
+
+    public JLabel getLblVendedor() {
+        return lblVendedor;
+    }
+
+    public void setLblVendedor(JLabel lblVendedor) {
+        this.lblVendedor = lblVendedor;
+    }
+
+    public JSeparator getSeparador1() {
+        return separador1;
+    }
+
+    public void setSeparador1(JSeparator separador1) {
+        this.separador1 = separador1;
+    }
+
+    public JTextField getTxtCodigo() {
+        return txtCodigo;
+    }
+
+    public void setTxtCodigo(JTextField txtCodigo) {
+        this.txtCodigo = txtCodigo;
+    }
+
+    public JTextField getTxtVendedor() {
+        return txtVendedor;
+    }
+
+    public void setTxtVendedor(JTextField txtVendedor) {
+        this.txtVendedor = txtVendedor;
+    }
+
+    public SisUsuario getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(SisUsuario vendedor) {
+        this.vendedor = vendedor;
     }
 
     public JLabel getLblCPF() {

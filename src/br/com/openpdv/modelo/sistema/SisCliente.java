@@ -30,7 +30,6 @@ public class SisCliente extends Dados implements Serializable {
     @Column(name = "sis_cliente_cadastrado")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sisClienteCadastrado;
-
     // usados somente na NFe
     private transient String ie;
     private transient int numero;
@@ -39,6 +38,8 @@ public class SisCliente extends Dados implements Serializable {
     private transient SisMunicipio sisMunicipio;
     private transient String fone;
     private transient String email;
+    // usado somente na identificacao
+    private transient SisUsuario vendedor;
 
     /**
      * Construtor padrao
@@ -163,5 +164,13 @@ public class SisCliente extends Dados implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public SisUsuario getVendedor() {
+        return vendedor;
+    }
+
+    public void setVendedor(SisUsuario vendedor) {
+        this.vendedor = vendedor;
     }
 }

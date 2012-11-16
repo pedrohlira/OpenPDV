@@ -33,8 +33,9 @@ public class PermissaoService extends CoreService<SisUsuario> {
         // cria os dois filtros contendo os valores de login
         FiltroTexto ft1 = new FiltroTexto("sisUsuarioLogin", ECompara.IGUAL, usuario);
         FiltroTexto ft2 = new FiltroTexto("sisUsuarioSenha", ECompara.IGUAL, senha);
-        FiltroBinario fb = new FiltroBinario("sisUsuarioAtivo", ECompara.IGUAL, true);
-        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft1, ft2, fb});
+        FiltroBinario fb1 = new FiltroBinario("sisUsuarioAtivo", ECompara.IGUAL, true);
+        FiltroBinario fb2 = new FiltroBinario("sisUsuarioCaixa", ECompara.IGUAL, true);
+        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft1, ft2, fb1, fb2});
 
         try {
             return selecionar(new SisUsuario(), gf);

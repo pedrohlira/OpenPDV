@@ -1,9 +1,6 @@
 package br.com.openpdv.visao.principal;
 
-import br.com.openpdv.controlador.core.Conexao;
-import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.TextFieldLimit;
-import br.com.openpdv.controlador.core.Util;
+import br.com.openpdv.controlador.core.*;
 import br.com.openpdv.modelo.core.EBusca;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
@@ -169,6 +166,7 @@ public class Produtos extends javax.swing.JDialog {
         lblFiltro.setText("Filtro:");
 
         txtFiltro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtFiltro.setToolTipText("Digite o texto de busca e precione ENTER. Use % após o texto para filtrar pelo inicio e % antes do texto para filtrar pelo fim.");
         txtFiltro.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtFiltroKeyPressed(evt);
@@ -200,11 +198,11 @@ public class Produtos extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Cod", "NCM", "Barra", "Descricao", "REF", "Preço", "EmbalagemID", "Embalagem", "Estoque", "Tipo", "Origem", "CST/CSON", "Tributação", "ICMS", "ISSQN", "IAT", "IPPT", "Cadastrado", "Alterado", "Ativo"
+                "Cod", "NCM", "Barra", "Descricao", "REF", "Preço", "EmbalagemID", "Embalagem", "Estoque", "Tipo", "Origem", "CST/CSON", "Tributação", "ICMS%", "ISSQN%", "IAT", "IPPT", "Cadastrado", "Alterado", "Ativo"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.String.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
@@ -233,17 +231,21 @@ public class Produtos extends javax.swing.JDialog {
         tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(300);
         tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(80);
+        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(6).setMinWidth(1);
         tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(1);
         tabProdutos.getColumnModel().getColumn(6).setMaxWidth(1);
         tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(80);
+        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(10).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(11).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(12).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(13).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(13).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(14).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(14).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(15).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(16).setPreferredWidth(50);
         tabProdutos.getColumnModel().getColumn(17).setPreferredWidth(150);
@@ -1039,7 +1041,7 @@ public class Produtos extends javax.swing.JDialog {
      */
     private void salvar() {
         if (txtNCM.getText().equals("") || txtDescricao.getText().equals("") || txtPreco.getText().equals("") || txtEstoque.getText().equals("")
-            || txtCST_CSON.getText().equals("") || txtICMS.getText().equals("") || txtISSQN.getText().equals("")) {
+                || txtCST_CSON.getText().equals("") || txtICMS.getText().equals("") || txtISSQN.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!", "Produtos", JOptionPane.INFORMATION_MESSAGE);
         } else {
             EntityManagerFactory emf = null;
@@ -1127,7 +1129,7 @@ public class Produtos extends javax.swing.JDialog {
      * Metodo que valida os precos do produto
      *
      * @param precos a lista de precos
-     * @param prod   o produto atual
+     * @param prod o produto atual
      * @return verdadeiro se valido, falso caso contrario
      */
     private boolean validaPrecos(List<ProdPreco> precos, ProdProduto prod) {
@@ -1151,8 +1153,8 @@ public class Produtos extends javax.swing.JDialog {
     /**
      * Metodo que salva os precos
      *
-     * @param em     a transacao ativa
-     * @param prod   o produto ativo
+     * @param em a transacao ativa
+     * @param prod o produto ativo
      * @param precos a lista de dados
      * @throws OpenPdvException caso ocorra alguma exececao
      */
@@ -1172,7 +1174,7 @@ public class Produtos extends javax.swing.JDialog {
      * Metodo que valida os itens do produto
      *
      * @param itens a lista de dados
-     * @param prod  o produto atual.
+     * @param prod o produto atual.
      * @return verdadeiro se valido, falso caso contrario
      */
     private boolean validaItens(List<ProdComposicao> itens, ProdProduto prod) {
@@ -1213,8 +1215,8 @@ public class Produtos extends javax.swing.JDialog {
     /**
      * Metodo que salva os itens
      *
-     * @param em    a transacao ativa
-     * @param prod  o produto ativo
+     * @param em a transacao ativa
+     * @param prod o produto ativo
      * @param itens a lista de dados
      * @throws OpenPdvException caso ocorra alguma exececao
      */
@@ -1236,7 +1238,7 @@ public class Produtos extends javax.swing.JDialog {
     private void excluir() {
         if (cod > 0) {
             int escolha = JOptionPane.showOptionDialog(this, "Deseja remover o registro selecionado?", "Produtos",
-                                                       JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+                    JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
             if (escolha == 0) {
                 try {
                     service.deletar(new ProdProduto(cod));
@@ -1304,7 +1306,7 @@ public class Produtos extends javax.swing.JDialog {
                     // referencia
                     FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft}));
-                } else if (texto.length() > 6) {
+                } else if (texto.length() == 8 || texto.length() >= 12) {
                     // barra
                     FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
                     // barra do preco
@@ -1328,10 +1330,18 @@ public class Produtos extends javax.swing.JDialog {
                     FiltroNumero fn3 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3}));
                 } catch (NumberFormatException ex1) {
+                    ECompara compara;
+                    if (texto.startsWith("%")) {
+                        compara = ECompara.CONTEM_FIM;
+                    } else if (texto.endsWith("%")) {
+                        compara = ECompara.CONTEM_INICIO;
+                    } else {
+                        compara = ECompara.CONTEM;
+                    }
                     // descricao
-                    FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", ECompara.CONTEM, texto);
+                    FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", compara, texto);
                     // referencia
-                    FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                    FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", compara, texto);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2}));
                 }
             }
@@ -1354,15 +1364,11 @@ public class Produtos extends javax.swing.JDialog {
                 String cadastrado = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(prod.getProdProdutoCadastrado());
                 String alterado = prod.getProdProdutoAlterado() == null ? "" : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(prod.getProdProdutoAlterado());
                 String barra = prod.getProdProdutoBarra() == null ? "" : prod.getProdProdutoBarra();
-                String preco = DecimalFormat.getCurrencyInstance().format(prod.getProdProdutoPreco());
-                String estoque = DecimalFormat.getNumberInstance().format(prod.getProdProdutoEstoque());
-                String icms = new DecimalFormat("#0.00").format(prod.getProdProdutoIcms()) + "%";
-                String issqn = new DecimalFormat("#0.00").format(prod.getProdProdutoIssqn()) + "%";
 
                 Object[] obj = new Object[]{prod.getId(), prod.getProdProdutoNcm(), barra, prod.getProdProdutoDescricao(), prod.getProdProdutoReferencia(),
-                                            preco, prod.getProdEmbalagem().getId(), prod.getProdEmbalagem().getProdEmbalagemNome(), estoque, prod.getProdProdutoTipo(), "" + prod.getProdProdutoOrigem(),
-                                            prod.getProdProdutoCstCson(), "" + prod.getProdProdutoTributacao(), icms, issqn, "" + prod.getProdProdutoIat(), "" + prod.getProdProdutoIppt(),
-                                            cadastrado, alterado, prod.getProdProdutoAtivo()};
+                    prod.getProdProdutoPreco(), prod.getProdEmbalagem().getId(), prod.getProdEmbalagem().getProdEmbalagemNome(), prod.getProdProdutoEstoque(), prod.getProdProdutoTipo(), "" + prod.getProdProdutoOrigem(),
+                    prod.getProdProdutoCstCson(), "" + prod.getProdProdutoTributacao(), prod.getProdProdutoIcms(), prod.getProdProdutoIssqn(), "" + prod.getProdProdutoIat(), "" + prod.getProdProdutoIppt(),
+                    cadastrado, alterado, prod.getProdProdutoAtivo()};
                 dtmProduto.addRow(obj);
             }
 
@@ -1411,15 +1417,15 @@ public class Produtos extends javax.swing.JDialog {
             txtBarra.setText(tabProdutos.getModel().getValueAt(rowModel, 2).toString());
             txtDescricao.setText(tabProdutos.getModel().getValueAt(rowModel, 3).toString());
             txtREF.setText(tabProdutos.getModel().getValueAt(rowModel, 4).toString());
-            txtPreco.setText(tabProdutos.getModel().getValueAt(rowModel, 5).toString().replace("R$ ", "").replace(".", ""));
+            txtPreco.setText(tabProdutos.getModel().getValueAt(rowModel, 5).toString().replace(".", ","));
             selecionarCombo(cmbEmbalagem, tabProdutos.getModel().getValueAt(rowModel, 6).toString());
-            txtEstoque.setText(tabProdutos.getModel().getValueAt(rowModel, 8).toString().replace(".", ""));
+            txtEstoque.setText(tabProdutos.getModel().getValueAt(rowModel, 8).toString().replace(".", ","));
             selecionarCombo(cmbTipo, tabProdutos.getModel().getValueAt(rowModel, 9).toString());
             selecionarCombo(cmbOrigem, tabProdutos.getModel().getValueAt(rowModel, 10).toString());
             txtCST_CSON.setText(tabProdutos.getModel().getValueAt(rowModel, 11).toString());
             selecionarCombo(cmbTributacao, tabProdutos.getModel().getValueAt(rowModel, 12).toString());
-            txtICMS.setText(tabProdutos.getModel().getValueAt(rowModel, 13).toString().replace("%", ""));
-            txtISSQN.setText(tabProdutos.getModel().getValueAt(rowModel, 14).toString().replace("%", ""));
+            txtICMS.setText(tabProdutos.getModel().getValueAt(rowModel, 13).toString().replace(".", ","));
+            txtISSQN.setText(tabProdutos.getModel().getValueAt(rowModel, 14).toString().replace(".", ","));
             selecionarCombo(cmbIAT, tabProdutos.getModel().getValueAt(rowModel, 15).toString());
             selecionarCombo(cmbIPPT, tabProdutos.getModel().getValueAt(rowModel, 16).toString());
             chkAtivo.setSelected(Boolean.valueOf(tabProdutos.getModel().getValueAt(rowModel, 19).toString()));
@@ -1431,12 +1437,12 @@ public class Produtos extends javax.swing.JDialog {
                 prod = (ProdProduto) service.selecionar(prod, fn);
                 for (ProdPreco preco : prod.getProdPrecos()) {
                     Object[] obj = new Object[]{preco.getId(), preco.getProdEmbalagem().getId() + " - " + preco.getProdEmbalagem().getProdEmbalagemNome(),
-                                                preco.getProdPrecoValor(), preco.getProdPrecoBarra()};
+                        preco.getProdPrecoValor(), preco.getProdPrecoBarra()};
                     dtmPreco.addRow(obj);
                 }
                 for (ProdComposicao item : prod.getProdComposicoes()) {
                     Object[] obj = new Object[]{item.getId(), item.getProdProduto().getId(), item.getProdProduto().getProdProdutoDescricao(),
-                                                item.getProdEmbalagem().getId() + " - " + item.getProdEmbalagem().getProdEmbalagemNome(), item.getProdComposicaoQuantidade(), item.getProdComposicaoValor()};
+                        item.getProdEmbalagem().getId() + " - " + item.getProdEmbalagem().getProdEmbalagemNome(), item.getProdComposicaoQuantidade(), item.getProdComposicaoValor()};
                     dtmItem.addRow(obj);
                 }
             } catch (OpenPdvException ex) {

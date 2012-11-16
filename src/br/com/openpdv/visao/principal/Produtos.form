@@ -117,6 +117,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Serif" size="12" style="0"/>
         </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Digite o texto de busca e precione ENTER. Use % ap&#xf3;s o texto para filtrar pelo inicio e % antes do texto para filtrar pelo fim."/>
       </Properties>
       <Events>
         <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txtFiltroKeyPressed"/>
@@ -172,16 +173,16 @@
                 <Column editable="false" title="Barra" type="java.lang.String"/>
                 <Column editable="false" title="Descricao" type="java.lang.String"/>
                 <Column editable="false" title="REF" type="java.lang.String"/>
-                <Column editable="false" title="Pre&#xe7;o" type="java.lang.String"/>
+                <Column editable="false" title="Pre&#xe7;o" type="java.lang.Double"/>
                 <Column editable="false" title="EmbalagemID" type="java.lang.Integer"/>
                 <Column editable="false" title="Embalagem" type="java.lang.String"/>
-                <Column editable="false" title="Estoque" type="java.lang.String"/>
+                <Column editable="false" title="Estoque" type="java.lang.Double"/>
                 <Column editable="false" title="Tipo" type="java.lang.String"/>
                 <Column editable="false" title="Origem" type="java.lang.String"/>
                 <Column editable="false" title="CST/CSON" type="java.lang.String"/>
                 <Column editable="false" title="Tributa&#xe7;&#xe3;o" type="java.lang.String"/>
-                <Column editable="false" title="ICMS" type="java.lang.String"/>
-                <Column editable="false" title="ISSQN" type="java.lang.String"/>
+                <Column editable="false" title="ICMS%" type="java.lang.Double"/>
+                <Column editable="false" title="ISSQN%" type="java.lang.Double"/>
                 <Column editable="false" title="IAT" type="java.lang.String"/>
                 <Column editable="false" title="IPPT" type="java.lang.String"/>
                 <Column editable="false" title="Cadastrado" type="java.lang.String"/>
@@ -221,7 +222,9 @@
                 <Column maxWidth="-1" minWidth="-1" prefWidth="80" resizable="true">
                   <Title/>
                   <Editor/>
-                  <Renderer/>
+                  <Renderer editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                    <Connection code="new TableCellRendererNumber(DecimalFormat.getCurrencyInstance())" type="code"/>
+                  </Renderer>
                 </Column>
                 <Column maxWidth="1" minWidth="1" prefWidth="1" resizable="true">
                   <Title/>
@@ -236,7 +239,9 @@
                 <Column maxWidth="-1" minWidth="-1" prefWidth="80" resizable="true">
                   <Title/>
                   <Editor/>
-                  <Renderer/>
+                  <Renderer editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                    <Connection code="new TableCellRendererNumber(DecimalFormat.getNumberInstance())" type="code"/>
+                  </Renderer>
                 </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="50" resizable="true">
                   <Title/>
@@ -261,12 +266,16 @@
                 <Column maxWidth="-1" minWidth="-1" prefWidth="50" resizable="true">
                   <Title/>
                   <Editor/>
-                  <Renderer/>
+                  <Renderer editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                    <Connection code="new TableCellRendererNumber(DecimalFormat.getNumberInstance())" type="code"/>
+                  </Renderer>
                 </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="50" resizable="true">
                   <Title/>
                   <Editor/>
-                  <Renderer/>
+                  <Renderer editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                    <Connection code="new TableCellRendererNumber(DecimalFormat.getNumberInstance())" type="code"/>
+                  </Renderer>
                 </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="50" resizable="true">
                   <Title/>

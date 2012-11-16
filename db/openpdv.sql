@@ -7,6 +7,7 @@ CREATE TABLE sis_usuario (
   sis_usuario_senha varchar(40) NOT NULL,
   sis_usuario_desconto int(11) NOT NULL,
   sis_usuario_ativo bit(1) NOT NULL,
+  sis_usuario_caixa bit(1) NOT NULL,
   sis_usuario_gerente bit(1) NOT NULL,
   PRIMARY KEY (sis_usuario_id),
   CONSTRAINT UK_sis_usuario_1 UNIQUE (sis_usuario_login)
@@ -275,6 +276,7 @@ DROP TABLE IF EXISTS ecf_venda;
 CREATE TABLE ecf_venda (
   ecf_venda_id int(11) NOT NULL AUTO_INCREMENT,
   sis_usuario_id int(11) NOT NULL,
+  sis_vendedor_id int(11) DEFAULT NULL,
   ecf_z_id int(11) DEFAULT NULL,
   sis_cliente_id int(11) DEFAULT NULL,
   ecf_venda_ccf int(6) NOT NULL,
@@ -289,7 +291,8 @@ CREATE TABLE ecf_venda (
   PRIMARY KEY (ecf_venda_id),
   CONSTRAINT FK_ecf_venda_1 FOREIGN KEY (sis_usuario_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_ecf_venda_2 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT FK_ecf_venda_3 FOREIGN KEY (sis_cliente_id) REFERENCES sis_cliente (sis_cliente_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT FK_ecf_venda_3 FOREIGN KEY (sis_cliente_id) REFERENCES sis_cliente (sis_cliente_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT FK_ecf_venda_4 FOREIGN KEY (sis_vendedor_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS ecf_venda_produto;

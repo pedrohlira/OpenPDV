@@ -131,10 +131,10 @@ public class Fechamento extends javax.swing.JDialog {
             }
         });
 
-        btnDinheiro.setFont(new java.awt.Font("Serif", 1, 12)); // NOI18N
+        btnDinheiro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnDinheiro.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/preco.png"))); // NOI18N
-        btnDinheiro.setText("<html><center>DINHEIRO<br>[F1]</center></html>");
-        btnDinheiro.setToolTipText("Pagamento com dinheiro.");
+        btnDinheiro.setText("<html><center><b>D</b>INHEIRO</center></html>");
+        btnDinheiro.setToolTipText("Pagamento com dinheiro. Atalho = D");
         btnDinheiro.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnDinheiro.setMaximumSize(new java.awt.Dimension(100, 75));
         btnDinheiro.setMinimumSize(new java.awt.Dimension(100, 75));
@@ -152,10 +152,10 @@ public class Fechamento extends javax.swing.JDialog {
             }
         });
 
-        btnCartao.setFont(new java.awt.Font("Serif", 1, 12)); // NOI18N
+        btnCartao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnCartao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cartao.png"))); // NOI18N
-        btnCartao.setText("<html><center>CARTÃO<br>[F2]</center></html>");
-        btnCartao.setToolTipText("Pagamento com cartão de crédito ou débito.");
+        btnCartao.setText("<html><center><b>C</b>ARTÃO</center></html>");
+        btnCartao.setToolTipText("Pagamento com cartão. Atalho = C");
         btnCartao.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnCartao.setMaximumSize(new java.awt.Dimension(100, 75));
         btnCartao.setMinimumSize(new java.awt.Dimension(100, 75));
@@ -173,10 +173,10 @@ public class Fechamento extends javax.swing.JDialog {
             }
         });
 
-        btnCheque.setFont(new java.awt.Font("Serif", 1, 12)); // NOI18N
+        btnCheque.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnCheque.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cheque.png"))); // NOI18N
-        btnCheque.setText("<html><center>CHEQUE<br>[F3]</center></html>");
-        btnCheque.setToolTipText("Pagamento com cheque.");
+        btnCheque.setText("<html><center>C<b>H</b>EQUE</center></html>");
+        btnCheque.setToolTipText("Pagamento com cheque. Atalho = H");
         btnCheque.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnCheque.setMaximumSize(new java.awt.Dimension(100, 75));
         btnCheque.setMinimumSize(new java.awt.Dimension(100, 75));
@@ -194,10 +194,10 @@ public class Fechamento extends javax.swing.JDialog {
             }
         });
 
-        btnAcres.setFont(new java.awt.Font("Serif", 1, 12)); // NOI18N
+        btnAcres.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnAcres.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/valor.png"))); // NOI18N
-        btnAcres.setText("ACRÉS. [F4]");
-        btnAcres.setToolTipText("Adicionar acréscimo.");
+        btnAcres.setText("<html><center><b>A</b>CRÉSCIMO</center></html>");
+        btnAcres.setToolTipText("Adicionar acréscimo. Atalho = A");
         btnAcres.setMaximumSize(new java.awt.Dimension(100, 40));
         btnAcres.setMinimumSize(new java.awt.Dimension(100, 40));
         btnAcres.setPreferredSize(new java.awt.Dimension(100, 40));
@@ -214,10 +214,10 @@ public class Fechamento extends javax.swing.JDialog {
             }
         });
 
-        btnDesc.setFont(new java.awt.Font("Serif", 1, 12)); // NOI18N
+        btnDesc.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnDesc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/receber.png"))); // NOI18N
-        btnDesc.setText("DESC. [F5]");
-        btnDesc.setToolTipText("Adicionar desconto.");
+        btnDesc.setText("<html><center>D<b>E</b>SCONTO</center></html>");
+        btnDesc.setToolTipText("Adicionar desconto. Atalho = E");
         btnDesc.setMaximumSize(new java.awt.Dimension(100, 40));
         btnDesc.setMinimumSize(new java.awt.Dimension(100, 40));
         btnDesc.setPreferredSize(new java.awt.Dimension(100, 40));
@@ -633,15 +633,15 @@ public class Fechamento extends javax.swing.JDialog {
      * @param e a tecla precionada.
      */
     private void atalhos(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_F1 && btnDinheiro.isEnabled()) { // Dinheiro
+        if (e.getKeyCode() == KeyEvent.VK_D && btnDinheiro.isEnabled()) { // Dinheiro
             btnDinheiroActionPerformed(null);
-        } else if (e.getKeyCode() == KeyEvent.VK_F2 && btnCartao.isEnabled()) { // Cartao
+        } else if (e.getKeyCode() == KeyEvent.VK_C && btnCartao.isEnabled()) { // Cartao
             btnCartaoActionPerformed(null);
-        } else if (e.getKeyCode() == KeyEvent.VK_F3 && btnCheque.isEnabled()) { // Cheque
+        } else if (e.getKeyCode() == KeyEvent.VK_H && btnCheque.isEnabled()) { // Cheque
             btnChequeActionPerformed(null);
-        } else if (e.getKeyCode() == KeyEvent.VK_F4 && btnAcres.isEnabled()) { // Acrescimo
+        } else if (e.getKeyCode() == KeyEvent.VK_A && btnAcres.isEnabled()) { // Acrescimo
             btnAcresActionPerformed(null);
-        } else if (e.getKeyCode() == KeyEvent.VK_F5 && btnDesc.isEnabled()) { // Desconto
+        } else if (e.getKeyCode() == KeyEvent.VK_E && btnDesc.isEnabled()) { // Desconto
             btnDescActionPerformed(null);
         } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && btnCancelar.isEnabled()) { // Cancelar
             cancelar();
@@ -863,8 +863,13 @@ public class Fechamento extends javax.swing.JDialog {
     private void limpar() {
         // botoes
         btnDinheiro.setEnabled(true);
-        btnCartao.setEnabled(true);
-        btnCheque.setEnabled(true);
+        if (Util.getConfig().get("tef.titulo") != null) {
+            btnCartao.setEnabled(true);
+            btnCheque.setEnabled(true);
+        } else {
+            btnCartao.setEnabled(false);
+            btnCheque.setEnabled(false);
+        }
         btnAcres.setEnabled(true);
         btnDesc.setEnabled(true);
         btnCancelar.setEnabled(true);
@@ -1008,10 +1013,10 @@ public class Fechamento extends javax.swing.JDialog {
             String arquivo = dtmPag.getValueAt(i, 7).toString();
 
             for (EcfPagamentoTipo tipo : tipos) {
-                if (tipo.getEcfPagamentoTipoCodigo().equals(codigo) || 
-                        (tipo.getEcfPagamentoTipoRede().equalsIgnoreCase(rede) && 
-                        tipo.isEcfPagamentoTipoDebito() == debito &&
-                        tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cartao")))) {
+                if (tipo.getEcfPagamentoTipoCodigo().equals(codigo)
+                        || (tipo.getEcfPagamentoTipoRede().equalsIgnoreCase(rede)
+                        && tipo.isEcfPagamentoTipoDebito() == debito
+                        && tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cartao")))) {
                     EcfPagamento vendaPagamento = new EcfPagamento();
                     vendaPagamento.setEcfVenda(Caixa.getInstancia().getVenda());
                     vendaPagamento.setEcfPagamentoTipo(tipo);

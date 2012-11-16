@@ -61,7 +61,8 @@ public class ComandoAdicionarItem implements IComando {
      */
     public void adicionarItemEcf() throws OpenPdvException {
         String codigo = vendaProduto.getEcfVendaProdutoCodigo();
-        String descricao = Util.normaliza(vendaProduto.getProdProduto().getProdProdutoDescricao());
+        String descricao = Util.normaliza(vendaProduto.getProdProduto().getProdProdutoDescricao()).replace(",", ".");
+        String aliquota = getAliquota().replace(",", ".");
         String qtd = Util.formataNumero(vendaProduto.getEcfVendaProdutoQuantidade(), 1, 2, false).replace(",", ".");
         String valor = Util.formataNumero(vendaProduto.getEcfVendaProdutoBruto(), 1, 2, false).replace(",", ".");
         String und = vendaProduto.getProdEmbalagem().getProdEmbalagemNome();
@@ -69,7 +70,7 @@ public class ComandoAdicionarItem implements IComando {
             und = und.substring(0, 3);
         }
 
-        String[] resp = ECF.enviar(EComandoECF.ECF_VendeItem, new String[]{codigo, descricao, getAliquota().replace(",", "."), qtd, valor, "0", und});
+        String[] resp = ECF.enviar(EComandoECF.ECF_VendeItem, new String[]{codigo, descricao, aliquota, qtd, valor, "0", und});
         if (ECF.OK.equals(resp[0])) {
             // atualiza o gt
             try {

@@ -30,6 +30,8 @@ public class SisUsuario extends Dados implements Serializable {
     private int sisUsuarioDesconto;
     @Column(name = "sis_usuario_ativo")
     private boolean sisUsuarioAtivo;
+    @Column(name = "sis_usuario_caixa")
+    private boolean sisUsuarioCaixa;
     @Column(name = "sis_usuario_gerente")
     private boolean sisUsuarioGerente;
 
@@ -101,6 +103,14 @@ public class SisUsuario extends Dados implements Serializable {
 
     public void setSisUsuarioAtivo(boolean sisUsuarioAtivo) {
         this.sisUsuarioAtivo = sisUsuarioAtivo;
+    }
+
+    public boolean isSisUsuarioCaixa() {
+        return sisUsuarioCaixa;
+    }
+
+    public void setSisUsuarioCaixa(boolean sisUsuarioCaixa) {
+        this.sisUsuarioCaixa = sisUsuarioCaixa;
     }
 
     public boolean isSisUsuarioGerente() {
