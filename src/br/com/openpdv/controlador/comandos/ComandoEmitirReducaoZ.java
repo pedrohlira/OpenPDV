@@ -17,12 +17,14 @@ import br.com.openpdv.modelo.ecf.EcfZTotais;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
 import br.com.phdss.EComandoECF;
+import br.com.phdss.EEstadoECF;
 import br.com.phdss.controlador.PAF;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.ini4j.Wini;
 
@@ -78,8 +80,30 @@ public class ComandoEmitirReducaoZ implements IComando {
      */
     public void emitirReducaoZEcf() throws OpenPdvException {
         String[] resp = ECF.enviar(EComandoECF.ECF_ReducaoZ);
+
         if (ECF.ERRO.equals(resp[0])) {
-            throw new OpenPdvException(resp[1]);
+            // enquanto o estado nao for bloquado(Z emitida), espera
+            EEstadoECF estado;
+            do {
+                int escolha = JOptionPane.showOptionDialog(null, "O documento ainda está sendo impresso?", "Redução Z",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+                if (escolha == JOptionPane.YES_OPTION) {
+                    try {
+                        // aguarda um minuto
+                        Thread.sleep(60000);
+                    } catch (InterruptedException ex) {
+                    }
+                } else {
+                    break;
+                }
+
+                // recupera o estado
+                try {
+                    estado = ECF.validarEstado();
+                } catch (Exception ex) {
+                    estado = EEstadoECF.estDesconhecido;
+                }
+            } while (estado != EEstadoECF.estBloqueada);
         }
     }
 

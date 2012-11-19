@@ -9,13 +9,11 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
-import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
-import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.GenericType;
@@ -97,10 +95,10 @@ public class ComandoReceberDados implements IComando {
             List<ProdComposicao> comps = new ArrayList<>();
 
             // parametros
-            Date dc = (Date) service.buscar(new ProdProduto(), "prodProdutoCadastrado", EBusca.MAXIMO, null);
+            Integer maxId = (Integer) service.buscar(new ProdProduto(), "prodProdutoId", EBusca.MAXIMO, null);
             Date da = (Date) service.buscar(new ProdProduto(), "prodProdutoAlterado", EBusca.MAXIMO, null);
             MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
-            mm.putSingle("data", Util.getDataHora(dc));
+            mm.putSingle("id", maxId != null ? maxId.toString() : "0");
             mm.putSingle("limite", String.valueOf(limite));
 
             do {
@@ -111,21 +109,25 @@ public class ComandoReceberDados implements IComando {
 
                 em.getTransaction().begin();
                 for (ProdProduto prod : novos) {
-                    // guarda as sub listas
-                    for (ProdPreco pp : prod.getProdPrecos()) {
-                        pp.setProdProduto(prod);
-                        precos.add(pp);
-                    }
-                    for (ProdComposicao pc : prod.getProdComposicoes()) {
-                        pc.setProdProdutoPrincipal(prod);
-                        comps.add(pc);
-                    }
+                    try {
+                        // guarda as sub listas
+                        for (ProdPreco pp : prod.getProdPrecos()) {
+                            pp.setProdProduto(prod);
+                            precos.add(pp);
+                        }
+                        for (ProdComposicao pc : prod.getProdComposicoes()) {
+                            pc.setProdProdutoPrincipal(prod);
+                            comps.add(pc);
+                        }
 
-                    // salva o produto
-                    prod.setProdPrecos(null);
-                    prod.setProdComposicoes(null);
-                    prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
-                    service.salvar(em, prod);
+                        // salva o produto
+                        prod.setProdPrecos(null);
+                        prod.setProdComposicoes(null);
+                        prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
+                        service.salvar(em, prod);
+                    } catch (Exception ex) {
+                        log.error("Nao salvou o produto com ID = " + prod.getProdProdutoId(), ex);
+                    }
                 }
                 em.getTransaction().commit();
 
@@ -136,18 +138,28 @@ public class ComandoReceberDados implements IComando {
             em.getTransaction().begin();
             // salva os precos
             for (ProdPreco preco : precos) {
-                service.salvar(em, preco);
+                try {
+                    service.salvar(em, preco);
+                } catch (Exception ex) {
+                    log.error("Nao salvou o preco do produto com ID = " + preco.getProdProduto().getProdProdutoId(), ex);
+                }
             }
             // salva os itens apos salvar todos os produtos.
             for (ProdComposicao comp : comps) {
-                service.salvar(em, comp);
+                try {
+                    service.salvar(em, comp);
+                } catch (Exception ex) {
+                    log.error("Nao salvou a composicao do produto com ID = " + comp.getProdProduto().getProdProdutoId(), ex);
+                }
             }
             em.getTransaction().commit();
 
             // recupera os produtos atualizados
             pagina = 0;
             List<ProdProduto> atualizados;
+            mm.clear();
             mm.putSingle("data", Util.getDataHora(da));
+            mm.putSingle("limite", String.valueOf(limite));
 
             do {
                 mm.putSingle("pagina", String.valueOf(pagina));
@@ -157,36 +169,40 @@ public class ComandoReceberDados implements IComando {
 
                 em.getTransaction().begin();
                 for (ProdProduto prod : atualizados) {
-                    // guarda as sub listas
-                    precos = prod.getProdPrecos();
-                    prod.setProdPrecos(null);
-                    comps = prod.getProdComposicoes();
-                    prod.setProdComposicoes(null);
+                    try {
+                        // guarda as sub listas
+                        precos = prod.getProdPrecos();
+                        prod.setProdPrecos(null);
+                        comps = prod.getProdComposicoes();
+                        prod.setProdComposicoes(null);
 
-                    // salva o produto
-                    prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
-                    service.salvar(em, prod);
+                        // salva o produto
+                        prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
+                        service.salvar(em, prod);
 
-                    // salva os precos
-                    if (!precos.isEmpty()) {
-                        FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
-                        Sql sql = new Sql(new ProdPreco(), EComandoSQL.EXCLUIR, fo);
-                        service.executar(em, sql);
-                        for (ProdPreco preco : precos) {
-                            preco.setProdProduto(prod);
-                            service.salvar(em, preco);
+                        // salva os precos
+                        if (!precos.isEmpty()) {
+                            FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
+                            Sql sql = new Sql(new ProdPreco(), EComandoSQL.EXCLUIR, fo);
+                            service.executar(em, sql);
+                            for (ProdPreco preco : precos) {
+                                preco.setProdProduto(prod);
+                                service.salvar(em, preco);
+                            }
                         }
-                    }
 
-                    // salva os itens
-                    if (!comps.isEmpty()) {
-                        FiltroObjeto fo1 = new FiltroObjeto("prodProdutoPrincipal", ECompara.IGUAL, prod);
-                        Sql sql1 = new Sql(new ProdComposicao(), EComandoSQL.EXCLUIR, fo1);
-                        service.executar(em, sql1);
-                        for (ProdComposicao comp : comps) {
-                            comp.setProdProdutoPrincipal(prod);
-                            service.salvar(em, comp);
+                        // salva os itens
+                        if (!comps.isEmpty()) {
+                            FiltroObjeto fo1 = new FiltroObjeto("prodProdutoPrincipal", ECompara.IGUAL, prod);
+                            Sql sql1 = new Sql(new ProdComposicao(), EComandoSQL.EXCLUIR, fo1);
+                            service.executar(em, sql1);
+                            for (ProdComposicao comp : comps) {
+                                comp.setProdProdutoPrincipal(prod);
+                                service.salvar(em, comp);
+                            }
                         }
+                    } catch (Exception ex) {
+                        log.error("Nao atualizou o produto com ID = " + prod.getProdProdutoId(), ex);
                     }
                 }
                 em.getTransaction().commit();

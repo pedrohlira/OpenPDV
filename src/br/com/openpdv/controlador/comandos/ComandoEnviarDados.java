@@ -22,15 +22,15 @@ import org.apache.log4j.Logger;
  * @author Pedro H. Lira
  */
 public class ComandoEnviarDados implements IComando {
-
+    
     private CoreService service;
     private Logger log;
-
+    
     public ComandoEnviarDados() {
         this.service = new CoreService();
         this.log = Logger.getLogger(ComandoEnviarDados.class);
     }
-
+    
     @Override
     public void executar() throws OpenPdvException {
         try {
@@ -44,11 +44,15 @@ public class ComandoEnviarDados implements IComando {
             }
             List<EcfNota> notas = service.selecionar(new EcfNota(), 0, 0, filtro);
             if (!notas.isEmpty()) {
-                wr = Util.getRest(Util.getConfig().get("sinc.server") + "/nota");
-                for (EcfNota nota : notas) {
-                    wr.type(MediaType.APPLICATION_JSON).put(nota);
+                try {
+                    wr = Util.getRest(Util.getConfig().get("sinc.server") + "/nota");
+                    for (EcfNota nota : notas) {
+                        wr.type(MediaType.APPLICATION_JSON).put(nota);
+                    }
+                    log.debug("Notas enviadas");
+                } catch (Exception ex) {
+                    log.error("Erro no envio das Notas.", ex);
                 }
-                log.debug("Notas enviadas");
             }
 
             // enviando as nfes
@@ -57,11 +61,15 @@ public class ComandoEnviarDados implements IComando {
             }
             List<EcfNotaEletronica> nfes = service.selecionar(new EcfNotaEletronica(), 0, 0, filtro);
             if (!nfes.isEmpty()) {
-                wr = Util.getRest(Util.getConfig().get("sinc.server") + "/nfe");
-                for (EcfNotaEletronica nfe : nfes) {
-                    wr.type(MediaType.APPLICATION_JSON).put(nfe);
+                try {
+                    wr = Util.getRest(Util.getConfig().get("sinc.server") + "/nfe");
+                    for (EcfNotaEletronica nfe : nfes) {
+                        wr.type(MediaType.APPLICATION_JSON).put(nfe);
+                    }
+                    log.debug("NFes enviadas");
+                } catch (Exception ex) {
+                    log.error("Erro no envio das NFe.", ex);
                 }
-                log.debug("NFes enviadas");
             }
 
             // enviando as reducoes Z
@@ -78,12 +86,12 @@ public class ComandoEnviarDados implements IComando {
                     cal.setTime(inicio);
                     cal.add(Calendar.DAY_OF_MONTH, 1);
                     Date fim = cal.getTime();
-
+                    
                     FiltroData fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR, inicio);
                     FiltroData fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, fim);
                     GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
                     List<EcfDocumento> docs = service.selecionar(new EcfDocumento(), 0, 0, gf);
-
+                    
                     z.setEcfDocumentos(docs);
                     wr.type(MediaType.APPLICATION_JSON).put(z);
                 }
@@ -98,7 +106,7 @@ public class ComandoEnviarDados implements IComando {
             throw new OpenPdvException("Erro no envio dos dados para sincronismo.", ex);
         }
     }
-
+    
     @Override
     public void desfazer() throws OpenPdvException {
         // comando nao aplicavel.

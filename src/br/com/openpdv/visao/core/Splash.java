@@ -18,13 +18,15 @@ import br.com.phdss.EComandoECF;
 import br.com.phdss.TEF;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.anexo.x.*;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.simple.container.SimpleServerFactory;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -207,12 +208,56 @@ public class Splash extends JFrame {
                     }
                 }
 
+                // verifica se existes atualizacoes da base de dados
+                FilenameFilter filtro = new FilenameFilter() {
+
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".sql");
+                    }
+                };
+                File pathDB = new File("db");
+                for (File arquivo : pathDB.listFiles(filtro)) {
+                    splash.pgBarra.setString("Atualizando base de dados...");
+                    splash.pgBarra.setValue(20);
+
+                    try {
+                        // retorna os dados do arquivo
+                        String dados = "";
+                        try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
+                            while (br.ready()) {
+                                dados = br.readLine();
+                                break;
+                            }
+                        }
+                        dados = PAF.descriptar(dados);
+
+                        // executa as instrucoes
+                        for (String sql : dados.split("\n")) {
+                            if (sql != null && !sql.equals("") && !sql.startsWith("/") && !sql.startsWith("#")) {
+                                try {
+                                    Integer resp = service.executar(sql);
+                                    log.info("Sql executdo: " + sql);
+                                    log.info("Registros atingidos: " + resp);
+                                } catch (Exception ex) {
+                                    log.error("Sql executdo: " + sql);
+                                    log.error("Erro retornado: ", ex);
+                                }
+                            }
+                        }
+                    } catch (Exception ex) {
+                        log.error("Erro ao tentar utilizar o arquivo: " + arquivo.getName(), ex);
+                    } finally {
+                        arquivo.delete();
+                    }
+                }
+
                 // validando arquivo auxiliar
                 boolean login = true;
                 try {
                     splash.pgBarra.setString("Lendo arquivo auxiliar...");
                     PAF.descriptografar();
-                    splash.pgBarra.setValue(20);
+                    splash.pgBarra.setValue(30);
                 } catch (Exception ex) {
                     login = false;
                     log.error("Problemas ao ler o auxiliar.txt", ex);
@@ -240,7 +285,7 @@ public class Splash extends JFrame {
                 try {
                     splash.pgBarra.setString("Gerando arquivoMD5.txt");
                     gerarArquivos(empresa);
-                    splash.pgBarra.setValue(30);
+                    splash.pgBarra.setValue(40);
                 } catch (Exception ex) {
                     log.error("Problemas ao gerar o arquivoMD5.txt", ex);
                     JOptionPane.showMessageDialog(splash, "Problemas ao gerar o arquivoMD5.txt", "OpenPDV", JOptionPane.ERROR_MESSAGE);
@@ -252,7 +297,6 @@ public class Splash extends JFrame {
                 try {
                     splash.pgBarra.setString("Conectando no ECF...");
                     ECF.conectar(Util.getConfig().get("ecf.servidor"), Integer.valueOf(Util.getConfig().get("ecf.porta")));
-                    splash.pgBarra.setValue(40);
 
                     splash.pgBarra.setString("Ativando o ECF...");
                     ECF.ativar();
@@ -332,7 +376,6 @@ public class Splash extends JFrame {
                     // valida o serial do ECF
                     try {
                         splash.pgBarra.setString("Validando Nº Série do ECF...");
-                        splash.pgBarra.setValue(80);
                         ECF.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
                     } catch (Exception ex) {
                         String msg = PAF.AUXILIAR.size() == 0 ? "Número de Série do arquivo auxiliar não reconhecido!" : ex.getMessage();
@@ -344,6 +387,7 @@ public class Splash extends JFrame {
                     // valida o GT
                     try {
                         splash.pgBarra.setString("Validando GT do ECF...");
+                        splash.pgBarra.setValue(80);
                         double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
                         int cro = Integer.valueOf(PAF.AUXILIAR.getProperty("ecf.cro"));
                         double novoGT = ECF.validarGT(gt, cro);
@@ -404,7 +448,7 @@ public class Splash extends JFrame {
                     try {
                         caixa.statusMenus(EModo.OFF);
                         caixa.setJanela(Autenticacao.getInstancia());
-                        
+
                         switch (ECF.validarEstado()) {
                             case estNaoInicializada:
                             case estDesconhecido:
