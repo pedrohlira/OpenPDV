@@ -69,9 +69,15 @@ public class ComandoReceberDados implements IComando {
             List<EcfPagamentoTipo> tiposPagamento = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<EcfPagamentoTipo>>() {
             });
             for (EcfPagamentoTipo tipo : tiposPagamento) {
-                // Nao adicionar formas que tem o codigo 00
-                if (!tipo.getEcfPagamentoTipoCodigo().equals("00")) {
-                    tipo.setEcfPagamentoTipoDescricao(Util.normaliza(tipo.getEcfPagamentoTipoDescricao()));
+                // Identifica se a forma de pagamento e uma das 3 permitidas [Dinheiro, Cheque ou Cartao (TEF = true)]
+                if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("dinheiro")) {
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.dinheiro"));
+                    service.salvar(em, tipo);
+                } else if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("cheque")) {
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.cheque"));
+                    service.salvar(em, tipo);
+                } else if (tipo.isEcfPagamentoTipoTef()) {
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.cartao"));
                     service.salvar(em, tipo);
                 }
             }

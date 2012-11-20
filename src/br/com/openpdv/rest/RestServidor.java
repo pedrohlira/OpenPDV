@@ -14,10 +14,8 @@ import br.com.openpdv.modelo.ecf.*;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
-import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.nfe.TNFe;
 import br.com.openpdv.nfe.TNfeProc;
-import br.com.phdss.controlador.PAF;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -54,49 +52,6 @@ public class RestServidor extends ARest {
     @Override
     public String ajuda() throws RestException {
         return super.ajuda();
-    }
-
-    /**
-     * Metodo usado para cadastrar a empresa no BD atraves do sistema, onde sera
-     * validado com os dados contidos no arquivo criptografo auxiliar.
-     *
-     * @param sisEmpresa objeto do tipo empresa a ser cadastrado.
-     * @throws RestException em caso de nao conseguir acessar a informacao.
-     */
-    @Path("/empresa")
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void setEmpresa(SisEmpresa sisEmpresa) throws RestException {
-        try {
-            if (PAF.AUXILIAR.getProperty("cli.cnpj").equals(sisEmpresa.getSisEmpresaCnpj())) {
-                sisEmpresa.setId(1);
-                service.salvar(sisEmpresa);
-            } else {
-                throw new RestException("O CNPJ informado da empresa não é igual ao registrado no arquivo auxiliar.txt");
-            }
-        } catch (Exception ex) {
-            log.error("Erro ao salvar a empresa.", ex);
-            throw new RestException(ex);
-        }
-    }
-
-    /**
-     * Metodo usado para cadastrar o ECF no BD atraves do sistema, onde sera
-     * validado com os dados contidos no arquivo criptografo auxiliar.
-     *
-     * @param ecfImpressora objeto do tipo impressora a ser cadastrado.
-     * @throws RestException em caso de nao conseguir acessar a informacao.
-     */
-    @Path("/impressora")
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    public void setImpressora(EcfImpressora ecfImpressora) throws RestException {
-        try {
-            service.salvar(ecfImpressora);
-        } catch (Exception ex) {
-            log.error("Erro ao salvar a impressora.", ex);
-            throw new RestException(ex);
-        }
     }
 
     /**

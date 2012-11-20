@@ -458,8 +458,8 @@ public class Splash extends JFrame {
                                 break;
                             case estBloqueada:
                                 login = false;
-                                caixa.modoIndisponivel();
-                                JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
+                                caixa.modoConsulta();
+                                JOptionPane.showMessageDialog(splash, "Entrando automaticamente no Modo Consulta.", "Redução Z emitida", JOptionPane.INFORMATION_MESSAGE);
                                 break;
                             case estRequerZ:
                                 splash.pgBarra.setString("Emitindo a redução Z...");
