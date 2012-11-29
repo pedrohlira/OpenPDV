@@ -89,8 +89,8 @@ public class ComandoEmitirReducaoZ implements IComando {
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
                 if (escolha == JOptionPane.YES_OPTION) {
                     try {
-                        // aguarda um minuto
-                        Thread.sleep(60000);
+                        // aguarda meio minuto
+                        Thread.sleep(30000);
                     } catch (InterruptedException ex) {
                     }
                 } else {
@@ -145,7 +145,8 @@ public class ComandoEmitirReducaoZ implements IComando {
                 z.setEcfZEmissao(new Date());
                 z.setEcfZBruto(ini.get("Totalizadores", "VendaBruta", double.class));
                 z.setEcfZGt(ini.get("Totalizadores", "GrandeTotal", double.class));
-                z.setEcfZIssqn(!Caixa.getInstancia().getEmpresa().getSisEmpresaIm().equals(""));
+                String im = Caixa.getInstancia().getEmpresa().getSisEmpresaIm() == null ? "" : Caixa.getInstancia().getEmpresa().getSisEmpresaIm().replaceAll("[^0-9]", "");
+                z.setEcfZIssqn(!im.equals(""));
                 // salva EcfZ
                 z = (EcfZ) service.salvar(z);
                 dataMovimento = z.getEcfZMovimento();

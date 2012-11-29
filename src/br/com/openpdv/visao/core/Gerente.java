@@ -4,6 +4,7 @@ import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
+import br.com.openpdv.modelo.sistema.SisUsuario;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
@@ -21,6 +22,7 @@ public class Gerente extends javax.swing.JDialog {
     private static Gerente gerente;
     private Logger log;
     private AsyncCallback<Integer> async;
+    private SisUsuario sisGerente;
 
     /**
      * Construtor padrao.
@@ -45,6 +47,7 @@ public class Gerente extends javax.swing.JDialog {
         gerente.txtGerenteUsuario.setText("");
         gerente.pswGerenteSenha.setText("");
         gerente.async = async;
+        gerente.sisGerente = null;
         return gerente;
     }
 
@@ -241,13 +244,13 @@ public class Gerente extends javax.swing.JDialog {
             String senhaGe = sha.encryptPassword(new String(pswGerenteSenha.getPassword()));
 
             try {
-                final int porcent = Login.autorizar(txtGerenteUsuario.getText(), senhaGe);
+                sisGerente = Login.autorizar(txtGerenteUsuario.getText(), senhaGe);
                 setVisible(false);
                 new Thread(new Runnable() {
 
                     @Override
                     public void run() {
-                        async.sucesso(porcent);
+                        async.sucesso(sisGerente.getSisUsuarioDesconto());
                     }
                 }).start();
             } catch (OpenPdvException ex) {
@@ -288,6 +291,14 @@ public class Gerente extends javax.swing.JDialog {
 
     public void setAsync(AsyncCallback<Integer> async) {
         this.async = async;
+    }
+
+    public SisUsuario getSisGerente() {
+        return sisGerente;
+    }
+
+    public void setSisGerente(SisUsuario sisGerente) {
+        this.sisGerente = sisGerente;
     }
 
     public JButton getBtnCancelar() {

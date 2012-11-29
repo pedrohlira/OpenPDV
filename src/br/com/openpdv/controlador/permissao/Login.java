@@ -40,13 +40,13 @@ public class Login {
      * @throws OpenPdvException caso ocorra alguma excecao ou os dados sejam
      * invalidos
      */
-    public static int autorizar(String usuarioGe, String senhaGe) throws OpenPdvException {
+    public static SisUsuario autorizar(String usuarioGe, String senhaGe) throws OpenPdvException {
         PermissaoService service = new PermissaoService();
         SisUsuario gerente = service.validar(usuarioGe, senhaGe);
         if (gerente == null || !gerente.isSisUsuarioGerente()) {
             throw new OpenPdvException("Usuário ou Senha do gerente inválido!");
         } else {
-            return gerente.getSisUsuarioDesconto();
+            return gerente;
         }
     }
 

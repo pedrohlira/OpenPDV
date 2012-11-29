@@ -199,7 +199,8 @@ public class ComandoFecharVenda implements IComando {
         ParametroBinario pb = new ParametroBinario("ecfVendaFechada", true);
         ParametroObjeto po1 = new ParametroObjeto("sisCliente", venda.getSisCliente());
         ParametroObjeto po2 = new ParametroObjeto("sisVendedor", venda.getSisVendedor());
-        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2});
+        ParametroObjeto po3 = new ParametroObjeto("sisGerente", acres_desc < 0 ? venda.getSisGerente() : null);
+        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2, po3});
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 

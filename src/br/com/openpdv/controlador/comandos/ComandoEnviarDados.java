@@ -25,16 +25,21 @@ public class ComandoEnviarDados implements IComando {
     
     private CoreService service;
     private Logger log;
+    private Date data;
     
     public ComandoEnviarDados() {
+        this(Util.getDataHora(PAF.AUXILIAR.getProperty("out.envio", null)));
+    }
+    
+    public ComandoEnviarDados(Date data) {
         this.service = new CoreService();
         this.log = Logger.getLogger(ComandoEnviarDados.class);
+        this.data = data;
     }
     
     @Override
     public void executar() throws OpenPdvException {
         try {
-            Date data = Util.getDataHora(PAF.AUXILIAR.getProperty("out.envio", null));
             WebResource wr;
 
             // enviando as notas

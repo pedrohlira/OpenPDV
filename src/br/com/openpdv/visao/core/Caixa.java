@@ -39,9 +39,10 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import javax.swing.JPopupMenu.Separator;
 import javax.swing.*;
+import javax.swing.JPopupMenu.Separator;
 import org.apache.log4j.Logger;
 
 /**
@@ -66,7 +67,6 @@ public class Caixa extends JFrame {
      * Variavel que responde de modo assincrono a pesquisa de produto.
      */
     private AsyncCallback<ProdProduto> pesquisado = new AsyncCallback<ProdProduto>() {
-
         private ComandoAdicionarItem adicionarItem = new ComandoAdicionarItem();
 
         @Override
@@ -78,7 +78,6 @@ public class Caixa extends JFrame {
             } else if (modo == EModo.ABERTO) {
                 if (!prod.getProdPrecos().isEmpty()) {
                     Precos.getInstancia(new AsyncCallback<ProdPreco>() {
-
                         @Override
                         public void sucesso(ProdPreco preco) {
                             // se selecionou
@@ -106,7 +105,6 @@ public class Caixa extends JFrame {
                 } else if (!prod.getProdComposicoes().isEmpty()) {
                     // abre tela pra informa que o produto e um kit de varios produtos
                     new Thread(new Runnable() {
-
                         @Override
                         public void run() {
                             // percorre os itens do produto
@@ -192,7 +190,6 @@ public class Caixa extends JFrame {
 
         // mapeando as teclas apertadas
         teclas = new KeyEventPostProcessor() {
-
             @Override
             public boolean postProcessKeyEvent(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_F1 && mnuSobre.isEnabled()) { // Sobre
@@ -342,9 +339,9 @@ public class Caixa extends JFrame {
         setTitle("OpenPDV");
         setMaximumSize(new java.awt.Dimension(1024, 746));
         setMinimumSize(new java.awt.Dimension(1024, 746));
-        setName("OpenPDV");
-        setResizable(false);
+        setName("OpenPDV"); // NOI18N
         setUndecorated(Boolean.valueOf(Util.getConfig().get("openpdv.semborda")));
+        setResizable(false);
 
         lblLivre.setBackground(new java.awt.Color(255, 255, 255));
         lblLivre.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -1091,7 +1088,6 @@ public class Caixa extends JFrame {
 
     private void mnuSuprimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSuprimentoActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 ECF.enviar(EComandoECF.ECF_AbreGaveta);
@@ -1128,7 +1124,6 @@ public class Caixa extends JFrame {
 
     private void mnuSangriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSangriaActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 ECF.enviar(EComandoECF.ECF_AbreGaveta);
@@ -1165,20 +1160,18 @@ public class Caixa extends JFrame {
 
     private void mnuReducaoZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuReducaoZActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 int escolha = JOptionPane.showOptionDialog(caixa, "Deseja emitir a ReduçãoZ?", "Redução Z",
                         JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
                 if (escolha == JOptionPane.YES_OPTION) {
                     new Thread(new Runnable() {
-
                         @Override
                         public void run() {
                             try {
                                 new ComandoEmitirReducaoZ().executar();
                                 Aguarde.getInstancia().setVisible(false);
-                                modoIndisponivel();
+                                modoConsulta();
                             } catch (OpenPdvException ex) {
                                 Aguarde.getInstancia().setVisible(false);
                                 log.error("Nao foi possivel realizar a ReducaoZ.", ex);
@@ -1200,7 +1193,6 @@ public class Caixa extends JFrame {
 
     private void mnuUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuUsuariosActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 janela = Usuarios.getInstancia();
@@ -1217,7 +1209,6 @@ public class Caixa extends JFrame {
 
     private void mnuClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuClientesActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 janela = Clientes.getInstancia();
@@ -1234,7 +1225,6 @@ public class Caixa extends JFrame {
 
     private void mnuEmbalagensActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEmbalagensActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 janela = Embalagens.getInstancia();
@@ -1251,7 +1241,6 @@ public class Caixa extends JFrame {
 
     private void mnuProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuProdutosActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 janela = Produtos.getInstancia();
@@ -1290,7 +1279,6 @@ public class Caixa extends JFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
         if (escolha == JOptionPane.YES_OPTION) {
             new Thread(new Runnable() {
-
                 @Override
                 public void run() {
                     try {
@@ -1314,7 +1302,6 @@ public class Caixa extends JFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
         if (escolha == JOptionPane.YES_OPTION) {
             new Thread(new Runnable() {
-
                 @Override
                 public void run() {
                     try {
@@ -1338,7 +1325,6 @@ public class Caixa extends JFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
         if (escolha == JOptionPane.YES_OPTION) {
             new Thread(new Runnable() {
-
                 @Override
                 public void run() {
                     try {
@@ -1431,7 +1417,6 @@ public class Caixa extends JFrame {
         if (permite) {
             statusMenus(EModo.OFF);
             Identificar.getInstancia(new AsyncCallback<SisCliente>() {
-
                 @Override
                 public void sucesso(SisCliente resultado) {
                     if (resultado != null && resultado.getSisClienteId() > 0) {
@@ -1465,11 +1450,9 @@ public class Caixa extends JFrame {
 
     private void mnuCancelarVendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCancelarVendaActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 new Thread(new Runnable() {
-
                     @Override
                     public void run() {
                         try {
@@ -1495,7 +1478,6 @@ public class Caixa extends JFrame {
 
     private void mnuCancelarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCancelarItemActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 String texto = JOptionPane.showInputDialog(caixa, "Digite o número do item.", "Cancelar Item", JOptionPane.OK_CANCEL_OPTION);
@@ -1544,7 +1526,6 @@ public class Caixa extends JFrame {
 
     private void mnuGavetaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuGavetaMouseClicked
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 String[] resp = ECF.enviar(EComandoECF.ECF_AbreGaveta);
@@ -1577,7 +1558,6 @@ public class Caixa extends JFrame {
     private void mnuIdentificarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuIdentificarMouseClicked
         statusMenus(EModo.OFF);
         Identificar.getInstancia(new AsyncCallback<SisCliente>() {
-
             @Override
             public void sucesso(SisCliente resultado) {
                 if (resultado != null) {
@@ -1621,11 +1601,9 @@ public class Caixa extends JFrame {
 
     private void mnuTEFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTEFActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 new Thread(new Runnable() {
-
                     @Override
                     public void run() {
                         try {
@@ -1683,25 +1661,27 @@ public class Caixa extends JFrame {
 
     private void mnuSincronizacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSincronizacaoActionPerformed
         final int escolha = JOptionPane.showOptionDialog(this, "O que deseja sincronizar?", "OpenPDV",
-                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Receber", "Enviar", "Tudo"}, JOptionPane.YES_OPTION);
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Receber", "Enviar", "Cancelar"}, JOptionPane.YES_OPTION);
 
         if (escolha > -1) {
             new Thread(new Runnable() {
-
                 @Override
                 public void run() {
                     try {
-                        if (escolha == JOptionPane.YES_OPTION) {
-                            new ComandoReceberDados().executar();
-                        } else if (escolha == JOptionPane.NO_OPTION) {
-                            new ComandoEnviarDados().executar();
-                        } else {
-                            new ComandoEnviarDados().executar();
-                            new ComandoReceberDados().executar();
+                        if (escolha == JOptionPane.YES_OPTION || escolha == JOptionPane.NO_OPTION) {
+                            if (escolha == JOptionPane.YES_OPTION) {
+                                new ComandoReceberDados().executar();
+                            } else {
+                                String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data no formato <b>dd/MM/aaaa HH:mm:ss</b>"
+                                        + "<br>Para usar a padrão deixe em branco.</html>", "Data de Envio", JOptionPane.INFORMATION_MESSAGE);
+                                if (valor != null) {
+                                    Date data = Util.formataData(valor, "dd/MM/yyyy HH:mm:ss");
+                                    new ComandoEnviarDados(data).executar();
+                                }
+                            }
+                            Aguarde.getInstancia().setVisible(false);
+                            JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                         }
-
-                        Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                     } catch (Exception ex) {
                         log.error("Nao conseguiu sincronizar com o servidor.", ex);
                         Aguarde.getInstancia().setVisible(false);
@@ -1715,7 +1695,6 @@ public class Caixa extends JFrame {
 
     private void mnuTipoPagamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoPagamentosActionPerformed
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-
             @Override
             public void sucesso(Integer resultado) {
                 janela = TiposPagamento.getInstancia();
@@ -1796,8 +1775,7 @@ public class Caixa extends JFrame {
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Metodo que desabilita os menus de venda aberta e seta o modo para
-     * disponivel.
+     * Metodo que desabilita os menus de venda aberta e seta o modo para disponivel.
      */
     public void modoDisponivel() {
         modo = EModo.DISPONIVEL;
@@ -1812,8 +1790,7 @@ public class Caixa extends JFrame {
     }
 
     /**
-     * Metodo que desabilita os menus que usam a ECF e cadastros, seta o modo
-     * para indisponivel.
+     * Metodo que desabilita os menus que usam a ECF e cadastros, seta o modo para indisponivel.
      */
     public void modoIndisponivel() {
         modo = EModo.INDISPONIVEL;
@@ -1826,8 +1803,7 @@ public class Caixa extends JFrame {
     }
 
     /**
-     * Metodo que desabilita os menus que usam para venda e cadastro, seta o
-     * modo para consulta.
+     * Metodo que desabilita os menus que usam para venda e cadastro, seta o modo para consulta.
      */
     public void modoConsulta() {
         modo = EModo.CONSULTA;
@@ -1841,8 +1817,7 @@ public class Caixa extends JFrame {
     }
 
     /**
-     * Metodo que desabilita os demais menus exceto de operacoes de venda e seta
-     * o modo para aberto.
+     * Metodo que desabilita os demais menus exceto de operacoes de venda e seta o modo para aberto.
      */
     public void modoAberto() {
         modo = EModo.ABERTO;

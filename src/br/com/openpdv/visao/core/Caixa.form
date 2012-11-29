@@ -617,11 +617,11 @@
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[1024, 746]"/>
     </Property>
-    <Property name="name" type="java.lang.String" value="OpenPDV"/>
-    <Property name="resizable" type="boolean" value="false"/>
+    <Property name="name" type="java.lang.String" value="OpenPDV" noResource="true"/>
     <Property name="undecorated" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
       <Connection code="Boolean.valueOf(Util.getConfig().get(&quot;openpdv.semborda&quot;))" type="code"/>
     </Property>
+    <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="barMenu"/>

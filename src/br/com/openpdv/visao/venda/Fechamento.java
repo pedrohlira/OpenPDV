@@ -530,19 +530,23 @@ public class Fechamento extends javax.swing.JDialog {
     }//GEN-LAST:event_btnAcresKeyPressed
 
     private void btnDescActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDescActionPerformed
-        Gerente.getInstancia(new AsyncCallback<Integer>() {
-
+        final Gerente gerente = Gerente.getInstancia(null);
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 String texto = JOptionPane.showInputDialog(fechamento, "Digite o valor.\nPara porcentagem coloque % no final.", "DESCONTO", JOptionPane.OK_CANCEL_OPTION);
                 acresdesc(resultado, "DESCONTO", texto);
+                Caixa.getInstancia().getVenda().setSisGerente(gerente.getSisGerente());
             }
 
             @Override
             public void falha(Exception excecao) {
+                Caixa.getInstancia().getVenda().setSisGerente(null);
                 JOptionPane.showMessageDialog(null, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        }).setVisible(true);
+        };
+        gerente.setAsync(async);
+        gerente.setVisible(true);
     }//GEN-LAST:event_btnDescActionPerformed
 
     private void btnDescKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnDescKeyPressed
@@ -688,7 +692,6 @@ public class Fechamento extends javax.swing.JDialog {
         if ((limite == 1 && valor.compareTo(apagar.subtract(pago)) == 0) || (limite > 1 && valor.doubleValue() > 0.00 && valor.compareTo(apagar.subtract(pago)) <= 0)) {
             if (tefs < limite) {
                 new Thread(new Runnable() {
-
                     @Override
                     public void run() {
                         // chama o metodo do tef para operacao com cartao
@@ -758,7 +761,6 @@ public class Fechamento extends javax.swing.JDialog {
         if ((limite == 1 && valor.compareTo(apagar.subtract(pago)) == 0) || (limite > 1 && valor.doubleValue() > 0.00 && valor.compareTo(apagar.subtract(pago)) <= 0)) {
             if (tefs < limite) {
                 new Thread(new Runnable() {
-
                     @Override
                     public void run() {
                         // chama o metodo do tef para operacao com cheque
@@ -944,7 +946,6 @@ public class Fechamento extends javax.swing.JDialog {
         btnCancelar.setEnabled(false);
 
         new Thread(new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -970,7 +971,6 @@ public class Fechamento extends javax.swing.JDialog {
     private void cancelar() {
         if (pagCartao) {
             new Thread(new Runnable() {
-
                 @Override
                 public void run() {
                     try {

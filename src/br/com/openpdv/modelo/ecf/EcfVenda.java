@@ -50,6 +50,9 @@ public class EcfVenda extends Dados implements Serializable {
     @JoinColumn(name = "sis_vendedor_id", referencedColumnName = "sis_usuario_id")
     @ManyToOne
     private SisUsuario sisVendedor;
+    @JoinColumn(name = "sis_gerente_id", referencedColumnName = "sis_usuario_id")
+    @ManyToOne
+    private SisUsuario sisGerente;
     @JoinColumn(name = "ecf_z_id")
     @ManyToOne
     @XmlInverseReference(mappedBy = "ecfVendas")
@@ -217,6 +220,14 @@ public class EcfVenda extends Dados implements Serializable {
 
     public void setSisVendedor(SisUsuario sisVendedor) {
         this.sisVendedor = sisVendedor;
+    }
+
+    public SisUsuario getSisGerente() {
+        return sisGerente;
+    }
+
+    public void setSisGerente(SisUsuario sisGerente) {
+        this.sisGerente = sisGerente;
     }
 
     public boolean isInformouCliente() {
