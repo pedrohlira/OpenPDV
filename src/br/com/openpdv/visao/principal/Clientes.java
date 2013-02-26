@@ -1,15 +1,29 @@
 package br.com.openpdv.visao.principal;
 
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.controlador.core.TextFieldLimit;
+import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
+import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.sistema.SisCliente;
+import br.com.openpdv.modelo.sistema.SisEstado;
+import br.com.openpdv.modelo.sistema.SisMunicipio;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
+import java.util.Date;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.Logger;
 
@@ -22,8 +36,10 @@ public class Clientes extends javax.swing.JDialog {
 
     private static Clientes clientes;
     private Logger log;
+    private int row;
+    private int cod;
     private DefaultTableModel dtm;
-    private CoreService<SisCliente> service;
+    private CoreService service;
 
     /**
      * Construtor padrao.
@@ -31,9 +47,30 @@ public class Clientes extends javax.swing.JDialog {
     private Clientes() {
         super(Caixa.getInstancia());
         log = Logger.getLogger(Clientes.class);
-        initComponents();
         service = new CoreService<>();
+        initComponents();
+        setUF();
+
         dtm = (DefaultTableModel) tabClientes.getModel();
+        tabClientes.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                row = tabClientes.getSelectedRow();
+                setDados();
+            }
+        });
+
+        // colocando limites nos campos
+        txtCPF_CNPJ.setDocument(new TextFieldLimit(20));
+        txtNome.setDocument(new TextFieldLimit(100));
+        txtIE.setDocument(new TextFieldLimit(20));
+        txtEndereco.setDocument(new TextFieldLimit(255));
+        txtNumero.setDocument(new TextFieldLimit(11, true));
+        txtComplemento.setDocument(new TextFieldLimit(100));
+        txtBairro.setDocument(new TextFieldLimit(100));
+        txtCEP.setDocument(new TextFieldLimit(9));
+        txtTelefone.setDocument(new TextFieldLimit(20));
+        txtEmail.setDocument(new TextFieldLimit(100));
     }
 
     /**
@@ -56,13 +93,41 @@ public class Clientes extends javax.swing.JDialog {
 
         spClientes = new javax.swing.JScrollPane();
         tabClientes = new javax.swing.JTable();
-        separador = new javax.swing.JSeparator();
         btnCancelar = new javax.swing.JButton();
+        painel = new javax.swing.JPanel();
+        lblCPF_CNPJ = new javax.swing.JLabel();
+        txtCPF_CNPJ = new javax.swing.JTextField();
+        lblNome = new javax.swing.JLabel();
+        txtNome = new javax.swing.JTextField();
+        lblIE = new javax.swing.JLabel();
+        txtIE = new javax.swing.JTextField();
+        lblEndereco = new javax.swing.JLabel();
+        txtEndereco = new javax.swing.JTextField();
+        lblNumero = new javax.swing.JLabel();
+        txtNumero = new javax.swing.JFormattedTextField();
+        lblComplemento = new javax.swing.JLabel();
+        txtComplemento = new javax.swing.JTextField();
+        lblBairro = new javax.swing.JLabel();
+        txtBairro = new javax.swing.JTextField();
+        lblCEP = new javax.swing.JLabel();
+        txtCEP = new javax.swing.JFormattedTextField();
+        lblUF = new javax.swing.JLabel();
+        cmbUF = new javax.swing.JComboBox();
+        lblMunicipio = new javax.swing.JLabel();
+        cmbMunicipio = new javax.swing.JComboBox();
+        lblTelefone = new javax.swing.JLabel();
+        txtTelefone = new javax.swing.JTextField();
+        lblEmail = new javax.swing.JLabel();
+        txtEmail = new javax.swing.JTextField();
+        btnNovo = new javax.swing.JButton();
+        btnSalvar = new javax.swing.JButton();
+        btnExcluir = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Clientes");
         setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         setModal(true);
+        setPreferredSize(new java.awt.Dimension(790, 282));
         setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -70,20 +135,21 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
 
+        tabClientes.setAutoCreateRowSorter(true);
         tabClientes.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabClientes.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "CPF/CNPJ", "Nome", "Endereço"
+                "Cod", "CPF/CNPJ", "Nome", "IE", "Endereço", "Nº", "Complemento", "Bairro", "CEP", "Município", "Telefone", "E-mail"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -94,7 +160,7 @@ public class Clientes extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabClientes.setAutoCreateRowSorter(true);
+        tabClientes.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabClientes.setRowHeight(20);
         tabClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabClientes.setShowGrid(true);
@@ -103,11 +169,29 @@ public class Clientes extends javax.swing.JDialog {
         spClientes.setViewportView(tabClientes);
         tabClientes.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabClientes.getColumnModel().getColumn(0).setResizable(false);
-        tabClientes.getColumnModel().getColumn(0).setPreferredWidth(100);
+        tabClientes.getColumnModel().getColumn(0).setPreferredWidth(50);
         tabClientes.getColumnModel().getColumn(1).setResizable(false);
         tabClientes.getColumnModel().getColumn(1).setPreferredWidth(100);
         tabClientes.getColumnModel().getColumn(2).setResizable(false);
         tabClientes.getColumnModel().getColumn(2).setPreferredWidth(200);
+        tabClientes.getColumnModel().getColumn(3).setResizable(false);
+        tabClientes.getColumnModel().getColumn(3).setPreferredWidth(50);
+        tabClientes.getColumnModel().getColumn(4).setResizable(false);
+        tabClientes.getColumnModel().getColumn(4).setPreferredWidth(200);
+        tabClientes.getColumnModel().getColumn(5).setResizable(false);
+        tabClientes.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tabClientes.getColumnModel().getColumn(6).setResizable(false);
+        tabClientes.getColumnModel().getColumn(6).setPreferredWidth(100);
+        tabClientes.getColumnModel().getColumn(7).setResizable(false);
+        tabClientes.getColumnModel().getColumn(7).setPreferredWidth(100);
+        tabClientes.getColumnModel().getColumn(8).setResizable(false);
+        tabClientes.getColumnModel().getColumn(8).setPreferredWidth(50);
+        tabClientes.getColumnModel().getColumn(9).setResizable(false);
+        tabClientes.getColumnModel().getColumn(9).setPreferredWidth(100);
+        tabClientes.getColumnModel().getColumn(10).setResizable(false);
+        tabClientes.getColumnModel().getColumn(10).setPreferredWidth(100);
+        tabClientes.getColumnModel().getColumn(11).setResizable(false);
+        tabClientes.getColumnModel().getColumn(11).setPreferredWidth(200);
 
         btnCancelar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cancelar.png"))); // NOI18N
@@ -126,35 +210,278 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
 
+        painel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        lblCPF_CNPJ.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblCPF_CNPJ.setText("CPF/CNPJ:");
+
+        txtCPF_CNPJ.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtCPF_CNPJ.setToolTipText("CPF ou CNPJ.");
+
+        lblNome.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblNome.setText("Nome:");
+
+        txtNome.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtNome.setToolTipText("Nome ou Razão Social.");
+
+        lblIE.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblIE.setText("IE:");
+
+        txtIE.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtIE.setToolTipText("CPF ou CNPJ.");
+
+        lblEndereco.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblEndereco.setText("Endereço:");
+
+        txtEndereco.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+
+        lblNumero.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblNumero.setText("Nº:");
+
+        txtNumero.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtNumero.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+
+        lblComplemento.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblComplemento.setText("Compl:");
+
+        txtComplemento.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+
+        lblBairro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblBairro.setText("Bairro:");
+
+        txtBairro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtBairro.setToolTipText("Nome ou Razão Social.");
+
+        lblCEP.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblCEP.setText("CEP:");
+
+        try {
+            txtCEP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("#####-###")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+        txtCEP.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+
+        lblUF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblUF.setText("UF:");
+
+        cmbUF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        cmbUF.setMaximumRowCount(20);
+        cmbUF.setToolTipText("Selecione um Estado");
+        cmbUF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbUFActionPerformed(evt);
+            }
+        });
+
+        lblMunicipio.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblMunicipio.setText("Município:");
+
+        cmbMunicipio.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        cmbMunicipio.setMaximumRowCount(20);
+        cmbMunicipio.setToolTipText("Selecione uma Cidade");
+
+        lblTelefone.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblTelefone.setText("Fone:");
+
+        txtTelefone.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtTelefone.setToolTipText("CPF ou CNPJ.");
+
+        lblEmail.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblEmail.setText("Email:");
+
+        txtEmail.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtEmail.setToolTipText("Nome ou Razão Social.");
+
+        org.jdesktop.layout.GroupLayout painelLayout = new org.jdesktop.layout.GroupLayout(painel);
+        painel.setLayout(painelLayout);
+        painelLayout.setHorizontalGroup(
+            painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(painelLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(painelLayout.createSequentialGroup()
+                        .add(lblUF)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(cmbUF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 85, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblMunicipio)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(cmbMunicipio, 0, 236, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblTelefone)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 104, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblEmail)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(txtEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 162, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(1, 1, 1))
+                    .add(painelLayout.createSequentialGroup()
+                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(lblEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 59, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(lblCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 63, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(painelLayout.createSequentialGroup()
+                                .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 121, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblNome)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtNome)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblIE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtIE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 102, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblCEP)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
+                            .add(painelLayout.createSequentialGroup()
+                                .add(txtEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 232, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblNumero)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 54, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblComplemento)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtComplemento)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblBairro)
+                                .add(9, 9, 9)))
+                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                            .add(txtBairro)
+                            .add(txtCEP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE))))
+                .addContainerGap())
+        );
+        painelLayout.setVerticalGroup(
+            painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(painelLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(lblNome)
+                    .add(txtNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblCPF_CNPJ)
+                    .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblIE)
+                    .add(txtIE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblCEP)
+                    .add(txtCEP, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(lblEndereco)
+                    .add(txtEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblNumero)
+                    .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblBairro)
+                    .add(txtBairro, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblComplemento)
+                    .add(txtComplemento, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(lblUF)
+                    .add(cmbUF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblMunicipio)
+                    .add(cmbMunicipio, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblTelefone)
+                    .add(lblEmail)
+                    .add(txtEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        btnNovo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnNovo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/novo.png"))); // NOI18N
+        btnNovo.setText("Novo");
+        btnNovo.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnNovo.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnNovo.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnNovo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNovoActionPerformed(evt);
+            }
+        });
+        btnNovo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnNovoKeyPressed(evt);
+            }
+        });
+
+        btnSalvar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnSalvar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/salvar.png"))); // NOI18N
+        btnSalvar.setText("Salvar");
+        btnSalvar.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnSalvar.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnSalvar.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnSalvar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalvarActionPerformed(evt);
+            }
+        });
+        btnSalvar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnSalvarKeyPressed(evt);
+            }
+        });
+
+        btnExcluir.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnExcluir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/excluir.png"))); // NOI18N
+        btnExcluir.setText("Excluir");
+        btnExcluir.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnExcluir.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnExcluir.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnExcluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcluirActionPerformed(evt);
+            }
+        });
+        btnExcluir.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnExcluirKeyPressed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(6, 6, 6)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(spClientes, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 648, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 648, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(6, 6, 6))
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(painel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .add(layout.createSequentialGroup()
+                        .add(0, 6, Short.MAX_VALUE)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(layout.createSequentialGroup()
+                                .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(spClientes, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 774, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                .add(16, 16, 16))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(6, 6, 6)
                 .add(spClientes, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 216, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(6, 6, 6)
-                .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(painel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-671)/2, (screenSize.height-304)/2, 671, 304);
+        setBounds((screenSize.width-796)/2, (screenSize.height-414)/2, 796, 414);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -173,12 +500,153 @@ public class Clientes extends javax.swing.JDialog {
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_formWindowClosing
 
+    private void cmbUFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbUFActionPerformed
+        setMunicipio((SisEstado) cmbUF.getSelectedItem());
+    }//GEN-LAST:event_cmbUFActionPerformed
+
+    private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
+        novo();
+    }//GEN-LAST:event_btnNovoActionPerformed
+
+    private void btnNovoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnNovoKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            novo();
+        }
+    }//GEN-LAST:event_btnNovoKeyPressed
+
+    private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
+        salvar();
+    }//GEN-LAST:event_btnSalvarActionPerformed
+
+    private void btnSalvarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnSalvarKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            salvar();
+        }
+    }//GEN-LAST:event_btnSalvarKeyPressed
+
+    private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
+        excluir();
+    }//GEN-LAST:event_btnExcluirActionPerformed
+
+    private void btnExcluirKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnExcluirKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            excluir();
+        }
+    }//GEN-LAST:event_btnExcluirKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
-    private javax.swing.JSeparator separador;
+    private javax.swing.JButton btnExcluir;
+    private javax.swing.JButton btnNovo;
+    private javax.swing.JButton btnSalvar;
+    private javax.swing.JComboBox cmbMunicipio;
+    private javax.swing.JComboBox cmbUF;
+    private javax.swing.JLabel lblBairro;
+    private javax.swing.JLabel lblCEP;
+    private javax.swing.JLabel lblCPF_CNPJ;
+    private javax.swing.JLabel lblComplemento;
+    private javax.swing.JLabel lblEmail;
+    private javax.swing.JLabel lblEndereco;
+    private javax.swing.JLabel lblIE;
+    private javax.swing.JLabel lblMunicipio;
+    private javax.swing.JLabel lblNome;
+    private javax.swing.JLabel lblNumero;
+    private javax.swing.JLabel lblTelefone;
+    private javax.swing.JLabel lblUF;
+    private javax.swing.JPanel painel;
     private javax.swing.JScrollPane spClientes;
     private javax.swing.JTable tabClientes;
+    private javax.swing.JTextField txtBairro;
+    private javax.swing.JFormattedTextField txtCEP;
+    private javax.swing.JTextField txtCPF_CNPJ;
+    private javax.swing.JTextField txtComplemento;
+    private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtEndereco;
+    private javax.swing.JTextField txtIE;
+    private javax.swing.JTextField txtNome;
+    private javax.swing.JFormattedTextField txtNumero;
+    private javax.swing.JTextField txtTelefone;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * Metodo para adicionar um novo registro.
+     */
+    private void novo() {
+        tabClientes.getSelectionModel().clearSelection();
+        txtCPF_CNPJ.requestFocus();
+    }
+
+    /**
+     * Metodo que salva um novo registro ou atualiza um existente.
+     */
+    private void salvar() {
+        if (!validar() || txtNome.getText().equals("") || txtCEP.getText().equals("") || txtEndereco.getText().equals("") || txtNumero.getText().equals("") || txtBairro.getText().equals("") || cmbMunicipio.getSelectedIndex() < 0) {
+            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!", "Clientes", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            SisCliente cliente = new SisCliente(cod);
+            cliente.setSisClienteDoc(txtCPF_CNPJ.getText());
+            cliente.setSisClienteNome(txtNome.getText());
+            cliente.setSisClienteDoc1(txtIE.getText());
+            cliente.setSisClienteEndereco(txtEndereco.getText());
+            cliente.setSisClienteNumero(Integer.valueOf(txtNumero.getText()));
+            cliente.setSisClienteComplemento(txtComplemento.getText());
+            cliente.setSisClienteBairro(txtBairro.getText());
+            cliente.setSisClienteCep(txtCEP.getText());
+            cliente.setSisMunicipio((SisMunicipio) cmbMunicipio.getSelectedItem());
+            cliente.setSisClienteTelefone(txtTelefone.getText());
+            cliente.setSisClienteEmail(txtEmail.getText());
+            cliente.setSisClienteData(new Date());
+
+            try {
+                service.salvar(cliente);
+                JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Clientes", JOptionPane.INFORMATION_MESSAGE);
+                setLista();
+            } catch (OpenPdvException ex) {
+                log.error("Erro ao salvar a embalagem.", ex);
+                JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Clientes", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Metodo que exclui um registro do sistema.
+     */
+    private void excluir() {
+        if (cod > 0) {
+            int escolha = JOptionPane.showOptionDialog(this, "Deseja remover o registro selecionado?", "Clientes",
+                    JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+            if (escolha == 0) {
+                try {
+                    service.deletar(new SisCliente(cod));
+                    setLista();
+                } catch (OpenPdvException ex) {
+                    log.debug("Erro ao excluir o cliente -> " + cod, ex);
+                    JOptionPane.showMessageDialog(this, "Esta registro não pode ser excluído!", "Clientes", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione um registro na listagem.", "Clientes", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    /**
+     * Metodo que valida o CPF e/ou CNPJ
+     *
+     * @return retorna verdadeiro se valido, falso caso contrario.
+     */
+    private boolean validar() {
+        String texto = txtCPF_CNPJ.getText();
+        texto = texto.replaceAll("\\D", "");
+        if (!texto.equals("")) {
+            if (texto.length() == 11) {
+                return Util.isCPF(texto);
+            } else if (texto.length() == 14) {
+                return Util.isCNPJ(texto);
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
@@ -192,11 +660,94 @@ public class Clientes extends javax.swing.JDialog {
             }
 
             for (SisCliente cliente : lista) {
-                Object[] obj = new Object[]{cliente.getSisClienteDoc(), cliente.getSisClienteNome(), cliente.getSisClienteEndereco()};
+                Object[] obj = new Object[]{cliente.getSisClienteId(), cliente.getSisClienteDoc(), cliente.getSisClienteNome(), cliente.getSisClienteDoc1(), cliente.getSisClienteEndereco(),
+                    cliente.getSisClienteNumero(), cliente.getSisClienteComplemento(), cliente.getSisClienteBairro(), cliente.getSisClienteCep(),
+                    cliente.getSisMunicipio(), cliente.getSisClienteTelefone(), cliente.getSisClienteEmail()
+                };
                 dtm.addRow(obj);
             }
+
+            row = -1;
+            setDados();
         } catch (OpenPdvException ex) {
             log.error("Erro ao selecionar os clientes do sistema", ex);
+        }
+    }
+
+    /**
+     * Metodo que seta os valores nos campos do formulario.
+     */
+    private void setDados() {
+        if (row == -1) {
+            cod = 0;
+            txtCPF_CNPJ.setText("");
+            txtNome.setText("");
+            txtIE.setText("");
+            txtEndereco.setText("");
+            txtNumero.setText("");
+            txtComplemento.setText("");
+            txtBairro.setText("");
+            txtCEP.setText("");
+            txtTelefone.setText("");
+            txtEmail.setText("");
+            cmbUF.setSelectedItem(Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado());
+            cmbMunicipio.setSelectedIndex(-1);
+        } else {
+            int rowModel = tabClientes.convertRowIndexToModel(row);
+            cod = Integer.valueOf(tabClientes.getModel().getValueAt(rowModel, 0).toString());
+            txtCPF_CNPJ.setText(tabClientes.getModel().getValueAt(rowModel, 1).toString());
+            txtNome.setText(tabClientes.getModel().getValueAt(rowModel, 2).toString());
+            txtIE.setText(tabClientes.getModel().getValueAt(rowModel, 3).toString());
+            txtEndereco.setText(tabClientes.getModel().getValueAt(rowModel, 4).toString());
+            txtNumero.setText(tabClientes.getModel().getValueAt(rowModel, 5).toString());
+            txtComplemento.setText(tabClientes.getModel().getValueAt(rowModel, 6).toString());
+            txtBairro.setText(tabClientes.getModel().getValueAt(rowModel, 7).toString());
+            txtCEP.setText(tabClientes.getModel().getValueAt(rowModel, 8).toString());
+            SisMunicipio mun = (SisMunicipio) tabClientes.getModel().getValueAt(rowModel, 9);
+            if (mun != null) {
+                Util.selecionarCombo(cmbUF, mun.getSisEstado().getSisEstadoSigla());
+                Util.selecionarCombo(cmbMunicipio, mun.getSisMunicipioDescricao());
+            } else {
+                Util.selecionarCombo(cmbUF, Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado().getSisEstadoSigla());
+                cmbMunicipio.setSelectedIndex(-1);
+            }
+            txtTelefone.setText(tabClientes.getModel().getValueAt(rowModel, 10).toString());
+            txtEmail.setText(tabClientes.getModel().getValueAt(rowModel, 11).toString());
+        }
+    }
+
+    /**
+     * Metodo que carrega os valores das UFs.
+     */
+    private void setUF() {
+        try {
+            List<SisEstado> lista = service.selecionar(new SisEstado(), 0, 0, null);
+            cmbUF.removeAllItems();
+            for (SisEstado est : lista) {
+                cmbUF.addItem(est);
+            }
+            cmbUF.setSelectedItem(Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado());
+            setMunicipio((SisEstado) cmbUF.getSelectedItem());
+        } catch (OpenPdvException ex) {
+            log.error("Nao carregou as UFs.", ex);
+        }
+    }
+
+    /**
+     * Metodo que carrega os valores dos municipios.
+     */
+    private void setMunicipio(SisEstado uf) {
+        try {
+            FiltroObjeto fo = new FiltroObjeto("sisEstado", ECompara.IGUAL, uf);
+            List<SisMunicipio> lista = service.selecionar(new SisMunicipio(), 0, 0, fo);
+            cmbMunicipio.removeAllItems();
+            for (SisMunicipio mun : lista) {
+                cmbMunicipio.addItem(mun);
+            }
+        } catch (OpenPdvException ex) {
+            log.error("Nao carregou as cidades.", ex);
+        } finally {
+            cmbMunicipio.setSelectedIndex(-1);
         }
     }
 
@@ -215,14 +766,6 @@ public class Clientes extends javax.swing.JDialog {
 
     public void setDtm(DefaultTableModel dtm) {
         this.dtm = dtm;
-    }
-
-    public JSeparator getjSeparator() {
-        return separador;
-    }
-
-    public void setjSeparator1(JSeparator jSeparator) {
-        this.separador = jSeparator;
     }
 
     public CoreService<SisCliente> getService() {
@@ -247,5 +790,245 @@ public class Clientes extends javax.swing.JDialog {
 
     public void setTabClientes(JTable tabClientes) {
         this.tabClientes = tabClientes;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public int getCod() {
+        return cod;
+    }
+
+    public void setCod(int cod) {
+        this.cod = cod;
+    }
+
+    public JButton getBtnExcluir() {
+        return btnExcluir;
+    }
+
+    public void setBtnExcluir(JButton btnExcluir) {
+        this.btnExcluir = btnExcluir;
+    }
+
+    public JButton getBtnNovo() {
+        return btnNovo;
+    }
+
+    public void setBtnNovo(JButton btnNovo) {
+        this.btnNovo = btnNovo;
+    }
+
+    public JButton getBtnSalvar() {
+        return btnSalvar;
+    }
+
+    public void setBtnSalvar(JButton btnSalvar) {
+        this.btnSalvar = btnSalvar;
+    }
+
+    public JComboBox getCmbMunicipio() {
+        return cmbMunicipio;
+    }
+
+    public void setCmbMunicipio(JComboBox cmbMunicipio) {
+        this.cmbMunicipio = cmbMunicipio;
+    }
+
+    public JComboBox getCmbUF() {
+        return cmbUF;
+    }
+
+    public void setCmbUF(JComboBox cmbUF) {
+        this.cmbUF = cmbUF;
+    }
+
+    public JLabel getLblBairro() {
+        return lblBairro;
+    }
+
+    public void setLblBairro(JLabel lblBairro) {
+        this.lblBairro = lblBairro;
+    }
+
+    public JLabel getLblCEP() {
+        return lblCEP;
+    }
+
+    public void setLblCEP(JLabel lblCEP) {
+        this.lblCEP = lblCEP;
+    }
+
+    public JLabel getLblCPF_CNPJ() {
+        return lblCPF_CNPJ;
+    }
+
+    public void setLblCPF_CNPJ(JLabel lblCPF_CNPJ) {
+        this.lblCPF_CNPJ = lblCPF_CNPJ;
+    }
+
+    public JLabel getLblComplemento() {
+        return lblComplemento;
+    }
+
+    public void setLblComplemento(JLabel lblComplemento) {
+        this.lblComplemento = lblComplemento;
+    }
+
+    public JLabel getLblEmail() {
+        return lblEmail;
+    }
+
+    public void setLblEmail(JLabel lblEmail) {
+        this.lblEmail = lblEmail;
+    }
+
+    public JLabel getLblEndereco() {
+        return lblEndereco;
+    }
+
+    public void setLblEndereco(JLabel lblEndereco) {
+        this.lblEndereco = lblEndereco;
+    }
+
+    public JLabel getLblIE() {
+        return lblIE;
+    }
+
+    public void setLblIE(JLabel lblIE) {
+        this.lblIE = lblIE;
+    }
+
+    public JLabel getLblMunicipio() {
+        return lblMunicipio;
+    }
+
+    public void setLblMunicipio(JLabel lblMunicipio) {
+        this.lblMunicipio = lblMunicipio;
+    }
+
+    public JLabel getLblNome() {
+        return lblNome;
+    }
+
+    public void setLblNome(JLabel lblNome) {
+        this.lblNome = lblNome;
+    }
+
+    public JLabel getLblNumero() {
+        return lblNumero;
+    }
+
+    public void setLblNumero(JLabel lblNumero) {
+        this.lblNumero = lblNumero;
+    }
+
+    public JLabel getLblTelefone() {
+        return lblTelefone;
+    }
+
+    public void setLblTelefone(JLabel lblTelefone) {
+        this.lblTelefone = lblTelefone;
+    }
+
+    public JLabel getLblUF() {
+        return lblUF;
+    }
+
+    public void setLblUF(JLabel lblUF) {
+        this.lblUF = lblUF;
+    }
+
+    public JPanel getPainel() {
+        return painel;
+    }
+
+    public void setPainel(JPanel painel) {
+        this.painel = painel;
+    }
+
+    public JTextField getTxtBairro() {
+        return txtBairro;
+    }
+
+    public void setTxtBairro(JTextField txtBairro) {
+        this.txtBairro = txtBairro;
+    }
+
+    public JFormattedTextField getTxtCEP() {
+        return txtCEP;
+    }
+
+    public void setTxtCEP(JFormattedTextField txtCEP) {
+        this.txtCEP = txtCEP;
+    }
+
+    public JTextField getTxtCPF_CNPJ() {
+        return txtCPF_CNPJ;
+    }
+
+    public void setTxtCPF_CNPJ(JTextField txtCPF_CNPJ) {
+        this.txtCPF_CNPJ = txtCPF_CNPJ;
+    }
+
+    public JTextField getTxtComplemento() {
+        return txtComplemento;
+    }
+
+    public void setTxtComplemento(JTextField txtComplemento) {
+        this.txtComplemento = txtComplemento;
+    }
+
+    public JTextField getTxtEmail() {
+        return txtEmail;
+    }
+
+    public void setTxtEmail(JTextField txtEmail) {
+        this.txtEmail = txtEmail;
+    }
+
+    public JTextField getTxtEndereco() {
+        return txtEndereco;
+    }
+
+    public void setTxtEndereco(JTextField txtEndereco) {
+        this.txtEndereco = txtEndereco;
+    }
+
+    public JTextField getTxtIE() {
+        return txtIE;
+    }
+
+    public void setTxtIE(JTextField txtIE) {
+        this.txtIE = txtIE;
+    }
+
+    public JTextField getTxtNome() {
+        return txtNome;
+    }
+
+    public void setTxtNome(JTextField txtNome) {
+        this.txtNome = txtNome;
+    }
+
+    public JFormattedTextField getTxtNumero() {
+        return txtNumero;
+    }
+
+    public void setTxtNumero(JFormattedTextField txtNumero) {
+        this.txtNumero = txtNumero;
+    }
+
+    public JTextField getTxtTelefone() {
+        return txtTelefone;
+    }
+
+    public void setTxtTelefone(JTextField txtTelefone) {
+        this.txtTelefone = txtTelefone;
     }
 }

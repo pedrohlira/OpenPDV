@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.JComboBox;
 import javax.swing.text.MaskFormatter;
 
 /**
@@ -369,5 +370,22 @@ public class Util {
         c.addFilter(new HTTPBasicAuthFilter(usuario, senha));
         c.addFilter(new GZIPContentEncodingFilter(true));
         return c;
+    }
+    
+    
+    /**
+     * Metodo que seleciona um item da combo pelo valor.
+     *
+     * @param combo a ser verificada.
+     * @param valor a ser comparado.
+     */
+    public static void selecionarCombo(JComboBox combo, String valor) {
+        for (int i = 0; i < combo.getItemCount(); i++) {
+            String item = combo.getItemAt(i).toString();
+            if (item.startsWith(valor)) {
+                combo.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 }

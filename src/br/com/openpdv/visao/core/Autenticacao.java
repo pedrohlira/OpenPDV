@@ -308,6 +308,8 @@ public class Autenticacao extends JDialog {
                 Login.logar(txtOperadorUsuario.getText(), senhaOp);
                 Caixa.getInstancia().getLblOperador().setText("Operador : " + txtOperadorUsuario.getText().toUpperCase());
                 Caixa.getInstancia().getLblCaixa().setText("Caixa : " + ECF.enviar(EComandoECF.ECF_NumECF)[1]);
+                txtOperadorUsuario.setText("");
+                pswOperadorSenha.setText("");
                 Caixa.getInstancia().setJanela(null);
                 dispose();
 

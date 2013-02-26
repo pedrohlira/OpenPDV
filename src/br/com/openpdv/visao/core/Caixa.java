@@ -4,16 +4,15 @@ import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
+import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
-import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.FiltroNumero;
-import br.com.openpdv.modelo.core.filtro.FiltroTexto;
 import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.produto.ProdComposicao;
+import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
@@ -23,6 +22,7 @@ import br.com.openpdv.visao.nota.NotaConsumidor;
 import br.com.openpdv.visao.nota.NotaEletronica;
 import br.com.openpdv.visao.principal.*;
 import br.com.openpdv.visao.venda.Fechamento;
+import br.com.openpdv.visao.venda.Grades;
 import br.com.openpdv.visao.venda.Identificar;
 import br.com.openpdv.visao.venda.Precos;
 import br.com.phdss.ECF;
@@ -67,41 +67,44 @@ public class Caixa extends JFrame {
      * Variavel que responde de modo assincrono a pesquisa de produto.
      */
     private AsyncCallback<ProdProduto> pesquisado = new AsyncCallback<ProdProduto>() {
-        private ComandoAdicionarItem adicionarItem = new ComandoAdicionarItem();
-
         @Override
         public void sucesso(final ProdProduto prod) {
             if (prod == null) {
                 JOptionPane.showMessageDialog(caixa, "Produto não encontrado.", "Pesquisa", JOptionPane.INFORMATION_MESSAGE);
-                txtCodigo.setText("");
-                txtCodigo.requestFocus();
             } else if (modo == EModo.ABERTO) {
                 if (!prod.getProdPrecos().isEmpty()) {
-                    Precos.getInstancia(new AsyncCallback<ProdPreco>() {
+                    AsyncCallback<ProdPreco> async = new AsyncCallback<ProdPreco>() {
                         @Override
                         public void sucesso(ProdPreco preco) {
-                            // se selecionou
-                            if (preco != null) {
-                                prod.setProdEmbalagem(preco.getProdEmbalagem());
-                                prod.setProdProdutoPreco(preco.getProdPrecoValor());
-                                prod.setProdProdutoBarra(preco.getProdPrecoBarra());
+                            prod.setProdEmbalagem(preco.getProdEmbalagem());
+                            prod.setProdProdutoPreco(preco.getProdPrecoValor());
+                            try {
+                                adicionar(prod, Double.valueOf(txtQuantidade.getText()), prod.getProdProdutoBarra());
+                            } catch (OpenPdvException ex) {
+                                falha(ex);
                             }
-                            falha(null);
                         }
 
                         @Override
                         public void falha(Exception excecao) {
-                            try {
-                                adicionar(prod, Double.valueOf(txtQuantidade.getText()));
-                            } catch (OpenPdvException ex) {
-                                log.error(ex);
-                                JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
-                            } finally {
-                                txtCodigo.setText("");
-                                txtCodigo.requestFocus();
-                            }
+                            log.error(excecao);
+                            JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
                         }
-                    }, prod).setVisible(true);
+                    };
+
+                    // procura a barra nas grades
+                    boolean achou = false;
+                    for (ProdPreco preco : prod.getProdPrecos()) {
+                        if (preco.getProdPrecoBarra().equals(txtCodigo.getText())) {
+                            async.sucesso(preco);
+                            achou = true;
+                            break;
+                        }
+                    }
+                    // se nao achou abre janela
+                    if (!achou) {
+                        Precos.getInstancia(async, prod).setVisible(true);
+                    }
                 } else if (!prod.getProdComposicoes().isEmpty()) {
                     // abre tela pra informa que o produto e um kit de varios produtos
                     new Thread(new Runnable() {
@@ -109,36 +112,61 @@ public class Caixa extends JFrame {
                         public void run() {
                             // percorre os itens do produto
                             for (ProdComposicao comp : prod.getProdComposicoes()) {
-                                ProdProduto item = comp.getProdProduto();
-                                item.setProdEmbalagem(comp.getProdEmbalagem());
-                                item.setProdProdutoPreco(comp.getProdComposicaoValor() / comp.getProdComposicaoQuantidade());
+                                ProdProduto prod = comp.getProdProduto();
+                                prod.setProdEmbalagem(comp.getProdEmbalagem());
+                                prod.setProdProdutoPreco(comp.getProdComposicaoValor() / comp.getProdComposicaoQuantidade());
                                 double qtd = comp.getProdComposicaoQuantidade() * Double.valueOf(txtQuantidade.getText());
 
                                 try {
-                                    adicionar(item, qtd);
+                                    adicionar(prod, qtd, prod.getProdProdutoBarra());
                                 } catch (OpenPdvException ex) {
                                     log.error(ex);
                                     JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar um item!\nCancele os itens adicionados.", "Venda", JOptionPane.WARNING_MESSAGE);
                                     break;
                                 }
-
-                                txtCodigo.setText("");
-                                txtCodigo.requestFocus();
                             }
                             Aguarde.getInstancia().setVisible(false);
                         }
                     }).start();
 
                     Aguarde.getInstancia().setVisible(true);
+                } else if (!prod.getProdGrades().isEmpty()) {
+                    AsyncCallback<ProdGrade> async = new AsyncCallback<ProdGrade>() {
+                        @Override
+                        public void sucesso(ProdGrade grade) {
+                            try {
+                                adicionar(prod, Double.valueOf(txtQuantidade.getText()), grade.getProdGradeBarra());
+                            } catch (OpenPdvException ex) {
+                                falha(ex);
+                            }
+                        }
+
+                        @Override
+                        public void falha(Exception excecao) {
+                            log.error(excecao);
+                            JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
+                        }
+                    };
+
+                    // procura a barra nas grades
+                    boolean achou = false;
+                    for (ProdGrade grade : prod.getProdGrades()) {
+                        if (grade.getProdGradeBarra().equals(txtCodigo.getText())) {
+                            async.sucesso(grade);
+                            achou = true;
+                            break;
+                        }
+                    }
+                    // se nao achou abre janela
+                    if (!achou) {
+                        Grades.getInstancia(async, prod).setVisible(true);
+                    }
                 } else {
                     try {
-                        adicionar(prod, Double.valueOf(txtQuantidade.getText()));
+                        adicionar(prod, Double.valueOf(txtQuantidade.getText()), prod.getProdProdutoBarra());
                     } catch (OpenPdvException ex) {
                         log.error(ex);
                         JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
-                    } finally {
-                        txtCodigo.setText("");
-                        txtCodigo.requestFocus();
                     }
                 }
             } else {
@@ -146,6 +174,9 @@ public class Caixa extends JFrame {
                 lblProduto.setToolTipText(lblProduto.getText());
                 lblTotal.setText(DecimalFormat.getCurrencyInstance().format(prod.getProdProdutoPreco()));
             }
+
+            txtCodigo.setText("");
+            txtCodigo.requestFocus();
         }
 
         @Override
@@ -154,22 +185,6 @@ public class Caixa extends JFrame {
             JOptionPane.showMessageDialog(caixa, "Erro ao pesquisar o produto.", "Pesquisa", JOptionPane.ERROR_MESSAGE);
             txtCodigo.setText("");
             txtCodigo.requestFocus();
-        }
-
-        private void adicionar(ProdProduto prod, double qtd) throws OpenPdvException {
-            // fluxo de adicao ecf, bd e tela
-            EcfVendaProduto vp = new EcfVendaProduto(prod, qtd);
-            adicionarItem.setVendaProduto(vp);
-            adicionarItem.executar();
-
-            // colocando os dados do produto visivel
-            lblProduto.setText(Util.normaliza(prod.getProdProdutoDescricao()));
-            lblProduto.setToolTipText(lblProduto.getText());
-            txtUnitario.setValue(prod.getProdProdutoPreco());
-            txtTotalItem.setValue(prod.getProdProdutoPreco() * qtd);
-            txtQuantidade.setText("1");
-            venda.getEcfVendaProdutos().add(vp);
-            totalizar();
         }
     };
 
@@ -233,7 +248,7 @@ public class Caixa extends JFrame {
                     option = new JOptionPane();
                     String texto = option.showInputDialog(caixa, "Digite o valor da quantidade.", "Venda", JOptionPane.OK_CANCEL_OPTION);
                     if (texto != null && !texto.equals("")) {
-                        texto = texto.replaceAll("[^0-9],", "");
+                        texto = texto.replaceAll("\\D,", "");
                         try {
                             double valor = Double.valueOf(texto.replace(",", "."));
                             if (valor > 0) {
@@ -302,6 +317,7 @@ public class Caixa extends JFrame {
         mnuProdutos = new javax.swing.JMenuItem();
         mnuEmbalagens = new javax.swing.JMenuItem();
         mnuTipoPagamentos = new javax.swing.JMenuItem();
+        mnuTipoGrades = new javax.swing.JMenuItem();
         mnuClientes = new javax.swing.JMenuItem();
         mnuUsuarios = new javax.swing.JMenuItem();
         separador2 = new javax.swing.JPopupMenu.Separator();
@@ -603,6 +619,18 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuTipoPagamentos);
+
+        mnuTipoGrades.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuTipoGrades.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/grade.png"))); // NOI18N
+        mnuTipoGrades.setText("Tipo Grades");
+        mnuTipoGrades.setToolTipText("Tipo Grades");
+        mnuTipoGrades.setEnabled(false);
+        mnuTipoGrades.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuTipoGradesActionPerformed(evt);
+            }
+        });
+        mnuPrincipal.add(mnuTipoGrades);
 
         mnuClientes.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuClientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cliente.png"))); // NOI18N
@@ -999,17 +1027,9 @@ public class Caixa extends JFrame {
     // Metodos dos menus.
     private void txtCodigoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodigoKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            String texto = txtCodigo.getText().trim().replaceAll("[^0-9]", "");
+            String texto = txtCodigo.getText().trim().replaceAll("\\D", "");
             if (!texto.equals("")) {
-                long valor = Long.valueOf(texto);
-                IFiltro filtro;
-
-                if (texto.length() <= 6) {
-                    filtro = new FiltroNumero("prodProdutoId", ECompara.IGUAL, valor);
-                } else {
-                    filtro = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
-                }
-
+                IFiltro filtro = Pesquisa.pesquisar(texto);
                 Pesquisa.getInstancia(pesquisado).selecionar(filtro);
             }
         }
@@ -1037,19 +1057,22 @@ public class Caixa extends JFrame {
 
     private void mnuSairMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuSairMouseClicked
         option = new JOptionPane();
-        int escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema?", "OpenPDV",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+        int escolha;
+        if (modo == EModo.DISPONIVEL) {
+            escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema ou trocar de operador?", "OpenPDV",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Sair", "Cancelar", "Trocar",}, JOptionPane.YES_OPTION);
+        } else {
+            escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema?", "OpenPDV",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+        }
+
         if (escolha == JOptionPane.YES_OPTION) {
-            try {
-                String back = Util.getConfig().get("openpdv.backup");
-                if (back == null || back.equals("")) {
-                    back = "db/backup.zip";
-                }
-                service.executar("BACKUP TO '" + back + "'");
-            } catch (OpenPdvException ex) {
-                log.error("Nao gerou backup ao sair do sistema.", ex);
-            }
             System.exit(0);
+        } else if (escolha == JOptionPane.CANCEL_OPTION) {
+            modoOff();
+            Login.setOperador(null);
+            janela = Autenticacao.getInstancia();
+            janela.setVisible(true);
         }
         option = null;
     }//GEN-LAST:event_mnuSairMouseClicked
@@ -1401,8 +1424,7 @@ public class Caixa extends JFrame {
         // valida o GT do ECF
         try {
             double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
-            int cro = Integer.valueOf(PAF.AUXILIAR.getProperty("ecf.cro"));
-            double novoGT = ECF.validarGT(gt, cro);
+            double novoGT = ECF.validarGT(gt);
             if (novoGT > 0.00) {
                 PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
                 PAF.criptografar();
@@ -1416,7 +1438,8 @@ public class Caixa extends JFrame {
         // se permitir abre a venda, solicita o cliente
         if (permite) {
             statusMenus(EModo.OFF);
-            Identificar.getInstancia(new AsyncCallback<SisCliente>() {
+            final Identificar ident = Identificar.getInstancia(null);
+            AsyncCallback<SisCliente> async = new AsyncCallback<SisCliente>() {
                 @Override
                 public void sucesso(SisCliente resultado) {
                     if (resultado != null && resultado.getSisClienteId() > 0) {
@@ -1435,6 +1458,25 @@ public class Caixa extends JFrame {
                         log.error(ex);
                         JOptionPane.showMessageDialog(caixa, "Erro ao abrir a venda.", "Venda", JOptionPane.ERROR_MESSAGE);
                     }
+
+                    // adiciona os itens da venda recuperada
+                    if (ident.getVenda() != null) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // percorre os produtos da venda recuperada
+                                for (EcfVendaProduto vp : ident.getVenda().getEcfVendaProdutos()) {
+                                    try {
+                                        adicionar(vp.getProdProduto(), vp.getEcfVendaProdutoQuantidade(), vp.getEcfVendaProdutoBarra());
+                                    } catch (OpenPdvException ex) {
+                                        JOptionPane.showMessageDialog(caixa, "Erro ao adicionar o item com codigo -> " + vp.getProdProduto().getId(), "Venda", JOptionPane.WARNING_MESSAGE);
+                                    }
+                                }
+                                Aguarde.getInstancia().setVisible(false);
+                            }
+                        }).start();
+                        Aguarde.getInstancia().setVisible(true);
+                    }
                 }
 
                 @Override
@@ -1442,7 +1484,11 @@ public class Caixa extends JFrame {
                     log.error("Erro na identificacao do cliente.", excecao);
                     JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar Cliente", JOptionPane.WARNING_MESSAGE);
                 }
-            }).setVisible(true);
+            };
+
+            ident.setAsync(async);
+            ident.getChkRecuperar().setEnabled(true);
+            ident.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, erro.toString(), "Venda", JOptionPane.ERROR_MESSAGE);
         }
@@ -1482,7 +1528,7 @@ public class Caixa extends JFrame {
             public void sucesso(Integer resultado) {
                 String texto = JOptionPane.showInputDialog(caixa, "Digite o número do item.", "Cancelar Item", JOptionPane.OK_CANCEL_OPTION);
                 if (texto != null) {
-                    texto = texto.replaceAll("[^0-9]", "");
+                    texto = texto.replaceAll("\\D", "");
                     try {
                         int item = Integer.valueOf(texto);
                         if (item < 1 || item > venda.getEcfVendaProdutos().size()) {
@@ -1557,7 +1603,7 @@ public class Caixa extends JFrame {
 
     private void mnuIdentificarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuIdentificarMouseClicked
         statusMenus(EModo.OFF);
-        Identificar.getInstancia(new AsyncCallback<SisCliente>() {
+        Identificar ident = Identificar.getInstancia(new AsyncCallback<SisCliente>() {
             @Override
             public void sucesso(SisCliente resultado) {
                 if (resultado != null) {
@@ -1576,7 +1622,9 @@ public class Caixa extends JFrame {
                 log.error("Erro na identificacao do cliente.", excecao);
                 JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar", JOptionPane.WARNING_MESSAGE);
             }
-        }).setVisible(true);
+        });
+        ident.getChkRecuperar().setEnabled(false);
+        ident.setVisible(true);
     }//GEN-LAST:event_mnuIdentificarMouseClicked
 
     private void mnuMovimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMovimentoActionPerformed
@@ -1712,6 +1760,22 @@ public class Caixa extends JFrame {
     private void mnuCartaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCartaoActionPerformed
         JOptionPane.showMessageDialog(caixa, "Este PAF-ECF não executa funções de Troco em Cartão", "Troco em Cartão", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_mnuCartaoActionPerformed
+
+    private void mnuTipoGradesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoGradesActionPerformed
+        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+            @Override
+            public void sucesso(Integer resultado) {
+                janela = TiposGrade.getInstancia();
+                janela.setVisible(true);
+            }
+
+            @Override
+            public void falha(Exception excecao) {
+                JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        janela.setVisible(true);
+    }//GEN-LAST:event_mnuTipoGradesActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
     private javax.swing.JLabel lblCaixa;
@@ -1759,6 +1823,7 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuSuprimento;
     private javax.swing.JMenuItem mnuTEF;
     private javax.swing.JMenuItem mnuTabProdutos;
+    private javax.swing.JMenuItem mnuTipoGrades;
     private javax.swing.JMenuItem mnuTipoPagamentos;
     private javax.swing.JMenuItem mnuUsuarios;
     private javax.swing.JMenu mnuVenda;
@@ -1832,6 +1897,20 @@ public class Caixa extends JFrame {
     }
 
     /**
+     * Metodo que desabilita tudo, deixando no estado antes de logar.
+     */
+    public void modoOff() {
+        modo = EModo.OFF;
+        limpar();
+        statusMenus(modo);
+
+        lblLivre.setVisible(true);
+        txtCodigo.setEnabled(false);
+        lblOperador.setText("Operador : ");
+        lblCaixa.setText("Caixa : ");
+    }
+
+    /**
      * Metodo que limpa os campos do caixa.
      */
     public void limpar() {
@@ -1874,6 +1953,7 @@ public class Caixa extends JFrame {
                 if (venda.getSisCliente() != null) {
                     mnuIdentificar.setEnabled(false);
                 }
+                mnuSair.setEnabled(false);
                 break;
             case CONSULTA:
                 mnuPrincipal.setEnabled(false);
@@ -1918,6 +1998,30 @@ public class Caixa extends JFrame {
         if (Util.getConfig().get("tef.titulo") == null) {
             mnuTEF.setEnabled(false);
         }
+    }
+
+    /**
+     * Metodo que adiciona um produto a venda nas operacoes necessarias.
+     *
+     * @param prod o produto vendido.
+     * @param qtd a quantidade vendida.
+     * @throws OpenPdvException dispara caso aconteca algum erro.
+     */
+    private void adicionar(ProdProduto prod, double qtd, String barra) throws OpenPdvException {
+        // fluxo de adicao ecf, bd e tela
+        EcfVendaProduto vp = new EcfVendaProduto(prod, qtd, barra);
+        ComandoAdicionarItem adicionarItem = new ComandoAdicionarItem();
+        adicionarItem.setVendaProduto(vp);
+        adicionarItem.executar();
+
+        // colocando os dados do produto visivel
+        lblProduto.setText(Util.normaliza(prod.getProdProdutoDescricao()));
+        lblProduto.setToolTipText(lblProduto.getText());
+        txtUnitario.setValue(prod.getProdProdutoPreco());
+        txtTotalItem.setValue(prod.getProdProdutoPreco() * qtd);
+        txtQuantidade.setText("1");
+        venda.getEcfVendaProdutos().add(vp);
+        totalizar();
     }
 
     /**

@@ -85,4 +85,9 @@ public class SisMunicipio extends Dados implements Serializable {
     public void setSisEstado(SisEstado sisEstado) {
         this.sisEstado = sisEstado;
     }
+
+    @Override
+    public String toString() {
+        return this.sisMunicipioDescricao;
+    }
 }

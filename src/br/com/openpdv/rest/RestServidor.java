@@ -55,8 +55,7 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que cadastra na base do server as notas de consumidor emitidas
-     * pelos sistemas em modo client.
+     * Metodo que cadastra na base do server as notas de consumidor emitidas pelos sistemas em modo client.
      *
      * @param ecfNota um objeto do tipo Nota.
      * @throws RestException em caso de nao conseguir acessar a informacao.
@@ -88,7 +87,7 @@ public class RestServidor extends ARest {
             em.getTransaction().commit();
 
             // salva os produtos vendidos
-            List<Sql> sqls = new ArrayList<Sql>();
+            List<Sql> sqls = new ArrayList<>();
             for (EcfNotaProduto np : nps) {
                 np.setId(0);
                 np.setEcfNota(ecfNota);
@@ -117,8 +116,7 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que cadastra na base do server as nfe emitidas pelos sistemas em
-     * modo client.
+     * Metodo que cadastra na base do server as nfe emitidas pelos sistemas em modo client.
      *
      * @param ecfNfe um objeto do tipo NFe.
      * @throws RestException em caso de nao conseguir acessar a informacao.
@@ -243,9 +241,7 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que cadastra na base do server as reducoes Z, totais, vendas,
-     * produtos vendidos, pagamentos, documentos emitidos pelos sistemas em modo
-     * client.
+     * Metodo que cadastra na base do server as reducoes Z, totais, vendas, produtos vendidos, pagamentos, documentos emitidos pelos sistemas em modo client.
      *
      * @param ecfZ um objeto do tipo ReducaoZ com a lista de documentos anexada.
      * @throws RestException em caso de nao conseguir acessar a informacao.
@@ -382,25 +378,27 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que encontra o cliente dentro do sistema usando os dados do
-     * cliente enviado, como o CNPJ.
+     * Metodo que encontra o cliente dentro do sistema usando os dados do cliente enviado, como o CNPJ.
      *
      * @param em um objeto de transacao.
      * @param sisCliente o obejto de cliente.
      * @return o cliente encontrado nesta base de dados.
      * @throws OpenPdvException dispara em caso de erro ao selecionar.
      */
-    private SisCliente getCliente(EntityManager em, SisCliente sisCliente) throws OpenPdvException {
-        FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, sisCliente.getSisClienteDoc().replaceAll("[^0-9]", ""));
-        SisCliente aux = (SisCliente) service.selecionar(new SisCliente(), ft);
+    private SisCliente getCliente(EntityManager em, SisCliente sisCliente) {
+        try {
+            FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, sisCliente.getSisClienteDoc().replaceAll("\\D", ""));
+            SisCliente aux = (SisCliente) service.selecionar(sisCliente, ft);
 
-        // se existir retornar, senao cria um novo
-        if (aux != null) {
-            return aux;
-        } else {
-            sisCliente.setId(0);
-            sisCliente.setSisClienteCadastrado(new Date());
-            return (SisCliente) service.salvar(em, sisCliente);
+            // se existir retornar, senao cria um novo
+            if (aux != null) {
+                return aux;
+            } else {
+                sisCliente.setId(0);
+                return (SisCliente) service.salvar(em, sisCliente);
+            }
+        } catch (OpenPdvException ex) {
+            return null;
         }
     }
 
@@ -411,8 +409,7 @@ public class RestServidor extends ARest {
      * @param emb o tipo de embalagem usada na venda.
      * @param prod o produto que foi vendido.
      * @return uma instrucao de SQL no formato de objeto para ser executada.
-     * @throws OpenPdvException dispara caso nao consiga gerar o sql de
-     * atualizacao.
+     * @throws OpenPdvException dispara caso nao consiga gerar o sql de atualizacao.
      */
     private Sql getEstoque(double qtd, ProdEmbalagem emb, ProdProduto prod) throws OpenPdvException {
         // fatorando a quantida no estoque

@@ -22,6 +22,8 @@ public class EcfNotaProduto extends Dados implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ecf_nota_produto_id")
     private Integer ecfNotaProdutoId;
+    @Column(name = "ecf_nota_produto_barra")
+    private String ecfNotaProdutoBarra;
     @Column(name = "ecf_nota_produto_quantidade")
     private Double ecfNotaProdutoQuantidade;
     @Column(name = "ecf_nota_produto_bruto")
@@ -162,4 +164,11 @@ public class EcfNotaProduto extends Dados implements Serializable {
         this.prodProduto = prodProduto;
     }
 
+    public String getEcfNotaProdutoBarra() {
+        return ecfNotaProdutoBarra;
+    }
+
+    public void setEcfNotaProdutoBarra(String ecfNotaProdutoBarra) {
+        this.ecfNotaProdutoBarra = ecfNotaProdutoBarra;
+    }
 }

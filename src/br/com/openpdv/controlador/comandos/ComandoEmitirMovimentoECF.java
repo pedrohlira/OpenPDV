@@ -93,7 +93,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
             cal.setTime(fim);
             cal.add(Calendar.DAY_OF_MONTH, 1);
             fim = cal.getTime();
-            
+
             // r02
             FiltroData dt1 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
             FiltroData dt2 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
@@ -150,7 +150,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
                     r04.setOrdemAcresDesc('A');
                     if (venda.getSisCliente() != null) {
                         r04.setClienteNome(venda.getSisCliente().getSisClienteNome());
-                        r04.setClienteCPF(venda.getSisCliente().getSisClienteDoc().replaceAll("[^0-9]", ""));
+                        r04.setClienteCPF(venda.getSisCliente().getSisClienteDoc().replaceAll("\\D", ""));
                     }
                     listaR04.add(r04);
                     // r05
@@ -245,7 +245,11 @@ public class ComandoEmitirMovimentoECF implements IComando {
 
             // formando o nome do arquivo
             String arquivo = impressora.getEcfImpressoraIdentificacao();
-            arquivo += impressora.getEcfImpressoraSerie().substring(impressora.getEcfImpressoraSerie().length() - 14);
+            if (impressora.getEcfImpressoraSerie().length() > 14) {
+                arquivo += impressora.getEcfImpressoraSerie().substring(impressora.getEcfImpressoraSerie().length() - 14);
+            } else {
+                arquivo += impressora.getEcfImpressoraSerie();
+            }
             arquivo += new SimpleDateFormat("ddMMyyyy").format(new Date());
             arquivo += ".txt";
             path = PAF.gerarMovimentosECF(anexoVI, arquivo);

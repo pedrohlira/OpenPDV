@@ -57,9 +57,6 @@ public class EcfNotaEletronica extends Dados implements Serializable {
     @JoinColumn(name = "sis_cliente_id")
     @ManyToOne
     private SisCliente sisCliente;
-    @JoinColumn(name = "sis_empresa_id")
-    @ManyToOne
-    private SisEmpresa sisEmpresa;
 
     /**
      * Construtor padrao
@@ -214,13 +211,5 @@ public class EcfNotaEletronica extends Dados implements Serializable {
 
     public void setSisCliente(SisCliente sisCliente) {
         this.sisCliente = sisCliente;
-    }
-
-    public SisEmpresa getSisEmpresa() {
-        return sisEmpresa;
-    }
-
-    public void setSisEmpresa(SisEmpresa sisEmpresa) {
-        this.sisEmpresa = sisEmpresa;
     }
 }

@@ -34,7 +34,7 @@ public class ComandoGerarNFeInutilizada implements IComando {
             // desmembra a chave
             String uf = empresa.getSisMunicipio().getSisEstado().getSisEstadoIbge() + "";
             String ano = Util.formataData(new Date(), "yyyy").substring(2, 4);
-            String cnpj = empresa.getSisEmpresaCnpj().replaceAll("[^0-9]", "");
+            String cnpj = empresa.getSisEmpresaCnpj().replaceAll("\\D", "");
             String modo = "55";
             String serie = Util.formataNumero(Util.getConfig().get("nfe.serie"), 3, 0, false);
             String nfIni = Util.formataNumero(numero, 9, 0, false);

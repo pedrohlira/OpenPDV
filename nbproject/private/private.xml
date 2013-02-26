@@ -6,12 +6,20 @@
             <line>264</line>
         </file>
     </editor-bookmarks>
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
         <file>
             <url>src/br/com/openpdv/controlador/comandos/ComandoGerarNFe.java</url>
             <bookmark id="0">
                 <name/>
                 <line>264</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/br/com/openpdv/visao/core/Caixa.java</url>
+            <bookmark id="2">
+                <name/>
+                <line>1462</line>
                 <key/>
             </bookmark>
         </file>

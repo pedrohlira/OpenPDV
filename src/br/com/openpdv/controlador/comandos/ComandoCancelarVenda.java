@@ -7,10 +7,14 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
+import br.com.openpdv.modelo.core.parametro.GrupoParametro;
+import br.com.openpdv.modelo.core.parametro.IParametro;
 import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
+import br.com.openpdv.modelo.core.parametro.ParametroNumero;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
+import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
@@ -110,29 +114,49 @@ public class ComandoCancelarVenda implements IComando {
      */
     public void cancelarVendaBanco() throws OpenPdvException {
         List<Sql> sqls = new ArrayList<>();
-        FiltroNumero fn = new FiltroNumero("ecfVendaId", ECompara.IGUAL, venda.getId());
-        ParametroBinario pb = new ParametroBinario("ecfVendaCancelada", true);
-        Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, pb);
-        sqls.add(sql);
-
-        // atualiza estoque
-        if (venda.getEcfVendaFechada()) {
-            for (EcfVendaProduto vendaProduto : venda.getEcfVendaProdutos()) {
-                if (!vendaProduto.getEcfVendaProdutoCancelado()) {
-                    // fatorando a quantida no estoque
-                    double qtd = vendaProduto.getEcfVendaProdutoQuantidade();
-                    if (vendaProduto.getProdEmbalagem().getProdEmbalagemId() != vendaProduto.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
-                        qtd *= vendaProduto.getProdEmbalagem().getProdEmbalagemUnidade();
-                        qtd /= vendaProduto.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
+        double valor = 0.00;
+        for (EcfVendaProduto vp : venda.getEcfVendaProdutos()) {
+            // atualiza estoque
+            if (venda.getEcfVendaFechada() && !vp.getEcfVendaProdutoCancelado()) {
+                // fatorando a quantida no estoque
+                double qtd = vp.getEcfVendaProdutoQuantidade();
+                if (vp.getProdEmbalagem().getProdEmbalagemId() != vp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                    qtd *= vp.getProdEmbalagem().getProdEmbalagemUnidade();
+                    qtd /= vp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
+                }
+                // atualiza o estoque
+                ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
+                FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, vp.getProdProduto().getId());
+                Sql sql1 = new Sql(vp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
+                sqls.add(sql1);
+                // adiciona estoque da grade caso o produto tenha
+                for (ProdGrade grade : vp.getProdProduto().getProdGrades()) {
+                    if (grade.getProdGradeBarra().equals(vp.getEcfVendaProdutoBarra())) {
+                        ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", qtd);
+                        FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                        Sql sql2 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
+                        sqls.add(sql2);
+                        break;
                     }
-                    // atualiza o estoque
-                    ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
-                    FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, vendaProduto.getProdProduto().getId());
-                    Sql sql1 = new Sql(vendaProduto.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                    sqls.add(sql1);
                 }
             }
+            valor += vp.getEcfVendaProdutoBruto();
         }
+
+        // atualiza o status da venda
+        GrupoParametro gp = new GrupoParametro();
+        FiltroNumero fn = new FiltroNumero("ecfVendaId", ECompara.IGUAL, venda.getId());
+        if (!venda.getEcfVendaFechada()) {
+            ParametroNumero pn1 = new ParametroNumero("ecfVendaBruto", valor);
+            gp.add(pn1);
+            ParametroNumero pn2 = new ParametroNumero("ecfVendaLiquido", valor);
+            gp.add(pn2);
+        }
+        ParametroBinario pb = new ParametroBinario("ecfVendaCancelada", true);
+        gp.add(pb);
+        Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
+        sqls.add(sql);
+
         service.executar(sqls);
     }
 

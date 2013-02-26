@@ -85,7 +85,7 @@ public class ComandoImprimirCartao implements IComando {
 
                     // se for o pendente, precisa confirmar no GP e sera o ultimo cartao
                     if (pag.getArquivo().contains("pendente")) {
-                        String id = pag.getArquivo().replaceAll("[^0-9]", "");
+                        String id = pag.getArquivo().replaceAll("\\D", "");
                         ECF.enviar(EComandoECF.ECF_FechaRelatorio);
                         TEF.confirmarTransacao(id, true);
 

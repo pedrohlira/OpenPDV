@@ -12,8 +12,10 @@ import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
+import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
+import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.GenericType;
@@ -47,27 +49,48 @@ public class ComandoReceberDados implements IComando {
     public void executar() throws OpenPdvException {
         EntityManagerFactory emf = null;
         EntityManager em = null;
+        WebResource wr;
 
         try {
             emf = Conexao.getInstancia();
             em = emf.createEntityManager();
-            em.getTransaction().begin();
-            WebResource wr;
 
             // atualiza os usuarios
             wr = Util.getRest(Util.getConfig().get("sinc.host") + "/usuario");
             List<SisUsuario> usuarios = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<SisUsuario>>() {
             });
+            
+            em.getTransaction().begin();
             for (SisUsuario usu : usuarios) {
                 usu.setSisUsuarioLogin(Util.normaliza(usu.getSisUsuarioLogin()));
                 service.salvar(em, usu);
             }
-            log.debug("Dados usuarios recebidos");
+            em.getTransaction().commit();
+            log.debug("Dados usuarios recebidos -> " + usuarios.size());
+
+            // atualiza os clientes
+            Date daCli = (Date) service.buscar(new SisCliente(), "sisClienteData", EBusca.MAXIMO, null);
+            wr = Util.getRest(Util.getConfig().get("sinc.host") + "/cliente");
+            List<SisCliente> clientes = wr.queryParam("data", Util.getDataHora(daCli)).accept(MediaType.APPLICATION_JSON).get(new GenericType<List<SisCliente>>() {
+            });
+            
+            em.getTransaction().begin();
+            for (SisCliente cli : clientes) {
+                try {
+                    service.salvar(em, cli);
+                } catch (Exception ex) {
+                    // caso exista duplicidade nao salva
+                }
+            }
+            em.getTransaction().commit();
+            log.debug("Dados clientes recebidos -> " + clientes.size());
 
             // atualiza os tipos de pagamento
             wr = Util.getRest(Util.getConfig().get("sinc.host") + "/tipo_pagamento/");
             List<EcfPagamentoTipo> tiposPagamento = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<EcfPagamentoTipo>>() {
             });
+            
+            em.getTransaction().begin();
             for (EcfPagamentoTipo tipo : tiposPagamento) {
                 // Identifica se a forma de pagamento e uma das 3 permitidas [Dinheiro, Cheque ou Cartao (TEF = true)]
                 if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("dinheiro")) {
@@ -81,16 +104,19 @@ public class ComandoReceberDados implements IComando {
                     service.salvar(em, tipo);
                 }
             }
-            log.debug("Dados tipos pagamento recebidos");
+            em.getTransaction().commit();
+            log.debug("Dados tipos pagamento recebidos -> " + tiposPagamento.size());
 
             // atualiza as embalagens
             wr = Util.getRest(Util.getConfig().get("sinc.host") + "/embalagem");
             List<ProdEmbalagem> embalagens = wr.accept(MediaType.APPLICATION_JSON).get(new GenericType<List<ProdEmbalagem>>() {
             });
+            
+            em.getTransaction().begin();
             for (ProdEmbalagem emb : embalagens) {
                 service.salvar(em, emb);
             }
-            log.debug("Dados embalagens recebidos");
+            log.debug("Dados embalagens recebidos -> " + embalagens.size());
             em.getTransaction().commit();
 
             // recupera os novos produtos
@@ -99,11 +125,11 @@ public class ComandoReceberDados implements IComando {
             List<ProdProduto> novos;
             List<ProdPreco> precos = new ArrayList<>();
             List<ProdComposicao> comps = new ArrayList<>();
+            List<ProdGrade> grades = new ArrayList<>();
 
             // parametros
-            Integer maxId = (Integer) service.buscar(new ProdProduto(), "prodProdutoId", EBusca.MAXIMO, null);
-            Date da = (Date) service.buscar(new ProdProduto(), "prodProdutoAlterado", EBusca.MAXIMO, null);
             MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
+            Integer maxId = (Integer) service.buscar(new ProdProduto(), "prodProdutoId", EBusca.MAXIMO, null);
             mm.putSingle("id", maxId != null ? maxId.toString() : "0");
             mm.putSingle("limite", String.valueOf(limite));
 
@@ -125,10 +151,15 @@ public class ComandoReceberDados implements IComando {
                             pc.setProdProdutoPrincipal(prod);
                             comps.add(pc);
                         }
+                        for(ProdGrade pg : prod.getProdGrades()){
+                            pg.setProdProduto(prod);
+                            grades.add(pg);
+                        }
 
                         // salva o produto
                         prod.setProdPrecos(null);
                         prod.setProdComposicoes(null);
+                        prod.setProdGrades(null);
                         prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
                         service.salvar(em, prod);
                     } catch (Exception ex) {
@@ -136,7 +167,6 @@ public class ComandoReceberDados implements IComando {
                     }
                 }
                 em.getTransaction().commit();
-
                 log.debug("Dados dos produtos novos recebidos da pagina " + pagina);
                 pagina++;
             } while (novos.size() == limite);
@@ -150,12 +180,20 @@ public class ComandoReceberDados implements IComando {
                     log.error("Nao salvou o preco do produto com ID = " + preco.getProdProduto().getProdProdutoId(), ex);
                 }
             }
-            // salva os itens apos salvar todos os produtos.
+            // salva os itens
             for (ProdComposicao comp : comps) {
                 try {
                     service.salvar(em, comp);
                 } catch (Exception ex) {
                     log.error("Nao salvou a composicao do produto com ID = " + comp.getProdProduto().getProdProdutoId(), ex);
+                }
+            }
+            // salva as grades 
+            for(ProdGrade grade : grades){
+                try {
+                    service.salvar(em, grade);
+                } catch (Exception ex) {
+                    log.error("Nao salvou a grade do produto com ID = " + grade.getProdProduto().getProdProdutoId(), ex);
                 }
             }
             em.getTransaction().commit();
@@ -164,7 +202,8 @@ public class ComandoReceberDados implements IComando {
             pagina = 0;
             List<ProdProduto> atualizados;
             mm.clear();
-            mm.putSingle("data", Util.getDataHora(da));
+            Date da = (Date) service.buscar(new ProdProduto(), "prodProdutoAlterado", EBusca.MAXIMO, null);
+            mm.putSingle("data", Util.getData(da));
             mm.putSingle("limite", String.valueOf(limite));
 
             do {
@@ -181,6 +220,8 @@ public class ComandoReceberDados implements IComando {
                         prod.setProdPrecos(null);
                         comps = prod.getProdComposicoes();
                         prod.setProdComposicoes(null);
+                        grades = prod.getProdGrades();
+                        prod.setProdGrades(null);
 
                         // salva o produto
                         prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
@@ -207,15 +248,25 @@ public class ComandoReceberDados implements IComando {
                                 service.salvar(em, comp);
                             }
                         }
+                        
+                        // salva as grades
+                        if(!grades.isEmpty()){
+                            FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
+                            Sql sql = new Sql(new ProdGrade(), EComandoSQL.EXCLUIR, fo);
+                            service.executar(em, sql);
+                            for (ProdGrade grade : grades) {
+                                grade.setProdProduto(prod);
+                                service.salvar(em, grade);
+                            }
+                        }
                     } catch (Exception ex) {
                         log.error("Nao atualizou o produto com ID = " + prod.getProdProdutoId(), ex);
                     }
                 }
                 em.getTransaction().commit();
-
                 log.debug("Dados dos produtos atualizados recebidos da pagina " + pagina);
                 pagina++;
-            } while (novos.size() == limite);
+            } while (atualizados.size() == limite);
 
             // se sucesso atualiza no arquivo a data do ultimo recebimento
             PAF.AUXILIAR.setProperty("out.recebimento", Util.getDataHora(new Date()));

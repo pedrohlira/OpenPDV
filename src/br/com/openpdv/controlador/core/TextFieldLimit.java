@@ -42,7 +42,7 @@ public class TextFieldLimit extends PlainDocument {
         }
 
         if(numeros){
-            str = str.replaceAll("[^0-9]", "");
+            str = str.replaceAll("\\D", "");
         }
         
         if ((getLength() + str.length()) <= limit) {

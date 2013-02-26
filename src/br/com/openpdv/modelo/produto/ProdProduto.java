@@ -65,6 +65,8 @@ public class ProdProduto extends Dados implements Serializable {
     private List<ProdPreco> prodPrecos;
     @OneToMany(mappedBy = "prodProdutoPrincipal", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<ProdComposicao> prodComposicoes;
+    @OneToMany(mappedBy = "prodProduto", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    private List<ProdGrade> prodGrades;
 
     /**
      * Construtor padrao
@@ -83,7 +85,8 @@ public class ProdProduto extends Dados implements Serializable {
         this.prodProdutoId = prodProdutoId;
         this.setTipoLetra(ELetra.GRANDE);
         Colecao col = new Colecao("ProdPreco", "t.prodPrecos", "LEFT JOIN", "t1");
-        this.setColecao(new Colecao[]{col});
+        Colecao col1 = new Colecao("ProdGrade", "t.prodGrades", "LEFT JOIN", "t2");
+        this.setColecao(new Colecao[]{col, col1});
     }
 
     @Override
@@ -263,5 +266,13 @@ public class ProdProduto extends Dados implements Serializable {
 
     public void setProdPrecos(List<ProdPreco> prodPrecos) {
         this.prodPrecos = prodPrecos;
+    }
+
+    public List<ProdGrade> getProdGrades() {
+        return prodGrades;
+    }
+
+    public void setProdGrades(List<ProdGrade> prodGrades) {
+        this.prodGrades = prodGrades;
     }
 }

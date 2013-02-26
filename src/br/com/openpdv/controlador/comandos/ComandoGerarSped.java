@@ -14,6 +14,7 @@ import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.nfe.TNFe;
 import br.com.openpdv.nfe.TNFe.InfNFe.Det;
 import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
+import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
 import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS00;
 import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS10;
 import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS20;
@@ -87,15 +88,9 @@ public class ComandoGerarSped implements IComando {
 
     @Override
     public void executar() throws OpenPdvException {
-        // ajustando a data fim para documento, pois o mesmo usa datetime
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(fim);
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        fim = cal.getTime();
-        
         // recupera as nfes emitidas no periodo
         FiltroData fd1 = new FiltroData("ecfNotaEletronicaData", ECompara.MAIOR_IGUAL, inicio);
-        FiltroData fd2 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR, fim);
+        FiltroData fd2 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR_IGUAL, fim);
         GrupoFiltro gp1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
         EcfNotaEletronica ene = new EcfNotaEletronica();
         ene.setOrdemDirecao(EDirecao.ASC);
@@ -103,7 +98,7 @@ public class ComandoGerarSped implements IComando {
 
         // recupera as notas emitidas no periodo
         FiltroData fd3 = new FiltroData("ecfNotaData", ECompara.MAIOR_IGUAL, inicio);
-        FiltroData fd4 = new FiltroData("ecfNotaData", ECompara.MENOR, fim);
+        FiltroData fd4 = new FiltroData("ecfNotaData", ECompara.MENOR_IGUAL, fim);
         GrupoFiltro gp2 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
         EcfNota en = new EcfNota();
         en.setOrdemDirecao(EDirecao.ASC);
@@ -111,14 +106,14 @@ public class ComandoGerarSped implements IComando {
 
         // recupera as leituras Z no periodo
         FiltroData fd7 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
-        FiltroData fd8 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
+        FiltroData fd8 = new FiltroData("ecfZMovimento", ECompara.MENOR_IGUAL, fim);
         GrupoFiltro gf4 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd7, fd8});
         EcfZ ez = new EcfZ();
         ez.setOrdemDirecao(EDirecao.ASC);
         zs = service.selecionar(ez, 0, 0, gf4);
 
         // recupera os produtos com estoque maior que zero
-        FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.DIFERENTE, 0);
+        FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.MAIOR, 0);
         ProdProduto pp = new ProdProduto();
         pp.setCampoOrdem("prodProdutoId");
         estoque = service.selecionar(pp, 0, 0, fn);
@@ -186,20 +181,16 @@ public class ComandoGerarSped implements IComando {
         Map<Integer, Dados0220> l220 = new HashMap<>();
         // notas eletronicas
         for (EcfNotaEletronica nfe : nfes) {
-            if (nfe.getSisCliente() != null) {
-                // clientes
-                if (!l150.containsKey(nfe.getSisCliente().getId())) {
-                    l150.put(nfe.getSisCliente().getId(), getDados150(nfe.getSisCliente()));
-                }
+            // clientes
+            if (!l150.containsKey(nfe.getSisCliente().getId())) {
+                l150.put(nfe.getSisCliente().getId(), getDados150(nfe.getSisCliente()));
             }
         }
         // notas de consumidor
         for (EcfNota nota : notas) {
-            if (nota.getSisCliente() != null) {
-                // clientes
-                if (!l150.containsKey(nota.getSisCliente().getId())) {
-                    l150.put(nota.getSisCliente().getId(), getDados150(nota.getSisCliente()));
-                }
+            // clientes
+            if (!l150.containsKey(nota.getSisCliente().getId())) {
+                l150.put(nota.getSisCliente().getId(), getDados150(nota.getSisCliente()));
             }
             if (!nota.isEcfNotaCancelada()) {
                 for (EcfNotaProduto np : nota.getEcfNotaProdutos()) {
@@ -221,12 +212,6 @@ public class ComandoGerarSped implements IComando {
         // cupom fiscais
         for (EcfZ z : zs) {
             for (EcfVenda venda : z.getEcfVendas()) {
-                if (venda.getSisCliente() != null) {
-                    // clientes
-                    if (!l150.containsKey(venda.getSisCliente().getId())) {
-                        l150.put(venda.getSisCliente().getId(), getDados150(venda.getSisCliente()));
-                    }
-                }
                 if (!venda.getEcfVendaCancelada()) {
                     for (EcfVendaProduto vp : venda.getEcfVendaProdutos()) {
                         if (!vp.getEcfVendaProdutoCancelado()) {
@@ -270,9 +255,6 @@ public class ComandoGerarSped implements IComando {
         linhas += bl0.getD0200().size();
         bl0.setD0220(new ArrayList<>(l220.values()));
         linhas += bl0.getD0220().size();
-        // Registro 0400
-        bl0.setD0400(getDados400());
-        linhas++;
         // Registro 0450
         bl0.setD0450(getDados450());
         linhas++;
@@ -382,16 +364,6 @@ public class ComandoGerarSped implements IComando {
         d220.setFat_conv(emb.getProdEmbalagemUnidade());
         Util.normaliza(d220);
         return d220;
-    }
-
-    private List<Dados0400> getDados400() {
-        List<Dados0400> l400 = new ArrayList<>();
-        Dados0400 d400 = new Dados0400();
-        d400.setCod_nat("1");
-        d400.setDescr_nat("VENDA DE MERCADORIAS");
-        l400.add(d400);
-        Util.normaliza(d400);
-        return l400;
     }
 
     private List<Dados0450> getDados450() {
@@ -563,131 +535,104 @@ public class ComandoGerarSped implements IComando {
         c170.setCfop(Integer.valueOf(prod.getCFOP()));
 
         try {
+            ICMS icms = dados.getImposto().getICMS();
             if (Util.getConfig().get("nfe.crt").equals("1")) {
-                ICMSSN101 icms101 = dados.getImposto().getICMS().getICMSSN101();
-                if (icms101 != null) {
-                    c170.setCst_icms(icms101.getCSOSN());
-                    c170.setVl_bc_icms(c170.getVl_item());
-                    c170.setAliq_icms(Double.valueOf(icms101.getPCredSN()));
-                    c170.setVl_icms(Double.valueOf(icms101.getVCredICMSSN()));
-                } else {
-                    ICMSSN102 icms102 = dados.getImposto().getICMS().getICMSSN102();
-                    if (icms102 != null) {
-                        c170.setCst_icms(icms102.getCSOSN());
+                // verifica qual icms CSON foi usado
+                if (icms.getICMSSN101() != null) {
+                    c170.setCst_icms(icms.getICMSSN101().getCSOSN());
+                    c170.setVl_bc_icms(0.00);
+                    c170.setAliq_icms(0.00);
+                    c170.setVl_icms(0.00);
+                } else if (icms.getICMSSN102() != null) {
+                    c170.setCst_icms(icms.getICMSSN102().getCSOSN());
+                    c170.setVl_bc_icms(0.00);
+                    c170.setAliq_icms(0.00);
+                    c170.setVl_icms(0.00);
+                } else if (icms.getICMSSN201() != null) {
+                    c170.setCst_icms(icms.getICMSSN201().getCSOSN());
+                    c170.setVl_bc_icms_st(Double.valueOf(icms.getICMSSN201().getVBCST()));
+                    c170.setAliq_st(Double.valueOf(icms.getICMSSN201().getPICMSST()));
+                    c170.setVl_icms_st(Double.valueOf(icms.getICMSSN201().getVICMSST()));
+                } else if (icms.getICMSSN202() != null) {
+                    c170.setCst_icms(icms.getICMSSN202().getCSOSN());
+                    c170.setVl_bc_icms_st(Double.valueOf(icms.getICMSSN202().getVBCST()));
+                    c170.setAliq_st(Double.valueOf(icms.getICMSSN202().getPICMSST()));
+                    c170.setVl_icms_st(Double.valueOf(icms.getICMSSN202().getVICMSST()));
+                } else if (icms.getICMSSN500() != null) {
+                    c170.setCst_icms(icms.getICMSSN500().getCSOSN());
+                    c170.setVl_bc_icms_st(Double.valueOf(icms.getICMSSN500().getVBCSTRet()));
+                    c170.setVl_icms_st(Double.valueOf(icms.getICMSSN500().getVICMSSTRet()));
+                    c170.setAliq_st(c170.getVl_icms_st() * 100 / c170.getVl_bc_icms_st());
+                } else if (icms.getICMSSN900() != null) {
+                    c170.setCst_icms(icms.getICMSSN900().getCSOSN());
+                    if (icms.getICMSSN900().getModBC() != null) {
+                        c170.setVl_bc_icms(Double.valueOf(icms.getICMSSN900().getVBC()));
+                        c170.setAliq_icms(Double.valueOf(icms.getICMSSN900().getPICMS()));
+                        c170.setVl_icms(Double.valueOf(icms.getICMSSN900().getVICMS()));
                     } else {
-                        ICMSSN201 icms201 = dados.getImposto().getICMS().getICMSSN201();
-                        if (icms201 != null) {
-                            c170.setCst_icms(icms201.getCSOSN());
-                            c170.setVl_bc_icms_st(Double.valueOf(icms201.getVBCST()));
-                            c170.setAliq_st(Double.valueOf(icms201.getPICMSST()));
-                            c170.setVl_icms_st(Double.valueOf(icms201.getVICMSST()));
-                        } else {
-                            ICMSSN202 icms202 = dados.getImposto().getICMS().getICMSSN202();
-                            if (icms202 != null) {
-                                c170.setCst_icms(icms202.getCSOSN());
-                                c170.setVl_bc_icms_st(Double.valueOf(icms202.getVBCST()));
-                                c170.setAliq_st(Double.valueOf(icms202.getPICMSST()));
-                                c170.setVl_icms_st(Double.valueOf(icms202.getVICMSST()));
-                            } else {
-                                ICMSSN500 icms500 = dados.getImposto().getICMS().getICMSSN500();
-                                if (icms500 != null) {
-                                    c170.setCst_icms(icms500.getCSOSN());
-                                    c170.setVl_bc_icms_st(Double.valueOf(icms500.getVBCSTRet()));
-                                    c170.setVl_icms_st(Double.valueOf(icms500.getVICMSSTRet()));
-                                    c170.setAliq_st(c170.getVl_icms_st() * 100 / c170.getVl_bc_icms_st());
-                                } else {
-                                    ICMSSN900 icms900 = dados.getImposto().getICMS().getICMSSN900();
-                                    c170.setCst_icms(icms900.getCSOSN());
-                                    if (icms900.getModBC() != null) {
-                                        c170.setVl_bc_icms(Double.valueOf(icms900.getVBC()));
-                                        c170.setAliq_icms(Double.valueOf(icms900.getPICMS()));
-                                        c170.setVl_icms(Double.valueOf(icms900.getVICMS()));
-                                    } else {
-                                        c170.setVl_bc_icms(Double.valueOf(icms900.getVBCST()));
-                                        c170.setAliq_icms(Double.valueOf(icms900.getPICMSST()));
-                                        c170.setVl_icms(Double.valueOf(icms900.getVICMSST()));
-                                    }
-                                }
-                            }
-                        }
+                        c170.setVl_bc_icms(Double.valueOf(icms.getICMSSN900().getVBCST()));
+                        c170.setAliq_icms(Double.valueOf(icms.getICMSSN900().getPICMSST()));
+                        c170.setVl_icms(Double.valueOf(icms.getICMSSN900().getVICMSST()));
                     }
                 }
             } else {
-                ICMS00 icms00 = dados.getImposto().getICMS().getICMS00();
-                if (icms00 != null) {
-                    c170.setCst_icms("0" + icms00.getCST());
-                    c170.setVl_bc_icms(Double.valueOf(icms00.getVBC()));
-                    c170.setAliq_icms(Double.valueOf(icms00.getPICMS()));
-                    c170.setVl_icms(Double.valueOf(icms00.getVICMS()));
-                } else {
-                    ICMS10 icms10 = dados.getImposto().getICMS().getICMS10();
-                    if (icms10 != null) {
-                        c170.setCst_icms("0" + icms10.getCST());
-                        c170.setVl_bc_icms_st(Double.valueOf(icms10.getVBCST()));
-                        c170.setAliq_st(Double.valueOf(icms10.getPICMSST()));
-                        c170.setVl_icms_st(Double.valueOf(icms10.getVICMSST()));
+                // verifica qual icms CST foi usado
+                if (icms.getICMS00() != null) {
+                    c170.setCst_icms("0" + icms.getICMS00().getCST());
+                    c170.setVl_bc_icms(Double.valueOf(icms.getICMS00().getVBC()));
+                    c170.setAliq_icms(Double.valueOf(icms.getICMS00().getPICMS()));
+                    c170.setVl_icms(Double.valueOf(icms.getICMS00().getVICMS()));
+                } else if (icms.getICMS10() != null) {
+                    c170.setCst_icms("0" + icms.getICMS10().getCST());
+                    c170.setVl_bc_icms_st(Double.valueOf(icms.getICMS10().getVBCST()));
+                    c170.setAliq_st(Double.valueOf(icms.getICMS10().getPICMSST()));
+                    c170.setVl_icms_st(Double.valueOf(icms.getICMS10().getVICMSST()));
+                } else if (icms.getICMS20() != null) {
+                    c170.setCst_icms("0" + icms.getICMS20().getCST());
+                    c170.setVl_bc_icms(Double.valueOf(icms.getICMS20().getVBC()));
+                    c170.setAliq_icms(Double.valueOf(icms.getICMS20().getPICMS()));
+                    c170.setVl_icms(Double.valueOf(icms.getICMS20().getVICMS()));
+                } else if (icms.getICMS30() != null) {
+                    c170.setCst_icms("0" + icms.getICMS30().getCST());
+                    c170.setVl_bc_icms_st(Double.valueOf(icms.getICMS30().getVBCST()));
+                    c170.setAliq_st(Double.valueOf(icms.getICMS30().getPICMSST()));
+                    c170.setVl_icms_st(Double.valueOf(icms.getICMS30().getVICMSST()));
+                } else if (icms.getICMS40() != null) {
+                    c170.setCst_icms("0" + icms.getICMS40().getCST());
+                    c170.setVl_bc_icms(0.00);
+                    c170.setAliq_icms(0.00);
+                    c170.setVl_icms(0.00);
+                } else if (icms.getICMS51() != null) {
+                    c170.setCst_icms("0" + icms.getICMS51().getCST());
+                    c170.setVl_bc_icms(Double.valueOf(icms.getICMS51().getVBC()));
+                    c170.setAliq_icms(Double.valueOf(icms.getICMS51().getPICMS()));
+                    c170.setVl_icms(Double.valueOf(icms.getICMS51().getVICMS()));
+                } else if (icms.getICMS60() != null) {
+                    c170.setCst_icms("0" + icms.getICMS60().getCST());
+                    c170.setVl_bc_icms_st(Double.valueOf(icms.getICMS60().getVBCSTRet()));
+                    c170.setAliq_st(c170.getVl_icms_st() * 100 / c170.getVl_bc_icms_st());
+                    c170.setVl_icms_st(Double.valueOf(icms.getICMS60().getVICMSSTRet()));
+                } else if (icms.getICMS70() != null) {
+                    c170.setCst_icms("0" + icms.getICMS70().getCST());
+                    if (icms.getICMS70().getModBC() != null) {
+                        c170.setVl_bc_icms(Double.valueOf(icms.getICMS70().getVBC()));
+                        c170.setAliq_icms(Double.valueOf(icms.getICMS70().getPICMS()));
+                        c170.setVl_icms(Double.valueOf(icms.getICMS70().getVICMS()));
                     } else {
-                        ICMS20 icms20 = dados.getImposto().getICMS().getICMS20();
-                        if (icms20 != null) {
-                            c170.setCst_icms("0" + icms20.getCST());
-                            c170.setVl_bc_icms(Double.valueOf(icms20.getVBC()));
-                            c170.setAliq_icms(Double.valueOf(icms20.getPICMS()));
-                            c170.setVl_icms(Double.valueOf(icms20.getVICMS()));
-                        } else {
-                            ICMS30 icms30 = dados.getImposto().getICMS().getICMS30();
-                            if (icms30 != null) {
-                                c170.setCst_icms("0" + icms30.getCST());
-                                c170.setVl_bc_icms_st(Double.valueOf(icms30.getVBCST()));
-                                c170.setAliq_st(Double.valueOf(icms30.getPICMSST()));
-                                c170.setVl_icms_st(Double.valueOf(icms30.getVICMSST()));
-                            } else {
-                                ICMS40 icms40 = dados.getImposto().getICMS().getICMS40();
-                                if (icms40 != null) {
-                                    c170.setCst_icms("0" + icms40.getCST());
-                                } else {
-                                    ICMS51 icms51 = dados.getImposto().getICMS().getICMS51();
-                                    if (icms51 != null) {
-                                        c170.setCst_icms("0" + icms51.getCST());
-                                        c170.setVl_bc_icms(Double.valueOf(icms51.getVBC()));
-                                        c170.setAliq_icms(Double.valueOf(icms51.getPICMS()));
-                                        c170.setVl_icms(Double.valueOf(icms51.getVICMS()));
-                                    } else {
-                                        ICMS60 icms60 = dados.getImposto().getICMS().getICMS60();
-                                        if (icms60 != null) {
-                                            c170.setCst_icms("0" + icms60.getCST());
-                                            c170.setVl_bc_icms_st(Double.valueOf(icms60.getVBCSTRet()));
-                                            c170.setVl_icms_st(Double.valueOf(icms60.getVICMSSTRet()));
-                                        } else {
-                                            ICMS70 icms70 = dados.getImposto().getICMS().getICMS70();
-                                            if (icms70 != null) {
-                                                c170.setCst_icms("0" + icms70.getCST());
-                                                if (icms70.getModBC() != null) {
-                                                    c170.setVl_bc_icms(Double.valueOf(icms70.getVBC()));
-                                                    c170.setAliq_icms(Double.valueOf(icms70.getPICMS()));
-                                                    c170.setVl_icms(Double.valueOf(icms70.getVICMS()));
-                                                } else {
-                                                    c170.setVl_bc_icms_st(Double.valueOf(icms70.getVBCST()));
-                                                    c170.setVl_icms_st(Double.valueOf(icms70.getVICMSST()));
-                                                    c170.setAliq_st(Double.valueOf(icms70.getPICMSST()));
-                                                }
-                                            } else {
-                                                ICMS90 icms90 = dados.getImposto().getICMS().getICMS90();
-                                                c170.setCst_icms("0" + icms90.getCST());
-                                                if (icms90.getModBC() != null) {
-                                                    c170.setVl_bc_icms(Double.valueOf(icms90.getVBC()));
-                                                    c170.setAliq_icms(Double.valueOf(icms90.getPICMS()));
-                                                    c170.setVl_icms(Double.valueOf(icms90.getVICMS()));
-                                                } else {
-                                                    c170.setVl_bc_icms_st(Double.valueOf(icms90.getVBCST()));
-                                                    c170.setVl_icms_st(Double.valueOf(icms90.getVICMSST()));
-                                                    c170.setAliq_st(Double.valueOf(icms90.getPICMSST()));
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        c170.setVl_bc_icms_st(Double.valueOf(icms.getICMS70().getVBCST()));
+                        c170.setVl_icms_st(Double.valueOf(icms.getICMS70().getVICMSST()));
+                        c170.setAliq_st(Double.valueOf(icms.getICMS70().getPICMSST()));
+                    }
+                } else if (icms.getICMS90() != null) {
+                    c170.setCst_icms("0" + icms.getICMS90().getCST());
+                    if (icms.getICMS90().getModBC() != null) {
+                        c170.setVl_bc_icms(Double.valueOf(icms.getICMS90().getVBC()));
+                        c170.setAliq_icms(Double.valueOf(icms.getICMS90().getPICMS()));
+                        c170.setVl_icms(Double.valueOf(icms.getICMS90().getVICMS()));
+                    } else {
+                        c170.setVl_bc_icms_st(Double.valueOf(icms.getICMS90().getVBCST()));
+                        c170.setVl_icms_st(Double.valueOf(icms.getICMS90().getVICMSST()));
+                        c170.setAliq_st(Double.valueOf(icms.getICMS90().getPICMSST()));
                     }
                 }
             }
@@ -788,6 +733,8 @@ public class ComandoGerarSped implements IComando {
         List<DadosC190> lc190 = new ArrayList<>();
         for (Entry<String, List<DadosC170>> entry : analitico.entrySet()) {
             DadosC190 c190 = new DadosC190();
+            c190.setVl_ipi(0.00);
+            c190.setCod_obs("");
             for (DadosC170 c170 : entry.getValue()) {
                 c190.setCst_icms(c170.getCst_icms());
                 c190.setCfop(c170.getCfop());
@@ -797,8 +744,6 @@ public class ComandoGerarSped implements IComando {
                 c190.setVl_icms(c190.getVl_icms() + c170.getVl_icms());
                 c190.setVl_bc_icms_st(c190.getVl_bc_icms_st() + c170.getVl_bc_icms_st());
                 c190.setVl_icms_st(c190.getVl_icms_st() + c170.getVl_icms_st());
-                c190.setVl_ipi(0.00);
-                c190.setCod_obs("");
             }
             lc190.add(c190);
         }
@@ -887,6 +832,7 @@ public class ComandoGerarSped implements IComando {
 
         for (Entry<String, List<EcfNotaProduto>> entry : analitico.entrySet()) {
             DadosC320 c320 = new DadosC320();
+            c320.setCod_obs("");
             Map<Integer, List<EcfNotaProduto>> produtos = new HashMap<>();
 
             for (EcfNotaProduto np : entry.getValue()) {
@@ -895,7 +841,6 @@ public class ComandoGerarSped implements IComando {
                 c320.setCfop(prod.getProdProdutoTributacao() == 'F' ? 5403 : 5102);
                 c320.setAliq_icms(np.getEcfNotaProdutoIcms());
                 c320.setVl_opr(c320.getVl_opr() + np.getEcfNotaProdutoLiquido());
-                c320.setCod_obs("");
 
                 // agrupando os produtos pelo id
                 List<EcfNotaProduto> lista = produtos.get(prod.getId());
@@ -960,7 +905,7 @@ public class ComandoGerarSped implements IComando {
                 c350.setSub(nota.getEcfNotaSubserie());
                 c350.setNum_doc(nota.getEcfNotaNumero());
                 c350.setDt_doc(nota.getEcfNotaData());
-                c350.setCnpj_cpf(nota.getSisCliente() != null ? nota.getSisCliente().getSisClienteDoc() : "");
+                c350.setCnpj_cpf(nota.getSisCliente().getSisClienteDoc());
                 c350.setVl_merc(nota.getEcfNotaBruto());
                 c350.setVl_doc(nota.getEcfNotaLiquido());
                 c350.setVl_desc(nota.getEcfNotaDesconto());
@@ -1020,18 +965,17 @@ public class ComandoGerarSped implements IComando {
 
         for (Entry<String, List<EcfNotaProduto>> entry : analitico.entrySet()) {
             DadosC390 c390 = new DadosC390();
+            c390.setCod_obs("");
             for (EcfNotaProduto np : entry.getValue()) {
                 ProdProduto prod = np.getProdProduto();
                 c390.setCst_icms(prod.getProdProdutoCstCson());
                 c390.setCfop(prod.getProdProdutoTributacao() == 'F' ? 5403 : 5102);
                 c390.setAliq_icms(prod.getProdProdutoIcms());
                 c390.setVl_opr(c390.getVl_opr() + np.getEcfNotaProdutoLiquido());
-                c390.setCod_obs("");
             }
-            if (c390.getAliq_icms() > 0) {
-                c390.setVl_bc_icms(c390.getVl_opr());
-                c390.setVl_icms(c390.getVl_opr() * c390.getAliq_icms() / 100);
-            }
+            c390.setVl_bc_icms(c390.getAliq_icms() > 0 ? c390.getVl_opr() : 0.00);
+            c390.setVl_icms(c390.getVl_bc_icms() * c390.getAliq_icms() / 100);
+            c390.setVl_red_bc(0.00);
             lc390.add(c390);
         }
 
@@ -1109,8 +1053,7 @@ public class ComandoGerarSped implements IComando {
         // recupera o valor liquido total vendido no dia
         double liquido = 0.00;
         for (EcfZTotais t : z.getEcfZTotais()) {
-            if (!t.getEcfZTotaisCodigo().equals("OPNF") && t.getEcfZTotaisCodigo().equals("DT")
-                    && t.getEcfZTotaisCodigo().equals("DS") && t.getEcfZTotaisCodigo().equals("Can-T") && t.getEcfZTotaisCodigo().equals("Can-S")) {
+            if (!t.getEcfZTotaisCodigo().equals("OPNF") && !t.getEcfZTotaisCodigo().startsWith("D") && !t.getEcfZTotaisCodigo().startsWith("C")) {
                 liquido += t.getEcfZTotaisValor();
             }
         }
@@ -1154,13 +1097,15 @@ public class ComandoGerarSped implements IComando {
 
         // agrupando os valores
         for (EcfVenda venda : z.getEcfVendas()) {
-            for (EcfVendaProduto prodVenda : venda.getEcfVendaProdutos()) {
-                EcfVendaProduto vp = m425.get(prodVenda.getProdProduto().getProdProdutoId());
-                if (vp == null) {
-                    m425.put(prodVenda.getProdProduto().getProdProdutoId(), prodVenda);
-                } else {
-                    vp.setEcfVendaProdutoQuantidade(vp.getEcfVendaProdutoQuantidade() + prodVenda.getEcfVendaProdutoQuantidade());
-                    vp.setEcfVendaProdutoTotal(vp.getEcfVendaProdutoTotal() + prodVenda.getEcfVendaProdutoTotal());
+            if (!venda.getEcfVendaCancelada()) {
+                for (EcfVendaProduto prodVenda : venda.getEcfVendaProdutos()) {
+                    EcfVendaProduto vp = m425.get(prodVenda.getProdProduto().getProdProdutoId());
+                    if (vp == null) {
+                        m425.put(prodVenda.getProdProduto().getProdProdutoId(), prodVenda);
+                    } else {
+                        vp.setEcfVendaProdutoQuantidade(vp.getEcfVendaProdutoQuantidade() + prodVenda.getEcfVendaProdutoQuantidade());
+                        vp.setEcfVendaProdutoTotal(vp.getEcfVendaProdutoTotal() + prodVenda.getEcfVendaProdutoTotal());
+                    }
                 }
             }
         }
@@ -1261,12 +1206,10 @@ public class ComandoGerarSped implements IComando {
                 c490.setCfop(c470.getCfop());
                 c490.setAliq_icms(c470.getAliq_icms());
                 c490.setVl_opr(c490.getVl_opr() + c470.getVl_item());
-                c490.setCod_obs("");
             }
-            if (c490.getAliq_icms() > 0) {
-                c490.setVl_bc_icms(c490.getVl_opr());
-                c490.setVl_icms(c490.getVl_bc_icms() * c490.getAliq_icms() / 100);
-            }
+            c490.setVl_bc_icms(c490.getAliq_icms() > 0 ? c490.getVl_opr() : 0.00);
+            c490.setVl_icms(c490.getVl_bc_icms() * c490.getAliq_icms() / 100);
+            c490.setCod_obs("");
             lc490.add(c490);
         }
         return lc490;
@@ -1318,7 +1261,7 @@ public class ComandoGerarSped implements IComando {
 
         // Registro H001
         DadosH001 dh1 = new DadosH001();
-        dh1.setInd_mov(estoque.size() > 0 ? 0 : 1);
+        dh1.setInd_mov(estoque.isEmpty() ? 1 : 0);
         blH.setdH001(dh1);
         linhas++;
 

@@ -31,6 +31,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
@@ -78,7 +79,6 @@ public class Splash extends JFrame {
 
         // abre uma thread para iniciar a aplicacao
         java.awt.EventQueue.invokeLater(new Runnable() {
-
             @Override
             public void run() {
                 splash = new Splash();
@@ -169,7 +169,6 @@ public class Splash extends JFrame {
 
         // abre uma thread para carregar as validacoes da aplicacao
         new Thread(new Runnable() {
-
             CoreService service;
 
             @Override
@@ -178,13 +177,36 @@ public class Splash extends JFrame {
                 try {
                     splash.pgBarra.setString("Conectando ao banco de dados...");
                     Conexao.getInstancia();
-                    // cria um objeto de manipulacao de dados e faz um backup do BD.
                     service = new CoreService();
+
+                    // realiza o backup do banco se preciso for
                     String back = Util.getConfig().get("openpdv.backup");
                     if (back == null || back.equals("")) {
-                        back = "db/backup.zip";
+                        back = "db/";
                     }
-                    service.executar("BACKUP TO '" + back + "'");
+
+                    String periodo = Util.getConfig().get("openpdv.backup.periodo");
+                    if (back == null || back.equals("")) {
+                        periodo = "mes";
+                    }
+
+                    SimpleDateFormat sdf;
+                    switch (periodo) {
+                        case "dia":
+                            sdf = new SimpleDateFormat("DDyyyy");
+                            break;
+                        case "semana":
+                            sdf = new SimpleDateFormat("wwyyyy");
+                            break;
+                        default:
+                            sdf = new SimpleDateFormat("MMyyyy");
+                            break;
+                    }
+                    back += String.format("backup_%s.zip", sdf.format(new Date()));
+                    File arquivo = new File(back);
+                    if (!arquivo.exists()) {
+                        service.executar("BACKUP TO '" + back + "'");
+                    }
                     splash.pgBarra.setValue(10);
                 } catch (Exception ex) {
                     log.error("Nao conseguiu conectar ao banco de dados.", ex);
@@ -210,7 +232,6 @@ public class Splash extends JFrame {
 
                 // verifica se existes atualizacoes da base de dados
                 FilenameFilter filtro = new FilenameFilter() {
-
                     @Override
                     public boolean accept(File dir, String name) {
                         return name.endsWith(".sql");
@@ -259,10 +280,22 @@ public class Splash extends JFrame {
                     PAF.descriptografar();
                     splash.pgBarra.setValue(30);
                 } catch (Exception ex) {
-                    login = false;
-                    log.error("Problemas ao ler o auxiliar.txt", ex);
-                    JOptionPane.showMessageDialog(splash, "Problemas com a leitura do arquivo auxiliar.\n"
-                            + "Informe ao administrador do sistema!", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    // caso tenha algum problema tenta recuperar usando o backup
+                    try {
+                        PAF.descriptografar("conf" + System.getProperty("file.separator") + "auxiliar.bak", PAF.AUXILIAR);
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(new Date());
+                        PAF.AUXILIAR.setProperty("out.recebimento", Util.getData(cal.getTime()));
+                        cal.add(Calendar.DAY_OF_MONTH, -1);
+                        PAF.AUXILIAR.setProperty("out.envio", Util.getData(cal.getTime()));
+                        PAF.AUXILIAR.setProperty("out.validade", Util.getData(cal.getTime()));
+                        JOptionPane.showMessageDialog(splash, "Backup do arquivo auxiliar recuperado, necessita validar o sistema!", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    } catch (Exception ex1) {
+                        login = false;
+                        log.error("Problemas ao ler o auxiliar.txt", ex);
+                        JOptionPane.showMessageDialog(splash, "Problemas com a leitura do arquivo auxiliar.\n"
+                                + "Informe ao administrador do sistema!", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    }
                 }
 
                 // recupera a empresa
@@ -284,7 +317,7 @@ public class Splash extends JFrame {
                 // gerando arquivoMD5.txt
                 try {
                     splash.pgBarra.setString("Gerando arquivoMD5.txt");
-                    gerarArquivos(empresa);
+                    PAF.gerarArquivos();
                     splash.pgBarra.setValue(40);
                 } catch (Exception ex) {
                     log.error("Problemas ao gerar o arquivoMD5.txt", ex);
@@ -389,11 +422,11 @@ public class Splash extends JFrame {
                         splash.pgBarra.setString("Validando GT do ECF...");
                         splash.pgBarra.setValue(80);
                         double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
-                        int cro = Integer.valueOf(PAF.AUXILIAR.getProperty("ecf.cro"));
-                        double novoGT = ECF.validarGT(gt, cro);
+                        double novoGT = ECF.validarGT(gt);
                         if (novoGT > 0.00) {
                             PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
                             PAF.criptografar();
+                            JOptionPane.showMessageDialog(splash, "Valor do GT recomposto no arquivo auxiliar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                         }
                     } catch (Exception ex) {
                         String msg = PAF.AUXILIAR.size() == 0 ? "Valor do GT do arquivo auxiliar não reconhecido!" : ex.getMessage();
@@ -513,46 +546,6 @@ public class Splash extends JFrame {
                 splash.dispose();
             }
         }).start();
-    }
-
-    /**
-     * Gere o arquivo com os arquivos autenticados.
-     *
-     * @throws Exception dispara caso nao consiga.
-     */
-    private void gerarArquivos(SisEmpresa empresa) throws Exception {
-        // cria o objeto modelo n1
-        N1 n1 = new N1();
-        n1.setCnpj(PAF.AUXILIAR.getProperty("sh.cnpj"));
-        n1.setIe(PAF.AUXILIAR.getProperty("sh.ie"));
-        n1.setIm(PAF.AUXILIAR.getProperty("sh.im"));
-        n1.setRazao(PAF.AUXILIAR.getProperty("sh.razao"));
-        // cria o objeto modelo n2
-        N2 n2 = new N2();
-        n2.setLaudo(PAF.AUXILIAR.getProperty("out.laudo"));
-        n2.setNome(PAF.AUXILIAR.getProperty("paf.nome"));
-        n2.setVersao(PAF.AUXILIAR.getProperty("paf.versao"));
-        // binario principal
-        N3 n3 = new N3();
-        n3.setNome("OpenPDV.jar");
-        StringBuilder principal = new StringBuilder(System.getProperty("user.dir"));
-        principal.append(System.getProperty("file.separator")).append("OpenPDV.jar");
-        n3.setMd5(PAF.gerarMD5(principal.toString()));
-        // cria a lista de n3
-        List<N3> listaN3 = new ArrayList<>();
-        listaN3.add(n3);
-        // cria o objeto modelo n9
-        N9 n9 = new N9();
-        n9.setCnpj(PAF.AUXILIAR.getProperty("sh.cnpj"));
-        n9.setIe(PAF.AUXILIAR.getProperty("sh.ie"));
-        n9.setTotal(listaN3.size());
-        // cria o modelo do anexo X
-        AnexoX anexoX = new AnexoX(n1, n2, listaN3, n9);
-        String md5Arquivo = PAF.gerarArquivos(anexoX);
-        if (!PAF.AUXILIAR.isEmpty()) {
-            PAF.AUXILIAR.setProperty("out.autenticado", md5Arquivo);
-            PAF.criptografar();
-        }
     }
 
     public JLabel getLblOpenPDV() {

@@ -101,10 +101,22 @@ public enum ECompara {
      */
     public static ECompara toCompara(String valor) {
         switch (valor.toLowerCase()) {
-            case "lt":
+            case "<>":
+                return DIFERENTE;
+            case "<":
                 return MENOR;
-            case "gt":
+            case "<=":
+                return MENOR_IGUAL;
+            case ">":
                 return MAIOR;
+            case ">=":
+                return MAIOR_IGUAL;
+            case "is null":
+                return NULO;
+            case "is empty":
+                return VAZIO;
+            case "like":
+                return CONTEM;
             default:
                 return IGUAL;
         }

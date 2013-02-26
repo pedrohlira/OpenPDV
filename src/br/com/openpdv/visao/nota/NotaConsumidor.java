@@ -47,11 +47,11 @@ public class NotaConsumidor extends javax.swing.JDialog {
     private DefaultTableModel dtmNota;
     private DefaultTableModel dtmProdutos;
     private CoreService service;
+    private SisCliente cliente;
     /**
      * Variavel que responde de modo assincrono a pesquisa de produto.
      */
     private AsyncCallback<ProdProduto> pesquisado = new AsyncCallback<ProdProduto>() {
-
         @Override
         public void sucesso(final ProdProduto prod) {
             if (prod == null) {
@@ -60,7 +60,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
             } else {
                 if (!prod.getProdPrecos().isEmpty()) {
                     Precos.getInstancia(new AsyncCallback<ProdPreco>() {
-
                         @Override
                         public void sucesso(ProdPreco preco) {
                             // se selecionou
@@ -141,7 +140,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
         dtmProdutos = (DefaultTableModel) tabProdutos.getModel();
         // escuta a selecao de linhas
         tabNotas.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 row = tabNotas.getSelectedRow();
@@ -150,7 +148,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
         });
         // escuta as alteracoes de valores de desc e qtd
         dtmProdutos.addTableModelListener(new TableModelListener() {
-
             @Override
             public void tableChanged(TableModelEvent e) {
                 int col = e.getColumn();
@@ -185,9 +182,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
         txtSerie.setDocument(new TextFieldLimit(3));
         txtSubSerie.setDocument(new TextFieldLimit(3));
         txtNumero.setDocument(new TextFieldLimit(6, true));
-        txtCpf.setDocument(new TextFieldLimit(18));
-        txtNome.setDocument(new TextFieldLimit(60));
-        txtEndereco.setDocument(new TextFieldLimit(60));
+        txtCPF_CNPJ.setDocument(new TextFieldLimit(18));
     }
 
     /**
@@ -219,12 +214,8 @@ public class NotaConsumidor extends javax.swing.JDialog {
         txtNumero = new javax.swing.JFormattedTextField();
         lblData = new javax.swing.JLabel();
         txtData = new javax.swing.JFormattedTextField();
-        lblCpf = new javax.swing.JLabel();
-        txtCpf = new javax.swing.JTextField();
-        lblNome = new javax.swing.JLabel();
-        txtNome = new javax.swing.JTextField();
-        lblEndereco = new javax.swing.JLabel();
-        txtEndereco = new javax.swing.JTextField();
+        lblCPF_CNPJ = new javax.swing.JLabel();
+        txtCPF_CNPJ = new javax.swing.JTextField();
         lblBruto = new javax.swing.JLabel();
         txtBruto = new javax.swing.JFormattedTextField();
         lblDesconto = new javax.swing.JLabel();
@@ -252,20 +243,21 @@ public class NotaConsumidor extends javax.swing.JDialog {
         spNotas.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         spNotas.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
+        tabNotas.setAutoCreateRowSorter(true);
         tabNotas.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabNotas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Cod", "Série", "Sub-Série", "Número", "Data", "CPF/CNPJ", "Nome", "Endereço", "Bruto", "Desconto", "Líquido", "PIS", "COFINS", "Cancelada"
+                "Cod", "Série", "Sub-Série", "Número", "Data", "CPF/CNPJ", "Nome", "Bruto", "Desconto", "Líquido", "PIS", "COFINS", "Cancelada"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -276,7 +268,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabNotas.setAutoCreateRowSorter(true);
         tabNotas.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabNotas.setRowHeight(20);
         tabNotas.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -299,19 +290,17 @@ public class NotaConsumidor extends javax.swing.JDialog {
         tabNotas.getColumnModel().getColumn(6).setResizable(false);
         tabNotas.getColumnModel().getColumn(6).setPreferredWidth(100);
         tabNotas.getColumnModel().getColumn(7).setResizable(false);
-        tabNotas.getColumnModel().getColumn(7).setPreferredWidth(100);
+        tabNotas.getColumnModel().getColumn(7).setPreferredWidth(75);
         tabNotas.getColumnModel().getColumn(8).setResizable(false);
         tabNotas.getColumnModel().getColumn(8).setPreferredWidth(75);
         tabNotas.getColumnModel().getColumn(9).setResizable(false);
         tabNotas.getColumnModel().getColumn(9).setPreferredWidth(75);
         tabNotas.getColumnModel().getColumn(10).setResizable(false);
-        tabNotas.getColumnModel().getColumn(10).setPreferredWidth(75);
+        tabNotas.getColumnModel().getColumn(10).setPreferredWidth(50);
         tabNotas.getColumnModel().getColumn(11).setResizable(false);
         tabNotas.getColumnModel().getColumn(11).setPreferredWidth(50);
         tabNotas.getColumnModel().getColumn(12).setResizable(false);
-        tabNotas.getColumnModel().getColumn(12).setPreferredWidth(50);
-        tabNotas.getColumnModel().getColumn(13).setResizable(false);
-        tabNotas.getColumnModel().getColumn(13).setPreferredWidth(75);
+        tabNotas.getColumnModel().getColumn(12).setPreferredWidth(75);
 
         lblSerie.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblSerie.setText("Série:");
@@ -338,23 +327,16 @@ public class NotaConsumidor extends javax.swing.JDialog {
         txtData.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
         txtData.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
-        lblCpf.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        lblCpf.setText("CPF:");
+        lblCPF_CNPJ.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblCPF_CNPJ.setText("CPF/CNPJ:");
 
-        txtCpf.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        txtCpf.setToolTipText("Digite o CPF ou CNPJ do cliente.");
-
-        lblNome.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        lblNome.setText("Nome:");
-
-        txtNome.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        txtNome.setToolTipText("Digite o CPF ou CNPJ do cliente.");
-
-        lblEndereco.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        lblEndereco.setText("Endereço:");
-
-        txtEndereco.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        txtEndereco.setToolTipText("Digite o CPF ou CNPJ do cliente.");
+        txtCPF_CNPJ.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtCPF_CNPJ.setToolTipText("Digite o CPF ou CNPJ do cliente.");
+        txtCPF_CNPJ.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtCPF_CNPJFocusLost(evt);
+            }
+        });
 
         lblBruto.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblBruto.setText("Bruto:");
@@ -533,83 +515,71 @@ public class NotaConsumidor extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(spNotas)
-                    .add(separador1)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, spProdutos)
-                    .add(separador2)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(layout.createSequentialGroup()
                         .add(0, 0, Short.MAX_VALUE)
                         .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(layout.createSequentialGroup()
+                    .add(separador2)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                            .add(layout.createSequentialGroup()
+                                .add(lblSerie)
+                                .add(11, 11, 11)
+                                .add(txtSerie, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 47, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblSubSerie))
+                            .add(layout.createSequentialGroup()
+                                .add(lblBruto)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                                .add(txtBruto)))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(layout.createSequentialGroup()
+                                .add(lblDesconto)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtDesconto, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 119, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblLiquido)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtLiquido, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE))
+                            .add(layout.createSequentialGroup()
+                                .add(txtSubSerie, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 47, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblNumero)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 72, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblData)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtData, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 84, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblCPF_CNPJ)))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(layout.createSequentialGroup()
+                                .add(lblPIS)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtPIS, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 123, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblCOFINS)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtCOFINS, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 126, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)))
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
                         .add(btnAdicionar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(6, 6, 6)
                         .add(btnRemover, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(0, 0, Short.MAX_VALUE))
-                    .add(layout.createSequentialGroup()
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(lblSerie)
-                            .add(lblBruto)
-                            .add(lblNome))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(layout.createSequentialGroup()
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                                    .add(layout.createSequentialGroup()
-                                        .add(txtSerie, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 47, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(lblSubSerie))
-                                    .add(txtBruto))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(txtSubSerie, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 47, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                    .add(lblDesconto))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                                    .add(layout.createSequentialGroup()
-                                        .add(lblNumero)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 72, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                                    .add(txtDesconto))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(layout.createSequentialGroup()
-                                        .add(lblData)
-                                        .add(17, 17, 17))
-                                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                                        .add(lblLiquido)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)))
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(layout.createSequentialGroup()
-                                        .add(txtLiquido, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(lblPIS)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(txtPIS, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(lblCOFINS)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(txtCOFINS, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
-                                        .add(6, 6, 6))
-                                    .add(layout.createSequentialGroup()
-                                        .add(txtData, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 84, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(lblCpf)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(txtCpf))))
-                            .add(layout.createSequentialGroup()
-                                .add(txtNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 329, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblEndereco)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtEndereco)))))
-                .addContainerGap())
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, spNotas)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, separador1)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, spProdutos))
+                .add(26, 26, 26))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -617,8 +587,8 @@ public class NotaConsumidor extends javax.swing.JDialog {
                 .addContainerGap()
                 .add(spNotas, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 167, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(separador1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 10, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(separador1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(4, 4, 4)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(lblSerie)
                     .add(txtSerie, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -628,17 +598,9 @@ public class NotaConsumidor extends javax.swing.JDialog {
                     .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(lblData)
                     .add(txtData, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(lblCpf)
-                    .add(txtCpf, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(lblCPF_CNPJ)
+                    .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                        .add(lblNome)
-                        .add(lblEndereco)
-                        .add(txtEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(txtNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)))
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(lblBruto)
                     .add(txtBruto, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -663,11 +625,11 @@ public class NotaConsumidor extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(38, 38, 38))
+                .add(68, 68, 68))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-800)/2, (screenSize.height-552)/2, 800, 552);
+        setBounds((screenSize.width-895)/2, (screenSize.height-510)/2, 895, 510);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -711,6 +673,10 @@ public class NotaConsumidor extends javax.swing.JDialog {
             totalizar();
         }
     }//GEN-LAST:event_btnRemoverActionPerformed
+
+    private void txtCPF_CNPJFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCPF_CNPJFocusLost
+        validarCliente();
+    }//GEN-LAST:event_txtCPF_CNPJFocusLost
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdicionar;
     private javax.swing.JButton btnCancelar;
@@ -719,12 +685,10 @@ public class NotaConsumidor extends javax.swing.JDialog {
     private javax.swing.JButton btnSalvar;
     private javax.swing.JLabel lblBruto;
     private javax.swing.JLabel lblCOFINS;
-    private javax.swing.JLabel lblCpf;
+    private javax.swing.JLabel lblCPF_CNPJ;
     private javax.swing.JLabel lblData;
     private javax.swing.JLabel lblDesconto;
-    private javax.swing.JLabel lblEndereco;
     private javax.swing.JLabel lblLiquido;
-    private javax.swing.JLabel lblNome;
     private javax.swing.JLabel lblNumero;
     private javax.swing.JLabel lblPIS;
     private javax.swing.JLabel lblSerie;
@@ -737,12 +701,10 @@ public class NotaConsumidor extends javax.swing.JDialog {
     private javax.swing.JTable tabProdutos;
     private javax.swing.JFormattedTextField txtBruto;
     private javax.swing.JFormattedTextField txtCOFINS;
-    private javax.swing.JTextField txtCpf;
+    private javax.swing.JTextField txtCPF_CNPJ;
     private javax.swing.JFormattedTextField txtData;
     private javax.swing.JFormattedTextField txtDesconto;
-    private javax.swing.JTextField txtEndereco;
     private javax.swing.JFormattedTextField txtLiquido;
-    private javax.swing.JTextField txtNome;
     private javax.swing.JFormattedTextField txtNumero;
     private javax.swing.JFormattedTextField txtPIS;
     private javax.swing.JTextField txtSerie;
@@ -760,84 +722,94 @@ public class NotaConsumidor extends javax.swing.JDialog {
     }
 
     /**
+     * Metodo que pesquisa o cliente pelo documento informado.
+     */
+    private void validarCliente() {
+        try {
+            String texto = txtCPF_CNPJ.getText().replaceAll("\\D", "");
+            if (!texto.equals("")) {
+                FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto);
+                cliente = (SisCliente) service.selecionar(new SisCliente(), ft);
+                if (cliente == null) {
+                    throw new Exception();
+                }
+            }
+        } catch (Exception ex) {
+            cliente = null;
+            txtCPF_CNPJ.setText("");
+            JOptionPane.showMessageDialog(this, "Cliente nao encontrado com o documento informado:\nCaso precise cadastre o cliente antes.", "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
+            txtCPF_CNPJ.requestFocus();
+        }
+    }
+
+    /**
      * Metodo que salva um novo registro.
      */
     private void salvar() {
         if (txtSerie.getText().equals("") || txtSubSerie.getText().equals("") || txtNumero.getText().equals("") || txtData.getText().equals("")
-                || txtCpf.getText().equals("") || txtNome.getText().equals("") || txtEndereco.getText().equals("") || txtLiquido.getText().equals("") || txtLiquido.getText().equals("0,00")) {
+                || cliente == null || txtLiquido.getText().equals("") || txtLiquido.getText().equals("0,00")) {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!\nAdicione também produtos com valor maior que zero.", "Nota Consumidor", JOptionPane.INFORMATION_MESSAGE);
-        } else if (txtNome.getText().split(" ").length < 2 || txtEndereco.getText().split(" ").length < 2) {
-            JOptionPane.showMessageDialog(this, "O campo NOME de ter primeiro e ultimo nome pelo menos.\n"
-                    + "O campo ENDEREÇO deve ter pelo menos duas informações.", "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
-            txtNome.requestFocus();
         } else {
+            EntityManagerFactory emf = null;
+            EntityManager em = null;
+
             try {
-                SisCliente cliente = validarCliente();
-                EntityManagerFactory emf = null;
-                EntityManager em = null;
+                EcfNota nota = new EcfNota();
+                nota.setSisCliente(cliente);
+                nota.setEcfNotaSerie(txtSerie.getText());
+                nota.setEcfNotaSubserie(txtSubSerie.getText());
+                nota.setEcfNotaNumero(Integer.valueOf(txtNumero.getText()));
+                nota.setEcfNotaData(new SimpleDateFormat("dd/MM/yyyy").parse(txtData.getText()));
+                nota.setEcfNotaBruto((Double) txtBruto.getValue());
+                nota.setEcfNotaDesconto((Double) txtDesconto.getValue());
+                nota.setEcfNotaLiquido((Double) txtLiquido.getValue());
+                nota.setEcfNotaPis((Double) txtPIS.getValue());
+                nota.setEcfNotaCofins((Double) txtCOFINS.getValue());
+                nota.setEcfNotaCancelada(false);
 
-                try {
-                    EcfNota nota = new EcfNota();
-                    nota.setSisCliente(cliente);
-                    nota.setSisEmpresa(Caixa.getInstancia().getEmpresa());
-                    nota.setEcfNotaSerie(txtSerie.getText());
-                    nota.setEcfNotaSubserie(txtSubSerie.getText());
-                    nota.setEcfNotaNumero(Integer.valueOf(txtNumero.getText()));
-                    nota.setEcfNotaData(new SimpleDateFormat("dd/MM/yyyy").parse(txtData.getText()));
-                    nota.setEcfNotaBruto((Double) txtBruto.getValue());
-                    nota.setEcfNotaDesconto((Double) txtDesconto.getValue());
-                    nota.setEcfNotaLiquido((Double) txtLiquido.getValue());
-                    nota.setEcfNotaPis((Double) txtPIS.getValue());
-                    nota.setEcfNotaCofins((Double) txtCOFINS.getValue());
-                    nota.setEcfNotaCancelada(false);
+                // recupera uma instancia do gerenciador de entidades
+                emf = Conexao.getInstancia();
+                em = emf.createEntityManager();
+                em.getTransaction().begin();
+                // salva
+                nota = (EcfNota) service.salvar(em, nota);
 
-                    // recupera uma instancia do gerenciador de entidades
-                    emf = Conexao.getInstancia();
-                    em = emf.createEntityManager();
-                    em.getTransaction().begin();
-                    // salva
-                    nota = (EcfNota) service.salvar(em, nota);
+                // valida sub-lista
+                List<EcfNotaProduto> produtos = new ArrayList<>();
+                if (validaProdutos(produtos, nota)) {
+                    service.salvar(em, produtos);
 
-                    // valida sub-lista
-                    List<EcfNotaProduto> produtos = new ArrayList<>();
-                    if (validaProdutos(produtos, nota)) {
-                        service.salvar(em, produtos);
-
-                        // atualiza o estoque
-                        for (EcfNotaProduto np : produtos) {
-                            // fatorando a quantida no estoque
-                            double qtd = np.getEcfNotaProdutoQuantidade();
-                            if (np.getProdEmbalagem().getProdEmbalagemId() != np.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
-                                qtd *= np.getProdEmbalagem().getProdEmbalagemUnidade();
-                                qtd /= np.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
-                            }
-
-                            // atualiza o estoque
-                            ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
-                            FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, np.getProdProduto().getId());
-                            Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                            service.executar(em, sql);
+                    // atualiza o estoque
+                    for (EcfNotaProduto np : produtos) {
+                        // fatorando a quantida no estoque
+                        double qtd = np.getEcfNotaProdutoQuantidade();
+                        if (np.getProdEmbalagem().getProdEmbalagemId() != np.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                            qtd *= np.getProdEmbalagem().getProdEmbalagemUnidade();
+                            qtd /= np.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
                         }
 
-                        em.getTransaction().commit();
-                        JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Nota Consumidor", JOptionPane.INFORMATION_MESSAGE);
-                        setLista();
-                    } else {
-                        em.getTransaction().rollback();
+                        // atualiza o estoque
+                        ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
+                        FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, np.getProdProduto().getId());
+                        Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
+                        service.executar(em, sql);
                     }
-                } catch (Exception ex) {
-                    if (em != null && em.getTransaction().isActive()) {
-                        em.getTransaction().rollback();
-                    }
-                    log.error("Erro ao salvar a nota.", ex);
-                    JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Nota Consumidor", JOptionPane.WARNING_MESSAGE);
-                } finally {
-                    em.close();
-                    emf.close();
+
+                    em.getTransaction().commit();
+                    JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Nota Consumidor", JOptionPane.INFORMATION_MESSAGE);
+                    setLista();
+                } else {
+                    em.getTransaction().rollback();
                 }
-            } catch (OpenPdvException ex) {
-                log.error("Erro ao salvar ou selecionar o cliente.", ex);
-                JOptionPane.showMessageDialog(this, "O CPF/CNPJ informado não é válido!", "Nota Consumidor", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                if (em != null && em.getTransaction().isActive()) {
+                    em.getTransaction().rollback();
+                }
+                log.error("Erro ao salvar a nota.", ex);
+                JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Nota Consumidor", JOptionPane.WARNING_MESSAGE);
+            } finally {
+                em.close();
+                emf.close();
             }
         }
     }
@@ -940,7 +912,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
             for (EcfNota nota : lista) {
                 String data = new SimpleDateFormat("dd/MM/yyyy").format(nota.getEcfNotaData());
                 Object[] obj = new Object[]{nota.getId(), nota.getEcfNotaSerie(), nota.getEcfNotaSubserie(), nota.getEcfNotaNumero(), data,
-                    nota.getSisCliente().getSisClienteDoc(), nota.getSisCliente().getSisClienteNome(), nota.getSisCliente().getSisClienteEndereco(),
+                    nota.getSisCliente().getSisClienteDoc(), nota.getSisCliente().getSisClienteNome(),
                     nota.getEcfNotaBruto(), nota.getEcfNotaDesconto(), nota.getEcfNotaLiquido(), nota.getEcfNotaPis(), nota.getEcfNotaCofins(), nota.isEcfNotaCancelada()};
                 dtmNota.addRow(obj);
             }
@@ -966,9 +938,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
             txtSubSerie.setText("");
             txtNumero.setValue(null);
             txtData.setValue(null);
-            txtCpf.setText("");
-            txtNome.setText("");
-            txtEndereco.setText("");
+            txtCPF_CNPJ.setText("");
             txtBruto.setValue(null);
             txtDesconto.setValue(null);
             txtLiquido.setValue(null);
@@ -984,14 +954,12 @@ public class NotaConsumidor extends javax.swing.JDialog {
             txtSubSerie.setText(tabNotas.getModel().getValueAt(rowModel, 2).toString());
             txtNumero.setValue(tabNotas.getModel().getValueAt(rowModel, 3));
             txtData.setText(tabNotas.getModel().getValueAt(rowModel, 4).toString());
-            txtCpf.setText(tabNotas.getModel().getValueAt(rowModel, 5).toString());
-            txtNome.setText(tabNotas.getModel().getValueAt(rowModel, 6).toString());
-            txtEndereco.setText(tabNotas.getModel().getValueAt(rowModel, 7).toString());
-            txtBruto.setValue(tabNotas.getModel().getValueAt(rowModel, 8));
-            txtDesconto.setValue(tabNotas.getModel().getValueAt(rowModel, 9));
-            txtLiquido.setValue(tabNotas.getModel().getValueAt(rowModel, 10));
-            txtPIS.setValue(tabNotas.getModel().getValueAt(rowModel, 11));
-            txtCOFINS.setValue(tabNotas.getModel().getValueAt(rowModel, 12));
+            txtCPF_CNPJ.setText(tabNotas.getModel().getValueAt(rowModel, 5).toString());
+            txtBruto.setValue(tabNotas.getModel().getValueAt(rowModel, 6));
+            txtDesconto.setValue(tabNotas.getModel().getValueAt(rowModel, 7));
+            txtLiquido.setValue(tabNotas.getModel().getValueAt(rowModel, 8));
+            txtPIS.setValue(tabNotas.getModel().getValueAt(rowModel, 9));
+            txtCOFINS.setValue(tabNotas.getModel().getValueAt(rowModel, 10));
             btnAdicionar.setEnabled(false);
             btnRemover.setEnabled(false);
             btnSalvar.setEnabled(false);
@@ -1011,39 +979,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
             } catch (OpenPdvException ex) {
                 log.error("Erro ao selecionar a nota do sistema", ex);
             }
-        }
-    }
-
-    /**
-     * Metodo que valida o cliente informado.
-     *
-     * @return retorna null ou um objeto de cliente.
-     * @throws OpenPdvException caso os dados informados nao sejam validos.
-     */
-    private SisCliente validarCliente() throws OpenPdvException {
-        String texto = txtCpf.getText();
-        texto = texto.replaceAll("[^0-9]", "");
-
-        if (!texto.equals("")) {
-            boolean valido = texto.length() == 11 ? Util.isCPF(texto) : Util.isCNPJ(texto);
-            if (valido) {
-                FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto);
-                SisCliente cliente = (SisCliente) service.selecionar(new SisCliente(), ft);
-                if (cliente == null) {
-                    cliente = new SisCliente();
-                }
-
-                cliente.setSisClienteDoc(texto);
-                cliente.setSisClienteNome(txtNome.getText().toUpperCase());
-                cliente.setSisClienteEndereco(txtEndereco.getText().toUpperCase());
-                cliente.setSisClienteCadastrado(new Date());
-                cliente = (SisCliente) service.salvar(cliente);
-                return cliente;
-            } else {
-                throw new OpenPdvException();
-            }
-        } else {
-            return null;
         }
     }
 
@@ -1145,11 +1080,11 @@ public class NotaConsumidor extends javax.swing.JDialog {
     }
 
     public JLabel getLblCliente() {
-        return lblCpf;
+        return lblCPF_CNPJ;
     }
 
     public void setLblCliente(JLabel lblCliente) {
-        this.lblCpf = lblCliente;
+        this.lblCPF_CNPJ = lblCliente;
     }
 
     public JLabel getLblData() {
@@ -1289,11 +1224,11 @@ public class NotaConsumidor extends javax.swing.JDialog {
     }
 
     public JTextField getTxtCliente() {
-        return txtCpf;
+        return txtCPF_CNPJ;
     }
 
     public void setTxtCliente(JTextField txtCliente) {
-        this.txtCpf = txtCliente;
+        this.txtCPF_CNPJ = txtCliente;
     }
 
     public JFormattedTextField getTxtData() {

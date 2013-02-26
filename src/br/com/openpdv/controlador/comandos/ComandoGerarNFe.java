@@ -8,6 +8,7 @@ import br.com.openpdv.modelo.ecf.EcfNotaProduto;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
+import br.com.openpdv.nfe.*;
 import br.com.openpdv.nfe.TNFe.InfNFe;
 import br.com.openpdv.nfe.TNFe.InfNFe.Dest;
 import br.com.openpdv.nfe.TNFe.InfNFe.Det;
@@ -39,7 +40,6 @@ import br.com.openpdv.nfe.TNFe.InfNFe.InfAdic;
 import br.com.openpdv.nfe.TNFe.InfNFe.Total;
 import br.com.openpdv.nfe.TNFe.InfNFe.Total.ICMSTot;
 import br.com.openpdv.nfe.TNFe.InfNFe.Transp;
-import br.com.openpdv.nfe.*;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.WebResource;
@@ -299,7 +299,7 @@ public class ComandoGerarNFe implements IComando {
         } else if (cliente.getSisClienteDoc().length() == 18) {
             dest.setCNPJ(cliente.getSisClienteDoc().replaceAll("\\D", ""));
             dest.setXNome(nome);
-            dest.setIE(cliente.getIe().replaceAll("\\D", ""));
+            dest.setIE(cliente.getSisClienteDoc1().replaceAll("\\D", ""));
         } else {
             dest.setCPF(cliente.getSisClienteDoc().replaceAll("\\D", ""));
             dest.setXNome(nome);
@@ -308,20 +308,20 @@ public class ComandoGerarNFe implements IComando {
         // endereco
         TEndereco enderDest = new TEndereco();
         enderDest.setXLgr(cliente.getSisClienteEndereco().trim());
-        enderDest.setNro(cliente.getNumero() + "");
-        enderDest.setXBairro(cliente.getBairro().trim());
+        enderDest.setNro(cliente.getSisClienteNumero() + "");
+        enderDest.setXBairro(cliente.getSisClienteBairro().trim());
         enderDest.setCMun(cliente.getSisMunicipio().getSisMunicipioIbge() + "");
         enderDest.setXMun(cliente.getSisMunicipio().getSisMunicipioDescricao());
         enderDest.setUF(TUf.valueOf(cliente.getSisMunicipio().getSisEstado().getSisEstadoSigla()));
-        enderDest.setCEP(cliente.getCep().replaceAll("\\D", ""));
+        enderDest.setCEP(cliente.getSisClienteCep().replaceAll("\\D", ""));
         enderDest.setCPais("1058");
         enderDest.setXPais("BRASIL");
-        if (!cliente.getFone().replaceAll("\\D", "").equals("")) {
-            enderDest.setFone(cliente.getFone().replaceAll("\\D", ""));
+        if (!cliente.getSisClienteTelefone().replaceAll("\\D", "").equals("")) {
+            enderDest.setFone(cliente.getSisClienteTelefone().replaceAll("\\D", ""));
         }
         dest.setEnderDest(enderDest);
-        if (!cliente.getEmail().equals("")) {
-            dest.setEmail(cliente.getEmail().toLowerCase().trim());
+        if (!cliente.getSisClienteEmail().equals("")) {
+            dest.setEmail(cliente.getSisClienteEmail().toLowerCase().trim());
         }
         return dest;
     }

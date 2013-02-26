@@ -37,8 +37,7 @@ public class Login {
      * @param usuarioGe o nome do usuario Gerente
      * @param senhaGe a senha do usuario Gerente
      * @return um inteiro com o valor em porcentagem de desconto permitido.
-     * @throws OpenPdvException caso ocorra alguma excecao ou os dados sejam
-     * invalidos
+     * @throws OpenPdvException caso ocorra alguma excecao ou os dados sejam invalidos
      */
     public static SisUsuario autorizar(String usuarioGe, String senhaGe) throws OpenPdvException {
         PermissaoService service = new PermissaoService();
@@ -53,5 +52,9 @@ public class Login {
     // GETs e SETs
     public static SisUsuario getOperador() {
         return operador;
+    }
+
+    public static void setOperador(SisUsuario operador) {
+        Login.operador = operador;
     }
 }

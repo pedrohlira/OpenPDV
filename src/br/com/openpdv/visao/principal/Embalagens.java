@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
  * @author Pedro H. Lira
  */
 public class Embalagens extends javax.swing.JDialog {
-
+    
     private static Embalagens embalagens;
     private Logger log;
     private int row;
@@ -35,11 +35,10 @@ public class Embalagens extends javax.swing.JDialog {
         super(Caixa.getInstancia());
         log = Logger.getLogger(Embalagens.class);
         initComponents();
-
+        
         service = new CoreService<>();
         dtm = (DefaultTableModel) tabEmbalagens.getModel();
         tabEmbalagens.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 row = tabEmbalagens.getSelectedRow();
@@ -62,11 +61,11 @@ public class Embalagens extends javax.swing.JDialog {
         if (embalagens == null) {
             embalagens = new Embalagens();
         }
-
+        
         embalagens.setLista();
         return embalagens;
     }
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -96,6 +95,7 @@ public class Embalagens extends javax.swing.JDialog {
             }
         });
 
+        tabEmbalagens.setAutoCreateRowSorter(true);
         tabEmbalagens.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabEmbalagens.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -120,8 +120,9 @@ public class Embalagens extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabEmbalagens.setAutoCreateRowSorter(true);
+        tabEmbalagens.setCellSelectionEnabled(false);
         tabEmbalagens.setRowHeight(20);
+        tabEmbalagens.setRowSelectionAllowed(true);
         tabEmbalagens.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabEmbalagens.setShowGrid(true);
         tabEmbalagens.setShowVerticalLines(false);
@@ -297,59 +298,58 @@ public class Embalagens extends javax.swing.JDialog {
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-681)/2, (screenSize.height-302)/2, 681, 302);
+        setBounds((screenSize.width-681)/2, (screenSize.height-308)/2, 681, 308);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
         salvar();
     }//GEN-LAST:event_btnSalvarActionPerformed
-
+    
     private void btnSalvarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnSalvarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             salvar();
         }
     }//GEN-LAST:event_btnSalvarKeyPressed
-
+    
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
         dispose();
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_btnCancelarActionPerformed
-
+    
     private void btnCancelarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnCancelarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             dispose();
             Caixa.getInstancia().setJanela(null);
         }
     }//GEN-LAST:event_btnCancelarKeyPressed
-
+    
     private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
         novo();
     }//GEN-LAST:event_btnNovoActionPerformed
-
+    
     private void btnNovoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnNovoKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             novo();
         }
     }//GEN-LAST:event_btnNovoKeyPressed
-
+    
     private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
         excluir();
     }//GEN-LAST:event_btnExcluirActionPerformed
-
+    
     private void btnExcluirKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnExcluirKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             excluir();
         }
     }//GEN-LAST:event_btnExcluirKeyPressed
-
+    
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_formWindowClosing
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnExcluir;
@@ -378,14 +378,14 @@ public class Embalagens extends javax.swing.JDialog {
      * Metodo que salva um novo registro ou atualiza um existente.
      */
     private void salvar() {
-        if (txtNome.getText().equals("") || txtUnidades.getText().equals("") || Integer.valueOf(txtUnidades.getText()) < 1 || txtDescricao.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!\nUnidades precisa ser maior que zero.", "Embalagens", JOptionPane.INFORMATION_MESSAGE);
+        if (txtNome.getText().equals("") || txtUnidades.getText().equals("") || Integer.valueOf(txtUnidades.getText()) < 1 || txtDescricao.getText().equals("") || txtNome.getText().equalsIgnoreCase(txtDescricao.getText())) {
+            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!\nUnidades precisa ser maior que zero.\nNome não pode ser igual a descrição.", "Embalagens", JOptionPane.INFORMATION_MESSAGE);
         } else {
             ProdEmbalagem embalagem = new ProdEmbalagem(cod);
             embalagem.setProdEmbalagemNome(txtNome.getText());
             embalagem.setProdEmbalagemUnidade(Integer.valueOf(txtUnidades.getText()));
             embalagem.setProdEmbalagemDescricao(txtDescricao.getText());
-
+            
             try {
                 service.salvar(embalagem);
                 JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Embalagens", JOptionPane.INFORMATION_MESSAGE);
@@ -424,16 +424,16 @@ public class Embalagens extends javax.swing.JDialog {
     private void setLista() {
         try {
             List<ProdEmbalagem> lista = service.selecionar(new ProdEmbalagem(), 0, 0, null);
-
+            
             while (dtm.getRowCount() > 0) {
                 dtm.removeRow(0);
             }
-
+            
             for (ProdEmbalagem embalagem : lista) {
                 Object[] obj = new Object[]{embalagem.getId(), embalagem.getProdEmbalagemNome(), embalagem.getProdEmbalagemUnidade(), embalagem.getProdEmbalagemDescricao()};
                 dtm.addRow(obj);
             }
-
+            
             row = -1;
             setDados();
         } catch (OpenPdvException ex) {
@@ -463,135 +463,135 @@ public class Embalagens extends javax.swing.JDialog {
     public JButton getBtnCancelar() {
         return btnCancelar;
     }
-
+    
     public void setBtnCancelar(JButton btnCancelar) {
         this.btnCancelar = btnCancelar;
     }
-
+    
     public JButton getBtnExcluir() {
         return btnExcluir;
     }
-
+    
     public void setBtnExcluir(JButton btnExcluir) {
         this.btnExcluir = btnExcluir;
     }
-
+    
     public JButton getBtnNovo() {
         return btnNovo;
     }
-
+    
     public void setBtnNovo(JButton btnNovo) {
         this.btnNovo = btnNovo;
     }
-
+    
     public JButton getBtnSalvar() {
         return btnSalvar;
     }
-
+    
     public void setBtnSalvar(JButton btnSalvar) {
         this.btnSalvar = btnSalvar;
     }
-
+    
     public int getCod() {
         return cod;
     }
-
+    
     public void setCod(int cod) {
         this.cod = cod;
     }
-
+    
     public DefaultTableModel getDtm() {
         return dtm;
     }
-
+    
     public void setDtm(DefaultTableModel dtm) {
         this.dtm = dtm;
     }
-
+    
     public JLabel getLblDescricao() {
         return lblDescricao;
     }
-
+    
     public void setLblDescricao(JLabel lblDescricao) {
         this.lblDescricao = lblDescricao;
     }
-
+    
     public JLabel getLblNome() {
         return lblNome;
     }
-
+    
     public void setLblNome(JLabel lblNome) {
         this.lblNome = lblNome;
     }
-
+    
     public JLabel getLblUnidades() {
         return lblUnidades;
     }
-
+    
     public void setLblUnidades(JLabel lblUnidades) {
         this.lblUnidades = lblUnidades;
     }
-
+    
     public JPanel getPanEmbalagens() {
         return panEmbalagens;
     }
-
+    
     public void setPanEmbalagens(JPanel panEmbalagens) {
         this.panEmbalagens = panEmbalagens;
     }
-
+    
     public int getRow() {
         return row;
     }
-
+    
     public void setRow(int row) {
         this.row = row;
     }
-
+    
     public CoreService<ProdEmbalagem> getService() {
         return service;
     }
-
+    
     public void setService(CoreService<ProdEmbalagem> service) {
         this.service = service;
     }
-
+    
     public JScrollPane getSpEmbalagens() {
         return spEmbalagens;
     }
-
+    
     public void setSpEmbalagens(JScrollPane spEmbalagens) {
         this.spEmbalagens = spEmbalagens;
     }
-
+    
     public JTable getTabEmbalagens() {
         return tabEmbalagens;
     }
-
+    
     public void setTabEmbalagens(JTable tabEmbalagens) {
         this.tabEmbalagens = tabEmbalagens;
     }
-
+    
     public JTextField getTxtDescricao() {
         return txtDescricao;
     }
-
+    
     public void setTxtDescricao(JTextField txtDescricao) {
         this.txtDescricao = txtDescricao;
     }
-
+    
     public JTextField getTxtNome() {
         return txtNome;
     }
-
+    
     public void setTxtNome(JTextField txtNome) {
         this.txtNome = txtNome;
     }
-
+    
     public JFormattedTextField getTxtUnidades() {
         return txtUnidades;
     }
-
+    
     public void setTxtUnidades(JFormattedTextField txtUnidades) {
         this.txtUnidades = txtUnidades;
     }

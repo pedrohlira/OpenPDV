@@ -44,6 +44,8 @@ public class EcfVenda extends Dados implements Serializable {
     private boolean ecfVendaFechada;
     @Column(name = "ecf_venda_cancelada")
     private boolean ecfVendaCancelada;
+    @Column(name = "ecf_venda_observacao")
+    private String ecfVendaObservacao;
     @JoinColumn(name = "sis_usuario_id")
     @ManyToOne
     private SisUsuario sisUsuario;
@@ -236,5 +238,13 @@ public class EcfVenda extends Dados implements Serializable {
 
     public void setInformouCliente(boolean informouCliente) {
         this.informouCliente = informouCliente;
+    }
+
+    public String getEcfVendaObservacao() {
+        return ecfVendaObservacao;
+    }
+
+    public void setEcfVendaObservacao(String ecfVendaObservacao) {
+        this.ecfVendaObservacao = ecfVendaObservacao;
     }
 }

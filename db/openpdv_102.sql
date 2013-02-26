@@ -7,6 +7,7 @@ CREATE TABLE sis_usuario (
   sis_usuario_senha varchar(40) NOT NULL,
   sis_usuario_desconto int(11) NOT NULL,
   sis_usuario_ativo bit(1) NOT NULL,
+  sis_usuario_caixa bit(1) NOT NULL,
   sis_usuario_gerente bit(1) NOT NULL,
   PRIMARY KEY (sis_usuario_id),
   CONSTRAINT UK_sis_usuario_1 UNIQUE (sis_usuario_login)
@@ -15,11 +16,21 @@ CREATE TABLE sis_usuario (
 DROP TABLE IF EXISTS sis_cliente;
 CREATE TABLE sis_cliente (
   sis_cliente_id int(11) NOT NULL AUTO_INCREMENT,
+  sis_municipio_id int(11) NOT NULL,
   sis_cliente_doc varchar(20) NOT NULL,
+  sis_cliente_doc1 varchar(20) NOT NULL,
   sis_cliente_nome varchar(100) NOT NULL,
   sis_cliente_endereco varchar(255) NOT NULL,
-  sis_cliente_cadastrado datetime NOT NULL,
-  PRIMARY KEY (sis_cliente_id)
+  sis_cliente_numero int(11) NOT NULL,
+  sis_cliente_complemento varchar(100) NOT NULL,
+  sis_cliente_bairro varchar(100) NOT NULL,
+  sis_cliente_cep varchar(9) NOT NULL,
+  sis_cliente_telefone varchar(20) NOT NULL,
+  sis_cliente_email varchar(100) NOT NULL,
+  sis_cliente_data datetime NOT NULL,
+  PRIMARY KEY (sis_cliente_id),
+  CONSTRAINT UK_sis_cliente_1 UNIQUE (sis_cliente_doc),
+  CONSTRAINT FK_sis_cliente_1 FOREIGN KEY (sis_municipio_id) REFERENCES sis_municipio (sis_municipio_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS sis_estado;
@@ -99,7 +110,6 @@ CREATE TABLE prod_produto (
   prod_produto_alterado datetime DEFAULT NULL,
   prod_produto_ativo bit(1) NOT NULL,
   PRIMARY KEY (prod_produto_id),
-  CONSTRAINT UK_prod_produto_1 UNIQUE (prod_produto_barra),
   CONSTRAINT FK_prod_produto_1 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -128,7 +138,6 @@ CREATE TABLE prod_preco (
   prod_preco_valor decimal(10,2) NOT NULL,
   prod_preco_barra varchar(14) DEFAULT NULL,
   PRIMARY KEY (prod_preco_id),
-  CONSTRAINT UK_prod_preco_1 UNIQUE (prod_preco_barra),
   CONSTRAINT FK_prod_preco_1 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT FK_prod_preco_2 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
@@ -145,6 +154,27 @@ CREATE TABLE prod_composicao (
   CONSTRAINT FK_prod_composicao_1 FOREIGN KEY (prod_produto_principal) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT FK_prod_composicao_2 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_prod_composicao_3 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS prod_grade_tipo;
+CREATE TABLE prod_grade_tipo (
+  prod_grade_tipo_id int NOT NULL AUTO_INCREMENT,
+  prod_grade_tipo_nome varchar(50) NOT NULL,
+  prod_grade_tipo_opcao char(1) NOT NULL,
+  PRIMARY KEY (prod_grade_tipo_id) 
+);
+
+DROP TABLE IF EXISTS prod_grade;
+CREATE  TABLE prod_grade (
+  prod_grade_id int NOT NULL AUTO_INCREMENT,
+  prod_produto_id int NOT NULL,
+  prod_grade_barra varchar(14) NOT NULL,
+  prod_grade_tamanho varchar(50) NOT NULL,
+  prod_grade_cor varchar(50) NOT NULL,
+  prod_grade_opcao varchar(50) NOT NULL,
+  prod_grade_estoque decimal(10,4) NOT NULL,
+  PRIMARY KEY (prod_grade_id),
+  CONSTRAINT FK_prod_grade_1 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 /* tabelas do ecf */
@@ -183,7 +213,6 @@ DROP TABLE IF EXISTS ecf_nota_eletronica;
 CREATE TABLE ecf_nota_eletronica (
   ecf_nota_eletronica_id int(11) NOT NULL AUTO_INCREMENT,
   sis_cliente_id int(11) DEFAULT NULL,
-  sis_empresa_id int(11) NOT NULL,
   ecf_nota_eletronica_status varchar(15) NOT NULL,
   ecf_nota_eletronica_numero int(11) NOT NULL,
   ecf_nota_eletronica_data datetime NOT NULL,
@@ -208,7 +237,6 @@ DROP TABLE IF EXISTS ecf_nota;
 CREATE TABLE ecf_nota (
   ecf_nota_id int(11) NOT NULL AUTO_INCREMENT,
   sis_cliente_id int(11) DEFAULT NULL,
-  sis_empresa_id int(11) NOT NULL,
   ecf_nota_serie varchar(3) NOT NULL,
   ecf_nota_subserie varchar(3) NOT NULL,
   ecf_nota_numero int(11) NOT NULL,
@@ -231,6 +259,7 @@ CREATE TABLE ecf_nota_produto (
   ecf_nota_id int(11) NOT NULL,
   prod_produto_id int(11) NOT NULL,
   prod_embalagem_id int(11) NOT NULL,
+  ecf_nota_produto_barra varchar(14) NULL DEFAULT NULL,
   ecf_nota_produto_quantidade decimal(10,3) NOT NULL,
   ecf_nota_produto_bruto decimal(10,2) NOT NULL,
   ecf_nota_produto_desconto decimal(10,2) NOT NULL,
@@ -268,6 +297,7 @@ CREATE TABLE ecf_z_totais (
   ecf_z_totais_codigo varchar(7) NOT NULL,
   ecf_z_totais_valor decimal(13,2) NOT NULL,
   PRIMARY KEY (ecf_z_totais_id),
+  CONSTRAINT UK_ecf_z_totais_1 UNIQUE (ecf_z_id, ecf_z_totais_codigo),
   CONSTRAINT FK_z_totais_1 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -275,6 +305,8 @@ DROP TABLE IF EXISTS ecf_venda;
 CREATE TABLE ecf_venda (
   ecf_venda_id int(11) NOT NULL AUTO_INCREMENT,
   sis_usuario_id int(11) NOT NULL,
+  sis_vendedor_id int(11) DEFAULT NULL,
+  sis_gerente_id int(11) DEFAULT NULL,
   ecf_z_id int(11) DEFAULT NULL,
   sis_cliente_id int(11) DEFAULT NULL,
   ecf_venda_ccf int(6) NOT NULL,
@@ -286,10 +318,13 @@ CREATE TABLE ecf_venda (
   ecf_venda_liquido decimal(10,2) NOT NULL,
   ecf_venda_fechada bit(1) NOT NULL,
   ecf_venda_cancelada bit(1) NOT NULL,
+  ecf_venda_observacao varchar(255) NULL,
   PRIMARY KEY (ecf_venda_id),
   CONSTRAINT FK_ecf_venda_1 FOREIGN KEY (sis_usuario_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_ecf_venda_2 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT FK_ecf_venda_3 FOREIGN KEY (sis_cliente_id) REFERENCES sis_cliente (sis_cliente_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT FK_ecf_venda_3 FOREIGN KEY (sis_cliente_id) REFERENCES sis_cliente (sis_cliente_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT FK_ecf_venda_4 FOREIGN KEY (sis_vendedor_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT FK_ecf_venda_5 FOREIGN KEY (sis_gerente_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 );
 
 DROP TABLE IF EXISTS ecf_venda_produto;
@@ -298,6 +333,7 @@ CREATE TABLE ecf_venda_produto (
   ecf_venda_id int(11) NOT NULL,
   prod_embalagem_id int(11) NOT NULL,
   prod_produto_id int(11) NOT NULL,
+  ecf_venda_produto_barra varchar(14) NULL DEFAULT NULL,
   ecf_venda_produto_cst_cson varchar(3) NOT NULL,
   ecf_venda_produto_tributacao char(1) NOT NULL,
   ecf_venda_produto_icms decimal(4,2) NOT NULL,

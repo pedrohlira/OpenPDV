@@ -6,6 +6,8 @@
         <class>br.com.openpdv.modelo.produto.ProdEmbalagem</class>
         <class>br.com.openpdv.modelo.produto.ProdPreco</class>
         <class>br.com.openpdv.modelo.produto.ProdComposicao</class>
+        <class>br.com.openpdv.modelo.produto.ProdGrade</class>
+        <class>br.com.openpdv.modelo.produto.ProdGradeTipo</class>
         <class>br.com.openpdv.modelo.sistema.SisCliente</class>
         <class>br.com.openpdv.modelo.sistema.SisUsuario</class>
         <class>br.com.openpdv.modelo.sistema.SisEmpresa</class>

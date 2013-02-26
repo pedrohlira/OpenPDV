@@ -88,4 +88,10 @@ public class SisEstado extends Dados implements Serializable {
     public void setSisEstadoSigla(String sisEstadoSigla) {
         this.sisEstadoSigla = sisEstadoSigla;
     }
+
+    @Override
+    public String toString() {
+        return this.sisEstadoSigla;
+    }
+    
 }

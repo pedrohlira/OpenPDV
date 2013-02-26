@@ -100,6 +100,7 @@ public class Usuarios extends javax.swing.JDialog {
             }
         });
 
+        tabUsuarios.setAutoCreateRowSorter(true);
         tabUsuarios.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabUsuarios.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -124,10 +125,7 @@ public class Usuarios extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabUsuarios.setAutoCreateRowSorter(true);
-        tabUsuarios.setCellSelectionEnabled(false);
         tabUsuarios.setRowHeight(20);
-        tabUsuarios.setRowSelectionAllowed(true);
         tabUsuarios.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabUsuarios.setShowGrid(true);
         tabUsuarios.setShowVerticalLines(false);
@@ -197,7 +195,7 @@ public class Usuarios extends javax.swing.JDialog {
                         .add(lblSenha)
                         .add(113, 113, 113)
                         .add(lblDesconto)
-                        .addContainerGap())
+                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .add(panUsuariosLayout.createSequentialGroup()
                         .add(txtSenha, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 139, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(6, 6, 6)
@@ -321,7 +319,7 @@ public class Usuarios extends javax.swing.JDialog {
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(spUsuarios)
                         .add(panUsuarios, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -336,11 +334,11 @@ public class Usuarios extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-669)/2, (screenSize.height-309)/2, 669, 309);
+        setBounds((screenSize.width-653)/2, (screenSize.height-320)/2, 653, 320);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed

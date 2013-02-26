@@ -11,6 +11,7 @@ import br.com.openpdv.modelo.core.parametro.*;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
+import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
@@ -18,10 +19,10 @@ import br.com.phdss.EComandoECF;
 import br.com.phdss.TEF;
 import br.com.phdss.controlador.PAF;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 
@@ -37,6 +38,7 @@ public class ComandoFecharVenda implements IComando {
     private double bruto;
     private double acres_desc;
     private double troco;
+    private String obs;
     private EcfVenda venda;
 
     /**
@@ -47,13 +49,14 @@ public class ComandoFecharVenda implements IComando {
      * @param acres_desc valor de acrescimo (positivo) ou desconto (negativo).
      * @param troco o valor do troco da venda.
      */
-    public ComandoFecharVenda(List<EcfPagamento> pagamentos, double bruto, double acres_desc, double troco) {
+    public ComandoFecharVenda(List<EcfPagamento> pagamentos, double bruto, double acres_desc, double troco, String obs) {
         this.log = Logger.getLogger(ComandoFecharVenda.class);
         this.pagamentos = pagamentos;
         this.bruto = bruto;
         this.acres_desc = acres_desc;
         this.troco = troco;
         this.venda = Caixa.getInstancia().getVenda();
+        this.obs = obs;
     }
 
     @Override
@@ -138,7 +141,7 @@ public class ComandoFecharVenda implements IComando {
                 throw new OpenPdvException(resp[1]);
             }
             // soma os pagamento que possuem o mesmo codigo
-            Map<String, Double> pags = new HashMap<>();
+            SortedMap<String, Double> pags = new TreeMap<>();
             for (EcfPagamento pag : pagamentos) {
                 if (pags.containsKey(pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo())) {
                     double valor = pag.getEcfPagamentoValor() + pags.get(pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo());
@@ -147,6 +150,19 @@ public class ComandoFecharVenda implements IComando {
                     pags.put(pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo(), pag.getEcfPagamentoValor());
                 }
             }
+            // garante que o dinheiro é impressos primeiro
+            String dinheiro = Util.getConfig().get("ecf.dinheiro");
+            if(pags.containsKey(dinheiro)){
+                String valor = Util.formataNumero(pags.remove(dinheiro), 1, 2, false).replace(",", ".");
+                ECF.enviar(EComandoECF.ECF_EfetuaPagamento, dinheiro, valor);
+            }
+            // garante que a troca é impressos em segundo se houver dinheiro
+            String troca = Util.getConfig().get("ecf.troca");
+            if(pags.containsKey(troca)){
+                String valor = Util.formataNumero(pags.remove(troca), 1, 2, false).replace(",", ".");
+                ECF.enviar(EComandoECF.ECF_EfetuaPagamento, troca, valor);
+            }
+            // imprime os demais
             for (Entry<String, Double> pag : pags.entrySet()) {
                 String valor = Util.formataNumero(pag.getValue(), 1, 2, false).replace(",", ".");
                 ECF.enviar(EComandoECF.ECF_EfetuaPagamento, pag.getKey(), valor);
@@ -200,7 +216,8 @@ public class ComandoFecharVenda implements IComando {
         ParametroObjeto po1 = new ParametroObjeto("sisCliente", venda.getSisCliente());
         ParametroObjeto po2 = new ParametroObjeto("sisVendedor", venda.getSisVendedor());
         ParametroObjeto po3 = new ParametroObjeto("sisGerente", acres_desc < 0 ? venda.getSisGerente() : null);
-        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2, po3});
+        ParametroTexto pt = new ParametroTexto("ecfVendaObservacao", obs);
+        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2, po3, pt});
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 
@@ -229,6 +246,16 @@ public class ComandoFecharVenda implements IComando {
                 FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, vp.getProdProduto().getId());
                 Sql sql2 = new Sql(vp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
                 sqls.add(sql2);
+                // remove estoque da grade caso o produto tenha
+                for (ProdGrade grade : vp.getProdProduto().getProdGrades()) {
+                    if (grade.getProdGradeBarra().equals(vp.getEcfVendaProdutoBarra())) {
+                        ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
+                        FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                        Sql sql3 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
+                        sqls.add(sql3);
+                        break;
+                    }
+                }
             }
         }
         CoreService service = new CoreService();

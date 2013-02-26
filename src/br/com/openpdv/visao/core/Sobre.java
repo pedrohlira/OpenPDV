@@ -119,7 +119,7 @@ public class Sobre extends JDialog {
         lblEmpresaNome.setText("PhD - Systems Solutions");
 
         lblVersaoNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
-        lblVersaoNome.setText("1.01");
+        lblVersaoNome.setText("1.02");
 
         lblAutorNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblAutorNome.setText("Pedro Henrique de Lira");

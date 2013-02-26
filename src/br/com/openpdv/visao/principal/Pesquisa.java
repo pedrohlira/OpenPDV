@@ -28,7 +28,6 @@ public class Pesquisa extends javax.swing.JDialog {
     private static Pesquisa pesquisa;
     private Logger log;
     private AsyncCallback<ProdProduto> async;
-    private GrupoFiltro filtro;
     private CoreService<ProdProduto> service;
 
     /**
@@ -53,9 +52,8 @@ public class Pesquisa extends javax.swing.JDialog {
         }
 
         pesquisa.async = async;
-        pesquisa.filtro = null;
         pesquisa.txtFiltro.setText("");
-        pesquisa.setLista();
+        pesquisa.setLista(null);
         return pesquisa;
     }
 
@@ -240,18 +238,19 @@ public class Pesquisa extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
-        pesquisar();
+        IFiltro filtro = pesquisar(txtFiltro.getText().toUpperCase());
+        setLista(filtro);
     }//GEN-LAST:event_btnPesquisarActionPerformed
 
     private void btnPesquisarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnPesquisarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            pesquisar();
+            btnPesquisarActionPerformed(null);
         }
     }//GEN-LAST:event_btnPesquisarKeyPressed
 
     private void txtFiltroKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFiltroKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            pesquisar();
+            btnPesquisarActionPerformed(null);
         }
     }//GEN-LAST:event_txtFiltroKeyPressed
 
@@ -296,20 +295,40 @@ public class Pesquisa extends javax.swing.JDialog {
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Metodo que realiza um filtro na listagem
+     * Metodo que realiza gera o filtro da listagem.
+     *
+     * @param texto o valor a ser pesquisado.
+     * @return um objeto de filtro.
      */
-    private void pesquisar() {
-        String texto = txtFiltro.getText().trim().toUpperCase();
-        filtro = new GrupoFiltro();
+    public static IFiltro pesquisar(String texto) {
+        GrupoFiltro filtro = new GrupoFiltro();
         FiltroBinario fb = new FiltroBinario("prodProdutoAtivo", ECompara.IGUAL, true);
         filtro.add(fb, EJuncao.E);
+        ECompara compara;
 
         if (texto.contains("/")) {
+            // identifica se foi informado alguma comparacao, ou usa o padrao
+            if (texto.startsWith(">=")) {
+                compara = ECompara.MAIOR_IGUAL;
+                texto = texto.substring(2);
+            } else if (texto.startsWith("<=")) {
+                compara = ECompara.MENOR_IGUAL;
+                texto = texto.substring(2);
+            } else if (texto.startsWith(">")) {
+                compara = ECompara.MAIOR;
+                texto = texto.substring(1);
+            } else if (texto.endsWith("<")) {
+                compara = ECompara.MENOR;
+                texto = texto.substring(1);
+            } else {
+                compara = ECompara.IGUAL;
+            }
+
             // verifica se e data completa
             try {
                 Date data = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(texto);
-                FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.IGUAL, data);
-                FiltroData fd2 = new FiltroData("prodProdutoAlterado", ECompara.IGUAL, data);
+                FiltroData fd1 = new FiltroData("prodProdutoCadastrado", compara, data);
+                FiltroData fd2 = new FiltroData("prodProdutoAlterado", compara, data);
                 filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2}));
             } catch (ParseException ex) {
                 // verifica se e data simples
@@ -322,44 +341,56 @@ public class Pesquisa extends javax.swing.JDialog {
                     cal.set(Calendar.MINUTE, 59);
                     cal.set(Calendar.SECOND, 59);
                     Date fim = cal.getTime();
-                    // monta o grupo para cadastrado
-                    FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.MAIOR_IGUAL, inicio);
-                    FiltroData fd2 = new FiltroData("prodProdutoCadastrado", ECompara.MENOR_IGUAL, fim);
-                    GrupoFiltro cad = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
-                    // monta o grupo para alterado
-                    FiltroData fd3 = new FiltroData("prodProdutoAlterado", ECompara.MAIOR_IGUAL, inicio);
-                    FiltroData fd4 = new FiltroData("prodProdutoAlterado", ECompara.MENOR_IGUAL, fim);
-                    GrupoFiltro alt = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
-                    // combinando os filtros
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{cad, alt}));
+
+                    if (compara == ECompara.IGUAL) {
+                        // monta o grupo para cadastrado
+                        FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.MAIOR_IGUAL, inicio);
+                        FiltroData fd2 = new FiltroData("prodProdutoCadastrado", ECompara.MENOR_IGUAL, fim);
+                        GrupoFiltro cad = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                        // monta o grupo para alterado
+                        FiltroData fd3 = new FiltroData("prodProdutoAlterado", ECompara.MAIOR_IGUAL, inicio);
+                        FiltroData fd4 = new FiltroData("prodProdutoAlterado", ECompara.MENOR_IGUAL, fim);
+                        GrupoFiltro alt = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
+                        // combinando os filtros
+                        filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{cad, alt}));
+                    } else {
+                        FiltroData fd1 = new FiltroData("prodProdutoCadastrado", compara, inicio);
+                        FiltroData fd2 = new FiltroData("prodProdutoAlterado", compara, inicio);
+                        filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2}));
+                    }
                 } catch (ParseException ex1) {
-                    log.debug("Nao filtrou por data.", ex);
-                    JOptionPane.showMessageDialog(this, "O sistema não conseguiu filtrar pelos campos de data!", "Produtos", JOptionPane.WARNING_MESSAGE);
+                    pesquisa.log.debug("Nao filtrou por data.", ex1);
+                    JOptionPane.showMessageDialog(pesquisa, "O sistema não conseguiu filtrar pelos campos de data!", "Produtos", JOptionPane.WARNING_MESSAGE);
                 }
             }
         } else {
             // verifica se e longo
             try {
                 long valor = Long.valueOf(texto);
-                if (texto.length() == 6) {
+                if (texto.length() <= 6) {
                     // codigo
                     FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, valor);
+                    // barra do preco
+                    FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
+                    ft1.setCampoPrefixo("t1.");
+                    // barra da grade
+                    FiltroTexto ft2 = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, texto);
+                    ft2.setCampoPrefixo("t2.");
                     // referencia
-                    FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft}));
-                } else if (texto.length() == 8 || texto.length() >= 12) {
+                    FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft1, ft2, ft3}));
+                } else {
                     // barra
                     FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
                     // barra do preco
                     FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
                     ft1.setCampoPrefixo("t1.");
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, ft1}));
-                } else {
+                    // barra da grade
+                    FiltroTexto ft2 = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, texto);
+                    ft2.setCampoPrefixo("t2.");
                     // referencia
-                    FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    // estoque
-                    FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, fn}));
+                    FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, ft1, ft2, ft3}));
                 }
             } catch (NumberFormatException ex) {
                 // verifica se e decimal
@@ -371,7 +402,6 @@ public class Pesquisa extends javax.swing.JDialog {
                     FiltroNumero fn3 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
                     filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3}));
                 } catch (NumberFormatException ex1) {
-                    ECompara compara;
                     if (texto.startsWith("%")) {
                         compara = ECompara.CONTEM_FIM;
                     } else if (texto.endsWith("%")) {
@@ -387,13 +417,13 @@ public class Pesquisa extends javax.swing.JDialog {
                 }
             }
         }
-        setLista();
+        return filtro;
     }
 
     /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
      */
-    private void setLista() {
+    private void setLista(IFiltro filtro) {
         try {
             DefaultTableModel dtmProduto = (DefaultTableModel) tabProdutos.getModel();
             while (dtmProduto.getRowCount() > 0) {
@@ -471,14 +501,6 @@ public class Pesquisa extends javax.swing.JDialog {
 
     public void setBtnPesquisar(JButton btnPesquisar) {
         this.btnPesquisar = btnPesquisar;
-    }
-
-    public GrupoFiltro getFiltro() {
-        return filtro;
-    }
-
-    public void setFiltro(GrupoFiltro filtro) {
-        this.filtro = filtro;
     }
 
     public JLabel getLblFiltro() {

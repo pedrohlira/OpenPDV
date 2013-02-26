@@ -23,21 +23,30 @@ public class SisCliente extends Dados implements Serializable {
     private Integer sisClienteId;
     @Column(name = "sis_cliente_doc")
     private String sisClienteDoc;
+    @Column(name = "sis_cliente_doc1")
+    private String sisClienteDoc1;
     @Column(name = "sis_cliente_nome")
     private String sisClienteNome;
     @Column(name = "sis_cliente_endereco")
     private String sisClienteEndereco;
-    @Column(name = "sis_cliente_cadastrado")
+    @Column(name = "sis_cliente_numero")
+    private int sisClienteNumero;
+    @Column(name = "sis_cliente_complemento")
+    private String sisClienteComplemento;
+    @Column(name = "sis_cliente_bairro")
+    private String sisClienteBairro;
+    @Column(name = "sis_cliente_cep")
+    private String sisClienteCep;
+    @Column(name = "sis_cliente_telefone")
+    private String sisClienteTelefone;
+    @Column(name = "sis_cliente_email")
+    private String sisClienteEmail;
+    @Column(name = "sis_cliente_data")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date sisClienteCadastrado;
-    // usados somente na NFe
-    private transient String ie;
-    private transient int numero;
-    private transient String bairro;
-    private transient String cep;
-    private transient SisMunicipio sisMunicipio;
-    private transient String fone;
-    private transient String email;
+    private Date sisClienteData;
+    @JoinColumn(name = "sis_municipio_id", referencedColumnName = "sis_municipio_id")
+    @ManyToOne
+    private SisMunicipio sisMunicipio;
     // usado somente na identificacao
     private transient SisUsuario vendedor;
 
@@ -102,44 +111,60 @@ public class SisCliente extends Dados implements Serializable {
         this.sisClienteNome = sisClienteNome;
     }
 
-    public Date getSisClienteCadastrado() {
-        return sisClienteCadastrado;
+    public String getSisClienteDoc1() {
+        return sisClienteDoc1;
     }
 
-    public void setSisClienteCadastrado(Date sisClienteCadastrado) {
-        this.sisClienteCadastrado = sisClienteCadastrado;
+    public void setSisClienteDoc1(String sisClienteDoc1) {
+        this.sisClienteDoc1 = sisClienteDoc1;
     }
 
-    public String getBairro() {
-        return bairro;
+    public int getSisClienteNumero() {
+        return sisClienteNumero;
     }
 
-    public void setBairro(String bairro) {
-        this.bairro = bairro;
+    public void setSisClienteNumero(int sisClienteNumero) {
+        this.sisClienteNumero = sisClienteNumero;
     }
 
-    public String getCep() {
-        return cep;
+    public String getSisClienteComplemento() {
+        return sisClienteComplemento;
     }
 
-    public void setCep(String cep) {
-        this.cep = cep;
+    public void setSisClienteComplemento(String sisClienteComplemento) {
+        this.sisClienteComplemento = sisClienteComplemento;
     }
 
-    public String getFone() {
-        return fone;
+    public String getSisClienteBairro() {
+        return sisClienteBairro;
     }
 
-    public void setFone(String fone) {
-        this.fone = fone;
+    public void setSisClienteBairro(String sisClienteBairro) {
+        this.sisClienteBairro = sisClienteBairro;
     }
 
-    public String getIe() {
-        return ie;
+    public String getSisClienteCep() {
+        return sisClienteCep;
     }
 
-    public void setIe(String ie) {
-        this.ie = ie;
+    public void setSisClienteCep(String sisClienteCep) {
+        this.sisClienteCep = sisClienteCep;
+    }
+
+    public String getSisClienteTelefone() {
+        return sisClienteTelefone;
+    }
+
+    public void setSisClienteTelefone(String sisClienteTelefone) {
+        this.sisClienteTelefone = sisClienteTelefone;
+    }
+
+    public String getSisClienteEmail() {
+        return sisClienteEmail;
+    }
+
+    public void setSisClienteEmail(String sisClienteEmail) {
+        this.sisClienteEmail = sisClienteEmail;
     }
 
     public SisMunicipio getSisMunicipio() {
@@ -150,20 +175,12 @@ public class SisCliente extends Dados implements Serializable {
         this.sisMunicipio = sisMunicipio;
     }
 
-    public int getNumero() {
-        return numero;
+    public Date getSisClienteData() {
+        return sisClienteData;
     }
 
-    public void setNumero(int numero) {
-        this.numero = numero;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setSisClienteData(Date sisClienteData) {
+        this.sisClienteData = sisClienteData;
     }
 
     public SisUsuario getVendedor() {

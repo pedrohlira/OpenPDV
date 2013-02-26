@@ -8,6 +8,7 @@ import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdProduto;
+import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisUsuario;
 import java.util.Date;
 import java.util.List;
@@ -82,6 +83,31 @@ public class RestCliente extends ARest {
         autorizar();
         try {
             return service.selecionar(new SisUsuario(), 0, 0, null);
+        } catch (Exception ex) {
+            log.error(ex);
+            throw new RestException(ex);
+        }
+    }
+
+    /**
+     * Metodo que retorna a lista de cliente do sistema.
+     *
+     * @param data data usada como corte para considerar novo cliente.
+     * @return uma lista de objetos cliente em formato JSON.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
+    @Path("/cliente")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<SisCliente> getClientes(@QueryParam("data") String data) throws RestException {
+        autorizar();
+        try {
+            Date dt = Util.formataData(data.substring(0, 10), "dd/MM/yyyy");
+            FiltroData fd = null;
+            if (dt != null) {
+                fd = new FiltroData("sisClienteData", ECompara.MAIOR_IGUAL, dt);
+            }
+            return service.selecionar(new SisCliente(), 0, 0, fd);
         } catch (Exception ex) {
             log.error(ex);
             throw new RestException(ex);

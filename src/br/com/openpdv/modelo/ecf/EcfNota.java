@@ -48,9 +48,6 @@ public class EcfNota extends Dados implements Serializable {
     @ManyToOne
     @JoinColumn(name = "sis_cliente_id")
     private SisCliente sisCliente;
-    @JoinColumn(name = "sis_empresa_id")
-    @ManyToOne
-    private SisEmpresa sisEmpresa;
     @OneToMany(mappedBy = "ecfNota", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<EcfNotaProduto> ecfNotaProdutos;
 
@@ -183,13 +180,5 @@ public class EcfNota extends Dados implements Serializable {
 
     public void setSisCliente(SisCliente sisCliente) {
         this.sisCliente = sisCliente;
-    }
-
-    public SisEmpresa getSisEmpresa() {
-        return sisEmpresa;
-    }
-
-    public void setSisEmpresa(SisEmpresa sisEmpresa) {
-        this.sisEmpresa = sisEmpresa;
     }
 }

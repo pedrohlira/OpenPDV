@@ -8,15 +8,15 @@ import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
+import br.com.openpdv.modelo.produto.ProdGrade;
+import br.com.openpdv.modelo.produto.ProdGradeTipo;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -38,10 +38,10 @@ public class Produtos extends javax.swing.JDialog {
     private Logger log;
     private int row;
     private int cod;
-    private GrupoFiltro filtro;
     private DefaultTableModel dtmProduto;
     private DefaultTableModel dtmPreco;
     private DefaultTableModel dtmItem;
+    private DefaultTableModel dtmGrade;
     private CoreService service;
 
     /**
@@ -56,8 +56,8 @@ public class Produtos extends javax.swing.JDialog {
         dtmProduto = (DefaultTableModel) tabProdutos.getModel();
         dtmPreco = (DefaultTableModel) tabPreco.getModel();
         dtmItem = (DefaultTableModel) tabItem.getModel();
+        dtmGrade = (DefaultTableModel) tabGrade.getModel();
         tabProdutos.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 row = tabProdutos.getSelectedRow();
@@ -88,7 +88,8 @@ public class Produtos extends javax.swing.JDialog {
         }
 
         produtos.setEmbalagens();
-        produtos.setLista();
+        produtos.setTipos();
+        produtos.setLista(null);
         return produtos;
     }
 
@@ -144,6 +145,11 @@ public class Produtos extends javax.swing.JDialog {
         btnItemRemover = new javax.swing.JButton();
         spItem = new javax.swing.JScrollPane();
         tabItem = new javax.swing.JTable();
+        panGrades = new javax.swing.JPanel();
+        btnGradeAdicionar = new javax.swing.JButton();
+        btnGradeRemover = new javax.swing.JButton();
+        spGrade = new javax.swing.JScrollPane();
+        tabGrade = new javax.swing.JTable();
         txtLimite = new javax.swing.JFormattedTextField();
         lblLimite = new javax.swing.JLabel();
         btnNovo = new javax.swing.JButton();
@@ -192,6 +198,7 @@ public class Produtos extends javax.swing.JDialog {
 
         spProdutos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        tabProdutos.setAutoCreateRowSorter(true);
         tabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabProdutos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -216,7 +223,6 @@ public class Produtos extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabProdutos.setAutoCreateRowSorter(true);
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabProdutos.setRowHeight(20);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -301,7 +307,7 @@ public class Produtos extends javax.swing.JDialog {
         lblOrigem.setText("Origem:");
 
         cmbOrigem.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        cmbOrigem.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0 - [Nacional]", "1 - [Estrangeira - Adquirida no mercado interno]", "2 - [Estrangeira - Importação Direta]" }));
+        cmbOrigem.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0 - Nacional, exceto as indicadas nos códigos 3 a 5]", "1 - [Estrangeira - Importação direta, exceto a indicada no código 6']", "2 - [Estrangeira - Adquirida no mercado interno, exceto a indicada no código 7]", "3 - [Nacional, mercadoria ou bem com Conteúdo de Importação superior a 40% (quarenta por cento)]", "4 - [Nacional, cuja produção tenha sido feita em conformidade com os processos produtivos básicos de que tratam o Decreto-Lei]", "5 - [Nacional, mercadoria ou bem com Conteúdo de Importação inferior ou igual a 40% (quarenta por cento)]", "6 - [Estrangeira - Importação direta, sem similar nacional, constante em lista de Resolução CAMEX]", "7 - [Estrangeira - Adquirida no mercado interno, sem similar nacional, constante em lista de Resolução CAMEX]" }));
 
         lblCST_CSON.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblCST_CSON.setText("CST/CSON:");
@@ -574,9 +580,7 @@ public class Produtos extends javax.swing.JDialog {
         tabPreco.getColumnModel().getColumn(2).setMinWidth(100);
         tabPreco.getColumnModel().getColumn(2).setPreferredWidth(100);
         tabPreco.getColumnModel().getColumn(2).setMaxWidth(100);
-        tabPreco.getColumnModel().getColumn(3).setMinWidth(200);
-        tabPreco.getColumnModel().getColumn(3).setPreferredWidth(200);
-        tabPreco.getColumnModel().getColumn(3).setMaxWidth(200);
+        tabPreco.getColumnModel().getColumn(3).setPreferredWidth(150);
 
         org.jdesktop.layout.GroupLayout panPrecosLayout = new org.jdesktop.layout.GroupLayout(panPrecos);
         panPrecos.setLayout(panPrecosLayout);
@@ -712,6 +716,112 @@ public class Produtos extends javax.swing.JDialog {
         );
 
         tabProd.addTab("Itens", new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/padrao.png")), panItens); // NOI18N
+
+        panGrades.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+
+        btnGradeAdicionar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnGradeAdicionar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/novo.png"))); // NOI18N
+        btnGradeAdicionar.setText("Adicionar");
+        btnGradeAdicionar.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnGradeAdicionar.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnGradeAdicionar.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnGradeAdicionar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGradeAdicionarActionPerformed(evt);
+            }
+        });
+        btnGradeAdicionar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnGradeAdicionarKeyPressed(evt);
+            }
+        });
+
+        btnGradeRemover.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnGradeRemover.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/excluir.png"))); // NOI18N
+        btnGradeRemover.setText("Remover");
+        btnGradeRemover.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnGradeRemover.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnGradeRemover.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnGradeRemover.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGradeRemoverActionPerformed(evt);
+            }
+        });
+        btnGradeRemover.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnGradeRemoverKeyPressed(evt);
+            }
+        });
+
+        spGrade.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        tabGrade.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        tabGrade.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Cod", "Barra", "Tamanho", "Cor", "Opção", "Estoque"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, true, true, true, true, true
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tabGrade.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabGrade.setRowHeight(20);
+        tabGrade.setShowGrid(true);
+        tabGrade.setShowVerticalLines(false);
+        tabGrade.getTableHeader().setReorderingAllowed(false);
+        spGrade.setViewportView(tabGrade);
+        tabGrade.getColumnModel().getColumn(0).setMinWidth(1);
+        tabGrade.getColumnModel().getColumn(0).setPreferredWidth(1);
+        tabGrade.getColumnModel().getColumn(0).setMaxWidth(1);
+        tabGrade.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tabGrade.getColumnModel().getColumn(2).setMinWidth(100);
+        tabGrade.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tabGrade.getColumnModel().getColumn(2).setMaxWidth(100);
+        tabGrade.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tabGrade.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tabGrade.getColumnModel().getColumn(5).setMinWidth(100);
+        tabGrade.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tabGrade.getColumnModel().getColumn(5).setMaxWidth(100);
+
+        org.jdesktop.layout.GroupLayout panGradesLayout = new org.jdesktop.layout.GroupLayout(panGrades);
+        panGrades.setLayout(panGradesLayout);
+        panGradesLayout.setHorizontalGroup(
+            panGradesLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(panGradesLayout.createSequentialGroup()
+                .add(6, 6, 6)
+                .add(panGradesLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(panGradesLayout.createSequentialGroup()
+                        .add(btnGradeAdicionar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(6, 6, 6)
+                        .add(btnGradeRemover, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(spGrade, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 855, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+        );
+        panGradesLayout.setVerticalGroup(
+            panGradesLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(panGradesLayout.createSequentialGroup()
+                .add(panGradesLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(btnGradeAdicionar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(btnGradeRemover, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(6, 6, 6)
+                .add(spGrade, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 117, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+        );
+
+        tabProd.addTab("Grades", new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/grade.png")), panGrades); // NOI18N
 
         txtLimite.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         txtLimite.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -901,18 +1011,19 @@ public class Produtos extends javax.swing.JDialog {
     }//GEN-LAST:event_btnExcluirKeyPressed
 
     private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
-        pesquisar();
+        IFiltro filtro = Pesquisa.pesquisar(txtFiltro.getText().toUpperCase());
+        setLista(filtro);
     }//GEN-LAST:event_btnPesquisarActionPerformed
 
     private void btnPesquisarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnPesquisarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            pesquisar();
+            btnPesquisarActionPerformed(null);
         }
     }//GEN-LAST:event_btnPesquisarKeyPressed
 
     private void txtFiltroKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFiltroKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            pesquisar();
+            btnPesquisarActionPerformed(null);
         }
     }//GEN-LAST:event_txtFiltroKeyPressed
 
@@ -970,9 +1081,31 @@ public class Produtos extends javax.swing.JDialog {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_formWindowClosing
+
+    private void btnGradeAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGradeAdicionarActionPerformed
+        adicionarGrade();
+    }//GEN-LAST:event_btnGradeAdicionarActionPerformed
+
+    private void btnGradeAdicionarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnGradeAdicionarKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            adicionarGrade();
+        }
+    }//GEN-LAST:event_btnGradeAdicionarKeyPressed
+
+    private void btnGradeRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGradeRemoverActionPerformed
+        removerGrade();
+    }//GEN-LAST:event_btnGradeRemoverActionPerformed
+
+    private void btnGradeRemoverKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnGradeRemoverKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            removerGrade();
+        }
+    }//GEN-LAST:event_btnGradeRemoverKeyPressed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnExcluir;
+    private javax.swing.JButton btnGradeAdicionar;
+    private javax.swing.JButton btnGradeRemover;
     private javax.swing.JButton btnItemAdicionar;
     private javax.swing.JButton btnItemRemover;
     private javax.swing.JButton btnNovo;
@@ -1004,12 +1137,15 @@ public class Produtos extends javax.swing.JDialog {
     private javax.swing.JLabel lblREF;
     private javax.swing.JLabel lblTipo;
     private javax.swing.JLabel lblTributacao;
+    private javax.swing.JPanel panGrades;
     private javax.swing.JPanel panItens;
     private javax.swing.JPanel panPrecos;
     private javax.swing.JPanel panProdutos;
+    private javax.swing.JScrollPane spGrade;
     private javax.swing.JScrollPane spItem;
     private javax.swing.JScrollPane spPreco;
     private javax.swing.JScrollPane spProdutos;
+    private javax.swing.JTable tabGrade;
     private javax.swing.JTable tabItem;
     private javax.swing.JTable tabPreco;
     private javax.swing.JTabbedPane tabProd;
@@ -1099,16 +1235,34 @@ public class Produtos extends javax.swing.JDialog {
                 em.getTransaction().begin();
 
                 // valida sub-listas
+                int subListas = 0;
                 List<ProdPreco> precos = new ArrayList<>();
                 List<ProdComposicao> itens = new ArrayList<>();
-                if (validaPrecos(precos, prod) && validaItens(itens, prod)) {
-                    // precos
-                    salvarPrecos(em, prod, precos);
-                    // itens
-                    salvarItens(em, prod, itens);
-                    em.getTransaction().commit();
-                    JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Produtos", JOptionPane.INFORMATION_MESSAGE);
-                    setLista();
+                List<ProdGrade> grades = new ArrayList<>();
+                if (validaPrecos(precos, prod) && validaItens(itens, prod) && validarGrades(grades, prod)) {
+                    if (!precos.isEmpty()) {
+                        subListas++;
+                    }
+                    if (!itens.isEmpty()) {
+                        subListas++;
+                    }
+                    if (!grades.isEmpty()) {
+                        subListas++;
+                    }
+                    if (subListas > 1) {
+                        em.getTransaction().rollback();
+                        JOptionPane.showMessageDialog(this, "O produto somente pode ter um das 3 sub listas.", "Produtos", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        // precos
+                        salvarPrecos(em, prod, precos);
+                        // itens
+                        salvarItens(em, prod, itens);
+                        // grades
+                        salvarGrades(em, prod, grades);
+                        em.getTransaction().commit();
+                        JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Produtos", JOptionPane.INFORMATION_MESSAGE);
+                        btnPesquisarActionPerformed(null);
+                    }
                 } else {
                     em.getTransaction().rollback();
                 }
@@ -1233,6 +1387,61 @@ public class Produtos extends javax.swing.JDialog {
     }
 
     /**
+     * Metodo que valida as grades do produto
+     *
+     * @param grades a lista de dados
+     * @param prod o produto atual.
+     * @return verdadeiro se valido, falso caso contrario
+     */
+    private boolean validarGrades(List<ProdGrade> grades, ProdProduto prod) {
+        boolean resp = true;
+        try {
+            double estoque = 0.00;
+            for (int i = 0; i < dtmGrade.getRowCount(); i++) {
+                ProdGrade grade = new ProdGrade();
+                grade.setProdProduto(new ProdProduto(prod.getId()));
+                grade.setProdGradeBarra(dtmGrade.getValueAt(i, 1) == null || dtmGrade.getValueAt(i, 1).toString().equals("") ? null : dtmGrade.getValueAt(i, 1).toString());
+                grade.setProdGradeTamanho(dtmGrade.getValueAt(i, 2).toString());
+                grade.setProdGradeCor(dtmGrade.getValueAt(i, 3).toString());
+                grade.setProdGradeOpcao(dtmGrade.getValueAt(i, 4).toString());
+                grade.setProdGradeEstoque(Double.valueOf(dtmGrade.getValueAt(i, 5).toString()));
+                grades.add(grade);
+                estoque += grade.getProdGradeEstoque();
+            }
+            // valida se estoque igual ao do produto
+            if (grades.size() > 0 && estoque != prod.getProdProdutoEstoque()) {
+                JOptionPane.showMessageDialog(this, "O total do estoque da grade, não é igual ao estoque do produto.", "Grades", JOptionPane.WARNING_MESSAGE);
+                resp = false;
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Problemas com os dados de grades!", "Grades", JOptionPane.WARNING_MESSAGE);
+            resp = false;
+        }
+
+        return resp;
+    }
+
+    /**
+     * Metodo que salva as grades
+     *
+     * @param em a transacao ativa
+     * @param prod o produto ativo
+     * @param grades a lista de dados
+     * @throws OpenPdvException caso ocorra alguma exececao
+     */
+    private void salvarGrades(EntityManager em, ProdProduto prod, List<ProdGrade> grades) throws OpenPdvException {
+        // deleta
+        if (cod > 0) {
+            FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
+            Sql sql = new Sql(new ProdGrade(), EComandoSQL.EXCLUIR, fo);
+            service.executar(em, sql);
+        }
+
+        // insere
+        service.salvar(em, grades);
+    }
+
+    /**
      * Metodo que exclui um registro do sistema.
      */
     private void excluir() {
@@ -1243,7 +1452,7 @@ public class Produtos extends javax.swing.JDialog {
                 try {
                     service.deletar(new ProdProduto(cod));
                     tabProdutos.clearSelection();
-                    setLista();
+                    btnPesquisarActionPerformed(null);
                 } catch (OpenPdvException ex) {
                     log.debug("Erro ao excluir o produto -> " + cod, ex);
                     JOptionPane.showMessageDialog(this, "Este registro não pode ser excluído!", "Produtos", JOptionPane.WARNING_MESSAGE);
@@ -1255,104 +1464,9 @@ public class Produtos extends javax.swing.JDialog {
     }
 
     /**
-     * Metodo que realiza um filtro na listagem
-     */
-    private void pesquisar() {
-        String texto = txtFiltro.getText().trim().toUpperCase();
-        filtro = new GrupoFiltro();
-        FiltroBinario fb = new FiltroBinario("prodProdutoAtivo", ECompara.IGUAL, true);
-        filtro.add(fb, EJuncao.E);
-
-        if (texto.contains("/")) {
-            // verifica se e data completa
-            try {
-                Date data = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(texto);
-                FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.IGUAL, data);
-                FiltroData fd2 = new FiltroData("prodProdutoAlterado", ECompara.IGUAL, data);
-                filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2}));
-            } catch (ParseException ex) {
-                // verifica se e data simples
-                try {
-                    // encontra o rande de datas
-                    Date inicio = new SimpleDateFormat("dd/MM/yyyy").parse(texto);
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(inicio);
-                    cal.set(Calendar.HOUR, 23);
-                    cal.set(Calendar.MINUTE, 59);
-                    cal.set(Calendar.SECOND, 59);
-                    Date fim = cal.getTime();
-                    // monta o grupo para cadastrado
-                    FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.MAIOR_IGUAL, inicio);
-                    FiltroData fd2 = new FiltroData("prodProdutoCadastrado", ECompara.MENOR_IGUAL, fim);
-                    GrupoFiltro cad = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
-                    // monta o grupo para alterado
-                    FiltroData fd3 = new FiltroData("prodProdutoAlterado", ECompara.MAIOR_IGUAL, inicio);
-                    FiltroData fd4 = new FiltroData("prodProdutoAlterado", ECompara.MENOR_IGUAL, fim);
-                    GrupoFiltro alt = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
-                    // combinando os filtros
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{cad, alt}));
-                } catch (ParseException ex1) {
-                    log.debug("Nao filtrou por data.", ex);
-                    JOptionPane.showMessageDialog(this, "O sistema não conseguiu filtrar pelos campos de data!", "Produtos", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        } else {
-            // verifica se e longo
-            try {
-                long valor = Long.valueOf(texto);
-                if (texto.length() == 6) {
-                    // codigo
-                    FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, valor);
-                    // referencia
-                    FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft}));
-                } else if (texto.length() == 8 || texto.length() >= 12) {
-                    // barra
-                    FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
-                    // barra do preco
-                    FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
-                    ft1.setCampoPrefixo("t1.");
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, ft1}));
-                } else {
-                    // referencia
-                    FiltroTexto ft = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    // estoque
-                    FiltroNumero fn = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, fn}));
-                }
-            } catch (NumberFormatException ex) {
-                // verifica se e decimal
-                try {
-                    double valor = Double.valueOf(texto.replace(",", "."));
-                    // preco
-                    FiltroNumero fn2 = new FiltroNumero("prodProdutoPreco", ECompara.IGUAL, valor);
-                    // estoque
-                    FiltroNumero fn3 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3}));
-                } catch (NumberFormatException ex1) {
-                    ECompara compara;
-                    if (texto.startsWith("%")) {
-                        compara = ECompara.CONTEM_FIM;
-                    } else if (texto.endsWith("%")) {
-                        compara = ECompara.CONTEM_INICIO;
-                    } else {
-                        compara = ECompara.CONTEM;
-                    }
-                    // descricao
-                    FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", compara, texto);
-                    // referencia
-                    FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", compara, texto);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2}));
-                }
-            }
-        }
-        setLista();
-    }
-
-    /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
      */
-    private void setLista() {
+    private void setLista(IFiltro filtro) {
         try {
             int limite = Integer.valueOf(txtLimite.getText());
             List<ProdProduto> lista = service.selecionar(new ProdProduto(), 0, limite, filtro);
@@ -1391,6 +1505,10 @@ public class Produtos extends javax.swing.JDialog {
         while (dtmItem.getRowCount() > 0) {
             dtmItem.removeRow(0);
         }
+        // removendo as grades
+        while (dtmGrade.getRowCount() > 0) {
+            dtmGrade.removeRow(0);
+        }
 
         if (row == -1) {
             cod = 0;
@@ -1418,16 +1536,16 @@ public class Produtos extends javax.swing.JDialog {
             txtDescricao.setText(tabProdutos.getModel().getValueAt(rowModel, 3).toString());
             txtREF.setText(tabProdutos.getModel().getValueAt(rowModel, 4).toString());
             txtPreco.setText(tabProdutos.getModel().getValueAt(rowModel, 5).toString().replace(".", ","));
-            selecionarCombo(cmbEmbalagem, tabProdutos.getModel().getValueAt(rowModel, 6).toString());
+            Util.selecionarCombo(cmbEmbalagem, tabProdutos.getModel().getValueAt(rowModel, 6).toString());
             txtEstoque.setText(tabProdutos.getModel().getValueAt(rowModel, 8).toString().replace(".", ","));
-            selecionarCombo(cmbTipo, tabProdutos.getModel().getValueAt(rowModel, 9).toString());
-            selecionarCombo(cmbOrigem, tabProdutos.getModel().getValueAt(rowModel, 10).toString());
+            Util.selecionarCombo(cmbTipo, tabProdutos.getModel().getValueAt(rowModel, 9).toString());
+            Util.selecionarCombo(cmbOrigem, tabProdutos.getModel().getValueAt(rowModel, 10).toString());
             txtCST_CSON.setText(tabProdutos.getModel().getValueAt(rowModel, 11).toString());
-            selecionarCombo(cmbTributacao, tabProdutos.getModel().getValueAt(rowModel, 12).toString());
+            Util.selecionarCombo(cmbTributacao, tabProdutos.getModel().getValueAt(rowModel, 12).toString());
             txtICMS.setText(tabProdutos.getModel().getValueAt(rowModel, 13).toString().replace(".", ","));
             txtISSQN.setText(tabProdutos.getModel().getValueAt(rowModel, 14).toString().replace(".", ","));
-            selecionarCombo(cmbIAT, tabProdutos.getModel().getValueAt(rowModel, 15).toString());
-            selecionarCombo(cmbIPPT, tabProdutos.getModel().getValueAt(rowModel, 16).toString());
+            Util.selecionarCombo(cmbIAT, tabProdutos.getModel().getValueAt(rowModel, 15).toString());
+            Util.selecionarCombo(cmbIPPT, tabProdutos.getModel().getValueAt(rowModel, 16).toString());
             chkAtivo.setSelected(Boolean.valueOf(tabProdutos.getModel().getValueAt(rowModel, 19).toString()));
 
             try {
@@ -1445,24 +1563,12 @@ public class Produtos extends javax.swing.JDialog {
                         item.getProdEmbalagem().getId() + " - " + item.getProdEmbalagem().getProdEmbalagemNome(), item.getProdComposicaoQuantidade(), item.getProdComposicaoValor()};
                     dtmItem.addRow(obj);
                 }
+                for (ProdGrade grade : prod.getProdGrades()) {
+                    Object[] obj = new Object[]{grade.getId(), grade.getProdGradeBarra(), grade.getProdGradeTamanho(), grade.getProdGradeCor(), grade.getProdGradeOpcao(), grade.getProdGradeEstoque()};
+                    dtmGrade.addRow(obj);
+                }
             } catch (OpenPdvException ex) {
                 log.error("Erro ao selecionar o produto do sistema", ex);
-            }
-        }
-    }
-
-    /**
-     * Metodo que seleciona um item da combo pelo valor.
-     *
-     * @param combo a ser verificada.
-     * @param valor a ser comparado.
-     */
-    private void selecionarCombo(JComboBox combo, String valor) {
-        for (int i = 0; i < combo.getItemCount(); i++) {
-            String item = combo.getItemAt(i).toString();
-            if (item.startsWith(valor)) {
-                combo.setSelectedIndex(i);
-                break;
             }
         }
     }
@@ -1485,6 +1591,34 @@ public class Produtos extends javax.swing.JDialog {
         } finally {
             tabPreco.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(embalagem));
             tabItem.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(embalagem));
+        }
+    }
+
+    /**
+     * Metodo que carrega os valores dos tipo de grades.
+     */
+    private void setTipos() {
+        JComboBox tam = new JComboBox();
+        JComboBox cor = new JComboBox();
+        JComboBox opc = new JComboBox();
+
+        try {
+            List<ProdGradeTipo> lista = service.selecionar(new ProdGradeTipo(), 0, 0, null);
+            for (ProdGradeTipo tipo : lista) {
+                if (tipo.getProdGradeTipoOpcao() == 'T') {
+                    tam.addItem(tipo.getProdGradeTipoNome());
+                } else if (tipo.getProdGradeTipoOpcao() == 'C') {
+                    cor.addItem(tipo.getProdGradeTipoNome());
+                } else {
+                    opc.addItem(tipo.getProdGradeTipoNome());
+                }
+            }
+        } catch (OpenPdvException ex) {
+            log.error("Nao carregou os tipos.", ex);
+        } finally {
+            tabGrade.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(tam));
+            tabGrade.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(cor));
+            tabGrade.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(opc));
         }
     }
 
@@ -1519,6 +1653,23 @@ public class Produtos extends javax.swing.JDialog {
         int rowItem = tabItem.getSelectedRow();
         if (rowItem >= 0) {
             dtmItem.removeRow(rowItem);
+        }
+    }
+
+    /**
+     * Adicionar uma linha a grade.
+     */
+    private void adicionarGrade() {
+        dtmGrade.addRow(new Object[]{0, "", "", "", "", 0.00});
+    }
+
+    /**
+     * Remove a linha selecionada da grade.
+     */
+    private void removerGrade() {
+        int rowGrade = tabGrade.getSelectedRow();
+        if (rowGrade >= 0) {
+            dtmGrade.removeRow(rowGrade);
         }
     }
 
@@ -1681,14 +1832,6 @@ public class Produtos extends javax.swing.JDialog {
 
     public void setDtmProduto(DefaultTableModel dtmProduto) {
         this.dtmProduto = dtmProduto;
-    }
-
-    public GrupoFiltro getFiltro() {
-        return filtro;
-    }
-
-    public void setFiltro(GrupoFiltro filtro) {
-        this.filtro = filtro;
     }
 
     public JLabel getLblBarra() {
@@ -2009,5 +2152,53 @@ public class Produtos extends javax.swing.JDialog {
 
     public void setTxtREF(JTextField txtREF) {
         this.txtREF = txtREF;
+    }
+
+    public DefaultTableModel getDtmGrade() {
+        return dtmGrade;
+    }
+
+    public void setDtmGrade(DefaultTableModel dtmGrade) {
+        this.dtmGrade = dtmGrade;
+    }
+
+    public JButton getBtnGradeAdicionar() {
+        return btnGradeAdicionar;
+    }
+
+    public void setBtnGradeAdicionar(JButton btnGradeAdicionar) {
+        this.btnGradeAdicionar = btnGradeAdicionar;
+    }
+
+    public JButton getBtnGradeRemover() {
+        return btnGradeRemover;
+    }
+
+    public void setBtnGradeRemover(JButton btnGradeRemover) {
+        this.btnGradeRemover = btnGradeRemover;
+    }
+
+    public JPanel getPanGrades() {
+        return panGrades;
+    }
+
+    public void setPanGrades(JPanel panGrades) {
+        this.panGrades = panGrades;
+    }
+
+    public JScrollPane getSpGrade() {
+        return spGrade;
+    }
+
+    public void setSpGrade(JScrollPane spGrade) {
+        this.spGrade = spGrade;
+    }
+
+    public JTable getTabGrade() {
+        return tabGrade;
+    }
+
+    public void setTabGrade(JTable tabGrade) {
+        this.tabGrade = tabGrade;
     }
 }

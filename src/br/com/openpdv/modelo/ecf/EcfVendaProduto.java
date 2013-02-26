@@ -23,6 +23,8 @@ public class EcfVendaProduto extends Dados implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ecf_venda_produto_id")
     private Integer ecfVendaProdutoId;
+    @Column(name = "ecf_venda_produto_barra")
+    private String ecfVendaProdutoBarra;
     @Column(name = "ecf_venda_produto_cst_cson")
     private String ecfVendaProdutoCstCson;
     @Column(name = "ecf_venda_produto_tributacao")
@@ -71,10 +73,11 @@ public class EcfVendaProduto extends Dados implements Serializable {
      * @param produto referencia para o produto selecionado.
      * @param quantidade a quantidade total vendida.
      */
-    public EcfVendaProduto(ProdProduto produto, Double quantidade) {
+    public EcfVendaProduto(ProdProduto produto, Double quantidade, String barra) {
         this(0);
         this.prodProduto = produto;
         this.prodEmbalagem = produto.getProdEmbalagem();
+        this.ecfVendaProdutoBarra = barra;
         this.ecfVendaProdutoCstCson = produto.getProdProdutoCstCson();
         this.ecfVendaProdutoTributacao = produto.getProdProdutoTributacao();
         this.ecfVendaProdutoIcms = produto.getProdProdutoIcms();
@@ -113,6 +116,14 @@ public class EcfVendaProduto extends Dados implements Serializable {
 
     public void setEcfVendaProdutoId(Integer ecfVendaProdutoId) {
         this.ecfVendaProdutoId = ecfVendaProdutoId;
+    }
+
+    public String getEcfVendaProdutoBarra() {
+        return ecfVendaProdutoBarra;
+    }
+
+    public void setEcfVendaProdutoBarra(String ecfVendaProdutoBarra) {
+        this.ecfVendaProdutoBarra = ecfVendaProdutoBarra;
     }
 
     public String getEcfVendaProdutoCstCson() {

@@ -145,7 +145,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 z.setEcfZEmissao(new Date());
                 z.setEcfZBruto(ini.get("Totalizadores", "VendaBruta", double.class));
                 z.setEcfZGt(ini.get("Totalizadores", "GrandeTotal", double.class));
-                String im = Caixa.getInstancia().getEmpresa().getSisEmpresaIm() == null ? "" : Caixa.getInstancia().getEmpresa().getSisEmpresaIm().replaceAll("[^0-9]", "");
+                String im = Caixa.getInstancia().getEmpresa().getSisEmpresaIm() == null ? "" : Caixa.getInstancia().getEmpresa().getSisEmpresaIm().replaceAll("\\D", "");
                 z.setEcfZIssqn(!im.equals(""));
                 // salva EcfZ
                 z = (EcfZ) service.salvar(z);
@@ -160,7 +160,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 service.executar(slqs);
 
                 // gera os registros EcfZTotais
-                List<EcfZTotais> totais = new ArrayList<>();
+                Map<String, EcfZTotais> totais = new HashMap<>();
                 Map<String, String> aliq = ini.get("Aliquotas");
                 for (String chave : aliq.keySet()) {
                     double valor = Double.valueOf(aliq.get(chave));
@@ -169,7 +169,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                         total.setEcfZ(z);
                         total.setEcfZTotaisCodigo(chave);
                         total.setEcfZTotaisValor(valor);
-                        totais.add(total);
+                        if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                            totais.put(total.getEcfZTotaisCodigo(), total);
+                        }
                     }
                 }
 
@@ -194,7 +196,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                             total.setEcfZ(z);
                             total.setEcfZTotaisCodigo(codigo);
                             total.setEcfZTotaisValor(valor);
-                            totais.add(total);
+                            if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                                totais.put(total.getEcfZTotaisCodigo(), total);
+                            }
                         }
                     }
                 }
@@ -206,7 +210,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("OPNF");
                     total.setEcfZTotaisValor(opnf);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
 
                 // descontos
@@ -216,7 +222,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("DT");
                     total.setEcfZTotaisValor(descT);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
                 double descS = ini.get("Totalizadores", "TotalDescontosISSQN", double.class);
                 if (descS > 0.00) {
@@ -224,7 +232,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("DS");
                     total.setEcfZTotaisValor(descS);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
 
                 // acrescimos
@@ -234,7 +244,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("AT");
                     total.setEcfZTotaisValor(acresT);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
                 double acresS = ini.get("Totalizadores", "TotalAcrescimosISSQN", double.class);
                 if (acresS > 0.00) {
@@ -242,7 +254,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("AS");
                     total.setEcfZTotaisValor(acresS);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
 
                 // cancelamentos
@@ -252,7 +266,9 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("Can-T");
                     total.setEcfZTotaisValor(canT);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
                 double canS = ini.get("Totalizadores", "TotalCancelamentosISSQN", double.class);
                 if (canS > 0.00) {
@@ -260,11 +276,13 @@ public class ComandoEmitirReducaoZ implements IComando {
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("Can-S");
                     total.setEcfZTotaisValor(canS);
-                    totais.add(total);
+                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
+                        totais.put(total.getEcfZTotaisCodigo(), total);
+                    }
                 }
 
                 // salva os totais do z
-                service.salvar(totais);
+                service.salvar(totais.values());
             } catch (Exception ex) {
                 log.error("Erro ao gerar ao salvar os dados da reducao Z.", ex);
                 log.error(resp);
@@ -291,7 +309,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 data = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]);
             } catch (ParseException ex) {
                 log.error("Erro na formatacao da data do ECF.", ex);
-                throw new OpenPdvException(ex);
+                data = new Date();
             }
         } else {
             log.error("Erro ao recuperar a data do ECF -> " + resp[1]);
@@ -301,10 +319,10 @@ public class ComandoEmitirReducaoZ implements IComando {
         // transforma a data para o dia 1º do mes
         Calendar cal = Calendar.getInstance();
         cal.setTime(data);
-        cal.set(cal.get(Calendar.YEAR), Calendar.MONTH, 1, 0, 0, 0);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
 
         // procura por uma Reducao Z no mes que esta o ECF
-        FiltroData fd = new FiltroData("ecfZEmissao", ECompara.MAIOR_IGUAL, cal.getTime());
+        FiltroData fd = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, cal.getTime());
         List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, fd);
         if (zs.isEmpty()) {
             // somente gera caso tenha algum registro de Z.

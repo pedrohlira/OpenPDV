@@ -99,6 +99,7 @@ public class TiposPagamento extends javax.swing.JDialog {
             }
         });
 
+        tabTipoPagamentos.setAutoCreateRowSorter(true);
         tabTipoPagamentos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabTipoPagamentos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -123,7 +124,6 @@ public class TiposPagamento extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabTipoPagamentos.setAutoCreateRowSorter(true);
         tabTipoPagamentos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabTipoPagamentos.setRowHeight(20);
         tabTipoPagamentos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -307,7 +307,7 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(spTipoPagamentos)
                         .add(panTipoPagamentos, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -322,11 +322,11 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-661)/2, (screenSize.height-307)/2, 661, 307);
+        setBounds((screenSize.width-650)/2, (screenSize.height-317)/2, 650, 317);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
