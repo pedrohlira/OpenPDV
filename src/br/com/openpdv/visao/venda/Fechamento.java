@@ -648,8 +648,8 @@ public class Fechamento extends javax.swing.JDialog {
                         JOptionPane.OK_CANCEL_OPTION, btnTroca.getIcon(), null, "0,00");
 
                 if (obj != null) {
-                    Object obj2 = JOptionPane.showInputDialog(fechamento, "Digite os detalhes da troca.", "TROCA",
-                            JOptionPane.OK_OPTION, btnTroca.getIcon(), null, "Nº do Cupom anterior e CPF do cliente.");
+                    Object obj2 = JOptionPane.showInputDialog(fechamento, "Digite os detalhes da troca, para que possa ser feita a entrada.", "TROCA",
+                            JOptionPane.OK_OPTION, btnTroca.getIcon(), null, "Nº do CCF anterior, CPF do cliente e Códigos dos produtos devolvidos");
                     if (obj2 != null) {
                         obs = obj2.toString().length() > 255 ? obj2.toString().substring(0, 255) : obj2.toString();
                     } else {
@@ -838,46 +838,55 @@ public class Fechamento extends javax.swing.JDialog {
      */
     private void cheque(final BigDecimal valor) {
         if ((limite == 1 && valor.compareTo(apagar.subtract(pago)) == 0) || (limite > 1 && valor.doubleValue() > 0.00 && valor.compareTo(apagar.subtract(pago)) <= 0)) {
-            if (tefs < limite) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // chama o metodo do tef para operacao com cheque
-                        try {
-                            String id = TEF.gerarId();
-                            TEF.consultarCheque(id, valor.doubleValue());
+            for (EcfPagamentoTipo tipo : tipos) {
+                if (tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cheque"))) {
+                    if (tipo.isEcfPagamentoTipoTef()) {
+                        if (tefs < limite) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // chama o metodo do tef para operacao com cheque
+                                    try {
+                                        String id = TEF.gerarId();
+                                        TEF.consultarCheque(id, valor.doubleValue());
 
-                            String rede = TEF.getDados().get("010-000");
-                            Date data = new SimpleDateFormat("ddMMyyyyHHmmss").parse(TEF.getDados().get("022-000") + TEF.getDados().get("023-000"));
-                            String nsu = TEF.getDados().get("012-000");
-                            String arquivo = TEF.getPathTmp().getAbsolutePath() + System.getProperty("file.separator") + "pendente" + id + ".txt";
-                            boolean confirmado = false;
+                                        String rede = TEF.getDados().get("010-000");
+                                        Date data = new SimpleDateFormat("ddMMyyyyHHmmss").parse(TEF.getDados().get("022-000") + TEF.getDados().get("023-000"));
+                                        String nsu = TEF.getDados().get("012-000");
+                                        String arquivo = TEF.getPathTmp().getAbsolutePath() + System.getProperty("file.separator") + "pendente" + id + ".txt";
+                                        boolean confirmado = false;
 
-                            // caso o pagamento seja menor que o total restante, podendo ter outro cartao
-                            if (valor.compareTo(apagar.subtract(pago)) < 0) {
-                                // confirma e gera o backup
-                                FileUtils.copy(arquivo, arquivo.replace("pendente", "backup"));
-                                arquivo = arquivo.replace("pendente", "backup");
-                                String msg = TEF.getDados().get("030-000");
-                                TEF.confirmarTransacao(id, true);
-                                lblTEF.setText("TEF [" + msg + "]");
-                                confirmado = true;
-                            }
-                            dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, valor.doubleValue(), confirmado, data, nsu, arquivo});
+                                        // caso o pagamento seja menor que o total restante, podendo ter outro cartao
+                                        if (valor.compareTo(apagar.subtract(pago)) < 0) {
+                                            // confirma e gera o backup
+                                            FileUtils.copy(arquivo, arquivo.replace("pendente", "backup"));
+                                            arquivo = arquivo.replace("pendente", "backup");
+                                            String msg = TEF.getDados().get("030-000");
+                                            TEF.confirmarTransacao(id, true);
+                                            lblTEF.setText("TEF [" + msg + "]");
+                                            confirmado = true;
+                                        }
+                                        dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, valor.doubleValue(), confirmado, data, nsu, arquivo});
 
-                            Aguarde.getInstancia().setVisible(false);
-                            atualizar();
-                        } catch (Exception ex) {
-                            Aguarde.getInstancia().setVisible(false);
-                            if (ex.getMessage() != null) {
-                                JOptionPane.showMessageDialog(fechamento, ex.getMessage(), "TEF", JOptionPane.INFORMATION_MESSAGE);
-                            }
+                                        Aguarde.getInstancia().setVisible(false);
+                                        atualizar();
+                                    } catch (Exception ex) {
+                                        Aguarde.getInstancia().setVisible(false);
+                                        if (ex.getMessage() != null) {
+                                            JOptionPane.showMessageDialog(fechamento, ex.getMessage(), "TEF", JOptionPane.INFORMATION_MESSAGE);
+                                        }
+                                    }
+                                }
+                            }).start();
+                            Aguarde.getInstancia().setVisible(true);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Máximo de " + limite + " pagamentos com TEF atingido!", "TEF", JOptionPane.INFORMATION_MESSAGE);
                         }
+                    } else {
+                        dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, valor.doubleValue(), true, new Date(), "", ""});
                     }
-                }).start();
-                Aguarde.getInstancia().setVisible(true);
-            } else {
-                JOptionPane.showMessageDialog(this, "Máximo de " + limite + " pagamentos com TEF atingido!", "TEF", JOptionPane.INFORMATION_MESSAGE);
+                    break;
+                }
             }
         } else {
             String restante = Util.formataNumero(apagar.subtract(pago).doubleValue(), 1, 2, false);
@@ -1165,7 +1174,7 @@ public class Fechamento extends javax.swing.JDialog {
         if (pagamentos.get(1) == null) {
             pagamentos.remove(1);
         }
-        
+
         // verifica se teve dinheiro, caso contrario remove a posicao 0
         if (pagamentos.get(0) == null) {
             pagamentos.remove(0);
