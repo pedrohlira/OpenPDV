@@ -317,7 +317,7 @@ public class Pesquisa extends javax.swing.JDialog {
             } else if (texto.startsWith(">")) {
                 compara = ECompara.MAIOR;
                 texto = texto.substring(1);
-            } else if (texto.endsWith("<")) {
+            } else if (texto.startsWith("<")) {
                 compara = ECompara.MENOR;
                 texto = texto.substring(1);
             } else {
@@ -367,40 +367,31 @@ public class Pesquisa extends javax.swing.JDialog {
             // verifica se e longo
             try {
                 long valor = Long.valueOf(texto);
-                if (texto.length() <= 6) {
-                    // codigo
-                    FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, valor);
-                    // barra do preco
-                    FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
-                    ft1.setCampoPrefixo("t1.");
-                    // barra da grade
-                    FiltroTexto ft2 = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, texto);
-                    ft2.setCampoPrefixo("t2.");
-                    // referencia
-                    FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft1, ft2, ft3}));
-                } else {
-                    // barra
-                    FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
-                    // barra do preco
-                    FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
-                    ft1.setCampoPrefixo("t1.");
-                    // barra da grade
-                    FiltroTexto ft2 = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, texto);
-                    ft2.setCampoPrefixo("t2.");
-                    // referencia
-                    FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft, ft1, ft2, ft3}));
-                }
+                // codigo
+                FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, valor);
+                // barra
+                FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
+                // barra do preco
+                FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
+                ft1.setCampoPrefixo("t1.");
+                // barra da grade
+                FiltroTexto ft2 = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, texto);
+                ft2.setCampoPrefixo("t2.");
+                // referencia
+                FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
+                filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft, ft1, ft2, ft3}));
             } catch (NumberFormatException ex) {
                 // verifica se e decimal
                 try {
-                    double valor = Double.valueOf(texto.replace(",", "."));
+                    double valor = Double.valueOf(texto.replace(".", "").replace(",", "."));
                     // preco
-                    FiltroNumero fn2 = new FiltroNumero("prodProdutoPreco", ECompara.IGUAL, valor);
+                    FiltroNumero fn = new FiltroNumero("prodProdutoPreco", ECompara.IGUAL, valor);
                     // estoque
-                    FiltroNumero fn3 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn2, fn3}));
+                    FiltroNumero fn1 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
+                    // barra do preco
+                    FiltroNumero fn2 = new FiltroNumero("prodPrecoValor", ECompara.IGUAL, valor);
+                    fn2.setCampoPrefixo("t1.");
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, fn1, fn2}));
                 } catch (NumberFormatException ex1) {
                     if (texto.startsWith("%")) {
                         compara = ECompara.CONTEM_FIM;
@@ -409,11 +400,21 @@ public class Pesquisa extends javax.swing.JDialog {
                     } else {
                         compara = ECompara.CONTEM;
                     }
+                    texto = texto.replace("%", "");
+
                     // descricao
                     FiltroTexto ft1 = new FiltroTexto("prodProdutoDescricao", compara, texto);
                     // referencia
                     FiltroTexto ft2 = new FiltroTexto("prodProdutoReferencia", compara, texto);
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2}));
+                    // barra
+                    FiltroTexto ft3 = new FiltroTexto("prodProdutoBarra", compara, texto);
+                    // barra do preco
+                    FiltroTexto ft4 = new FiltroTexto("prodPrecoBarra", compara, texto);
+                    ft4.setCampoPrefixo("t1.");
+                    // barra da grade
+                    FiltroTexto ft5 = new FiltroTexto("prodGradeBarra", compara, texto);
+                    ft5.setCampoPrefixo("t2.");
+                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2, ft3, ft4, ft5}));
                 }
             }
         }
@@ -477,10 +478,16 @@ public class Pesquisa extends javax.swing.JDialog {
      * @param filtro informa o filtro a ser usado.
      */
     public void selecionar(IFiltro filtro) {
-        ProdProduto prod = new ProdProduto();
         try {
-            prod = service.selecionar(prod, filtro);
-            async.sucesso(prod);
+            List<ProdProduto> lista = service.selecionar(new ProdProduto(), 0, 2, filtro);
+            if (lista.isEmpty()) {
+                async.sucesso(null);
+            } else if (lista.size() == 1) {
+                async.sucesso(lista.get(0));
+            } else {
+                throw new OpenPdvException("Existe mais de um registro encontrado.\nUse a tecla [F5] para identificá-lo.");
+            }
+
         } catch (OpenPdvException ex) {
             async.falha(ex);
         }

@@ -62,9 +62,12 @@ public class EcfVenda extends Dados implements Serializable {
     @JoinColumn(name = "sis_cliente_id")
     @ManyToOne
     private SisCliente sisCliente;
-    @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "ecf_troca_id")
+    @ManyToOne
+    private EcfTroca ecfTroca;
+    @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER)
     private List<EcfVendaProduto> ecfVendaProdutos;
-    @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER)
     private List<EcfPagamento> ecfPagamentos;
     private transient boolean informouCliente;
 
@@ -246,5 +249,13 @@ public class EcfVenda extends Dados implements Serializable {
 
     public void setEcfVendaObservacao(String ecfVendaObservacao) {
         this.ecfVendaObservacao = ecfVendaObservacao;
+    }
+
+    public EcfTroca getEcfTroca() {
+        return ecfTroca;
+    }
+
+    public void setEcfTroca(EcfTroca ecfTroca) {
+        this.ecfTroca = ecfTroca;
     }
 }

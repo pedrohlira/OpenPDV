@@ -2,13 +2,19 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
+import br.com.openpdv.modelo.Ibpt;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
+import br.com.openpdv.modelo.core.filtro.FiltroTexto;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
+import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.core.parametro.*;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
+import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.produto.ProdGrade;
@@ -37,7 +43,6 @@ public class ComandoFecharVenda implements IComando {
     private List<EcfPagamento> pagamentos;
     private double bruto;
     private double acres_desc;
-    private double troco;
     private String obs;
     private EcfVenda venda;
 
@@ -54,7 +59,6 @@ public class ComandoFecharVenda implements IComando {
         this.pagamentos = pagamentos;
         this.bruto = bruto;
         this.acres_desc = acres_desc;
-        this.troco = troco;
         this.venda = Caixa.getInstancia().getVenda();
         this.obs = obs;
     }
@@ -70,7 +74,7 @@ public class ComandoFecharVenda implements IComando {
             // salva o documento para relatorio
             new ComandoSalvarDocumento("RV").executar();
             // imprime os cartoes se tiver
-            new ComandoImprimirCartao(pagamentos, troco).executar();
+            new ComandoImprimirCartao(pagamentos).executar();
             // coloca na tela
             fecharVendaTela();
             TEF.bloquear(false);
@@ -135,6 +139,34 @@ public class ComandoFecharVenda implements IComando {
                 sb.append(Util.formataNumero(Caixa.getInstancia().getImpressora().getEcfImpressoraCaixa(), 3, 0, false));
             }
 
+            // caso a opcao de mostrar os valores de impostos esteja ativa
+            boolean mostraIbpt = Boolean.valueOf(Util.getConfig().get("nfe.ibpt"));
+            if (mostraIbpt) {
+                CoreService<Ibpt> service = new CoreService<>();
+                double impostos = 0.00;
+                double porcent = acres_desc / bruto;
+
+                for (EcfVendaProduto vp : venda.getEcfVendaProdutos()) {
+                    if (!vp.getEcfVendaProdutoCancelado()) {
+                        FiltroTexto ft = new FiltroTexto("ibptCodigo", ECompara.IGUAL, vp.getProdProduto().getProdProdutoNcm());
+                        FiltroNumero fn = new FiltroNumero("ibptTabela", ECompara.IGUAL, vp.getProdProduto().getProdProdutoTipo().equals("09") ? 1 : 0);
+                        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft, fn});
+                        Ibpt ibpt = service.selecionar(new Ibpt(), gf);
+
+                        if (ibpt != null) {
+                            char ori = vp.getProdProduto().getProdProdutoOrigem();
+                            double taxa = (ori == '0' || ori == '3' || ori == '4' || ori == '5') ? ibpt.getIbptAliqNac() : ibpt.getIbptAliqImp();
+                            double rateado = vp.getEcfVendaProdutoBruto() * porcent;
+                            impostos += (vp.getEcfVendaProdutoBruto() + rateado) * vp.getEcfVendaProdutoQuantidade() * taxa / 100;
+                        }
+                    }
+                }
+                double porcentagem = impostos / (bruto + acres_desc) * 100;
+                sb.append("Val Aprox Trib R$ ");
+                sb.append(Util.formataNumero(impostos, 1, 2, false).replace(",", ".")).append(" [");
+                sb.append(Util.formataNumero(porcentagem, 1, 2, false).replace(",", ".")).append("%] Fonte: IBPT").append(ECF.SL);
+            }
+
             String[] resp = ECF.enviar(EComandoECF.ECF_SubtotalizaCupom, AD, sb.toString());
             if (ECF.ERRO.equals(resp[0])) {
                 log.error("Erro ao fechar a venda. -> " + resp[1]);
@@ -152,13 +184,13 @@ public class ComandoFecharVenda implements IComando {
             }
             // garante que o dinheiro é impressos primeiro
             String dinheiro = Util.getConfig().get("ecf.dinheiro");
-            if(pags.containsKey(dinheiro)){
+            if (pags.containsKey(dinheiro)) {
                 String valor = Util.formataNumero(pags.remove(dinheiro), 1, 2, false).replace(",", ".");
                 ECF.enviar(EComandoECF.ECF_EfetuaPagamento, dinheiro, valor);
             }
             // garante que a troca é impressos em segundo se houver dinheiro
             String troca = Util.getConfig().get("ecf.troca");
-            if(pags.containsKey(troca)){
+            if (pags.containsKey(troca)) {
                 String valor = Util.formataNumero(pags.remove(troca), 1, 2, false).replace(",", ".");
                 ECF.enviar(EComandoECF.ECF_EfetuaPagamento, troca, valor);
             }
@@ -215,18 +247,56 @@ public class ComandoFecharVenda implements IComando {
         ParametroBinario pb = new ParametroBinario("ecfVendaFechada", true);
         ParametroObjeto po1 = new ParametroObjeto("sisCliente", venda.getSisCliente());
         ParametroObjeto po2 = new ParametroObjeto("sisVendedor", venda.getSisVendedor());
-        ParametroObjeto po3 = new ParametroObjeto("sisGerente", acres_desc < 0 ? venda.getSisGerente() : null);
+        ParametroObjeto po3 = new ParametroObjeto("sisGerente", venda.getSisGerente());
+        ParametroObjeto po4 = new ParametroObjeto("ecfTroca", venda.getEcfTroca());
         ParametroTexto pt = new ParametroTexto("ecfVendaObservacao", obs);
-        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2, po3, pt});
+        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2, po3, po4, pt});
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 
+        // atualiza a troca para ativo = true, se a venda estiver usando uma
+        if (venda.getEcfTroca() != null) {
+            FiltroNumero fn1 = new FiltroNumero("ecfTrocaId", ECompara.IGUAL, venda.getEcfTroca().getEcfTrocaId());
+            ParametroBinario pb1 = new ParametroBinario("ecfTrocaAtivo", true);
+            Sql sql1 = new Sql(venda.getEcfTroca(), EComandoSQL.ATUALIZAR, fn1, pb1);
+            sqls.add(sql1);
+
+            // atualiza o estoque
+            for (EcfTrocaProduto tp : venda.getEcfTroca().getEcfTrocaProdutos()) {
+                // fatorando a quantida no estoque
+                double qtd = tp.getEcfTrocaProdutoQuantidade();
+                if (tp.getProdEmbalagem().getProdEmbalagemId() != tp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                    qtd *= tp.getProdEmbalagem().getProdEmbalagemUnidade();
+                    qtd /= tp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
+                }
+
+                // atualiza o estoque
+                ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
+                FiltroNumero fn2 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, tp.getProdProduto().getId());
+                Sql sql2 = new Sql(tp.getProdProduto(), EComandoSQL.ATUALIZAR, fn2, pf);
+                sqls.add(sql2);
+                // adiciona estoque da grade caso o produto tenha
+                if (tp.getProdProduto().getProdGrades() != null) {
+                    for (ProdGrade grade : tp.getProdProduto().getProdGrades()) {
+                        if (grade.getProdGradeBarra().equals(tp.getEcfTrocaProdutoBarra())) {
+                            ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", qtd);
+                            FiltroNumero fn3 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                            Sql sql3 = new Sql(grade, EComandoSQL.ATUALIZAR, fn3, pf2);
+                            sqls.add(sql3);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // atualiza estoque e produtos
-        double rateado = acres_desc / venda.getEcfVendaProdutos().size();
+        double porcentagem = acres_desc / bruto;
         for (EcfVendaProduto vp : venda.getEcfVendaProdutos()) {
-            if (rateado != 0) {
+            if (porcentagem != 0) {
+                double rateado = vp.getEcfVendaProdutoBruto() * porcentagem;
                 FiltroNumero vp_fn = new FiltroNumero("ecfVendaProdutoId", ECompara.IGUAL, vp.getId());
-                ParametroNumero vp_pn1 = new ParametroNumero(rateado > 0 ? "ecfVendaProdutoAcrescimo" : "ecfVendaProdutoDesconto", Math.abs(rateado));
+                ParametroNumero vp_pn1 = new ParametroNumero(porcentagem > 0 ? "ecfVendaProdutoAcrescimo" : "ecfVendaProdutoDesconto", Math.abs(rateado));
                 ParametroNumero vp_pn2 = new ParametroNumero("ecfVendaProdutoLiquido", vp.getEcfVendaProdutoBruto() + rateado);
                 ParametroNumero vp_pn3 = new ParametroNumero("ecfVendaProdutoTotal", (vp.getEcfVendaProdutoBruto() + rateado) * vp.getEcfVendaProdutoQuantidade());
                 GrupoParametro vp_gp = new GrupoParametro(new IParametro[]{vp_pn1, vp_pn2, vp_pn3});
@@ -247,19 +317,21 @@ public class ComandoFecharVenda implements IComando {
                 Sql sql2 = new Sql(vp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
                 sqls.add(sql2);
                 // remove estoque da grade caso o produto tenha
-                for (ProdGrade grade : vp.getProdProduto().getProdGrades()) {
-                    if (grade.getProdGradeBarra().equals(vp.getEcfVendaProdutoBarra())) {
-                        ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
-                        FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
-                        Sql sql3 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
-                        sqls.add(sql3);
-                        break;
+                if (vp.getProdProduto().getProdGrades() != null) {
+                    for (ProdGrade grade : vp.getProdProduto().getProdGrades()) {
+                        if (grade.getProdGradeBarra().equals(vp.getEcfVendaProdutoBarra())) {
+                            ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
+                            FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                            Sql sql3 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
+                            sqls.add(sql3);
+                            break;
+                        }
                     }
                 }
             }
         }
         CoreService service = new CoreService();
-        service.executar(sqls);
+        service.executar(sqls.toArray(new Sql[]{}));
     }
 
     /**

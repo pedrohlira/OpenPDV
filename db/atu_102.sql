@@ -10,16 +10,19 @@ ALTER TABLE ecf_z_totais ADD CONSTRAINT UK_ecf_z_totais_1 UNIQUE (ecf_z_id, ecf_
 /* Adicionando os campos novos para a tabela de clientes */
 ALTER TABLE sis_cliente ADD COLUMN sis_municipio_id int(11) NOT NULL BEFORE sis_cliente_doc;
 UPDATE sis_cliente SET sis_municipio_id = 1695;
-ALTER TABLE sis_cliente ADD CONSTRAINT UK_sis_cliente_1 UNIQUE (sis_cliente_doc);
 ALTER TABLE sis_cliente ADD CONSTRAINT FK_sis_cliente_1 FOREIGN KEY (sis_municipio_id) REFERENCES sis_municipio (sis_municipio_id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_doc1 varchar(20) NOT NULL BEFORE sis_cliente_nome;
 ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_cadastrado RENAME TO sis_cliente_data;
+ALTER TABLE sis_cliente DROP COLUMN sis_cliente_endereco;
+ALTER TABLE sis_cliente ADD COLUMN sis_cliente_endereco varchar(100) NOT NULL BEFORE sis_cliente_data;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_numero int(11) NOT NULL BEFORE sis_cliente_data;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_complemento varchar(100) NOT NULL BEFORE sis_cliente_data;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_bairro varchar(100) NOT NULL BEFORE sis_cliente_data;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_cep varchar(9) NOT NULL BEFORE sis_cliente_data;
-ALTER TABLE sis_cliente ADD COLUMN sis_cliente_telefone varchar(20) NOT NULL BEFORE sis_cliente_data;
+ALTER TABLE sis_cliente ADD COLUMN sis_cliente_telefone varchar(100) NOT NULL BEFORE sis_cliente_data;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_email varchar(100) NOT NULL BEFORE sis_cliente_data;
+UPDATE sis_cliente SET sis_cliente_doc = REPLACE(sis_cliente_doc,'.','');
+UPDATE sis_cliente SET sis_cliente_doc = REPLACE(sis_cliente_doc,'-','');
 
 /* Adicionando as tabelas para controle da grade dos produtos */
 CREATE TABLE prod_grade_tipo (prod_grade_tipo_id int NOT NULL AUTO_INCREMENT, prod_grade_tipo_nome varchar(50) NOT NULL, prod_grade_tipo_opcao char(1) NOT NULL, PRIMARY KEY (prod_grade_tipo_id));
@@ -27,7 +30,9 @@ CREATE TABLE prod_grade (prod_grade_id int NOT NULL AUTO_INCREMENT,prod_produto_
 
 /* Removendo os campos de empresa_id que nao sao necessarios */
 ALTER TABLE ecf_nota_eletronica DROP COLUMN sis_empresa_id;
+ALTER TABLE ecf_nota_eletronica DROP CONSTRAINT FK_ecf_nota_eletronica_2;
 ALTER TABLE ecf_nota DROP COLUMN sis_empresa_id;
+ALTER TABLE ecf_nota DROP CONSTRAINT FK_ecf_nota_2;
 
 /* Adicionando o novo campo para venda_produto saber sobre a grade */
 ALTER TABLE ecf_venda_produto ADD COLUMN ecf_venda_produto_barra varchar(14) NULL DEFAULT NULL BEFORE ecf_venda_produto_cst_cson;

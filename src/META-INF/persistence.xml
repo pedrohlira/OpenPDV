@@ -23,8 +23,11 @@
         <class>br.com.openpdv.modelo.ecf.EcfPagamentoTipo</class>
         <class>br.com.openpdv.modelo.ecf.EcfPagamentoParcela</class>
         <class>br.com.openpdv.modelo.ecf.EcfPagamentoTotais</class>
+        <class>br.com.openpdv.modelo.ecf.EcfNota</class>
         <class>br.com.openpdv.modelo.ecf.EcfNotaProduto</class>
         <class>br.com.openpdv.modelo.ecf.EcfNotaEletronica</class>
-        <class>br.com.openpdv.modelo.ecf.EcfNota</class>
+        <class>br.com.openpdv.modelo.ecf.EcfTroca</class>
+        <class>br.com.openpdv.modelo.ecf.EcfTrocaProduto</class>
+        <class>br.com.openpdv.modelo.Ibpt</class>
     </persistence-unit>
 </persistence>

@@ -1,9 +1,7 @@
 package br.com.openpdv.visao.nota;
 
-import br.com.openpdv.cancnfe.TCancNFe;
 import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.*;
-import br.com.openpdv.inutnfe.TInutNFe;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
@@ -17,18 +15,21 @@ import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
-import br.com.openpdv.nfe.TNFe;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det;
-import br.com.openpdv.nfe.TNfeProc;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.openpdv.visao.principal.Pesquisa;
 import br.com.openpdv.visao.venda.Precos;
+import br.com.opensig.eventocancnfe.TEvento;
+import br.com.opensig.inutnfe.TInutNFe;
+import br.com.opensig.nfe.TNFe;
+import br.com.opensig.nfe.TNFe.InfNFe.Det;
+import br.com.opensig.nfe.TNfeProc;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -152,17 +153,6 @@ public class NotaEletronica extends javax.swing.JDialog {
                     Double qtd = (Double) model.getValueAt(row, 4);
                     Double bruto = (Double) model.getValueAt(row, 5);
                     Double desc = (Double) model.getValueAt(row, 6);
-
-                    // valida alguns valores
-                    if (qtd <= 0) {
-                        qtd = 1.00;
-                    }
-                    if (desc < 0) {
-                        desc = 0.00;
-                    } else if (desc > bruto) {
-                        desc = bruto;
-                    }
-
                     Double liquido = bruto - desc;
                     Double total = liquido * qtd;
                     model.setValueAt(liquido, row, 7);
@@ -296,19 +286,24 @@ public class NotaEletronica extends javax.swing.JDialog {
         tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
         tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
         tabProdutos.getColumnModel().getColumn(2).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(400);
+        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(300);
         tabProdutos.getColumnModel().getColumn(3).setResizable(false);
         tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(4).setResizable(false);
         tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(5).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(6).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(7).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(8).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(100);
+        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(9).setMinWidth(0);
         tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(0);
         tabProdutos.getColumnModel().getColumn(9).setMaxWidth(0);
@@ -457,12 +452,10 @@ public class NotaEletronica extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "O cliente é obrigatório!\nAdicione também produtos com valor maior que zero.", "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
             txtCPF_CNPJ.requestFocus();
         } else {
-            try {
-                // pega os produtos
-                List<EcfNotaProduto> produtos = validarProdutos();
+            // pega os produtos
+            List<EcfNotaProduto> produtos = new ArrayList<>();
+            if (validarProdutos(produtos)) {
                 gerar(cliente, produtos);
-            } catch (OpenPdvException ex) {
-                log.debug(ex.getMessage());
             }
         }
     }//GEN-LAST:event_btnGerarActionPerformed
@@ -602,7 +595,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                     throw new Exception();
                 }
             }
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             cliente = null;
             txtCPF_CNPJ.setText("");
             JOptionPane.showMessageDialog(notaEletronica, "Cliente nao encontrado com o documento informado:\nCaso precise cadastre o cliente antes.", "Nota Eletrônica", JOptionPane.INFORMATION_MESSAGE);
@@ -659,7 +652,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                     // gera o xml
                     ComandoGerarNFeCancelada gerarNFe = new ComandoGerarNFeCancelada(nota, obs);
                     gerarNFe.executar();
-                    JAXBElement<TCancNFe> element = gerarNFe.getElement();
+                    JAXBElement<TEvento> element = gerarNFe.getElement();
                     // envia o xml para sefaz
                     ComandoEnviarNFeCancelada enviarNFe = new ComandoEnviarNFeCancelada(element, nota);
                     enviarNFe.executar();
@@ -696,7 +689,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                         Sql sql = new Sql(prod, EComandoSQL.ATUALIZAR, fn1, pf);
                         sqls.add(sql);
                     }
-                    service.executar(sqls);
+                    service.executar(sqls.toArray(new Sql[]{}));
 
                     // salva o xml no arquivo
                     File xml = new File("nfe/" + nota2.getEcfNotaEletronicaChave() + "-procCanNFe.xml");
@@ -808,7 +801,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                         Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
                         sqls.add(sql);
                     }
-                    service.executar(sqls);
+                    service.executar(sqls.toArray(new Sql[]{}));
 
                     // salva o xml no arquivo
                     File xml = new File("nfe/" + nota.getEcfNotaEletronicaChave() + "-procNFe.xml");
@@ -871,9 +864,8 @@ public class NotaEletronica extends javax.swing.JDialog {
      * @param produtos a lista de produtos
      * @param nota a nota atual
      */
-    private List<EcfNotaProduto> validarProdutos() throws OpenPdvException {
+    private boolean validarProdutos(List<EcfNotaProduto> produtos) {
         try {
-            List<EcfNotaProduto> produtos = new ArrayList<>();
             for (int i = 0; i < dtmProdutos.getRowCount(); i++) {
                 EcfNotaProduto np = new EcfNotaProduto();
                 np.setProdProduto((ProdProduto) dtmProdutos.getValueAt(i, 1));
@@ -896,10 +888,10 @@ public class NotaEletronica extends javax.swing.JDialog {
                 np.setEcfNotaProdutoOrdem((Integer) dtmProdutos.getValueAt(i, 9));
                 produtos.add(np);
             }
-            return produtos;
+            return true;
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Problemas com os dados do produtos!", "Nota Eletrônica", JOptionPane.WARNING_MESSAGE);
-            throw new OpenPdvException(ex);
+            return false;
         }
     }
 
@@ -907,16 +899,14 @@ public class NotaEletronica extends javax.swing.JDialog {
      * Metodo que totaliza os valores dos produtos adicionados.
      */
     private void totalizar() {
-        try {
-            List<EcfNotaProduto> nps = validarProdutos();
-            Double liquido = 0.00;
-            for (EcfNotaProduto np : nps) {
-                liquido += np.getEcfNotaProdutoLiquido() * np.getEcfNotaProdutoQuantidade();
-            }
-            lblTotal.setText("R$ " + Util.formataNumero(liquido, 1, 2, true));
-        } catch (OpenPdvException ex) {
-            // nao altera nada
+        List<EcfNotaProduto> nps = new ArrayList<>();
+        validarProdutos(nps);
+
+        Double liquido = 0.00;
+        for (EcfNotaProduto np : nps) {
+            liquido += np.getEcfNotaProdutoLiquido() * np.getEcfNotaProdutoQuantidade();
         }
+        lblTotal.setText("R$ " + Util.formataNumero(liquido, 1, 2, true));
     }
 
     public JButton getBtnAdicionar() {

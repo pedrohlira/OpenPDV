@@ -94,7 +94,6 @@ public class ComandoAbrirVenda implements IComando {
         }
         venda.setSisCliente(cliente);
         venda.setInformouCliente(cliente != null);
-        venda.setEcfZ(null);
         // ccf
         resp = ECF.enviar(EComandoECF.ECF_NumCCF);
         if (ECF.OK.equals(resp[0])) {

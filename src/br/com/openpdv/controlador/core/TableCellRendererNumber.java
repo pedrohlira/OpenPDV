@@ -26,7 +26,9 @@ public class TableCellRendererNumber extends DefaultTableCellRenderer {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        value = nf.format((Double) value);
+        if(value instanceof Double){
+            value = nf.format((Double) value);
+        }
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
 }

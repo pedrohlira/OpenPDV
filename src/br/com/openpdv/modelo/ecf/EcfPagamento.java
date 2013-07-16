@@ -49,7 +49,7 @@ public class EcfPagamento extends Dados implements Serializable {
     @JoinColumn(name = "ecf_pagamento_tipo_id")
     @ManyToOne
     private EcfPagamentoTipo ecfPagamentoTipo;
-    @OneToMany(mappedBy = "EcfPagamento", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "EcfPagamento", fetch = FetchType.EAGER)
     private List<EcfPagamentoParcela> ecfPagamentoParcelas;
     private transient String arquivo;
 

@@ -7,6 +7,7 @@ import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
+import br.com.openpdv.modelo.produto.ProdGradeTipo;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisUsuario;
@@ -102,7 +103,7 @@ public class RestCliente extends ARest {
     public List<SisCliente> getClientes(@QueryParam("data") String data) throws RestException {
         autorizar();
         try {
-            Date dt = Util.formataData(data.substring(0, 10), "dd/MM/yyyy");
+            Date dt = Util.formataData(data, "dd/MM/yyyy");
             FiltroData fd = null;
             if (dt != null) {
                 fd = new FiltroData("sisClienteData", ECompara.MAIOR_IGUAL, dt);
@@ -153,6 +154,25 @@ public class RestCliente extends ARest {
     }
 
     /**
+     * Metodo que retorna a lista de tipos de grades cadastradas no sistema.
+     *
+     * @return uma lista de objetos tipo grade em formato JSON.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
+    @Path("/tipo_grade")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ProdGradeTipo> getGradeTipo() throws RestException {
+        autorizar();
+        try {
+            return service.selecionar(new ProdGradeTipo(), 0, 0, null);
+        } catch (Exception ex) {
+            log.error(ex);
+            throw new RestException(ex);
+        }
+    }
+
+    /**
      * Metodo que retorna a lista de novos produtos cadastrados no sistema.
      *
      * @param id o ultimo id cadastro no banco do pdv.
@@ -192,7 +212,7 @@ public class RestCliente extends ARest {
     public List<ProdProduto> getProdutoAtualizado(@QueryParam("data") String data, @QueryParam("pagina") int pagina, @QueryParam("limite") int limite) throws RestException {
         autorizar();
         try {
-            Date alterado = Util.getDataHora(data);
+            Date alterado = Util.formataData(data, "dd/MM/yyyy");
             IFiltro filtro = null;
             if (alterado != null) {
                 FiltroData fd1 = new FiltroData("prodProdutoAlterado", ECompara.MAIOR, alterado);

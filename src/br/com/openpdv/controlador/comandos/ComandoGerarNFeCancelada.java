@@ -1,10 +1,13 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.cancnfe.TCancNFe;
-import br.com.openpdv.cancnfe.TCancNFe.InfCanc;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
+import br.com.opensig.eventocancnfe.TEvento;
+import br.com.opensig.eventocancnfe.TEvento.InfEvento;
+import br.com.opensig.eventocancnfe.TEvento.InfEvento.DetEvento;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.xml.bind.JAXBElement;
 
 /**
@@ -14,7 +17,7 @@ import javax.xml.bind.JAXBElement;
  */
 public class ComandoGerarNFeCancelada implements IComando {
 
-    private JAXBElement<TCancNFe> element;
+    private JAXBElement<TEvento> element;
     private EcfNotaEletronica nota;
     private String obs;
 
@@ -26,18 +29,43 @@ public class ComandoGerarNFeCancelada implements IComando {
     @Override
     public void executar() throws OpenPdvException {
         try {
-            InfCanc infCanc = new InfCanc();
-            infCanc.setId("ID" + nota.getEcfNotaEletronicaChave());
-            infCanc.setTpAmb(Util.getConfig().get("nfe.tipoamb"));
-            infCanc.setChNFe(nota.getEcfNotaEletronicaChave());
-            infCanc.setNProt(nota.getEcfNotaEletronicaProtocolo());
-            infCanc.setXJust(Util.normaliza(obs));
-            infCanc.setXServ("CANCELAR");
-            TCancNFe cancNfe = new TCancNFe();
-            cancNfe.setInfCanc(infCanc);
-            cancNfe.setVersao(Util.getConfig().get("nfe.versao"));
+            // desmembra a chave
+            Date agora = new Date();
+            String chave = nota.getEcfNotaEletronicaChave();
+            String uf = chave.substring(0, 2);
+            String cnpj = chave.substring(6, 20);
+            String data = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").format(agora);
+            String tipo = "110111";
+            String versao = Util.getConfig().get("nfe.evento");
+            String seq = "1";
 
-            element = new br.com.openpdv.cancnfe.ObjectFactory().createCancNFe(cancNfe);
+            // informacoes
+            InfEvento infEvento = new InfEvento();
+            infEvento.setId("ID" + tipo + chave + "01");
+            infEvento.setCOrgao(uf);
+            infEvento.setTpAmb(Util.getConfig().get("nfe.tipoamb"));
+            infEvento.setCNPJ(cnpj);
+            infEvento.setChNFe(chave);
+            infEvento.setDhEvento(data.replace("GMT", ""));
+            infEvento.setTpEvento(tipo);
+            infEvento.setNSeqEvento(seq);
+            infEvento.setVerEvento(versao);
+
+            // descricao
+            DetEvento detEvento = new DetEvento();
+            detEvento.setVersao(versao);
+            detEvento.setDescEvento("Cancelamento");
+            detEvento.setNProt(nota.getEcfNotaEletronicaProtocolo());
+            detEvento.setXJust(Util.normaliza(obs));
+            infEvento.setDetEvento(detEvento);
+
+            // evento
+            TEvento evento = new TEvento();
+            evento.setInfEvento(infEvento);
+            evento.setVersao(versao);
+
+            // transforma em string o xml e salva
+            element = new br.com.opensig.eventocancnfe.ObjectFactory().createEvento(evento);
         } catch (Exception e) {
             throw new OpenPdvException(e.getMessage());
         }
@@ -53,7 +81,7 @@ public class ComandoGerarNFeCancelada implements IComando {
      *
      * @return uma objeto contendo um xml ou null se teve erro na geracao.
      */
-    public JAXBElement<TCancNFe> getElement() {
+    public JAXBElement<TEvento> getElement() {
         return element;
     }
 }

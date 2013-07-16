@@ -14,14 +14,13 @@ import br.com.openpdv.modelo.ecf.*;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
-import br.com.openpdv.nfe.TNFe;
-import br.com.openpdv.nfe.TNfeProc;
+import br.com.opensig.nfe.TNFe;
+import br.com.opensig.nfe.TNfeProc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -98,7 +97,7 @@ public class RestServidor extends ARest {
 
             // atualiza o estoque se nao cancelada
             if (ecfNota.isEcfNotaCancelada() == false) {
-                service.executar(sqls);
+                service.executar(sqls.toArray(new Sql[]{}));
             }
         } catch (Exception ex) {
             if (em != null && em.getTransaction().isActive()) {
@@ -166,7 +165,7 @@ public class RestServidor extends ARest {
                 }
                 em.getTransaction().commit();
                 // remove do estoque
-                service.executar(sqls);
+                service.executar(sqls.toArray(new Sql[]{}));
 
                 // salva o xml no arquivo
                 File xml = new File("nfe/" + ecfNfe.getEcfNotaEletronicaChave() + "-procNFe.xml");
@@ -206,7 +205,7 @@ public class RestServidor extends ARest {
                 }
                 em.getTransaction().commit();
                 // remove do estoque
-                service.executar(sqls);
+                service.executar(sqls.toArray(new Sql[]{}));
 
                 // salva o xml no arquivo
                 File xml = new File("nfe/" + ecfNfe.getEcfNotaEletronicaChave() + "-procCanNFe.xml");
@@ -325,6 +324,12 @@ public class RestServidor extends ARest {
             venda.setSisCliente(cliente);
         }
 
+        // verifica se tem troca vinculada
+        if (venda.getEcfTroca() != null) {
+            EcfTroca troca = getTroca(em, venda.getEcfTroca());
+            venda.setEcfTroca(troca);
+        }
+
         // guarda os produtos vendidos e pagamentos
         List<EcfVendaProduto> vps = venda.getEcfVendaProdutos();
         List<EcfPagamento> pags = venda.getEcfPagamentos();
@@ -351,6 +356,33 @@ public class RestServidor extends ARest {
             pag.setEcfVenda(venda);
             salvarPagamento(em, pag);
         }
+    }
+
+    /**
+     * Metodo que salva a troca no sistema fazendo as validacoes.
+     *
+     * @param em um objeto de transacao.
+     * @param troca o objeto de troca.
+     * @return a troca salva no sistama.
+     * @throws OpenPdvException dispara em caso de erro ao salvar.
+     */
+    private EcfTroca getTroca(EntityManager em, EcfTroca troca) throws OpenPdvException {
+        // guarda os produtos da troca
+        List<EcfTrocaProduto> tps = troca.getEcfTrocaProdutos();
+
+        // salva a troca
+        troca.setId(0);
+        troca.setEcfTrocaProdutos(null);
+        troca = (EcfTroca) service.salvar(em, troca);
+
+        // salva os produtos da troca e atualiza o estoque
+        for (EcfTrocaProduto tp : tps) {
+            tp.setId(0);
+            tp.setEcfTroca(troca);
+            service.salvar(em, tp);
+        }
+
+        return troca;
     }
 
     /**

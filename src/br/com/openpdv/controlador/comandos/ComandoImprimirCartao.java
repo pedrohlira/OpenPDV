@@ -27,19 +27,16 @@ public class ComandoImprimirCartao implements IComando {
     private Logger log;
     private CoreService service;
     private List<EcfPagamento> pagamentos;
-    private double troco;
 
     /**
      * Construtor padrao.
      *
      * @param pagamentos a lista de pagamentos realizados.
-     * @param troco o valor do troco da venda.
      */
-    public ComandoImprimirCartao(List<EcfPagamento> pagamentos, double troco) {
+    public ComandoImprimirCartao(List<EcfPagamento> pagamentos) {
         this.log = Logger.getLogger(ComandoImprimirCartao.class);
         this.service = new CoreService();
         this.pagamentos = pagamentos;
-        this.troco = troco;
     }
 
     @Override
@@ -50,7 +47,6 @@ public class ComandoImprimirCartao implements IComando {
         // percorre os pagamentos para inserir no banco e imprimir cartoes
         for (int i = 0; i < pagamentos.size(); i++) {
             EcfPagamento pag = pagamentos.get(i);
-            List<EcfPagamentoParcela> parcelas;
 
             if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef()) {
                 // abre o relatorio vinculado
@@ -98,23 +94,24 @@ public class ComandoImprimirCartao implements IComando {
                     }
 
                     // gerar as parcelas e deleta o arquivo
-                    parcelas = gerarParcela(dados, pag);
+                    List<EcfPagamentoParcela> parcelas = gerarParcela(dados, pag);
+                    pag.setEcfPagamentoParcelas(parcelas);
                     impressos.add(new File(pag.getArquivo()));
                 } catch (Exception ex) {
                     ECF.enviar(EComandoECF.ECF_FechaRelatorio);
                     throw new OpenPdvException(ex);
                 }
-            } else {
-                parcelas = new ArrayList<>();
+            } else if (pag.getEcfPagamentoParcelas() == null) {
+                List<EcfPagamentoParcela> parcelas = new ArrayList<>();
                 EcfPagamentoParcela parcela = new EcfPagamentoParcela();
                 parcela.setEcfPagamentoParcelaData(pag.getEcfPagamentoData());
                 parcela.setEcfPagamentoParcelaValor(pag.getEcfPagamentoValor());
                 parcela.setEcfPagamentoParcelaNsu("");
                 parcelas.add(parcela);
+                pag.setEcfPagamentoParcelas(parcelas);
             }
 
             // salva o pagamento
-            pag.setEcfPagamentoParcelas(parcelas);
             salvarPagamento(pag);
         }
 
@@ -130,8 +127,7 @@ public class ComandoImprimirCartao implements IComando {
     }
 
     /**
-     * Metodo que adiciona a lista de parcelas as parcelas correspondente do
-     * pagamento informado.
+     * Metodo que adiciona a lista de parcelas as parcelas correspondente do pagamento informado.
      *
      * @param dados o mapa de dados lidos do arquivo.
      * @param pagamento o objeto de pagamento a ser considerado.
@@ -189,8 +185,7 @@ public class ComandoImprimirCartao implements IComando {
     }
 
     /**
-     * Metodo que a operacao de salvar os dados no banco de dados para posterior
-     * uso, ate mesmo de cancelamento.
+     * Metodo que a operacao de salvar os dados no banco de dados para posterior uso, ate mesmo de cancelamento.
      *
      * @param pagamento objeto de pagamento a ser salvo.
      * @throws OpenPdvException dispara caso nao consiga salvar.

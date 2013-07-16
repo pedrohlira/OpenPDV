@@ -3,10 +3,10 @@ package br.com.openpdv.controlador.core;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.phdss.controlador.PAF;
-import br.inf.portalfiscal.www.nfe.wsdl.nfecancelamento2.NfeCancelamento2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.nfeinutilizacao2.NfeInutilizacao2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.nferecepcao2.NfeRecepcao2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.nferetrecepcao2.NfeRetRecepcao2Stub;
+import br.inf.portalfiscal.www.nfe.wsdl.recepcaoevento.RecepcaoEventoStub;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.security.KeyStore;
@@ -236,31 +236,33 @@ public class NFe {
      * Metodo que cancela uma NFe ja enviada.
      *
      * @param xml o arquivo em formato de string.
-     * @param uf o estado da nota.
-     * @param ambiente o ambiente que a nota foi gerada.
      * @return uma string com o xml de resposta.
      * @throws OpenPdvException caso ocorra algum erro.
      */
-    public String cancelar(String xml, String uf, String ambiente) throws OpenPdvException {
+    public String evento(String xml) throws OpenPdvException {
         try {
-            String url = identificarXml(uf, ambiente, "NfeCancelamento", false);
+            Document doc = getXml(xml);
+            String uf = getValorTag(doc.getDocumentElement(), "chNFe").substring(0, 2);
+            String ambiente = getValorTag(doc.getDocumentElement(), "tpAmb");
+            String url = identificarXml(uf, ambiente, "RecepcaoEvento", false);
+            String versao = doc.getDocumentElement().getAttribute("versao");
 
             OMElement ome = AXIOMUtil.stringToOM(xml);
-            NfeCancelamento2Stub.NfeDadosMsg dadosMsg = new NfeCancelamento2Stub.NfeDadosMsg();
+            RecepcaoEventoStub.NfeDadosMsg dadosMsg = new RecepcaoEventoStub.NfeDadosMsg();
             dadosMsg.setExtraElement(ome);
 
-            NfeCancelamento2Stub.NfeCabecMsg nfeCabecMsg = new NfeCancelamento2Stub.NfeCabecMsg();
+            RecepcaoEventoStub.NfeCabecMsg nfeCabecMsg = new RecepcaoEventoStub.NfeCabecMsg();
             nfeCabecMsg.setCUF(uf);
-            nfeCabecMsg.setVersaoDados(Util.getConfig().get("nfe.versao"));
+            nfeCabecMsg.setVersaoDados(versao);
 
-            NfeCancelamento2Stub.NfeCabecMsgE nfeCabecMsgE = new NfeCancelamento2Stub.NfeCabecMsgE();
+            RecepcaoEventoStub.NfeCabecMsgE nfeCabecMsgE = new RecepcaoEventoStub.NfeCabecMsgE();
             nfeCabecMsgE.setNfeCabecMsg(nfeCabecMsg);
 
-            NfeCancelamento2Stub stub = new NfeCancelamento2Stub(url);
-            NfeCancelamento2Stub.NfeCancelamentoNF2Result result = stub.nfeCancelamentoNF2(dadosMsg, nfeCabecMsgE);
+            RecepcaoEventoStub stub = new RecepcaoEventoStub(url);
+            RecepcaoEventoStub.NfeRecepcaoEventoResult result = stub.nfeRecepcaoEvento(dadosMsg, nfeCabecMsgE);
 
             return result.getExtraElement().toString();
-        } catch (OpenPdvException | XMLStreamException | RemoteException ex) {
+        } catch (XMLStreamException | RemoteException ex) {
             log.error("Erro ao cancelar uma nfe na sefaz :: ", ex);
             throw new OpenPdvException(ex);
         }
@@ -453,8 +455,7 @@ public class NFe {
     }
 
     /**
-     * @see #getXml(java.lang.String, java.lang.String,
-     * org.xml.sax.ErrorHandler)
+     * @see #getXml(java.lang.String, java.lang.String, org.xml.sax.ErrorHandler)
      */
     public static Document getXml(String xml) {
         return getXml(xml, null, null);

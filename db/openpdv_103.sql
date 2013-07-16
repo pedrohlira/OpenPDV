@@ -137,7 +137,7 @@ CREATE TABLE prod_preco (
   prod_preco_valor decimal(10,2) NOT NULL,
   prod_preco_barra varchar(14) DEFAULT NULL,
   PRIMARY KEY (prod_preco_id),
-  CONSTRAINT FK_prod_preco_1 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT FK_prod_preco_1 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT FK_prod_preco_2 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -150,7 +150,7 @@ CREATE TABLE prod_composicao (
   prod_composicao_quantidade decimal(10,4) NOT NULL,
   prod_composicao_valor decimal(10,2) NOT NULL,
   PRIMARY KEY (prod_composicao_id),
-  CONSTRAINT FK_prod_composicao_1 FOREIGN KEY (prod_produto_principal) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT FK_prod_composicao_1 FOREIGN KEY (prod_produto_principal) REFERENCES prod_produto (prod_produto_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT FK_prod_composicao_2 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_prod_composicao_3 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
@@ -270,6 +270,35 @@ CREATE TABLE ecf_nota_produto (
   CONSTRAINT FK_ecf_nota_produto_3 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
+DROP TABLE IF EXISTS ecf_troca;
+CREATE TABLE ecf_troca (
+  ecf_troca_id int(11) NOT NULL AUTO_INCREMENT,
+  ecf_troca_cliente varchar(18) NOT NULL,
+  ecf_troca_data datetime NOT NULL,
+  ecf_troca_valor decimal(10,2) NOT NULL,
+  ecf_troca_ecf int(11) NOT NULL,
+  ecf_troca_coo int(11) NOT NULL,
+  ecf_troca_ativo bit(1) NOT NULL,
+  PRIMARY KEY (ecf_troca_id)
+);
+
+DROP TABLE IF EXISTS ecf_troca_produto;
+CREATE TABLE ecf_troca_produto (
+  ecf_troca_produto_id int(11) NOT NULL AUTO_INCREMENT,
+  ecf_troca_id int(11) NOT NULL,
+  prod_produto_id int(11) NOT NULL,
+  prod_embalagem_id int(11) NOT NULL,
+  ecf_troca_produto_barra varchar(14) NULL DEFAULT NULL,
+  ecf_troca_produto_quantidade decimal(10,3) NOT NULL,
+  ecf_troca_produto_valor decimal(10,2) NOT NULL,
+  ecf_troca_produto_total decimal(10,2) NOT NULL,
+  ecf_troca_produto_ordem int(11) NOT NULL,
+  PRIMARY KEY (ecf_troca_produto_id),
+  CONSTRAINT FK_ecf_troca_produto_1 FOREIGN KEY (ecf_troca_id) REFERENCES ecf_troca (ecf_troca_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT FK_ecf_troca_produto_2 FOREIGN KEY (prod_produto_id) REFERENCES prod_produto (prod_produto_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT FK_ecf_troca_produto_3 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
 DROP TABLE IF EXISTS ecf_z;
 CREATE TABLE ecf_z (
   ecf_z_id int(11) NOT NULL AUTO_INCREMENT,
@@ -296,7 +325,7 @@ CREATE TABLE ecf_z_totais (
   ecf_z_totais_valor decimal(13,2) NOT NULL,
   PRIMARY KEY (ecf_z_totais_id),
   CONSTRAINT UK_ecf_z_totais_1 UNIQUE (ecf_z_id, ecf_z_totais_codigo),
-  CONSTRAINT FK_z_totais_1 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE CASCADE ON UPDATE NO ACTION
+  CONSTRAINT FK_z_totais_1 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS ecf_venda;
@@ -305,8 +334,9 @@ CREATE TABLE ecf_venda (
   sis_usuario_id int(11) NOT NULL,
   sis_vendedor_id int(11) DEFAULT NULL,
   sis_gerente_id int(11) DEFAULT NULL,
-  ecf_z_id int(11) DEFAULT NULL,
   sis_cliente_id int(11) DEFAULT NULL,
+  ecf_z_id int(11) DEFAULT NULL,
+  ecf_troca_id int(11) DEFAULT NULL,
   ecf_venda_ccf int(6) NOT NULL,
   ecf_venda_coo int(6) NOT NULL,
   ecf_venda_data datetime NOT NULL,
@@ -322,7 +352,8 @@ CREATE TABLE ecf_venda (
   CONSTRAINT FK_ecf_venda_2 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_ecf_venda_3 FOREIGN KEY (sis_cliente_id) REFERENCES sis_cliente (sis_cliente_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT FK_ecf_venda_4 FOREIGN KEY (sis_vendedor_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT FK_ecf_venda_5 FOREIGN KEY (sis_gerente_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT FK_ecf_venda_5 FOREIGN KEY (sis_gerente_id) REFERENCES sis_usuario (sis_usuario_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT FK_ecf_venda_6 FOREIGN KEY (ecf_troca_id) REFERENCES ecf_troca (ecf_troca_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS ecf_venda_produto;
@@ -403,9 +434,21 @@ CREATE TABLE ecf_pagamento_totais (
   CONSTRAINT FK_ecf_pagamento_totais_1 FOREIGN KEY (ecf_pagamento_tipo_id) REFERENCES ecf_pagamento_tipo (ecf_pagamento_tipo_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
+DROP TABLE IF EXISTS ibpt;
+CREATE TABLE ibpt (
+  ibpt_codigo varchar(10) NOT NULL,
+  ibpt_ex varchar(100) NULL,
+  ibpt_tabela int(11) NOT NULL,
+  ibpt_descricao varchar(500) NOT NULL,
+  ibpt_aliqNac decimal(10,2) NOT NULL,
+  ibpt_aliqImp decimal(10,2) NOT NULL,
+  ibpt_versao varchar(5) NULL
+);
+
 /* inserindo dados padroes deve-se colocar o path completo dos arquivos
 
-INSERT INTO SIS_ESTADO DIRECT SELECT * FROM CSVREAD('estados.csv',null,'charset=UTF-8');
-INSERT INTO SIS_MUNICIPIO DIRECT SELECT * FROM CSVREAD('municipios.csv',null,'charset=UTF-8');
+INSERT INTO SIS_ESTADO DIRECT SELECT * FROM CSVREAD('db/estados.csv',null,'charset=UTF-8');
+INSERT INTO SIS_MUNICIPIO DIRECT SELECT * FROM CSVREAD('db/municipios.csv',null,'charset=UTF-8');
+INSERT INTO IBPT DIRECT SELECT * FROM CSVREAD('db/ibpt.csv',null,'charset=ISO-8859-1 fieldSeparator=;');
 
 */

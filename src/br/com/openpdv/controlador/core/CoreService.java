@@ -484,11 +484,11 @@ public class CoreService<E extends Dados> {
    /**
      * Metodo para executar instrucões diretas no BD com uma nova transacao.
      *
-     * @param sql a instrucao Sql em formato de objeto.
+     * @param sqls as instruções Sqls em formato de objeto.
      * @return um inteiro informando a quantidade de registros afetados.
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
-    public List<Integer> executar(Collection<Sql<E>> sqls) throws OpenPdvException {
+    public List<Integer> executar(Sql<E>... sqls) throws OpenPdvException {
         EntityManagerFactory emf = null;
         EntityManager em = null;
         List<Integer> resultado = new ArrayList<>();

@@ -51,10 +51,8 @@ public class ComandoTotalizarPagamentos implements IComando {
         FiltroData fdDel1 = new FiltroData("ecfPagamentoTotaisData", ECompara.MAIOR_IGUAL, data);
         FiltroData fdDel2 = new FiltroData("ecfPagamentoTotaisData", ECompara.MENOR, cal.getTime());
         GrupoFiltro gfDel = new GrupoFiltro(EJuncao.E, new IFiltro[]{fdDel1, fdDel2});
-        List<Sql> sqls = new ArrayList<>();
         Sql sql = new Sql(new EcfPagamentoTotais(), EComandoSQL.EXCLUIR, gfDel);
-        sqls.add(sql);
-        service.executar(sqls);
+        service.executar(sql);
 
         // seleciona todas as formas de pagamentos
         List<EcfPagamentoTipo> tipos = service.selecionar(new EcfPagamentoTipo(), 0, 0, null);

@@ -2,45 +2,57 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
+import br.com.openpdv.modelo.Ibpt;
 import br.com.openpdv.modelo.core.OpenPdvException;
+import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.FiltroNumero;
+import br.com.openpdv.modelo.core.filtro.FiltroTexto;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
+import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfNotaProduto;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
-import br.com.openpdv.nfe.*;
-import br.com.openpdv.nfe.TNFe.InfNFe;
-import br.com.openpdv.nfe.TNFe.InfNFe.Dest;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSAliq;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSOutr;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS00;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS30;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS40;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS60;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS90;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN101;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN102;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN201;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN202;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN500;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN900;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.IPI;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.IPI.IPITrib;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.PIS;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISAliq;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISOutr;
-import br.com.openpdv.nfe.TNFe.InfNFe.Det.Prod;
-import br.com.openpdv.nfe.TNFe.InfNFe.Emit;
-import br.com.openpdv.nfe.TNFe.InfNFe.Ide;
-import br.com.openpdv.nfe.TNFe.InfNFe.InfAdic;
-import br.com.openpdv.nfe.TNFe.InfNFe.Total;
-import br.com.openpdv.nfe.TNFe.InfNFe.Total.ICMSTot;
-import br.com.openpdv.nfe.TNFe.InfNFe.Transp;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.opensig.nfe.TEnderEmi;
+import br.com.opensig.nfe.TEndereco;
+import br.com.opensig.nfe.TNFe;
+import br.com.opensig.nfe.TNFe.InfNFe;
+import br.com.opensig.nfe.TNFe.InfNFe.Dest;
+import br.com.opensig.nfe.TNFe.InfNFe.Det;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSAliq;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSOutr;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS00;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS30;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS40;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS60;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS90;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN101;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN102;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN201;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN202;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN500;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN900;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.IPI;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.IPI.IPITrib;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISAliq;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISOutr;
+import br.com.opensig.nfe.TNFe.InfNFe.Det.Prod;
+import br.com.opensig.nfe.TNFe.InfNFe.Emit;
+import br.com.opensig.nfe.TNFe.InfNFe.Ide;
+import br.com.opensig.nfe.TNFe.InfNFe.InfAdic;
+import br.com.opensig.nfe.TNFe.InfNFe.Total;
+import br.com.opensig.nfe.TNFe.InfNFe.Total.ICMSTot;
+import br.com.opensig.nfe.TNFe.InfNFe.Transp;
+import br.com.opensig.nfe.TUf;
+import br.com.opensig.nfe.TUfEmi;
+import br.com.phdss.ECF;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.WebResource;
 import java.util.Date;
@@ -59,7 +71,6 @@ public class ComandoGerarNFe implements IComando {
     private Logger log;
     private CoreService servico;
     private Date data;
-    private EcfNotaEletronica nota;
     private SisEmpresa empresa;
     private SisCliente cliente;
     private List<EcfNotaProduto> produtos;
@@ -122,7 +133,7 @@ public class ComandoGerarNFe implements IComando {
             TNFe nfe = new TNFe();
             nfe.setInfNFe(infNFe);
 
-            element = new br.com.openpdv.nfe.ObjectFactory().createNFe(nfe);
+            element = new br.com.opensig.nfe.ObjectFactory().createNFe(nfe);
         } catch (Exception ex) {
             log.error("Erro na montagem do xml.", ex);
             throw new OpenPdvException(ex);
@@ -684,6 +695,33 @@ public class ComandoGerarNFe implements IComando {
         // uma mensagem padrao se precisar
         if (Util.getConfig().get("nfe.info") != null) {
             sb.append("#").append(Util.getConfig().get("nfe.info"));
+        }
+        // caso a opcao de mostrar os valores de impostos esteja ativa
+        boolean mostraIbpt = Boolean.valueOf(Util.getConfig().get("nfe.ibpt"));
+        if (mostraIbpt) {
+            double impostos = 0.00;
+
+            for (EcfNotaProduto np : produtos) {
+                FiltroTexto ft = new FiltroTexto("ibptCodigo", ECompara.IGUAL, np.getProdProduto().getProdProdutoNcm());
+                FiltroNumero fn = new FiltroNumero("ibptTabela", ECompara.IGUAL, np.getProdProduto().getProdProdutoTipo().equals("09") ? 1 : 0);
+                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft, fn});
+                Ibpt ibpt;
+                try {
+                    ibpt = (Ibpt) servico.selecionar(new Ibpt(), gf);
+                } catch (OpenPdvException ex) {
+                    ibpt = null;
+                }
+
+                if (ibpt != null) {
+                    char ori = np.getProdProduto().getProdProdutoOrigem();
+                    double taxa = (ori == '0' || ori == '3' || ori == '4' || ori == '5') ? ibpt.getIbptAliqNac() : ibpt.getIbptAliqImp();
+                    impostos += np.getEcfNotaProdutoLiquido() * taxa / 100;
+                }
+            }
+            double porcentagem = impostos / valorProd * 100;
+            sb.append("#Valor Aproximado dos Tributos R$ ");
+            sb.append(Util.formataNumero(impostos, 1, 2, false)).append(" [");
+            sb.append(Util.formataNumero(porcentagem, 1, 2, false)).append("%] Fonte: IBPT");
         }
 
         InfAdic inf = new InfAdic();

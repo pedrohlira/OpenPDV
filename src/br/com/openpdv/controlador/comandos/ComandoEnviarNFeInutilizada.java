@@ -2,12 +2,12 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.NFe;
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.inutnfe.TInutNFe;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
-import br.com.openpdv.retinutnfe.TRetInutNFe;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.opensig.inutnfe.TInutNFe;
+import br.com.opensig.retinutnfe.TRetInutNFe;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;

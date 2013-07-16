@@ -8,13 +8,15 @@ import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.parametro.GrupoParametro;
-import br.com.openpdv.modelo.core.parametro.IParametro;
 import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.core.parametro.ParametroNumero;
+import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
+import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.produto.ProdGrade;
+import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
@@ -40,6 +42,20 @@ public class ComandoCancelarVenda implements IComando {
      * Construtor padrao.
      */
     public ComandoCancelarVenda(boolean auto) {
+        this(auto, null);
+    }
+
+    /**
+     * Construtor padrao.
+     */
+    public ComandoCancelarVenda(SisUsuario gerente) {
+        this(false, gerente);
+    }
+
+    /**
+     * Construtor padrao.
+     */
+    public ComandoCancelarVenda(boolean auto, SisUsuario gerente) {
         this.log = Logger.getLogger(ComandoCancelarVenda.class);
         this.service = new CoreService();
         this.auto = auto;
@@ -48,6 +64,7 @@ public class ComandoCancelarVenda implements IComando {
             List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
             if (!vendas.isEmpty()) {
                 venda = vendas.get(0);
+                venda.setSisGerente(gerente);
             }
         } catch (OpenPdvException ex) {
             venda = null;
@@ -142,6 +159,41 @@ public class ComandoCancelarVenda implements IComando {
             }
             valor += vp.getEcfVendaProdutoBruto();
         }
+        
+        // remove a troca caso exista uma vinculada
+        if (venda.getEcfTroca() != null) {
+            FiltroNumero fn = new FiltroNumero("ecfTrocaId", ECompara.IGUAL, venda.getEcfTroca().getId());
+            Sql sql = new Sql(venda.getEcfTroca(), EComandoSQL.EXCLUIR, fn);
+            sqls.add(sql);
+            
+            // atualiza o estoque
+            for (EcfTrocaProduto tp : venda.getEcfTroca().getEcfTrocaProdutos()) {
+                // fatorando a quantida no estoque
+                double qtd = tp.getEcfTrocaProdutoQuantidade();
+                if (tp.getProdEmbalagem().getProdEmbalagemId() != tp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                    qtd *= tp.getProdEmbalagem().getProdEmbalagemUnidade();
+                    qtd /= tp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
+                }
+
+                // atualiza o estoque
+                ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
+                FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, tp.getProdProduto().getId());
+                Sql sql1 = new Sql(tp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
+                sqls.add(sql1);
+                // remove estoque da grade caso o produto tenha
+                if (tp.getProdProduto().getProdGrades() != null) {
+                    for (ProdGrade grade : tp.getProdProduto().getProdGrades()) {
+                        if (grade.getProdGradeBarra().equals(tp.getEcfTrocaProdutoBarra())) {
+                            ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
+                            FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                            Sql sql2 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
+                            sqls.add(sql2);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         // atualiza o status da venda
         GrupoParametro gp = new GrupoParametro();
@@ -154,10 +206,15 @@ public class ComandoCancelarVenda implements IComando {
         }
         ParametroBinario pb = new ParametroBinario("ecfVendaCancelada", true);
         gp.add(pb);
+        ParametroObjeto po = new ParametroObjeto("sisGerente", venda.getSisGerente());
+        gp.add(po);
+        ParametroObjeto po1 = new ParametroObjeto("ecfTroca", null);
+        gp.add(po1);
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 
-        service.executar(sqls);
+        // efetiva as instrucoes SQLs.
+        service.executar(sqls.toArray(new Sql[]{}));
     }
 
     /**

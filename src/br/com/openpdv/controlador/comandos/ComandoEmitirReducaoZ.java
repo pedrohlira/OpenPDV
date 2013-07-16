@@ -155,9 +155,8 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // atualiza as vendas, marcando que pertence a esta Z
                 ParametroObjeto po = new ParametroObjeto("ecfZ", z);
                 FiltroObjeto fo = new FiltroObjeto("ecfZ", ECompara.NULO, null);
-                List<Sql> slqs = new ArrayList<>();
-                slqs.add(new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fo, po));
-                service.executar(slqs);
+                Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fo, po);
+                service.executar(sql);
 
                 // gera os registros EcfZTotais
                 Map<String, EcfZTotais> totais = new HashMap<>();
@@ -326,7 +325,7 @@ public class ComandoEmitirReducaoZ implements IComando {
         List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, fd);
         if (zs.isEmpty()) {
             // somente gera caso tenha algum registro de Z.
-            zs = service.selecionar(new EcfZ(), 0, 0, null);
+            zs = service.selecionar(new EcfZ(), 0, 1, null);
             if (!zs.isEmpty()) {
                 cal.add(Calendar.MONTH, - 1);
                 String inicio = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());

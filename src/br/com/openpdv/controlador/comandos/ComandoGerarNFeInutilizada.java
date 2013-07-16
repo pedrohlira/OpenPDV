@@ -1,12 +1,12 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.inutnfe.TInutNFe;
-import br.com.openpdv.inutnfe.TInutNFe.InfInut;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.opensig.inutnfe.TInutNFe;
+import br.com.opensig.inutnfe.TInutNFe.InfInut;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 
@@ -58,7 +58,7 @@ public class ComandoGerarNFeInutilizada implements IComando {
             inutNfe.setInfInut(infInut);
             inutNfe.setVersao(Util.getConfig().get("nfe.versao"));
 
-            element = new br.com.openpdv.inutnfe.ObjectFactory().createInutNFe(inutNfe);
+            element = new br.com.opensig.inutnfe.ObjectFactory().createInutNFe(inutNfe);
         } catch (Exception e) {
             throw new OpenPdvException(e.getMessage());
         }

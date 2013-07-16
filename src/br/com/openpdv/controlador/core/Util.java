@@ -364,7 +364,12 @@ public class Util {
 
         // cria a autenticacao
         String usuario = PAF.AUXILIAR.getProperty("cli.cnpj");
-        String senha = PAF.encriptar(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
+        String senha = PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0];
+        
+        // criptografa a senha se estiver setado no config
+        if(Boolean.valueOf(config.get("sinc.criptografar"))){
+            senha = PAF.encriptar(senha);
+        }
 
         // seta os filtros
         c.addFilter(new HTTPBasicAuthFilter(usuario, senha));

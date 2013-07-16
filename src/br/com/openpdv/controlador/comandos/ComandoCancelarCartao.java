@@ -62,7 +62,7 @@ public class ComandoCancelarCartao implements IComando {
                     pag.setEcfPagamentoEstornoData(new Date());
                     pag.setEcfPagamentoEstornoValor(pag.getEcfPagamentoValor());
 
-                    if (!auto && pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && !pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cheque"))) {
+                    if (!auto && pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && !pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cheque")) && !pag.getEcfPagamentoNsu().startsWith("DV")) {
                         // cancela a trasacao
                         String id = TEF.gerarId();
                         TEF.cancelarTransacao(id, pag.getEcfPagamentoValor(), pag.getEcfPagamentoTipo().getEcfPagamentoTipoRede(), pag.getEcfPagamentoNsu(), pag.getEcfPagamentoData());

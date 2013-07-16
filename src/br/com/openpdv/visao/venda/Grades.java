@@ -1,14 +1,13 @@
 package br.com.openpdv.visao.venda;
 
 import br.com.openpdv.controlador.core.AsyncCallback;
+import br.com.openpdv.controlador.core.TableCellRendererNumber;
 import br.com.openpdv.modelo.produto.ProdGrade;
-import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
-import javax.swing.JButton;
+import java.text.DecimalFormat;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -87,6 +86,7 @@ public class Grades extends javax.swing.JDialog {
             }
         });
         tabGrade.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabGrade.setColumnSelectionAllowed(true);
         tabGrade.setRowHeight(20);
         tabGrade.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabGrade.setShowGrid(true);
@@ -117,6 +117,7 @@ public class Grades extends javax.swing.JDialog {
         tabGrade.getColumnModel().getColumn(4).setPreferredWidth(100);
         tabGrade.getColumnModel().getColumn(5).setResizable(false);
         tabGrade.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tabGrade.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
 
         getContentPane().add(spGrade, java.awt.BorderLayout.CENTER);
 

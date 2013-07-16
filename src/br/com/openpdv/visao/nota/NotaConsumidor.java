@@ -19,6 +19,7 @@ import br.com.openpdv.visao.core.Caixa;
 import br.com.openpdv.visao.principal.Pesquisa;
 import br.com.openpdv.visao.venda.Precos;
 import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -158,17 +159,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
                     Double qtd = (Double) model.getValueAt(row, 4);
                     Double bruto = (Double) model.getValueAt(row, 5);
                     Double desc = (Double) model.getValueAt(row, 6);
-
-                    // valida alguns valores
-                    if (qtd <= 0) {
-                        qtd = 1.00;
-                    }
-                    if (desc < 0) {
-                        desc = 0.00;
-                    } else if (desc > bruto) {
-                        desc = bruto;
-                    }
-
                     Double liquido = bruto - desc;
                     Double total = liquido * qtd;
                     model.setValueAt(liquido, row, 7);
@@ -291,14 +281,19 @@ public class NotaConsumidor extends javax.swing.JDialog {
         tabNotas.getColumnModel().getColumn(6).setPreferredWidth(100);
         tabNotas.getColumnModel().getColumn(7).setResizable(false);
         tabNotas.getColumnModel().getColumn(7).setPreferredWidth(75);
+        tabNotas.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabNotas.getColumnModel().getColumn(8).setResizable(false);
         tabNotas.getColumnModel().getColumn(8).setPreferredWidth(75);
+        tabNotas.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabNotas.getColumnModel().getColumn(9).setResizable(false);
         tabNotas.getColumnModel().getColumn(9).setPreferredWidth(75);
+        tabNotas.getColumnModel().getColumn(9).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabNotas.getColumnModel().getColumn(10).setResizable(false);
         tabNotas.getColumnModel().getColumn(10).setPreferredWidth(50);
+        tabNotas.getColumnModel().getColumn(10).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabNotas.getColumnModel().getColumn(11).setResizable(false);
         tabNotas.getColumnModel().getColumn(11).setPreferredWidth(50);
+        tabNotas.getColumnModel().getColumn(11).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabNotas.getColumnModel().getColumn(12).setResizable(false);
         tabNotas.getColumnModel().getColumn(12).setPreferredWidth(75);
 
@@ -342,7 +337,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
         lblBruto.setText("Bruto:");
 
         txtBruto.setEditable(false);
-        txtBruto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtBruto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
         txtBruto.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtBruto.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -350,7 +345,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
         lblDesconto.setText("Desconto:");
 
         txtDesconto.setEditable(false);
-        txtDesconto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtDesconto.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
         txtDesconto.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtDesconto.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -358,7 +353,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
         lblLiquido.setText("Líquido:");
 
         txtLiquido.setEditable(false);
-        txtLiquido.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtLiquido.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
         txtLiquido.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtLiquido.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -366,7 +361,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
         lblPIS.setText("PIS:");
 
         txtPIS.setEditable(false);
-        txtPIS.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtPIS.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
         txtPIS.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtPIS.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -374,7 +369,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
         lblCOFINS.setText("COFINS:");
 
         txtCOFINS.setEditable(false);
-        txtCOFINS.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtCOFINS.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
         txtCOFINS.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtCOFINS.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -448,14 +443,19 @@ public class NotaConsumidor extends javax.swing.JDialog {
         tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
         tabProdutos.getColumnModel().getColumn(4).setResizable(false);
         tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
         tabProdutos.getColumnModel().getColumn(5).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(6).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(7).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(50);
+        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(8).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(75);
+        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(100);
+        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabProdutos.getColumnModel().getColumn(9).setMinWidth(0);
         tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(0);
         tabProdutos.getColumnModel().getColumn(9).setMaxWidth(0);
@@ -776,7 +776,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
 
                 // valida sub-lista
                 List<EcfNotaProduto> produtos = new ArrayList<>();
-                if (validaProdutos(produtos, nota)) {
+                if (validarProdutos(produtos, nota)) {
                     service.salvar(em, produtos);
 
                     // atualiza o estoque
@@ -849,7 +849,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
                         Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
                         sqls.add(sql);
                     }
-                    service.executar(sqls);
+                    service.executar(sqls.toArray(new Sql[]{}));
                 } catch (OpenPdvException ex) {
                     log.error("Erro ao cancelar a nota.", ex);
                     JOptionPane.showMessageDialog(this, "Não foi possível cancelar o registro!", "Nota Consumidor", JOptionPane.WARNING_MESSAGE);
@@ -867,24 +867,23 @@ public class NotaConsumidor extends javax.swing.JDialog {
      * @param nota a nota atual
      * @return verdadeiro se valido, falso caso contrario
      */
-    private boolean validaProdutos(List<EcfNotaProduto> produtos, EcfNota nota) {
+    private boolean validarProdutos(List<EcfNotaProduto> produtos, EcfNota nota) {
         try {
             for (int i = 0; i < dtmProdutos.getRowCount(); i++) {
+                String[] emb = dtmProdutos.getValueAt(i, 3).toString().split(" - ");
+                Double qtd = (Double) dtmProdutos.getValueAt(i, 4);
+                Double bruto = (Double) dtmProdutos.getValueAt(i, 5);
+                Double desconto = (Double) dtmProdutos.getValueAt(i, 6);
+                if (qtd <= 0.00 || desconto < 0.00 || desconto >= bruto) {
+                    throw new Exception();
+                }
+                
                 EcfNotaProduto np = new EcfNotaProduto();
                 np.setEcfNota(nota);
                 np.setProdProduto((ProdProduto) dtmProdutos.getValueAt(i, 1));
-                String[] emb = dtmProdutos.getValueAt(i, 3).toString().split(" - ");
                 np.setProdEmbalagem(new ProdEmbalagem(Integer.valueOf(emb[0])));
-                Double qtd = (Double) dtmProdutos.getValueAt(i, 4);
-                if (qtd <= 0.00) {
-                    throw new Exception();
-                }
                 np.setEcfNotaProdutoQuantidade(qtd);
-                np.setEcfNotaProdutoBruto((Double) dtmProdutos.getValueAt(i, 5));
-                Double desconto = (Double) dtmProdutos.getValueAt(i, 6);
-                if (desconto < 0.00 || desconto > np.getEcfNotaProdutoBruto()) {
-                    throw new Exception();
-                }
+                np.setEcfNotaProdutoBruto(bruto);
                 np.setEcfNotaProdutoDesconto(desconto);
                 np.setEcfNotaProdutoLiquido((Double) dtmProdutos.getValueAt(i, 7));
                 np.setEcfNotaProdutoIcms(np.getEcfNotaProdutoLiquido() * np.getProdProduto().getProdProdutoIcms() / 100);
@@ -987,7 +986,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
      */
     private void totalizar() {
         List<EcfNotaProduto> nps = new ArrayList<>();
-        validaProdutos(nps, null);
+        validarProdutos(nps, null);
 
         Double bruto = 0.00;
         Double desconto = 0.00;

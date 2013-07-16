@@ -33,6 +33,7 @@ import br.com.phdss.modelo.anexo.v.AnexoV;
 import br.com.phdss.modelo.anexo.v.P1;
 import br.com.phdss.modelo.anexo.v.P2;
 import br.com.phdss.modelo.anexo.v.P9;
+import java.awt.HeadlessException;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
@@ -92,10 +93,10 @@ public class Caixa extends JFrame {
                         }
                     };
 
-                    // procura a barra nas grades
+                    // procura a barra nos precos
                     boolean achou = false;
                     for (ProdPreco preco : prod.getProdPrecos()) {
-                        if (preco.getProdPrecoBarra().equals(txtCodigo.getText())) {
+                        if (txtCodigo.getText().equals(preco.getProdPrecoBarra())) {
                             async.sucesso(preco);
                             achou = true;
                             break;
@@ -151,7 +152,7 @@ public class Caixa extends JFrame {
                     // procura a barra nas grades
                     boolean achou = false;
                     for (ProdGrade grade : prod.getProdGrades()) {
-                        if (grade.getProdGradeBarra().equals(txtCodigo.getText())) {
+                        if (txtCodigo.getText().equals(grade.getProdGradeBarra())) {
                             async.sucesso(grade);
                             achou = true;
                             break;
@@ -181,8 +182,7 @@ public class Caixa extends JFrame {
 
         @Override
         public void falha(Exception excecao) {
-            log.error("Problemas na pesquisa de produtos.", excecao);
-            JOptionPane.showMessageDialog(caixa, "Erro ao pesquisar o produto.", "Pesquisa", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Pesquisa", JOptionPane.INFORMATION_MESSAGE);
             txtCodigo.setText("");
             txtCodigo.requestFocus();
         }
@@ -207,7 +207,7 @@ public class Caixa extends JFrame {
         teclas = new KeyEventPostProcessor() {
             @Override
             public boolean postProcessKeyEvent(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_F1 && mnuSobre.isEnabled()) { // Sobre
+                if (e.getKeyCode() == KeyEvent.VK_F1) { // Sobre
                     mnuSobreMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F2 && mnuPrincipal.isEnabled() && janela == null) { // Menu Principal
                     mnuPrincipal.doClick();
@@ -222,9 +222,9 @@ public class Caixa extends JFrame {
                     mnuFiscal.doClick();
                 } else if (e.getKeyCode() == KeyEvent.VK_F4 && mnuNota.isEnabled()) { // Nota Fiscal
                     mnuNota.doClick();
-                } else if (e.getKeyCode() == KeyEvent.VK_F5 && mnuPesquisa.isEnabled()) { // Pesquisa
+                } else if (e.getKeyCode() == KeyEvent.VK_F5) { // Pesquisa
                     mnuPesquisaMouseClicked(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F6 && mnuVenda.isEnabled() && janela == null) { // Menu Gaveta
+                } else if (e.getKeyCode() == KeyEvent.VK_F6) { // Menu Gaveta
                     mnuGavetaMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F7 && mnuAbrirVenda.isEnabled()) { // Abrir Venda
                     mnuAbrirVendaActionPerformed(null);
@@ -234,9 +234,9 @@ public class Caixa extends JFrame {
                     mnuCancelarItemActionPerformed(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F10 && mnuCancelarVenda.isEnabled()) { // Cancelar Venda
                     mnuCancelarVendaActionPerformed(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F11 && mnuIdentificar.isEnabled()) { // Identificar
+                } else if (e.getKeyCode() == KeyEvent.VK_F11) { // Identificar
                     mnuIdentificarMouseClicked(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F12 && mnuSair.isEnabled() && option == null) { // Sair
+                } else if (e.getKeyCode() == KeyEvent.VK_F12) { // Sair
                     mnuSairMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // ESC
                     if (janela != null && !(janela instanceof Aguarde) && !(janela instanceof Autenticacao)) {
@@ -299,7 +299,7 @@ public class Caixa extends JFrame {
         panBobina = new javax.swing.JScrollPane();
         lstBobina = new javax.swing.JList();
         lblLogo = new javax.swing.JLabel();
-        txtCodigo = new javax.swing.JFormattedTextField();
+        txtCodigo = new javax.swing.JTextField();
         txtQuantidade = new javax.swing.JFormattedTextField();
         txtUnitario = new javax.swing.JFormattedTextField();
         txtTotalItem = new javax.swing.JFormattedTextField();
@@ -320,6 +320,7 @@ public class Caixa extends JFrame {
         mnuTipoGrades = new javax.swing.JMenuItem();
         mnuClientes = new javax.swing.JMenuItem();
         mnuUsuarios = new javax.swing.JMenuItem();
+        mnuTrocas = new javax.swing.JMenuItem();
         separador2 = new javax.swing.JPopupMenu.Separator();
         mnuTEF = new javax.swing.JMenuItem();
         mnuSincronizacao = new javax.swing.JMenuItem();
@@ -348,6 +349,8 @@ public class Caixa extends JFrame {
         mnuFecharVenda = new javax.swing.JMenuItem();
         mnuCancelarItem = new javax.swing.JMenuItem();
         mnuCancelarVenda = new javax.swing.JMenuItem();
+        separador3 = new javax.swing.JPopupMenu.Separator();
+        mnuCupomPresente = new javax.swing.JMenuItem();
         mnuIdentificar = new javax.swing.JMenu();
         mnuSair = new javax.swing.JMenu();
 
@@ -363,7 +366,6 @@ public class Caixa extends JFrame {
         lblLivre.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblLivre.setForeground(new java.awt.Color(24, 24, 88));
         lblLivre.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblLivre.setAlignmentY(0.0F);
         lblLivre.setFocusable(false);
         lblLivre.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         lblLivre.setIconTextGap(0);
@@ -430,10 +432,10 @@ public class Caixa extends JFrame {
         lblLogo.setBounds(730, 250, 250, 250);
         panCamadas.add(lblLogo, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        txtCodigo.setBorder(null);
-        txtCodigo.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtCodigo.setEnabled(false);
         txtCodigo.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
+        txtCodigo.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtCodigo.setBorder(null);
+        txtCodigo.setEnabled(false);
         txtCodigo.setName("txtCodigo"); // NOI18N
         txtCodigo.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -443,8 +445,8 @@ public class Caixa extends JFrame {
         txtCodigo.setBounds(490, 262, 200, 30);
         panCamadas.add(txtCodigo, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        txtQuantidade.setBorder(null);
         txtQuantidade.setEditable(false);
+        txtQuantidade.setBorder(null);
         txtQuantidade.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.###"))));
         txtQuantidade.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtQuantidade.setText("1");
@@ -655,6 +657,18 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuUsuarios);
+
+        mnuTrocas.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuTrocas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/padrao.png"))); // NOI18N
+        mnuTrocas.setText("Trocas");
+        mnuTrocas.setToolTipText("Trocas");
+        mnuTrocas.setEnabled(false);
+        mnuTrocas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuTrocasActionPerformed(evt);
+            }
+        });
+        mnuPrincipal.add(mnuTrocas);
         mnuPrincipal.add(separador2);
 
         mnuTEF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -968,6 +982,19 @@ public class Caixa extends JFrame {
             }
         });
         mnuVenda.add(mnuCancelarVenda);
+        mnuVenda.add(separador3);
+
+        mnuCupomPresente.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuCupomPresente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/estoque.png"))); // NOI18N
+        mnuCupomPresente.setText("Cupom Presente");
+        mnuCupomPresente.setToolTipText("Cupom que é ser usado nas compras para presente, facilitando possíveis trocas.");
+        mnuCupomPresente.setEnabled(false);
+        mnuCupomPresente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCupomPresenteActionPerformed(evt);
+            }
+        });
+        mnuVenda.add(mnuCupomPresente);
 
         barMenu.add(mnuVenda);
 
@@ -1024,19 +1051,8 @@ public class Caixa extends JFrame {
         setBounds((screenSize.width-1024)/2, (screenSize.height-768)/2, 1024, 768);
     }// </editor-fold>//GEN-END:initComponents
 
-    // Metodos dos menus.
-    private void txtCodigoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodigoKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            String texto = txtCodigo.getText().trim().replaceAll("\\D", "");
-            if (!texto.equals("")) {
-                IFiltro filtro = Pesquisa.pesquisar(texto);
-                Pesquisa.getInstancia(pesquisado).selecionar(filtro);
-            }
-        }
-    }//GEN-LAST:event_txtCodigoKeyPressed
-
     private void mnuSobreMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuSobreMouseClicked
-        if (janela == null) {
+        if (janela == null && mnuSobre.isEnabled()) {
             janela = Sobre.getInstancia();
             janela.setVisible(true);
         }
@@ -1049,32 +1065,34 @@ public class Caixa extends JFrame {
             try {
                 PAF.leituraX();
             } catch (Exception ex) {
-                log.error("Nao foi possivel emitir a LeituraX! -> ", ex);
+                log.error("Não foi possivel emitir a LeituraX! -> ", ex);
                 JOptionPane.showMessageDialog(caixa, "Não foi possível emitir a LeituraX!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
             }
         }
     }//GEN-LAST:event_mnuLXActionPerformed
 
     private void mnuSairMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuSairMouseClicked
-        option = new JOptionPane();
-        int escolha;
-        if (modo == EModo.DISPONIVEL) {
-            escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema ou trocar de operador?", "OpenPDV",
-                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Sair", "Cancelar", "Trocar",}, JOptionPane.YES_OPTION);
-        } else {
-            escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema?", "OpenPDV",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
-        }
+        if (mnuSair.isEnabled() && option == null) {
+            option = new JOptionPane();
+            int escolha;
+            if (modo == EModo.DISPONIVEL) {
+                escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema ou trocar de operador?", "OpenPDV",
+                        JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Sair", "Cancelar", "Trocar",}, JOptionPane.YES_OPTION);
+            } else {
+                escolha = JOptionPane.showOptionDialog(this, "Deseja sair do sistema?", "OpenPDV",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+            }
 
-        if (escolha == JOptionPane.YES_OPTION) {
-            System.exit(0);
-        } else if (escolha == JOptionPane.CANCEL_OPTION) {
-            modoOff();
-            Login.setOperador(null);
-            janela = Autenticacao.getInstancia();
-            janela.setVisible(true);
+            if (escolha == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            } else if (escolha == JOptionPane.CANCEL_OPTION) {
+                modoOff();
+                Login.setOperador(null);
+                janela = Autenticacao.getInstancia();
+                janela.setVisible(true);
+            }
+            option = null;
         }
-        option = null;
     }//GEN-LAST:event_mnuSairMouseClicked
 
     private void mnuSairKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_mnuSairKeyPressed
@@ -1126,7 +1144,7 @@ public class Caixa extends JFrame {
                         if (ECF.OK.equals(resp[0])) {
                             new ComandoSalvarDocumento("CN").executar();
                         } else {
-                            log.error("Nao foi possivel realizar o Suprimento! -> " + resp[1]);
+                            log.error("Não foi possivel realizar o Suprimento! -> " + resp[1]);
                             JOptionPane.showMessageDialog(caixa, "Não foi possível realizar o Suprimento!", "Suprimento", JOptionPane.WARNING_MESSAGE);
                         }
                     } catch (OpenPdvException ex) {
@@ -1162,7 +1180,7 @@ public class Caixa extends JFrame {
                         if (ECF.OK.equals(resp[0])) {
                             new ComandoSalvarDocumento("CN").executar();
                         } else {
-                            log.error("Nao foi possivel realizar a Sangria! -> " + resp[1]);
+                            log.error("Não foi possivel realizar a Sangria! -> " + resp[1]);
                             JOptionPane.showMessageDialog(caixa, "Não foi possível realizar a Sangria!", "Sangria", JOptionPane.WARNING_MESSAGE);
                         }
                     } catch (OpenPdvException ex) {
@@ -1197,7 +1215,7 @@ public class Caixa extends JFrame {
                                 modoConsulta();
                             } catch (OpenPdvException ex) {
                                 Aguarde.getInstancia().setVisible(false);
-                                log.error("Nao foi possivel realizar a ReducaoZ.", ex);
+                                log.error("Não foi possivel realizar a ReducaoZ.", ex);
                                 JOptionPane.showMessageDialog(caixa, "Não foi possível realizar a Redução Z!", "Redução Z", JOptionPane.WARNING_MESSAGE);
                             }
                         }
@@ -1234,7 +1252,7 @@ public class Caixa extends JFrame {
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
-                janela = Clientes.getInstancia();
+                janela = Clientes.getInstancia(null);
                 janela.setVisible(true);
             }
 
@@ -1285,7 +1303,7 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuPesquisaKeyPressed
 
     private void mnuPesquisaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuPesquisaMouseClicked
-        if (janela == null) {
+        if (janela == null && mnuPesquisa.isEnabled()) {
             janela = Pesquisa.getInstancia(pesquisado);
             janela.setVisible(true);
         }
@@ -1310,7 +1328,7 @@ public class Caixa extends JFrame {
                         Aguarde.getInstancia().setVisible(false);
                     } catch (Exception ex) {
                         Aguarde.getInstancia().setVisible(false);
-                        log.error("Nao foi possivel emitir o relatorio de configuracao! -> ", ex);
+                        log.error("Não foi possivel emitir o relatorio de configuracao! -> ", ex);
                         JOptionPane.showMessageDialog(caixa, "Não foi possível emitir o Relatório!\nVerifique se o ECF está ativa e livre.", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
                     }
                 }
@@ -1333,7 +1351,7 @@ public class Caixa extends JFrame {
                         Aguarde.getInstancia().setVisible(false);
                     } catch (Exception ex) {
                         Aguarde.getInstancia().setVisible(false);
-                        log.error("Nao foi possivel emitir o relatorio de identificacao do paf! -> ", ex);
+                        log.error("Não foi possivel emitir o relatorio de identificacao do paf! -> ", ex);
                         JOptionPane.showMessageDialog(caixa, "Não foi possível emitir o Relatório!\nVerifique se o ECF está ativa e livre.", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
                     }
                 }
@@ -1388,7 +1406,7 @@ public class Caixa extends JFrame {
                         JOptionPane.showMessageDialog(caixa, "Arquivo gerado com sucesso em:\n" + path, "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
                     } catch (Exception ex) {
                         Aguarde.getInstancia().setVisible(false);
-                        log.error("Nao foi possivel gerar o arquivo -> ", ex);
+                        log.error("Não foi possivel gerar o arquivo -> ", ex);
                         JOptionPane.showMessageDialog(caixa, "Não foi possível gerar o arquivo!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
                     }
                 }
@@ -1495,7 +1513,8 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuAbrirVendaActionPerformed
 
     private void mnuCancelarVendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCancelarVendaActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        final Gerente gerente = Gerente.getInstancia(null);
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 new Thread(new Runnable() {
@@ -1503,11 +1522,13 @@ public class Caixa extends JFrame {
                     public void run() {
                         try {
                             statusMenus(EModo.OFF);
-                            new ComandoCancelarVenda(false).executar();
+                            new ComandoCancelarVenda(gerente.getSisGerente()).executar();
                         } catch (OpenPdvException ex) {
                             log.error(ex);
                             Aguarde.getInstancia().setVisible(false);
                             JOptionPane.showMessageDialog(caixa, "Erro ao cancelar a venda.", "Cancelar Venda", JOptionPane.ERROR_MESSAGE);
+                        } finally {
+                            janela = null;
                         }
                     }
                 }).start();
@@ -1516,10 +1537,14 @@ public class Caixa extends JFrame {
 
             @Override
             public void falha(Exception excecao) {
+                janela = null;
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        janela = gerente;
+        gerente.setAsync(async);
+        gerente.setVisible(true);
     }//GEN-LAST:event_mnuCancelarVendaActionPerformed
 
     private void mnuCancelarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCancelarItemActionPerformed
@@ -1571,22 +1596,24 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuFecharVendaActionPerformed
 
     private void mnuGavetaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuGavetaMouseClicked
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
-            @Override
-            public void sucesso(Integer resultado) {
-                String[] resp = ECF.enviar(EComandoECF.ECF_AbreGaveta);
-                if (ECF.ERRO.equals(resp[0])) {
-                    log.error("Erro ao abrir a gaveta. -> " + resp[1]);
-                    JOptionPane.showMessageDialog(caixa, "Não foi possível abrir a gaveta!", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
+        if (mnuVenda.isEnabled() && janela == null) {
+            janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+                @Override
+                public void sucesso(Integer resultado) {
+                    String[] resp = ECF.enviar(EComandoECF.ECF_AbreGaveta);
+                    if (ECF.ERRO.equals(resp[0])) {
+                        log.error("Erro ao abrir a gaveta. -> " + resp[1]);
+                        JOptionPane.showMessageDialog(caixa, "Não foi possível abrir a gaveta!", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
-            }
 
-            @Override
-            public void falha(Exception excecao) {
-                JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        janela.setVisible(true);
+                @Override
+                public void falha(Exception excecao) {
+                    JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuGavetaMouseClicked
 
     private void mnuGavetaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_mnuGavetaKeyPressed
@@ -1602,29 +1629,31 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuIdentificarKeyPressed
 
     private void mnuIdentificarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuIdentificarMouseClicked
-        statusMenus(EModo.OFF);
-        Identificar ident = Identificar.getInstancia(new AsyncCallback<SisCliente>() {
-            @Override
-            public void sucesso(SisCliente resultado) {
-                if (resultado != null) {
-                    if (resultado.getSisClienteId() > 0) {
-                        venda.setSisCliente(resultado);
-                        mnuIdentificar.setEnabled(false);
+        if (mnuIdentificar.isEnabled()) {
+            statusMenus(EModo.OFF);
+            Identificar ident = Identificar.getInstancia(new AsyncCallback<SisCliente>() {
+                @Override
+                public void sucesso(SisCliente resultado) {
+                    if (resultado != null) {
+                        if (resultado.getSisClienteId() > 0) {
+                            venda.setSisCliente(resultado);
+                            mnuIdentificar.setEnabled(false);
+                        }
+                        venda.setSisVendedor(resultado.getVendedor());
                     }
-                    venda.setSisVendedor(resultado.getVendedor());
+                    statusMenus(modo);
                 }
-                statusMenus(modo);
-            }
 
-            @Override
-            public void falha(Exception excecao) {
-                statusMenus(modo);
-                log.error("Erro na identificacao do cliente.", excecao);
-                JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar", JOptionPane.WARNING_MESSAGE);
-            }
-        });
-        ident.getChkRecuperar().setEnabled(false);
-        ident.setVisible(true);
+                @Override
+                public void falha(Exception excecao) {
+                    statusMenus(modo);
+                    log.error("Erro na identificacao do cliente.", excecao);
+                    JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar", JOptionPane.WARNING_MESSAGE);
+                }
+            });
+            ident.getChkRecuperar().setEnabled(false);
+            ident.setVisible(true);
+        }
     }//GEN-LAST:event_mnuIdentificarMouseClicked
 
     private void mnuMovimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMovimentoActionPerformed
@@ -1720,20 +1749,21 @@ public class Caixa extends JFrame {
                             if (escolha == JOptionPane.YES_OPTION) {
                                 new ComandoReceberDados().executar();
                             } else {
-                                String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data no formato <b>dd/MM/aaaa HH:mm:ss</b>"
-                                        + "<br>Para usar a padrão deixe em branco.</html>", "Data de Envio", JOptionPane.INFORMATION_MESSAGE);
-                                if (valor != null) {
-                                    Date data = Util.formataData(valor, "dd/MM/yyyy HH:mm:ss");
+                                String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data no formato <b>dd/MM/aaaa</b></html>", "Data de Envio", JOptionPane.INFORMATION_MESSAGE);
+                                Date data = Util.formataData(valor, "dd/MM/yyyy");
+                                if (data != null) {
                                     new ComandoEnviarDados(data).executar();
+                                } else {
+                                    JOptionPane.showMessageDialog(caixa, "Data informada inválida!.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
                                 }
                             }
                             Aguarde.getInstancia().setVisible(false);
                             JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                         }
-                    } catch (Exception ex) {
-                        log.error("Nao conseguiu sincronizar com o servidor.", ex);
+                    } catch (OpenPdvException ex) {
+                        log.error("Não conseguiu sincronizar com o servidor.", ex);
                         Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(caixa, "Nao conseguiu sincronizar com o servidor.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(caixa, "Não conseguiu sincronizar com o servidor.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
                     }
                 }
             }).start();
@@ -1776,6 +1806,50 @@ public class Caixa extends JFrame {
         });
         janela.setVisible(true);
     }//GEN-LAST:event_mnuTipoGradesActionPerformed
+
+    private void mnuCupomPresenteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCupomPresenteActionPerformed
+        String valor = JOptionPane.showInputDialog(caixa, "Insira o número do CCF.");
+        ComandoCupomPresente ccp = null;
+
+        try {
+            int ccf = Integer.valueOf(valor);
+            ccp = new ComandoCupomPresente(ccf);
+        } catch (Exception ex) {
+            ccp = new ComandoCupomPresente();
+        } finally {
+            try {
+                ccp.executar();
+            } catch (OpenPdvException ex) {
+                JOptionPane.showMessageDialog(caixa, "CCF não existe ou problemas na impressão!", "Cupom Presente", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_mnuCupomPresenteActionPerformed
+
+    private void txtCodigoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCodigoKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            String texto = txtCodigo.getText().trim();
+            if (!texto.equals("")) {
+                IFiltro filtro = Pesquisa.pesquisar(texto);
+                Pesquisa.getInstancia(pesquisado).selecionar(filtro);
+            }
+        }
+    }//GEN-LAST:event_txtCodigoKeyPressed
+
+    private void mnuTrocasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTrocasActionPerformed
+        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+            @Override
+            public void sucesso(Integer resultado) {
+                janela = Trocas.getInstancia(null);
+                janela.setVisible(true);
+            }
+
+            @Override
+            public void falha(Exception excecao) {
+                JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        janela.setVisible(true);
+    }//GEN-LAST:event_mnuTrocasActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
     private javax.swing.JLabel lblCaixa;
@@ -1794,6 +1868,7 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuCancelarVenda;
     private javax.swing.JMenuItem mnuCartao;
     private javax.swing.JMenuItem mnuClientes;
+    private javax.swing.JMenuItem mnuCupomPresente;
     private javax.swing.JMenuItem mnuEmbalagens;
     private javax.swing.JMenuItem mnuEspelho;
     private javax.swing.JMenuItem mnuEstoque;
@@ -1825,6 +1900,7 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuTabProdutos;
     private javax.swing.JMenuItem mnuTipoGrades;
     private javax.swing.JMenuItem mnuTipoPagamentos;
+    private javax.swing.JMenuItem mnuTrocas;
     private javax.swing.JMenuItem mnuUsuarios;
     private javax.swing.JMenu mnuVenda;
     private javax.swing.JMenuItem mnuVendas;
@@ -1832,7 +1908,8 @@ public class Caixa extends JFrame {
     private javax.swing.JLayeredPane panCamadas;
     private javax.swing.JPopupMenu.Separator separador1;
     private javax.swing.JPopupMenu.Separator separador2;
-    private javax.swing.JFormattedTextField txtCodigo;
+    private javax.swing.JPopupMenu.Separator separador3;
+    private javax.swing.JTextField txtCodigo;
     private javax.swing.JFormattedTextField txtQuantidade;
     private javax.swing.JFormattedTextField txtSubTotal;
     private javax.swing.JFormattedTextField txtTotalItem;
@@ -2474,11 +2551,11 @@ public class Caixa extends JFrame {
         this.teclas = teclas;
     }
 
-    public JFormattedTextField getTxtCodigo() {
+    public JTextField getTxtCodigo() {
         return txtCodigo;
     }
 
-    public void setTxtCodigo(JFormattedTextField txtCodigo) {
+    public void setTxtCodigo(JTextField txtCodigo) {
         this.txtCodigo = txtCodigo;
     }
 
@@ -2568,5 +2645,45 @@ public class Caixa extends JFrame {
 
     public void setBobina(DefaultListModel bobina) {
         this.bobina = bobina;
+    }
+
+    public JMenuItem getMnuCartao() {
+        return mnuCartao;
+    }
+
+    public void setMnuCartao(JMenuItem mnuCartao) {
+        this.mnuCartao = mnuCartao;
+    }
+
+    public JMenuItem getMnuCupomPresente() {
+        return mnuCupomPresente;
+    }
+
+    public void setMnuCupomPresente(JMenuItem mnuCupomPresente) {
+        this.mnuCupomPresente = mnuCupomPresente;
+    }
+
+    public JMenuItem getMnuTEF() {
+        return mnuTEF;
+    }
+
+    public void setMnuTEF(JMenuItem mnuTEF) {
+        this.mnuTEF = mnuTEF;
+    }
+
+    public JMenuItem getMnuTipoGrades() {
+        return mnuTipoGrades;
+    }
+
+    public void setMnuTipoGrades(JMenuItem mnuTipoGrades) {
+        this.mnuTipoGrades = mnuTipoGrades;
+    }
+
+    public JMenuItem getMnuTipoPagamentos() {
+        return mnuTipoPagamentos;
+    }
+
+    public void setMnuTipoPagamentos(JMenuItem mnuTipoPagamentos) {
+        this.mnuTipoPagamentos = mnuTipoPagamentos;
     }
 }

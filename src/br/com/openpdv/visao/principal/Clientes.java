@@ -1,5 +1,6 @@
 package br.com.openpdv.visao.principal;
 
+import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.TextFieldLimit;
 import br.com.openpdv.controlador.core.Util;
@@ -40,6 +41,7 @@ public class Clientes extends javax.swing.JDialog {
     private int cod;
     private DefaultTableModel dtm;
     private CoreService service;
+    private AsyncCallback<SisCliente> async;
 
     /**
      * Construtor padrao.
@@ -63,7 +65,7 @@ public class Clientes extends javax.swing.JDialog {
         // colocando limites nos campos
         txtCPF_CNPJ.setDocument(new TextFieldLimit(20));
         txtNome.setDocument(new TextFieldLimit(100));
-        txtIE.setDocument(new TextFieldLimit(20));
+        txtRG_IE.setDocument(new TextFieldLimit(20));
         txtEndereco.setDocument(new TextFieldLimit(255));
         txtNumero.setDocument(new TextFieldLimit(11, true));
         txtComplemento.setDocument(new TextFieldLimit(100));
@@ -78,11 +80,19 @@ public class Clientes extends javax.swing.JDialog {
      *
      * @return o objeto do componente.
      */
-    public static Clientes getInstancia() {
+    public static Clientes getInstancia(AsyncCallback<SisCliente> async) {
         if (clientes == null) {
             clientes = new Clientes();
         }
 
+        if (async != null) {
+            clientes.btnNovo.setEnabled(false);
+            clientes.btnExcluir.setEnabled(false);
+        } else {
+            clientes.btnNovo.setEnabled(true);
+            clientes.btnExcluir.setEnabled(true);
+        }
+        clientes.async = async;
         clientes.setLista();
         return clientes;
     }
@@ -99,8 +109,8 @@ public class Clientes extends javax.swing.JDialog {
         txtCPF_CNPJ = new javax.swing.JTextField();
         lblNome = new javax.swing.JLabel();
         txtNome = new javax.swing.JTextField();
-        lblIE = new javax.swing.JLabel();
-        txtIE = new javax.swing.JTextField();
+        lblRG_IE = new javax.swing.JLabel();
+        txtRG_IE = new javax.swing.JTextField();
         lblEndereco = new javax.swing.JLabel();
         txtEndereco = new javax.swing.JTextField();
         lblNumero = new javax.swing.JLabel();
@@ -224,11 +234,11 @@ public class Clientes extends javax.swing.JDialog {
         txtNome.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         txtNome.setToolTipText("Nome ou Razão Social.");
 
-        lblIE.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        lblIE.setText("IE:");
+        lblRG_IE.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblRG_IE.setText("RG/IE:");
 
-        txtIE.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        txtIE.setToolTipText("CPF ou CNPJ.");
+        txtRG_IE.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtRG_IE.setToolTipText("CPF ou CNPJ.");
 
         lblEndereco.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblEndereco.setText("Endereço:");
@@ -330,9 +340,9 @@ public class Clientes extends javax.swing.JDialog {
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(txtNome)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblIE)
+                                .add(lblRG_IE)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtIE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 102, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(txtRG_IE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 102, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(lblCEP)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
@@ -363,8 +373,8 @@ public class Clientes extends javax.swing.JDialog {
                     .add(txtNome, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(lblCPF_CNPJ)
                     .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(lblIE)
-                    .add(txtIE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblRG_IE)
+                    .add(txtRG_IE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(lblCEP)
                     .add(txtCEP, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -485,14 +495,12 @@ public class Clientes extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
-        dispose();
-        Caixa.getInstancia().setJanela(null);
+        cancelar();
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnCancelarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnCancelarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            dispose();
-            Caixa.getInstancia().setJanela(null);
+            cancelar();
         }
     }//GEN-LAST:event_btnCancelarKeyPressed
 
@@ -533,7 +541,6 @@ public class Clientes extends javax.swing.JDialog {
             excluir();
         }
     }//GEN-LAST:event_btnExcluirKeyPressed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnExcluir;
@@ -547,10 +554,10 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JLabel lblComplemento;
     private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblEndereco;
-    private javax.swing.JLabel lblIE;
     private javax.swing.JLabel lblMunicipio;
     private javax.swing.JLabel lblNome;
     private javax.swing.JLabel lblNumero;
+    private javax.swing.JLabel lblRG_IE;
     private javax.swing.JLabel lblTelefone;
     private javax.swing.JLabel lblUF;
     private javax.swing.JPanel painel;
@@ -562,9 +569,9 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JTextField txtComplemento;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtEndereco;
-    private javax.swing.JTextField txtIE;
     private javax.swing.JTextField txtNome;
     private javax.swing.JFormattedTextField txtNumero;
+    private javax.swing.JTextField txtRG_IE;
     private javax.swing.JTextField txtTelefone;
     // End of variables declaration//GEN-END:variables
 
@@ -580,13 +587,13 @@ public class Clientes extends javax.swing.JDialog {
      * Metodo que salva um novo registro ou atualiza um existente.
      */
     private void salvar() {
-        if (!validar() || txtNome.getText().equals("") || txtCEP.getText().equals("") || txtEndereco.getText().equals("") || txtNumero.getText().equals("") || txtBairro.getText().equals("") || cmbMunicipio.getSelectedIndex() < 0) {
-            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!", "Clientes", JOptionPane.INFORMATION_MESSAGE);
+        if (!validar() || txtNome.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "CPF/CNPJ e ou Nome nao sao validos!", "Clientes", JOptionPane.INFORMATION_MESSAGE);
         } else {
             SisCliente cliente = new SisCliente(cod);
-            cliente.setSisClienteDoc(txtCPF_CNPJ.getText());
+            cliente.setSisClienteDoc(txtCPF_CNPJ.getText().replaceAll("\\D", ""));
             cliente.setSisClienteNome(txtNome.getText());
-            cliente.setSisClienteDoc1(txtIE.getText());
+            cliente.setSisClienteDoc1(txtRG_IE.getText());
             cliente.setSisClienteEndereco(txtEndereco.getText());
             cliente.setSisClienteNumero(Integer.valueOf(txtNumero.getText()));
             cliente.setSisClienteComplemento(txtComplemento.getText());
@@ -598,9 +605,15 @@ public class Clientes extends javax.swing.JDialog {
             cliente.setSisClienteData(new Date());
 
             try {
-                service.salvar(cliente);
+                cliente = (SisCliente) service.salvar(cliente);
                 JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Clientes", JOptionPane.INFORMATION_MESSAGE);
-                setLista();
+
+                if (async != null) {
+                    async.sucesso(cliente);
+                    dispose();
+                } else {
+                    setLista();
+                }
             } catch (OpenPdvException ex) {
                 log.error("Erro ao salvar a embalagem.", ex);
                 JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Clientes", JOptionPane.WARNING_MESSAGE);
@@ -630,6 +643,17 @@ public class Clientes extends javax.swing.JDialog {
     }
 
     /**
+     * Metodo que cancela o registro do sistema.
+     */
+    private void cancelar() {
+        if (async != null) {
+            async.falha(null);
+        }
+        dispose();
+        Caixa.getInstancia().setJanela(null);
+    }
+
+    /**
      * Metodo que valida o CPF e/ou CNPJ
      *
      * @return retorna verdadeiro se valido, falso caso contrario.
@@ -653,16 +677,16 @@ public class Clientes extends javax.swing.JDialog {
      */
     private void setLista() {
         try {
-            List<SisCliente> lista = service.selecionar(new SisCliente(), 0, 0, null);
+            List<SisCliente> clis = service.selecionar(new SisCliente(), 0, 0, null);
 
             while (dtm.getRowCount() > 0) {
                 dtm.removeRow(0);
             }
 
-            for (SisCliente cliente : lista) {
-                Object[] obj = new Object[]{cliente.getSisClienteId(), cliente.getSisClienteDoc(), cliente.getSisClienteNome(), cliente.getSisClienteDoc1(), cliente.getSisClienteEndereco(),
-                    cliente.getSisClienteNumero(), cliente.getSisClienteComplemento(), cliente.getSisClienteBairro(), cliente.getSisClienteCep(),
-                    cliente.getSisMunicipio(), cliente.getSisClienteTelefone(), cliente.getSisClienteEmail()
+            for (SisCliente cli : clis) {
+                Object[] obj = new Object[]{cli.getSisClienteId(), cli.getSisClienteDoc(), cli.getSisClienteNome(), cli.getSisClienteDoc1(), cli.getSisClienteEndereco(),
+                    cli.getSisClienteNumero(), cli.getSisClienteComplemento(), cli.getSisClienteBairro(), cli.getSisClienteCep(),
+                    cli.getSisMunicipio(), cli.getSisClienteTelefone(), cli.getSisClienteEmail()
                 };
                 dtm.addRow(obj);
             }
@@ -681,36 +705,31 @@ public class Clientes extends javax.swing.JDialog {
         if (row == -1) {
             cod = 0;
             txtCPF_CNPJ.setText("");
-            txtNome.setText("");
-            txtIE.setText("");
+            txtNome.setText("NAO INFORMADO");
+            txtRG_IE.setText("");
             txtEndereco.setText("");
-            txtNumero.setText("");
+            txtNumero.setText("0");
             txtComplemento.setText("");
             txtBairro.setText("");
             txtCEP.setText("");
+            Util.selecionarCombo(cmbUF, Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado().getSisEstadoSigla());
+            Util.selecionarCombo(cmbMunicipio, Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisMunicipioDescricao());
             txtTelefone.setText("");
             txtEmail.setText("");
-            cmbUF.setSelectedItem(Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado());
-            cmbMunicipio.setSelectedIndex(-1);
         } else {
             int rowModel = tabClientes.convertRowIndexToModel(row);
             cod = Integer.valueOf(tabClientes.getModel().getValueAt(rowModel, 0).toString());
             txtCPF_CNPJ.setText(tabClientes.getModel().getValueAt(rowModel, 1).toString());
             txtNome.setText(tabClientes.getModel().getValueAt(rowModel, 2).toString());
-            txtIE.setText(tabClientes.getModel().getValueAt(rowModel, 3).toString());
+            txtRG_IE.setText(tabClientes.getModel().getValueAt(rowModel, 3).toString());
             txtEndereco.setText(tabClientes.getModel().getValueAt(rowModel, 4).toString());
             txtNumero.setText(tabClientes.getModel().getValueAt(rowModel, 5).toString());
             txtComplemento.setText(tabClientes.getModel().getValueAt(rowModel, 6).toString());
             txtBairro.setText(tabClientes.getModel().getValueAt(rowModel, 7).toString());
             txtCEP.setText(tabClientes.getModel().getValueAt(rowModel, 8).toString());
             SisMunicipio mun = (SisMunicipio) tabClientes.getModel().getValueAt(rowModel, 9);
-            if (mun != null) {
-                Util.selecionarCombo(cmbUF, mun.getSisEstado().getSisEstadoSigla());
-                Util.selecionarCombo(cmbMunicipio, mun.getSisMunicipioDescricao());
-            } else {
-                Util.selecionarCombo(cmbUF, Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado().getSisEstadoSigla());
-                cmbMunicipio.setSelectedIndex(-1);
-            }
+            Util.selecionarCombo(cmbUF, mun.getSisEstado().getSisEstadoSigla());
+            Util.selecionarCombo(cmbMunicipio, mun.getSisMunicipioDescricao());
             txtTelefone.setText(tabClientes.getModel().getValueAt(rowModel, 10).toString());
             txtEmail.setText(tabClientes.getModel().getValueAt(rowModel, 11).toString());
         }
@@ -726,10 +745,10 @@ public class Clientes extends javax.swing.JDialog {
             for (SisEstado est : lista) {
                 cmbUF.addItem(est);
             }
-            cmbUF.setSelectedItem(Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado());
-            setMunicipio((SisEstado) cmbUF.getSelectedItem());
         } catch (OpenPdvException ex) {
             log.error("Nao carregou as UFs.", ex);
+        } finally {
+            cmbUF.setSelectedIndex(-1);
         }
     }
 
@@ -897,11 +916,11 @@ public class Clientes extends javax.swing.JDialog {
     }
 
     public JLabel getLblIE() {
-        return lblIE;
+        return lblRG_IE;
     }
 
     public void setLblIE(JLabel lblIE) {
-        this.lblIE = lblIE;
+        this.lblRG_IE = lblIE;
     }
 
     public JLabel getLblMunicipio() {
@@ -1001,11 +1020,11 @@ public class Clientes extends javax.swing.JDialog {
     }
 
     public JTextField getTxtIE() {
-        return txtIE;
+        return txtRG_IE;
     }
 
     public void setTxtIE(JTextField txtIE) {
-        this.txtIE = txtIE;
+        this.txtRG_IE = txtIE;
     }
 
     public JTextField getTxtNome() {
@@ -1030,5 +1049,29 @@ public class Clientes extends javax.swing.JDialog {
 
     public void setTxtTelefone(JTextField txtTelefone) {
         this.txtTelefone = txtTelefone;
+    }
+
+    public JLabel getLblRG_IE() {
+        return lblRG_IE;
+    }
+
+    public void setLblRG_IE(JLabel lblRG_IE) {
+        this.lblRG_IE = lblRG_IE;
+    }
+
+    public JTextField getTxtRG_IE() {
+        return txtRG_IE;
+    }
+
+    public void setTxtRG_IE(JTextField txtRG_IE) {
+        this.txtRG_IE = txtRG_IE;
+    }
+
+    public AsyncCallback<SisCliente> getAsync() {
+        return async;
+    }
+
+    public void setAsync(AsyncCallback<SisCliente> async) {
+        this.async = async;
     }
 }

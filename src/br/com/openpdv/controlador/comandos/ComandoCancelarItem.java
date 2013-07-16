@@ -77,14 +77,12 @@ public class ComandoCancelarItem implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void cancelarItemBanco() throws OpenPdvException {
-        List<Sql> sqls = new ArrayList<>();
         FiltroNumero fn = new FiltroNumero("ecfVendaProdutoId", ECompara.IGUAL, vendaProduto.getId());
         ParametroBinario pb = new ParametroBinario("ecfVendaProdutoCancelado", true);
         Sql sql = new Sql(new EcfVendaProduto(), EComandoSQL.ATUALIZAR, fn, pb);
-        sqls.add(sql);
 
         CoreService service = new CoreService<>();
-        service.executar(sqls);
+        service.executar(sql);
     }
 
     /**

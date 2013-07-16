@@ -9,7 +9,6 @@ import br.com.openpdv.modelo.sistema.SisUsuario;
  * Classe que implementa a chamada no servidor da função de entrar no sistema,
  * acessando os dados para autenticar o usuário junto ao servidor.
  *
- * @param <E> o tipo de dados.
  * @author Pedro H. Lira
  */
 public class PermissaoService extends CoreService<SisUsuario> {

@@ -1,13 +1,13 @@
 package br.com.openpdv.visao.venda;
 
 import br.com.openpdv.controlador.core.AsyncCallback;
+import br.com.openpdv.controlador.core.TableCellRendererNumber;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
-import javax.swing.JButton;
+import java.text.DecimalFormat;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -86,6 +86,7 @@ public class Precos extends javax.swing.JDialog {
             }
         });
         tabPreco.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabPreco.setColumnSelectionAllowed(true);
         tabPreco.setRowHeight(20);
         tabPreco.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabPreco.setShowGrid(true);
@@ -110,6 +111,7 @@ public class Precos extends javax.swing.JDialog {
         tabPreco.getColumnModel().getColumn(1).setPreferredWidth(100);
         tabPreco.getColumnModel().getColumn(2).setResizable(false);
         tabPreco.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tabPreco.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
         tabPreco.getColumnModel().getColumn(3).setResizable(false);
         tabPreco.getColumnModel().getColumn(3).setPreferredWidth(200);
 

@@ -1176,7 +1176,7 @@ public class Produtos extends javax.swing.JDialog {
      * Metodo que salva um novo registro ou atualiza um existente.
      */
     private void salvar() {
-        if (txtNCM.getText().equals("") || txtDescricao.getText().equals("") || txtPreco.getText().equals("") || txtEstoque.getText().equals("")
+        if (txtNCM.getText().equals("") || txtNCM.getText().length() < 8 || txtDescricao.getText().equals("") || txtPreco.getText().equals("") || txtEstoque.getText().equals("")
                 || txtCST_CSON.getText().equals("") || txtICMS.getText().equals("") || txtISSQN.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!", "Produtos", JOptionPane.INFORMATION_MESSAGE);
         } else {

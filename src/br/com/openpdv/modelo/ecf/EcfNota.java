@@ -48,7 +48,7 @@ public class EcfNota extends Dados implements Serializable {
     @ManyToOne
     @JoinColumn(name = "sis_cliente_id")
     private SisCliente sisCliente;
-    @OneToMany(mappedBy = "ecfNota", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "ecfNota", fetch = FetchType.EAGER)
     private List<EcfNotaProduto> ecfNotaProdutos;
 
     /**

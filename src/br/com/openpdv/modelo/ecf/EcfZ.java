@@ -46,9 +46,9 @@ public class EcfZ extends Dados implements Serializable {
     @JoinColumn(name = "ecf_impressora_id")
     @ManyToOne
     private EcfImpressora ecfImpressora;
-    @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER)
     private List<EcfZTotais> ecfZTotais;
-    @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER)
     private List<EcfVenda> ecfVendas;
     // somente para salvar no servidor via REST
     @Transient
