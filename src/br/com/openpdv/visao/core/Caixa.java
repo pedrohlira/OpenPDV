@@ -33,7 +33,6 @@ import br.com.phdss.modelo.anexo.v.AnexoV;
 import br.com.phdss.modelo.anexo.v.P1;
 import br.com.phdss.modelo.anexo.v.P2;
 import br.com.phdss.modelo.anexo.v.P9;
-import java.awt.HeadlessException;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
@@ -1745,25 +1744,25 @@ public class Caixa extends JFrame {
                 @Override
                 public void run() {
                     try {
-                        if (escolha == JOptionPane.YES_OPTION || escolha == JOptionPane.NO_OPTION) {
-                            if (escolha == JOptionPane.YES_OPTION) {
-                                new ComandoReceberDados().executar();
-                            } else {
-                                String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data no formato <b>dd/MM/aaaa</b></html>", "Data de Envio", JOptionPane.INFORMATION_MESSAGE);
-                                Date data = Util.formataData(valor, "dd/MM/yyyy");
-                                if (data != null) {
-                                    new ComandoEnviarDados(data).executar();
-                                } else {
-                                    JOptionPane.showMessageDialog(caixa, "Data informada inválida!.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
-                                }
-                            }
+                        if (escolha == JOptionPane.YES_OPTION) {
+                            new ComandoReceberDados().executar();
                             Aguarde.getInstancia().setVisible(false);
                             JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data no formato <b>dd/MM/aaaa</b></html>", "Data de Envio", JOptionPane.INFORMATION_MESSAGE);
+                            Date data = Util.formataData(valor, "dd/MM/yyyy");
+                            if (data != null) {
+                                new ComandoEnviarDados(data).executar();
+                                Aguarde.getInstancia().setVisible(false);
+                                JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(caixa, "Data informada inválida!.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
+                            }
                         }
                     } catch (OpenPdvException ex) {
                         log.error("Não conseguiu sincronizar com o servidor.", ex);
                         Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(caixa, "Não conseguiu sincronizar com o servidor.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(caixa, ex.getMessage(), "Sincronismo", JOptionPane.WARNING_MESSAGE);
                     }
                 }
             }).start();
@@ -1808,7 +1807,7 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuTipoGradesActionPerformed
 
     private void mnuCupomPresenteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCupomPresenteActionPerformed
-        String valor = JOptionPane.showInputDialog(caixa, "Insira o número do CCF.");
+        String valor = JOptionPane.showInputDialog(caixa, "Insira o número do CCF.\nDeixe em branco para usar o último.");
         ComandoCupomPresente ccp = null;
 
         try {

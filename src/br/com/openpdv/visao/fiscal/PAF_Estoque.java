@@ -305,11 +305,11 @@ public class PAF_Estoque extends JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnOk, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCancelar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(11, 11, 11))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-454)/2, (screenSize.height-234)/2, 454, 234);
+        setBounds((screenSize.width-454)/2, (screenSize.height-240)/2, 454, 240);
     }// </editor-fold>//GEN-END:initComponents
 
     private void radCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCodigoActionPerformed

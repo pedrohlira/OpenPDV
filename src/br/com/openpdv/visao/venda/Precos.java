@@ -86,8 +86,9 @@ public class Precos extends javax.swing.JDialog {
             }
         });
         tabPreco.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabPreco.setColumnSelectionAllowed(true);
+        tabPreco.setCellSelectionEnabled(false);
         tabPreco.setRowHeight(20);
+        tabPreco.setRowSelectionAllowed(true);
         tabPreco.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabPreco.setShowGrid(true);
         tabPreco.setShowVerticalLines(false);

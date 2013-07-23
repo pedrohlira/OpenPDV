@@ -1,6 +1,6 @@
 package br.com.openpdv.visao.core;
 
-import br.com.openpdv.controlador.comandos.ComandoCancelarCartao;
+import br.com.openpdv.controlador.comandos.ComandoCancelarPagamento;
 import br.com.openpdv.controlador.comandos.ComandoCancelarVenda;
 import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
@@ -363,7 +363,7 @@ public class Splash extends JFrame {
                                 if (!vendas.isEmpty()) {
                                     venda = vendas.get(0);
                                 }
-                                new ComandoCancelarCartao(venda.getEcfPagamentos(), true).executar();
+                                new ComandoCancelarPagamento(venda.getEcfPagamentos(), true).executar();
                                 Caixa.getInstancia().modoDisponivel();
                             }
                         }
@@ -520,13 +520,13 @@ public class Splash extends JFrame {
                     if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
                         splash.pgBarra.setString("Sincronizando com o servidor...");
                         try {
-                            Date recebimento = Util.getDataHora(PAF.AUXILIAR.getProperty("out.recebimento", null)); // ultimo recebimento
+                            Date recebimento = Util.getData(PAF.AUXILIAR.getProperty("out.recebimento", null)); // ultimo recebimento
                             if (recebimento == null || (atual.getTime() - recebimento.getTime()) / 86400000 > 0) { // maior que 1 dia em milisegundos
                                 new ComandoReceberDados().executar();
                             }
                         } catch (OpenPdvException ex) {
                             log.error("Nao conseguiu sincronizar com o servidor.", ex);
-                            JOptionPane.showMessageDialog(splash, "Nao conseguiu sincronizar com o servidor.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(splash, ex.getMessage(), "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                         }
                     } else {
                         splash.pgBarra.setString("Finalizado");

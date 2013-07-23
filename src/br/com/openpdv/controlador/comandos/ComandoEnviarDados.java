@@ -13,9 +13,7 @@ import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.phdss.controlador.PAF;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -35,7 +33,7 @@ public class ComandoEnviarDados implements IComando {
     private StringBuilder erros;
 
     public ComandoEnviarDados() {
-        this(Util.getDataHora(PAF.AUXILIAR.getProperty("out.envio", null)));
+        this(Util.getData(PAF.AUXILIAR.getProperty("out.envio", null)));
     }
 
     public ComandoEnviarDados(Date data) {
@@ -121,7 +119,7 @@ public class ComandoEnviarDados implements IComando {
         // se sucesso atualiza no arquivo a data do ultimo envio
         if (erros.length() == 0) {
             try {
-                PAF.AUXILIAR.setProperty("out.envio", Util.getDataHora(new Date()));
+                PAF.AUXILIAR.setProperty("out.envio", Util.getData(new Date()));
                 PAF.criptografar();
             } catch (Exception ex) {
                 throw new OpenPdvException("Erro ao salvar no arquivo auxiliar.\nVerifique o log do sistema.", ex);

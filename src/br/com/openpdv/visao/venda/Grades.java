@@ -86,8 +86,9 @@ public class Grades extends javax.swing.JDialog {
             }
         });
         tabGrade.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabGrade.setColumnSelectionAllowed(true);
+        tabGrade.setCellSelectionEnabled(false);
         tabGrade.setRowHeight(20);
+        tabGrade.setRowSelectionAllowed(true);
         tabGrade.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabGrade.setShowGrid(true);
         tabGrade.setShowVerticalLines(false);

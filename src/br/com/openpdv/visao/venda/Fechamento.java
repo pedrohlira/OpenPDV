@@ -66,14 +66,6 @@ public class Fechamento extends javax.swing.JDialog {
         log = Logger.getLogger(Fechamento.class);
         dtmPag = (DefaultTableModel) tabPagamentos.getModel();
         limite = Util.getConfig().get("tef.cartoes") != null ? Integer.valueOf(Util.getConfig().get("tef.cartoes")) : 1;
-
-        CoreService<EcfPagamentoTipo> service = new CoreService<>();
-        try {
-            tipos = service.selecionar(new EcfPagamentoTipo(), 0, 0, null);
-        } catch (OpenPdvException ex) {
-            log.error("Erro ao selecionar os tipo de pagamentos.", ex);
-            JOptionPane.showMessageDialog(fechamento, "Problemas ao carregar as formas de pagamentos.", "Fechar Venda", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     /**
@@ -85,6 +77,14 @@ public class Fechamento extends javax.swing.JDialog {
     public static Fechamento getInstancia(double total) {
         if (fechamento == null) {
             fechamento = new Fechamento();
+        }
+
+        CoreService<EcfPagamentoTipo> service = new CoreService<>();
+        try {
+            fechamento.tipos = service.selecionar(new EcfPagamentoTipo(), 0, 0, null);
+        } catch (OpenPdvException ex) {
+            fechamento.log.error("Erro ao selecionar os tipo de pagamentos.", ex);
+            JOptionPane.showMessageDialog(fechamento, "Problemas ao carregar as formas de pagamentos.", "Fechar Venda", JOptionPane.ERROR_MESSAGE);
         }
 
         fechamento.limpar();
@@ -107,10 +107,10 @@ public class Fechamento extends javax.swing.JDialog {
         btnDinheiro = new javax.swing.JButton();
         btnCartao = new javax.swing.JButton();
         btnCheque = new javax.swing.JButton();
-        btnOutros = new javax.swing.JButton();
+        btnTroca = new javax.swing.JButton();
+        btnPos = new javax.swing.JButton();
         btnAcres = new javax.swing.JButton();
         btnDesc = new javax.swing.JButton();
-        btnTroca = new javax.swing.JButton();
         spPagamentos = new javax.swing.JScrollPane();
         tabPagamentos = new javax.swing.JTable();
         lblPago = new javax.swing.JLabel();
@@ -163,7 +163,7 @@ public class Fechamento extends javax.swing.JDialog {
         btnCartao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnCartao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cartao.png"))); // NOI18N
         btnCartao.setText("<html><center><b>C</b>ARTÃO</center></html>");
-        btnCartao.setToolTipText("Pagamento com cartão. Atalho = C");
+        btnCartao.setToolTipText("Pagamento com cartão via TEF. Atalho = C");
         btnCartao.setMaximumSize(new java.awt.Dimension(100, 75));
         btnCartao.setMinimumSize(new java.awt.Dimension(100, 75));
         btnCartao.setPreferredSize(new java.awt.Dimension(100, 75));
@@ -198,22 +198,41 @@ public class Fechamento extends javax.swing.JDialog {
             }
         });
 
-        btnOutros.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        btnOutros.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/informacao.png"))); // NOI18N
-        btnOutros.setText("<html><center><b>O</b>UTROS</center></html>");
-        btnOutros.setToolTipText("Adicionar valor de troca. Atalho = T");
-        btnOutros.setMaximumSize(new java.awt.Dimension(100, 40));
-        btnOutros.setMinimumSize(new java.awt.Dimension(100, 40));
-        btnOutros.setPreferredSize(new java.awt.Dimension(100, 40));
-        btnOutros.setSize(new java.awt.Dimension(100, 40));
-        btnOutros.addActionListener(new java.awt.event.ActionListener() {
+        btnTroca.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnTroca.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sincroniza.png"))); // NOI18N
+        btnTroca.setText("<html><center><b>T</b>ROCA</center></html>");
+        btnTroca.setToolTipText("Adicionar valor de troca. Atalho = T");
+        btnTroca.setMaximumSize(new java.awt.Dimension(100, 40));
+        btnTroca.setMinimumSize(new java.awt.Dimension(100, 40));
+        btnTroca.setPreferredSize(new java.awt.Dimension(100, 40));
+        btnTroca.setSize(new java.awt.Dimension(100, 40));
+        btnTroca.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnOutrosActionPerformed(evt);
+                btnTrocaActionPerformed(evt);
             }
         });
-        btnOutros.addKeyListener(new java.awt.event.KeyAdapter() {
+        btnTroca.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                btnOutrosKeyPressed(evt);
+                btnTrocaKeyPressed(evt);
+            }
+        });
+
+        btnPos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnPos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/informacao.png"))); // NOI18N
+        btnPos.setText("<html><center><b>P</b>OS</center></html>");
+        btnPos.setToolTipText("Pagamento com cartão via POS. Atalho = P");
+        btnPos.setMaximumSize(new java.awt.Dimension(100, 40));
+        btnPos.setMinimumSize(new java.awt.Dimension(100, 40));
+        btnPos.setPreferredSize(new java.awt.Dimension(100, 40));
+        btnPos.setSize(new java.awt.Dimension(100, 40));
+        btnPos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPosActionPerformed(evt);
+            }
+        });
+        btnPos.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnPosKeyPressed(evt);
             }
         });
 
@@ -253,25 +272,6 @@ public class Fechamento extends javax.swing.JDialog {
         btnDesc.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 btnDescKeyPressed(evt);
-            }
-        });
-
-        btnTroca.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        btnTroca.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sincroniza.png"))); // NOI18N
-        btnTroca.setText("<html><center><b>T</b>ROCA</center></html>");
-        btnTroca.setToolTipText("Adicionar valor de troca. Atalho = T");
-        btnTroca.setMaximumSize(new java.awt.Dimension(100, 40));
-        btnTroca.setMinimumSize(new java.awt.Dimension(100, 40));
-        btnTroca.setPreferredSize(new java.awt.Dimension(100, 40));
-        btnTroca.setSize(new java.awt.Dimension(100, 40));
-        btnTroca.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnTrocaActionPerformed(evt);
-            }
-        });
-        btnTroca.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                btnTrocaKeyPressed(evt);
             }
         });
 
@@ -443,19 +443,21 @@ public class Fechamento extends javax.swing.JDialog {
                                         .add(lblPagoValor, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                     .add(org.jdesktop.layout.GroupLayout.LEADING, spPagamentos, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                                     .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
-                                        .add(btnAcres, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(btnDesc, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(btnTroca, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
-                                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                                            .add(btnCheque, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
-                                            .add(btnDinheiro, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                                            .add(btnCartao, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
-                                            .add(btnOutros, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                            .add(layout.createSequentialGroup()
+                                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                                                    .add(btnDinheiro, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
+                                                    .add(btnAcres, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                                                    .add(btnDesc, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                    .add(org.jdesktop.layout.GroupLayout.LEADING, btnCartao, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)))
+                                            .add(layout.createSequentialGroup()
+                                                .add(btnCheque, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 106, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                                .add(btnTroca, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 106, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                                .add(btnPos, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 90, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
                                         .add(0, 0, Short.MAX_VALUE)))
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(separador, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -482,13 +484,12 @@ public class Fechamento extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                             .add(btnCheque, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(btnOutros, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(btnTroca, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .add(btnPos, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(btnAcres, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                                .add(btnDesc, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .add(btnTroca, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                            .add(btnDesc, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(spPagamentos, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 104, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -596,7 +597,7 @@ public class Fechamento extends javax.swing.JDialog {
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             btnAcresActionPerformed(null);
         } else if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
-            btnOutros.requestFocus();
+            btnPos.requestFocus();
         } else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
             btnDesc.requestFocus();
         } else {
@@ -629,7 +630,7 @@ public class Fechamento extends javax.swing.JDialog {
         } else if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
             btnAcres.requestFocus();
         } else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
-            btnTroca.requestFocus();
+            btnCancelar.requestFocus();
         } else {
             atalhos(evt);
         }
@@ -652,17 +653,46 @@ public class Fechamento extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelarKeyPressed
 
     private void btnChequeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChequeActionPerformed
-        Object obj = JOptionPane.showInputDialog(this, "Digite o valor do pagamento.", "CHEQUE",
-                JOptionPane.OK_CANCEL_OPTION, btnCheque.getIcon(), null, Util.formataNumero(apagar.subtract(pago).doubleValue(), 1, 2, false));
-
-        if (obj != null) {
-            try {
-                String texto = obj.toString().replace(".", "").replace(",", ".");
-                BigDecimal valor = new BigDecimal(texto).setScale(2, RoundingMode.HALF_UP);
-                cheque(valor);
-            } catch (NumberFormatException nfe) {
-                JOptionPane.showMessageDialog(this, "Valor informado inválido!", "CHEQUE", JOptionPane.INFORMATION_MESSAGE);
+        boolean chequeTef = false;
+        if (Util.getConfig().get("tef.titulo") != null) {
+            for (EcfPagamentoTipo tipo : tipos) {
+                if (tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cheque"))) {
+                    chequeTef = tipo.isEcfPagamentoTipoTef();
+                }
             }
+        }
+
+        // verifica se e pra usar o TEF ou nao
+        if (chequeTef) {
+            Object obj = JOptionPane.showInputDialog(this, "Digite o valor do pagamento.", "CHEQUE",
+                    JOptionPane.OK_CANCEL_OPTION, btnCheque.getIcon(), null, Util.formataNumero(apagar.subtract(pago).doubleValue(), 1, 2, false));
+
+            if (obj != null) {
+                try {
+                    String texto = obj.toString().replace(".", "").replace(",", ".");
+                    BigDecimal valor = new BigDecimal(texto).setScale(2, RoundingMode.HALF_UP);
+                    cheque(valor);
+                } catch (NumberFormatException nfe) {
+                    JOptionPane.showMessageDialog(this, "Valor informado inválido!", "CHEQUE", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        } else {
+            AsyncCallback<EcfPagamento> async = new AsyncCallback<EcfPagamento>() {
+                @Override
+                public void sucesso(EcfPagamento resultado) {
+                    if (resultado != null) {
+                        dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, resultado.getEcfPagamentoValor(), true, resultado.getEcfPagamentoData(), resultado.getEcfPagamentoNsu(), ""});
+                        atualizar();
+                    }
+                }
+
+                @Override
+                public void falha(Exception excecao) {
+                    JOptionPane.showMessageDialog(fechamento, excecao.getMessage(), "Pagamento", JOptionPane.INFORMATION_MESSAGE);
+                }
+            };
+            Cheque cheque = Cheque.getInstancia(async, apagar.subtract(pago).doubleValue());
+            cheque.setVisible(true);
         }
     }//GEN-LAST:event_btnChequeActionPerformed
 
@@ -672,7 +702,7 @@ public class Fechamento extends javax.swing.JDialog {
         } else if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
             btnCartao.requestFocus();
         } else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
-            btnOutros.requestFocus();
+            btnTroca.requestFocus();
         } else {
             atalhos(evt);
         }
@@ -708,15 +738,15 @@ public class Fechamento extends javax.swing.JDialog {
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             btnTrocaActionPerformed(null);
         } else if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
-            btnDesc.requestFocus();
+            btnCheque.requestFocus();
         } else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
-            btnCancelar.requestFocus();
+            btnPos.requestFocus();
         } else {
             atalhos(evt);
         }
     }//GEN-LAST:event_btnTrocaKeyPressed
 
-    private void btnOutrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOutrosActionPerformed
+    private void btnPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPosActionPerformed
         AsyncCallback<EcfPagamento> async = new AsyncCallback<EcfPagamento>() {
             @Override
             public void sucesso(EcfPagamento resultado) {
@@ -733,21 +763,21 @@ public class Fechamento extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(fechamento, excecao.getMessage(), "Pagamento", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        Pagamento pagamento = Pagamento.getInstancia(async, apagar.subtract(pago).doubleValue());
-        pagamento.setVisible(true);
-    }//GEN-LAST:event_btnOutrosActionPerformed
+        Cartao cartao = Cartao.getInstancia(async, apagar.subtract(pago).doubleValue());
+        cartao.setVisible(true);
+    }//GEN-LAST:event_btnPosActionPerformed
 
-    private void btnOutrosKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnOutrosKeyPressed
+    private void btnPosKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnPosKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            btnOutrosActionPerformed(null);
+            btnPosActionPerformed(null);
         } else if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
-            btnCheque.requestFocus();
+            btnTroca.requestFocus();
         } else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
             btnAcres.requestFocus();
         } else {
             atalhos(evt);
         }
-    }//GEN-LAST:event_btnOutrosKeyPressed
+    }//GEN-LAST:event_btnPosKeyPressed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAcres;
     private javax.swing.JButton btnCancelar;
@@ -755,7 +785,7 @@ public class Fechamento extends javax.swing.JDialog {
     private javax.swing.JButton btnCheque;
     private javax.swing.JButton btnDesc;
     private javax.swing.JButton btnDinheiro;
-    private javax.swing.JButton btnOutros;
+    private javax.swing.JButton btnPos;
     private javax.swing.JButton btnTroca;
     private javax.swing.JCheckBox chkPresente;
     private javax.swing.JLabel lblPagar;
@@ -783,14 +813,14 @@ public class Fechamento extends javax.swing.JDialog {
             btnCartaoActionPerformed(null);
         } else if (e.getKeyCode() == KeyEvent.VK_H && btnCheque.isEnabled()) { // Cheque
             btnChequeActionPerformed(null);
-        } else if (e.getKeyCode() == KeyEvent.VK_O && btnOutros.isEnabled()) { // Outros
-            btnOutrosActionPerformed(null);
+        } else if (e.getKeyCode() == KeyEvent.VK_T && btnTroca.isEnabled()) { // Troca
+            btnTrocaActionPerformed(null);
+        } else if (e.getKeyCode() == KeyEvent.VK_P && btnPos.isEnabled()) { // Pos
+            btnPosActionPerformed(null);
         } else if (e.getKeyCode() == KeyEvent.VK_A && btnAcres.isEnabled()) { // Acrescimo
             btnAcresActionPerformed(null);
         } else if (e.getKeyCode() == KeyEvent.VK_E && btnDesc.isEnabled()) { // Desconto
             btnDescActionPerformed(null);
-        } else if (e.getKeyCode() == KeyEvent.VK_T && btnTroca.isEnabled()) { // Desconto
-            btnTrocaActionPerformed(null);
         } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && btnCancelar.isEnabled()) { // Cancelar
             cancelar();
         }
@@ -903,55 +933,45 @@ public class Fechamento extends javax.swing.JDialog {
      */
     private void cheque(final BigDecimal valor) {
         if ((limite == 1 && valor.compareTo(apagar.subtract(pago)) == 0) || (limite > 1 && valor.doubleValue() > 0.00 && valor.compareTo(apagar.subtract(pago)) <= 0)) {
-            for (EcfPagamentoTipo tipo : tipos) {
-                if (tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cheque"))) {
-                    if (tipo.isEcfPagamentoTipoTef()) {
-                        if (tefs < limite) {
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // chama o metodo do tef para operacao com cheque
-                                    try {
-                                        String id = TEF.gerarId();
-                                        TEF.consultarCheque(id, valor.doubleValue());
+            if (tefs < limite) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // chama o metodo do tef para operacao com cheque
+                        try {
+                            String id = TEF.gerarId();
+                            TEF.consultarCheque(id, valor.doubleValue());
 
-                                        Date data = new SimpleDateFormat("ddMMyyyyHHmmss").parse(TEF.getDados().get("022-000") + TEF.getDados().get("023-000"));
-                                        String nsu = TEF.getDados().get("012-000");
-                                        String arquivo = TEF.getPathTmp().getAbsolutePath() + System.getProperty("file.separator") + "pendente" + id + ".txt";
-                                        boolean confirmado = false;
+                            Date data = new SimpleDateFormat("ddMMyyyyHHmmss").parse(TEF.getDados().get("022-000") + TEF.getDados().get("023-000"));
+                            String nsu = TEF.getDados().get("012-000");
+                            String arquivo = TEF.getPathTmp().getAbsolutePath() + System.getProperty("file.separator") + "pendente" + id + ".txt";
+                            boolean confirmado = false;
 
-                                        // caso o pagamento seja menor que o total restante, podendo ter outro cartao
-                                        if (valor.compareTo(apagar.subtract(pago)) < 0) {
-                                            // confirma e gera o backup
-                                            FileUtils.copy(arquivo, arquivo.replace("pendente", "backup"));
-                                            arquivo = arquivo.replace("pendente", "backup");
-                                            String msg = TEF.getDados().get("030-000");
-                                            TEF.confirmarTransacao(id, true);
-                                            lblTEF.setText("TEF [" + msg + "]");
-                                            confirmado = true;
-                                        }
-                                        dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, valor.doubleValue(), confirmado, data, nsu, arquivo});
+                            // caso o pagamento seja menor que o total restante, podendo ter outro cartao
+                            if (valor.compareTo(apagar.subtract(pago)) < 0) {
+                                // confirma e gera o backup
+                                FileUtils.copy(arquivo, arquivo.replace("pendente", "backup"));
+                                arquivo = arquivo.replace("pendente", "backup");
+                                String msg = TEF.getDados().get("030-000");
+                                TEF.confirmarTransacao(id, true);
+                                lblTEF.setText("TEF [" + msg + "]");
+                                confirmado = true;
+                            }
+                            dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, valor.doubleValue(), confirmado, data, nsu, arquivo});
 
-                                        Aguarde.getInstancia().setVisible(false);
-                                        atualizar();
-                                    } catch (Exception ex) {
-                                        Aguarde.getInstancia().setVisible(false);
-                                        if (ex.getMessage() != null) {
-                                            JOptionPane.showMessageDialog(fechamento, ex.getMessage(), "TEF", JOptionPane.INFORMATION_MESSAGE);
-                                        }
-                                    }
-                                }
-                            }).start();
-                            Aguarde.getInstancia().setVisible(true);
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Máximo de " + limite + " pagamentos com TEF atingido!", "TEF", JOptionPane.INFORMATION_MESSAGE);
+                            Aguarde.getInstancia().setVisible(false);
+                            atualizar();
+                        } catch (Exception ex) {
+                            Aguarde.getInstancia().setVisible(false);
+                            if (ex.getMessage() != null) {
+                                JOptionPane.showMessageDialog(fechamento, ex.getMessage(), "TEF", JOptionPane.INFORMATION_MESSAGE);
+                            }
                         }
-                    } else {
-                        dtmPag.addRow(new Object[]{Util.getConfig().get("ecf.cheque"), "CHEQUE", false, valor.doubleValue(), true, new Date(), "", ""});
-                        atualizar();
                     }
-                    break;
-                }
+                }).start();
+                Aguarde.getInstancia().setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Máximo de " + limite + " pagamentos com TEF atingido!", "TEF", JOptionPane.INFORMATION_MESSAGE);
             }
         } else {
             String restante = Util.formataNumero(apagar.subtract(pago).doubleValue(), 1, 2, false);
@@ -1071,17 +1091,12 @@ public class Fechamento extends javax.swing.JDialog {
     private void limpar() {
         // botoes
         btnDinheiro.setEnabled(true);
-        if (Util.getConfig().get("tef.titulo") != null) {
-            btnCartao.setEnabled(true);
-            btnCheque.setEnabled(true);
-        } else {
-            btnCartao.setEnabled(false);
-            btnCheque.setEnabled(false);
-        }
-        btnOutros.setEnabled(true);
+        btnCartao.setEnabled(true);
+        btnCheque.setEnabled(true);
+        btnTroca.setEnabled(true);
+        btnPos.setEnabled(true);
         btnAcres.setEnabled(true);
         btnDesc.setEnabled(true);
-        btnTroca.setEnabled(true);
         btnCancelar.setEnabled(true);
         // pagamentos
         while (dtmPag.getRowCount() > 0) {
@@ -1155,10 +1170,10 @@ public class Fechamento extends javax.swing.JDialog {
         btnDinheiro.setEnabled(false);
         btnCartao.setEnabled(false);
         btnCheque.setEnabled(false);
-        btnOutros.setEnabled(false);
+        btnTroca.setEnabled(false);
+        btnPos.setEnabled(false);
         btnAcres.setEnabled(false);
         btnDesc.setEnabled(false);
-        btnTroca.setEnabled(false);
         btnCancelar.setEnabled(false);
 
         new Thread(new Runnable() {
@@ -1530,19 +1545,27 @@ public class Fechamento extends javax.swing.JDialog {
         this.btnTroca = btnTroca;
     }
 
-    public JButton getBtnOutros() {
-        return btnOutros;
-    }
-
-    public void setBtnOutros(JButton btnOutros) {
-        this.btnOutros = btnOutros;
-    }
-
     public JCheckBox getChkPresente() {
         return chkPresente;
     }
 
     public void setChkPresente(JCheckBox chkPresente) {
         this.chkPresente = chkPresente;
+    }
+
+    public String getObs() {
+        return obs;
+    }
+
+    public void setObs(String obs) {
+        this.obs = obs;
+    }
+
+    public JButton getBtnPos() {
+        return btnPos;
+    }
+
+    public void setBtnPos(JButton btnPos) {
+        this.btnPos = btnPos;
     }
 }

@@ -90,7 +90,7 @@ public class ComandoCancelarVenda implements IComando {
             // cancela os cartoes
             try {
                 if (Util.getConfig().get("tef.titulo") != null) {
-                    new ComandoCancelarCartao(venda.getEcfPagamentos(), auto).executar();
+                    new ComandoCancelarPagamento(venda.getEcfPagamentos(), auto).executar();
                 }
                 Caixa.getInstancia().modoDisponivel();
             } catch (OpenPdvException ex) {
@@ -159,13 +159,13 @@ public class ComandoCancelarVenda implements IComando {
             }
             valor += vp.getEcfVendaProdutoBruto();
         }
-        
+
         // remove a troca caso exista uma vinculada
         if (venda.getEcfTroca() != null) {
             FiltroNumero fn = new FiltroNumero("ecfTrocaId", ECompara.IGUAL, venda.getEcfTroca().getId());
             Sql sql = new Sql(venda.getEcfTroca(), EComandoSQL.EXCLUIR, fn);
             sqls.add(sql);
-            
+
             // atualiza o estoque
             for (EcfTrocaProduto tp : venda.getEcfTroca().getEcfTrocaProdutos()) {
                 // fatorando a quantida no estoque

@@ -29,9 +29,9 @@ import org.apache.log4j.Logger;
  *
  * @author Pedro H. Lira
  */
-public class Pagamento extends javax.swing.JDialog {
+public class Cartao extends javax.swing.JDialog {
 
-    private static Pagamento pagamento;
+    private static Cartao cartao;
     private Logger log;
     private CoreService service;
     private AsyncCallback<EcfPagamento> async;
@@ -40,9 +40,9 @@ public class Pagamento extends javax.swing.JDialog {
     /**
      * Construtor padrao.
      */
-    private Pagamento() {
+    private Cartao() {
         super(Caixa.getInstancia());
-        log = Logger.getLogger(Pagamento.class);
+        log = Logger.getLogger(Cartao.class);
         initComponents();
         service = new CoreService();
         carregaTipos();
@@ -54,19 +54,19 @@ public class Pagamento extends javax.swing.JDialog {
      * @param async objeto assincrono para resposta da acao.
      * @return o objeto de Gerente.
      */
-    public static Pagamento getInstancia(AsyncCallback<EcfPagamento> async, double total) {
-        if (pagamento == null) {
-            pagamento = new Pagamento();
+    public static Cartao getInstancia(AsyncCallback<EcfPagamento> async, double total) {
+        if (cartao == null) {
+            cartao = new Cartao();
         }
 
-        pagamento.cmbTipo.setSelectedIndex(-1);
-        pagamento.txtValor.setText(Util.formataNumero(total, 1, 2, true));
-        pagamento.spParcela.setValue(1);
-        pagamento.txtDoc.setText("");
-        pagamento.txtDoc.setDocument(new TextFieldLimit(10));
-        pagamento.async = async;
-        pagamento.total = total;
-        return pagamento;
+        cartao.cmbTipo.setSelectedIndex(-1);
+        cartao.txtValor.setValue(total);
+        cartao.spParcela.setValue(1);
+        cartao.txtDoc.setText("");
+        cartao.txtDoc.setDocument(new TextFieldLimit(10));
+        cartao.async = async;
+        cartao.total = total;
+        return cartao;
     }
 
     @SuppressWarnings("unchecked")
@@ -311,7 +311,7 @@ public class Pagamento extends javax.swing.JDialog {
             }
         } catch (OpenPdvException ex) {
             log.error("Nao conseguiu carregar os tipos -> ", ex);
-            JOptionPane.showMessageDialog(this, "Não foi possível carregar os tipos de pagamentos!", "Pagamento", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Não foi possível carregar os tipos de pagamentos!", "Cartão", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -388,7 +388,7 @@ public class Pagamento extends javax.swing.JDialog {
             setVisible(false);
             async.sucesso(pag);
         } else {
-            JOptionPane.showMessageDialog(null, "Deve-se informar todos os dados, ou dados errados!", "Pagamento", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Deve-se informar todos os dados, ou dados errados!", "Cartão", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -397,7 +397,7 @@ public class Pagamento extends javax.swing.JDialog {
      */
     private void cancelar() {
         setVisible(false);
-        async.falha(new OpenPdvException("Operação de pagamento cancelada!"));
+        async.falha(new OpenPdvException("Operação de cartão cancelada!"));
     }
 
     //GETs e SETs

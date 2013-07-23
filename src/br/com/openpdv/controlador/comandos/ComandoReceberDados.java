@@ -8,6 +8,7 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
+import br.com.openpdv.modelo.core.filtro.FiltroTexto;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
@@ -67,13 +68,15 @@ public class ComandoReceberDados implements IComando {
 
         // atualiza os clientes
         try {
-            Date daCli = (Date) service.buscar(new SisCliente(), "sisClienteData", EBusca.MAXIMO, null);
             wr = Util.getRest(Util.getConfig().get("sinc.host") + "/cliente");
-            List<SisCliente> clientes = wr.queryParam("data", daCli != null ? Util.getData(daCli) : "").accept(MediaType.APPLICATION_JSON).get(new GenericType<List<SisCliente>>() {
+            List<SisCliente> clientes = wr.queryParam("data", PAF.AUXILIAR.getProperty("out.recebimento")).accept(MediaType.APPLICATION_JSON).get(new GenericType<List<SisCliente>>() {
             });
 
             for (SisCliente cli : clientes) {
-                service.salvar(cli);
+                FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, cli.getSisClienteDoc().replaceAll("\\D", ""));
+                if (service.selecionar(cli, ft) == null) {
+                    service.salvar(cli);
+                }
             }
             log.info("Dados clientes recebidos -> " + clientes.size());
         } catch (Exception ex) {
@@ -291,7 +294,7 @@ public class ComandoReceberDados implements IComando {
         // se sucesso atualiza no arquivo a data do ultimo recebimento
         if (erros.length() == 0) {
             try {
-                PAF.AUXILIAR.setProperty("out.recebimento", Util.getDataHora(new Date()));
+                PAF.AUXILIAR.setProperty("out.recebimento", Util.getData(new Date()));
                 PAF.criptografar();
             } catch (Exception ex) {
                 throw new OpenPdvException("Erro ao salvar no arquivo auxiliar.\nVerifique o log do sistema.", ex);

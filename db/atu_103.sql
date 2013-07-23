@@ -23,7 +23,8 @@ CREATE TABLE ecf_troca (
   ecf_troca_cliente varchar(18) NOT NULL,
   ecf_troca_data datetime NOT NULL,
   ecf_troca_valor decimal(10,2) NOT NULL,
-  ecf_troca_ccf int(11) NOT NULL,
+  ecf_troca_ecf int(11) NOT NULL,
+  ecf_troca_coo int(11) NOT NULL,
   ecf_troca_ativo bit(1) NOT NULL,
   PRIMARY KEY (ecf_troca_id)
 );
@@ -35,7 +36,7 @@ CREATE TABLE ecf_troca_produto (
   prod_produto_id int(11) NOT NULL,
   prod_embalagem_id int(11) NOT NULL,
   ecf_troca_produto_barra varchar(14) NULL DEFAULT NULL,
-  ecf_troca_produto_quantidade decimal(10,3) NOT NULL,
+  ecf_troca_produto_quantidade decimal(10,4) NOT NULL,
   ecf_troca_produto_valor decimal(10,2) NOT NULL,
   ecf_troca_produto_total decimal(10,2) NOT NULL,
   ecf_troca_produto_ordem int(11) NOT NULL,
@@ -48,3 +49,10 @@ CREATE TABLE ecf_troca_produto (
 /* Adicionando o campo de troca a venda, para caso a mesma tenha alguma vinculada */
 ALTER TABLE ecf_venda ADD COLUMN ecf_troca_id int(11) DEFAULT NULL BEFORE ecf_venda_ccf;
 ALTER TABLE ecf_venda ADD CONSTRAINT FK_ecf_venda_6 FOREIGN KEY (ecf_troca_id) REFERENCES ecf_troca (ecf_troca_id) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+/* Alterando o campo de quantidade para decimal com 4 casas */
+ALTER TABLE ecf_nota_produto ALTER COLUMN ecf_nota_produto_quantidade decimal(10,4) NOT NULL;
+
+/* Alterando o tamanho dos campos de nsu, para suportar a barra dos cheques */
+ALTER TABLE ecf_pagamento ALTER COLUMN ecf_pagamento_nsu varchar(32) NOT NULL;
+ALTER TABLE ecf_pagamento_parcela ALTER COLUMN ecf_pagamento_parcela_nsu varchar(32) NOT NULL;

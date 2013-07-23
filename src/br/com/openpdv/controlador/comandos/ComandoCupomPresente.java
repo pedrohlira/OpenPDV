@@ -80,10 +80,10 @@ public class ComandoCupomPresente implements IComando {
 
             // dados da venda
             sb.append("<N>Venda: </N>").append(new SimpleDateFormat("dd/MM/yyyy").format(venda.getEcfVendaData()));
-            sb.append("  CCF: ").append(Util.formataNumero(venda.getEcfVendaCcf(), 6, 0, false));
-            sb.append("  COO: ").append(Util.formataNumero(venda.getEcfVendaCoo(), 6, 0, false));
+            sb.append(" CCF: ").append(Util.formataNumero(venda.getEcfVendaCcf(), 6, 0, false));
+            sb.append(" COO: ").append(Util.formataNumero(venda.getEcfVendaCoo(), 6, 0, false));
             sb.append(ECF.SL);
-            sb.append("ITEM CÓDIGO         DESCRIÇÃO               QTD.").append(ECF.SL);
+            sb.append("ITEM CODIGO         DESCRICAO               QTD.").append(ECF.SL);
             sb.append(ECF.LS);
 
             // dados dos produtos
@@ -113,7 +113,7 @@ public class ComandoCupomPresente implements IComando {
 
             // rodape
             sb.append(ECF.LD).append(ECF.SL);
-            sb.append("<CE><N>").append(Util.getConfig().get("ecf.msgpresente")).append("</N></CE>").append(ECF.SL);
+            sb.append(Util.getConfig().get("ecf.msgpresente")).append(ECF.SL);
             sb.append(ECF.LD).append(ECF.SL);
 
             // envia o comando com todo o texto

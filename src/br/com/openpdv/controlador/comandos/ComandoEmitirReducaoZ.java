@@ -322,17 +322,13 @@ public class ComandoEmitirReducaoZ implements IComando {
 
         // procura por uma Reducao Z no mes que esta o ECF
         FiltroData fd = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, cal.getTime());
-        List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, fd);
+        List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 1, fd);
         if (zs.isEmpty()) {
-            // somente gera caso tenha algum registro de Z.
-            zs = service.selecionar(new EcfZ(), 0, 1, null);
-            if (!zs.isEmpty()) {
-                cal.add(Calendar.MONTH, - 1);
-                String inicio = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
-                cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-                String fim = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
-                PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
-            }
+            cal.add(Calendar.MONTH, - 1);
+            String inicio = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
+            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+            String fim = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
+            PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
         }
     }
 

@@ -507,7 +507,7 @@ public class Trocas extends javax.swing.JDialog {
                         .add(lblCOO)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtCOO, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 75, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .add(26, 26, 26))
+                .add(14, 14, 14))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -545,7 +545,7 @@ public class Trocas extends javax.swing.JDialog {
         );
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-596)/2, (screenSize.height-510)/2, 596, 510);
+        setBounds((screenSize.width-586)/2, (screenSize.height-485)/2, 586, 485);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEcxluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEcxluirActionPerformed

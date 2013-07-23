@@ -73,8 +73,8 @@ public class ComandoFecharVenda implements IComando {
             fecharVendaBanco();
             // salva o documento para relatorio
             new ComandoSalvarDocumento("RV").executar();
-            // imprime os cartoes se tiver
-            new ComandoImprimirCartao(pagamentos).executar();
+            // salva os pagamentos
+            new ComandoSalvarPagamento(pagamentos).executar();
             // coloca na tela
             fecharVendaTela();
             TEF.bloquear(false);
