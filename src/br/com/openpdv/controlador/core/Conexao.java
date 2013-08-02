@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
  */
 public class Conexao {
 
-    private static final Properties dados = new Properties();
+    public static final Properties DADOS = new Properties();
     private static final Logger log = Logger.getLogger(Conexao.class);
 
     /**
@@ -22,10 +22,10 @@ public class Conexao {
     static {
         // descriptografando os dados de acesso do BD
         try {
-            PAF.descriptografar("db" + System.getProperty("file.separator") + "banco.txt", dados);
+            PAF.descriptografar("db" + System.getProperty("file.separator") + "banco.txt", DADOS);
             // arrumando a url do banco
-            String url = dados.getProperty("eclipselink.jdbc.url", "").replace("+", "=");
-            dados.setProperty("eclipselink.jdbc.url", url);
+            String url = DADOS.getProperty("eclipselink.jdbc.url", "").replace("+", "=");
+            DADOS.setProperty("eclipselink.jdbc.url", url);
         } catch (Exception ex) {
             log.error(ex);
         }
@@ -55,7 +55,7 @@ public class Conexao {
      * @throws Exception dispara caso nao consiga conectar.
      */
     public static EntityManagerFactory getInstancia(String pu) throws Exception {
-        return getInstancia(pu, dados);
+        return getInstancia(pu, DADOS);
     }
 
     /**

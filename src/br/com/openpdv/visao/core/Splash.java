@@ -17,7 +17,6 @@ import br.com.phdss.ECF;
 import br.com.phdss.EComandoECF;
 import br.com.phdss.TEF;
 import br.com.phdss.controlador.PAF;
-import br.com.phdss.modelo.anexo.x.*;
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -30,7 +29,6 @@ import java.io.FilenameFilter;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -180,32 +178,34 @@ public class Splash extends JFrame {
                     service = new CoreService();
 
                     // realiza o backup do banco se preciso for
-                    String back = Util.getConfig().get("openpdv.backup");
-                    if (back == null || back.equals("")) {
-                        back = "db/";
-                    }
+                    if (Conexao.DADOS.getProperty("eclipselink.jdbc.driver").contains("h2")) {
+                        String back = Util.getConfig().get("openpdv.backup");
+                        if (back == null || back.equals("")) {
+                            back = "db/";
+                        }
 
-                    String periodo = Util.getConfig().get("openpdv.backup.periodo");
-                    if (back == null || back.equals("")) {
-                        periodo = "mes";
-                    }
+                        String periodo = Util.getConfig().get("openpdv.backup.periodo");
+                        if (back == null || back.equals("")) {
+                            periodo = "mes";
+                        }
 
-                    SimpleDateFormat sdf;
-                    switch (periodo) {
-                        case "dia":
-                            sdf = new SimpleDateFormat("DDyyyy");
-                            break;
-                        case "semana":
-                            sdf = new SimpleDateFormat("wwyyyy");
-                            break;
-                        default:
-                            sdf = new SimpleDateFormat("MMyyyy");
-                            break;
-                    }
-                    back += String.format("backup_%s.zip", sdf.format(new Date()));
-                    File arquivo = new File(back);
-                    if (!arquivo.exists()) {
-                        service.executar("BACKUP TO '" + back + "'");
+                        SimpleDateFormat sdf;
+                        switch (periodo) {
+                            case "dia":
+                                sdf = new SimpleDateFormat("DDyyyy");
+                                break;
+                            case "semana":
+                                sdf = new SimpleDateFormat("wwyyyy");
+                                break;
+                            default:
+                                sdf = new SimpleDateFormat("MMyyyy");
+                                break;
+                        }
+                        back += String.format("backup_%s.zip", sdf.format(new Date()));
+                        File arquivo = new File(back);
+                        if (!arquivo.exists()) {
+                            service.executar("BACKUP TO '" + back + "'");
+                        }
                     }
                     splash.pgBarra.setValue(10);
                 } catch (Exception ex) {
