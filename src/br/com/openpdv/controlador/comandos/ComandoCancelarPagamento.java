@@ -4,8 +4,6 @@ import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
-import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
 import br.com.phdss.TEF;
 import java.util.Date;
 import java.util.List;

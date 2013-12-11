@@ -1,7 +1,5 @@
 package br.com.openpdv.visao.core;
 
-import br.com.openpdv.controlador.comandos.ComandoCancelarPagamento;
-import br.com.openpdv.controlador.comandos.ComandoCancelarVenda;
 import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
 import br.com.openpdv.controlador.core.Conexao;
@@ -11,11 +9,11 @@ import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
-import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.phdss.ECF;
 import br.com.phdss.EComandoECF;
 import br.com.phdss.TEF;
+import static br.com.phdss.TEF.lerArquivo;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
@@ -31,7 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -185,7 +183,7 @@ public class Splash extends JFrame {
                         }
 
                         String periodo = Util.getConfig().get("openpdv.backup.periodo");
-                        if (back == null || back.equals("")) {
+                        if (periodo == null || periodo.equals("")) {
                             periodo = "mes";
                         }
 
@@ -214,8 +212,8 @@ public class Splash extends JFrame {
                     System.exit(0);
                 }
 
-                // ativando o RESTful server, caso esteja configurado como localhost
-                if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+                // ativando o RESTful server, caso esteja configurado como localhost e rest
+                if (Util.getConfig().get("sinc.tipo").equals("rest") && Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
                     try {
                         splash.pgBarra.setString("Iniciando o serviço RESTful...");
                         URI uri = UriBuilder.fromUri(Util.getConfig().get("sinc.servidor")).port(Integer.valueOf(Util.getConfig().get("sinc.porta"))).build();
@@ -341,36 +339,39 @@ public class Splash extends JFrame {
                 }
 
                 // validacao do TEF
-                TEF.setTEF(Util.getConfig());
-                splash.pgBarra.setString("Validando o TEF...");
-                splash.pgBarra.setValue(60);
-                if (Util.getConfig().get("tef.titulo") != null) {
+                if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
+                    TEF.setTEF(Util.getConfig());
+                    splash.pgBarra.setString("Validando o TEF...");
+                    splash.pgBarra.setValue(60);
                     while (!TEF.gpAtivo()) {
                         JOptionPane.showMessageDialog(splash, "Gerenciador Padrão não está ativo!\nPor favor ative-o para continuar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     }
-                    // cancelando pendentes do TEF.
-                    try {
-                        splash.pgBarra.setString("Cancelando os TEF pendentes...");
-                        File resp = new File(TEF.getRespIntPos001());
-                        if (resp.exists() || TEF.getPathTmp().listFiles(TEF.getFiltro()).length > 0) {
-                            // tenta cancelar a venda, caso ela já esteja cancelada, cancela somente o TEF
-                            try {
-                                new ComandoCancelarVenda(true).executar();
-                            } catch (Exception ex) {
-                                log.error("Venda ja estava cancelada.", ex);
-                                EcfVenda venda = null;
-                                List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
-                                if (!vendas.isEmpty()) {
-                                    venda = vendas.get(0);
+
+                    if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
+                        try {
+                            String arquivo = lerArquivo(TEF.getRespIntPos001(), 0);
+                            boolean pendente = false;
+                            if (arquivo != null) {
+                                Map<String, String> mapa = TEF.iniToMap(arquivo);
+                                pendente = !(mapa.get("000-000").equals("ATV") || mapa.get("000-000").equals("ADM"));
+                            }
+                            if (pendente || TEF.getPathTmp().listFiles(TEF.getFiltro()).length > 0) {
+                                int opt = JOptionPane.showConfirmDialog(splash, "O sistema identificou problemas no último TEF!\nO sistema irá cancelar a última operação!\nDeseja realizar este procedimento?", "OpenPDV", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                                if (opt == JOptionPane.YES_OPTION) {
+                                    // cancela somente o TEF
+                                    splash.pgBarra.setString("Cancelando os TEF pendentes...");
+                                    TEF.cancelarPendentes(true);
                                 }
-                                new ComandoCancelarPagamento(venda.getEcfPagamentos(), true).executar();
-                                Caixa.getInstancia().modoDisponivel();
+                            }
+                        } catch (Exception ex) {
+                            log.error("Problemas ao cancelar pendentes do TEF", ex);
+                            JOptionPane.showMessageDialog(splash, "Problemas ao cancelar pendentes do TEF.\nCaso precise, estorne os cartões pelo ADM.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        } finally {
+                            TEF.deletarArquivo(TEF.getRespIntPos001());
+                            for (File arquivo : TEF.getPathTmp().listFiles(TEF.getFiltro())) {
+                                arquivo.delete();
                             }
                         }
-                    } catch (Exception ex) {
-                        log.error("Problemas ao cancelar pendentes do TEF", ex);
-                        JOptionPane.showMessageDialog(splash, "Problemas ao cancelar pendentes do TEF.\nRemova os arquivos pendentes e estorne pelo ADM.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
-                        System.exit(0);
                     }
                 }
 
@@ -470,8 +471,7 @@ public class Splash extends JFrame {
                     caixa.getMnuNota().setEnabled(false);
                     caixa.getMnuPesquisa().setEnabled(false);
                     JOptionPane.showMessageDialog(splash, "ATENCÃO: O OpenPDV está com a data de validade vencida!\n\n"
-                            + "Favor entre no menu Sobre - F1 e valide o sistema novamente.\n"
-                            + "Caso não consiga re-validar pela internet, entre em contato.\n\n"
+                            + "Favor entre no menu Sobre - F1 e clique no botão Validar Sistema.\n\n"
                             + "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                 }
 
@@ -518,19 +518,18 @@ public class Splash extends JFrame {
                     // verifica se precisa sincronizar
                     splash.pgBarra.setValue(100);
                     if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
-                        splash.pgBarra.setString("Sincronizando com o servidor...");
                         try {
                             Date recebimento = Util.getData(PAF.AUXILIAR.getProperty("out.recebimento", null)); // ultimo recebimento
                             if (recebimento == null || (atual.getTime() - recebimento.getTime()) / 86400000 > 0) { // maior que 1 dia em milisegundos
-                                new ComandoReceberDados().executar();
+                                splash.pgBarra.setString("Sincronizando com o servidor...");
+                                ComandoReceberDados.getInstancia().executar();
                             }
                         } catch (OpenPdvException ex) {
                             log.error("Nao conseguiu sincronizar com o servidor.", ex);
                             JOptionPane.showMessageDialog(splash, ex.getMessage(), "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
                         }
-                    } else {
-                        splash.pgBarra.setString("Finalizado");
                     }
+                    splash.pgBarra.setString("Finalizado");
                 } else if (autorizado) {
                     login = false;
                     caixa.modoIndisponivel();

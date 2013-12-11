@@ -1,6 +1,6 @@
 package br.com.openpdv.visao.venda;
 
-import br.com.openpdv.controlador.core.AsyncCallback;
+import br.com.openpdv.controlador.core.AsyncDoubleBack;
 import br.com.openpdv.controlador.core.TableCellRendererNumber;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
@@ -20,7 +20,8 @@ public class Precos extends javax.swing.JDialog {
 
     private static Precos precos;
     private DefaultTableModel dtm;
-    private AsyncCallback<ProdPreco> async;
+    private ProdProduto produto;
+    private AsyncDoubleBack<ProdProduto, ProdPreco> async;
 
     /**
      * Construtor padrao.
@@ -37,14 +38,15 @@ public class Precos extends javax.swing.JDialog {
      * @param produto o produto pesquisado.
      * @return o objeto de Precos.
      */
-    public static Precos getInstancia(AsyncCallback<ProdPreco> async, ProdProduto produto) {
+    public static Precos getInstancia(AsyncDoubleBack<ProdProduto, ProdPreco> async, ProdProduto produto) {
         if (precos == null) {
             precos = new Precos();
         }
 
         precos.dtm = (DefaultTableModel) precos.tabPreco.getModel();
         precos.async = async;
-        precos.setLista(produto);
+        precos.produto = produto;
+        precos.setLista();
         return precos;
     }
 
@@ -141,7 +143,7 @@ public class Precos extends javax.swing.JDialog {
     /**
      * Metodo que seta os valores dos precos disponiveis.
      */
-    private void setLista(ProdProduto produto) {
+    private void setLista() {
         // limpa
         while (dtm.getRowCount() > 0) {
             dtm.removeRow(0);
@@ -170,23 +172,13 @@ public class Precos extends javax.swing.JDialog {
     }
 
     /**
-     * Metodo que cancela o registro.
-     */
-    private void cancelar() {
-        setVisible(false);
-        async.sucesso(null);
-        Caixa.getInstancia().setJanela(null);
-        dispose();
-    }
-
-    /**
      * Metodo que seleciona o preco.
      */
     private void ok() {
         int row = tabPreco.convertRowIndexToModel(tabPreco.getSelectedRow());
         if (row >= 0) {
             setVisible(false);
-            async.sucesso((ProdPreco) tabPreco.getModel().getValueAt(row, 0));
+            async.sucesso(produto, (ProdPreco) tabPreco.getModel().getValueAt(row, 0));
             Caixa.getInstancia().setJanela(null);
             dispose();
         }
@@ -201,11 +193,11 @@ public class Precos extends javax.swing.JDialog {
         this.dtm = dtm;
     }
 
-    public AsyncCallback<ProdPreco> getAsync() {
+    public AsyncDoubleBack<ProdProduto, ProdPreco> getAsync() {
         return async;
     }
 
-    public void setAsync(AsyncCallback<ProdPreco> async) {
+    public void setAsync(AsyncDoubleBack<ProdProduto, ProdPreco> async) {
         this.async = async;
     }
 

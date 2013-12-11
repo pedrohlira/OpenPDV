@@ -34,7 +34,7 @@ CREATE TABLE `sis_usuario` (
   `sis_usuario_gerente` bit(1) NOT NULL,
   PRIMARY KEY (`sis_usuario_id`),
   UNIQUE KEY `UK_sis_usuario_1` (`sis_usuario_login`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +62,7 @@ CREATE TABLE `ibpt` (
   `ibpt_aliqNac` decimal(10,2) NOT NULL,
   `ibpt_aliqImp` decimal(10,2) NOT NULL,
   `ibpt_versao` varchar(5) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,7 +94,7 @@ CREATE TABLE `ecf_impressora` (
   `ecf_impressora_caixa` int(3) NOT NULL,
   `ecf_impressora_ativo` bit(1) NOT NULL,
   PRIMARY KEY (`ecf_impressora_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,7 +119,7 @@ CREATE TABLE `prod_grade_tipo` (
   `prod_grade_tipo_nome` varchar(50) NOT NULL,
   `prod_grade_tipo_opcao` char(1) NOT NULL,
   PRIMARY KEY (`prod_grade_tipo_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -141,14 +141,16 @@ DROP TABLE IF EXISTS `ecf_troca`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ecf_troca` (
   `ecf_troca_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ecf_venda_id` int(11) DEFAULT NULL,
   `ecf_troca_cliente` varchar(18) NOT NULL,
   `ecf_troca_data` datetime NOT NULL,
   `ecf_troca_valor` decimal(10,2) NOT NULL,
   `ecf_troca_ecf` int(11) NOT NULL,
   `ecf_troca_coo` int(11) NOT NULL,
   `ecf_troca_ativo` bit(1) NOT NULL,
-  PRIMARY KEY (`ecf_troca_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`ecf_troca_id`),
+  CONSTRAINT `FK_ecf_troca_1` FOREIGN KEY (`ecf_venda_id`) REFERENCES `ecf_venda` (`ecf_venda_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,7 +178,7 @@ CREATE TABLE `sis_municipio` (
   UNIQUE KEY `UK_sis_municipio_1` (`sis_municipio_ibge`),
   KEY `FK_sis_municipio_1` (`sis_estado_id`),
   CONSTRAINT `FK_sis_municipio_1` FOREIGN KEY (`sis_estado_id`) REFERENCES `sis_estado` (`sis_estado_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=5565 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -213,7 +215,7 @@ CREATE TABLE `ecf_troca_produto` (
   CONSTRAINT `FK_ecf_troca_produto_1` FOREIGN KEY (`ecf_troca_id`) REFERENCES `ecf_troca` (`ecf_troca_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_ecf_troca_produto_2` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_troca_produto_3` FOREIGN KEY (`prod_embalagem_id`) REFERENCES `prod_embalagem` (`prod_embalagem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -240,7 +242,7 @@ CREATE TABLE `ecf_z_totais` (
   PRIMARY KEY (`ecf_z_totais_id`),
   UNIQUE KEY `UK_ecf_z_totais_1` (`ecf_z_id`,`ecf_z_totais_codigo`),
   CONSTRAINT `FK_z_totais_1` FOREIGN KEY (`ecf_z_id`) REFERENCES `ecf_z` (`ecf_z_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -278,7 +280,7 @@ CREATE TABLE `ecf_pagamento` (
   KEY `FK_ecf_pagamento_2` (`ecf_pagamento_tipo_id`),
   CONSTRAINT `FK_ecf_pagamento_1` FOREIGN KEY (`ecf_venda_id`) REFERENCES `ecf_venda` (`ecf_venda_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_pagamento_2` FOREIGN KEY (`ecf_pagamento_tipo_id`) REFERENCES `ecf_pagamento_tipo` (`ecf_pagamento_tipo_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -312,7 +314,7 @@ CREATE TABLE `prod_composicao` (
   CONSTRAINT `FK_prod_composicao_1` FOREIGN KEY (`prod_produto_principal`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_prod_composicao_2` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_prod_composicao_3` FOREIGN KEY (`prod_embalagem_id`) REFERENCES `prod_embalagem` (`prod_embalagem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,7 +341,7 @@ CREATE TABLE `prod_embalagem` (
   `prod_embalagem_unidade` int(11) NOT NULL,
   PRIMARY KEY (`prod_embalagem_id`),
   UNIQUE KEY `UK_prod_embalagem_1` (`prod_embalagem_nome`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -370,7 +372,7 @@ CREATE TABLE `prod_preco` (
   KEY `FK_prod_preco_2` (`prod_embalagem_id`),
   CONSTRAINT `FK_prod_preco_1` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_prod_preco_2` FOREIGN KEY (`prod_embalagem_id`) REFERENCES `prod_embalagem` (`prod_embalagem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -397,7 +399,7 @@ CREATE TABLE `sis_estado` (
   `sis_estado_sigla` char(2) NOT NULL,
   PRIMARY KEY (`sis_estado_id`),
   UNIQUE KEY `UK_sis_estado_1` (`sis_estado_ibge`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -437,7 +439,7 @@ CREATE TABLE `ecf_nota_produto` (
   CONSTRAINT `FK_ecf_nota_produto_1` FOREIGN KEY (`ecf_nota_id`) REFERENCES `ecf_nota` (`ecf_nota_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_nota_produto_2` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_nota_produto_3` FOREIGN KEY (`prod_embalagem_id`) REFERENCES `prod_embalagem` (`prod_embalagem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -477,7 +479,7 @@ CREATE TABLE `ecf_nota_eletronica` (
   UNIQUE KEY `UK_ecf_nota_eletronica_1` (`ecf_nota_eletronica_chave`),
   KEY `FK_ecf_nota_eletronica_1` (`sis_cliente_id`),
   CONSTRAINT `FK_ecf_nota_eletronica_1` FOREIGN KEY (`sis_cliente_id`) REFERENCES `sis_cliente` (`sis_cliente_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -516,7 +518,7 @@ CREATE TABLE `sis_empresa` (
   PRIMARY KEY (`sis_empresa_id`),
   KEY `FK_sis_empresa_1` (`sis_municipio_id`),
   CONSTRAINT `FK_sis_empresa_1` FOREIGN KEY (`sis_municipio_id`) REFERENCES `sis_municipio` (`sis_municipio_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -545,7 +547,7 @@ CREATE TABLE `ecf_pagamento_totais` (
   PRIMARY KEY (`ecf_pagamento_totais_id`),
   KEY `FK_ecf_pagamento_totais_1` (`ecf_pagamento_tipo_id`),
   CONSTRAINT `FK_ecf_pagamento_totais_1` FOREIGN KEY (`ecf_pagamento_tipo_id`) REFERENCES `ecf_pagamento_tipo` (`ecf_pagamento_tipo_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -590,7 +592,7 @@ CREATE TABLE `ecf_venda_produto` (
   CONSTRAINT `FK_ecf_venda_produto_1` FOREIGN KEY (`ecf_venda_id`) REFERENCES `ecf_venda` (`ecf_venda_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_venda_produto_2` FOREIGN KEY (`prod_embalagem_id`) REFERENCES `prod_embalagem` (`prod_embalagem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_venda_produto_3` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -616,8 +618,8 @@ CREATE TABLE `ecf_venda` (
   `sis_vendedor_id` int(11) DEFAULT NULL,
   `sis_gerente_id` int(11) DEFAULT NULL,
   `sis_cliente_id` int(11) DEFAULT NULL,
+  `ecf_impressora_id` int(11) NOT NULL,
   `ecf_z_id` int(11) DEFAULT NULL,
-  `ecf_troca_id` int(11) DEFAULT NULL,
   `ecf_venda_ccf` int(6) NOT NULL,
   `ecf_venda_coo` int(6) NOT NULL,
   `ecf_venda_data` datetime NOT NULL,
@@ -627,6 +629,7 @@ CREATE TABLE `ecf_venda` (
   `ecf_venda_liquido` decimal(10,2) NOT NULL,
   `ecf_venda_fechada` bit(1) NOT NULL,
   `ecf_venda_cancelada` bit(1) NOT NULL,
+  `ecf_venda_sinc` bit(1) NOT NULL,
   `ecf_venda_observacao` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`ecf_venda_id`),
   KEY `FK_ecf_venda_1` (`sis_usuario_id`),
@@ -634,14 +637,14 @@ CREATE TABLE `ecf_venda` (
   KEY `FK_ecf_venda_3` (`sis_cliente_id`),
   KEY `FK_ecf_venda_4` (`sis_vendedor_id`),
   KEY `FK_ecf_venda_5` (`sis_gerente_id`),
-  KEY `FK_ecf_venda_6` (`ecf_troca_id`),
+  KEY `FK_ecf_venda_6` (`ecf_impressora_id`),
   CONSTRAINT `FK_ecf_venda_1` FOREIGN KEY (`sis_usuario_id`) REFERENCES `sis_usuario` (`sis_usuario_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_venda_2` FOREIGN KEY (`ecf_z_id`) REFERENCES `ecf_z` (`ecf_z_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_venda_3` FOREIGN KEY (`sis_cliente_id`) REFERENCES `sis_cliente` (`sis_cliente_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_venda_4` FOREIGN KEY (`sis_vendedor_id`) REFERENCES `sis_usuario` (`sis_usuario_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_ecf_venda_5` FOREIGN KEY (`sis_gerente_id`) REFERENCES `sis_usuario` (`sis_usuario_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_ecf_venda_6` FOREIGN KEY (`ecf_troca_id`) REFERENCES `ecf_troca` (`ecf_troca_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+  CONSTRAINT `FK_ecf_venda_6` FOREIGN KEY (`ecf_impressora_id`) REFERENCES `ecf_impressora` (`ecf_impressora_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -678,7 +681,7 @@ CREATE TABLE `sis_cliente` (
   PRIMARY KEY (`sis_cliente_id`),
   KEY `FK_sis_cliente_1` (`sis_municipio_id`),
   CONSTRAINT `FK_sis_cliente_1` FOREIGN KEY (`sis_municipio_id`) REFERENCES `sis_municipio` (`sis_municipio_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -714,7 +717,7 @@ CREATE TABLE `ecf_z` (
   PRIMARY KEY (`ecf_z_id`),
   KEY `FK_ecf_z_1` (`ecf_impressora_id`),
   CONSTRAINT `FK_ecf_z_1` FOREIGN KEY (`ecf_impressora_id`) REFERENCES `ecf_impressora` (`ecf_impressora_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -751,7 +754,7 @@ CREATE TABLE `ecf_nota` (
   UNIQUE KEY `UK_ecf_nota_1` (`ecf_nota_serie`,`ecf_nota_subserie`,`ecf_nota_numero`),
   KEY `FK_ecf_nota_1` (`sis_cliente_id`),
   CONSTRAINT `FK_ecf_nota_1` FOREIGN KEY (`sis_cliente_id`) REFERENCES `sis_cliente` (`sis_cliente_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -801,7 +804,7 @@ CREATE TABLE `prod_produto` (
   KEY `IK_prod_produto_7` (`prod_produto_alterado`),
   KEY `IK_prod_produto_8` (`prod_produto_ativo`),
   CONSTRAINT `FK_prod_produto_1` FOREIGN KEY (`prod_embalagem_id`) REFERENCES `prod_embalagem` (`prod_embalagem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -832,7 +835,7 @@ CREATE TABLE `prod_grade` (
   PRIMARY KEY (`prod_grade_id`),
   KEY `FK_prod_grade_1` (`prod_produto_id`),
   CONSTRAINT `FK_prod_grade_1` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -861,7 +864,7 @@ CREATE TABLE `ecf_pagamento_parcela` (
   PRIMARY KEY (`ecf_pagamento_parcela_id`),
   KEY `FK_ecf_pagamento_parcela_1` (`ecf_pagamento_id`),
   CONSTRAINT `FK_ecf_pagamento_parcela_1` FOREIGN KEY (`ecf_pagamento_id`) REFERENCES `ecf_pagamento` (`ecf_pagamento_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -883,6 +886,7 @@ DROP TABLE IF EXISTS `ecf_documento`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `ecf_documento` (
   `ecf_documento_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ecf_z_id` int(11) DEFAULT NULL,
   `ecf_impressora_id` int(11) NOT NULL,
   `ecf_documento_usuario` int(11) NOT NULL,
   `ecf_documento_coo` int(11) NOT NULL,
@@ -893,8 +897,9 @@ CREATE TABLE `ecf_documento` (
   `ecf_documento_data` datetime NOT NULL,
   PRIMARY KEY (`ecf_documento_id`),
   KEY `FK_ecf_documento_1` (`ecf_impressora_id`),
-  CONSTRAINT `FK_ecf_documento_1` FOREIGN KEY (`ecf_impressora_id`) REFERENCES `ecf_impressora` (`ecf_impressora_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+  CONSTRAINT `FK_ecf_documento_1` FOREIGN KEY (`ecf_impressora_id`) REFERENCES `ecf_impressora` (`ecf_impressora_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_ecf_documento_2` FOREIGN KEY (`ecf_z_id`) REFERENCES `ecf_z` (`ecf_z_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -923,7 +928,7 @@ CREATE TABLE `ecf_pagamento_tipo` (
   `ecf_pagamento_tipo_debito` bit(1) NOT NULL,
   `ecf_pagamento_tipo_rede` varchar(20) NOT NULL,
   PRIMARY KEY (`ecf_pagamento_tipo_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

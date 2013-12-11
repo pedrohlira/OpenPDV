@@ -1,5 +1,6 @@
 package br.com.openpdv.modelo.produto;
 
+import br.com.openpdv.modelo.Ibpt;
 import br.com.openpdv.modelo.core.Colecao;
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.core.ELetra;
@@ -67,6 +68,9 @@ public class ProdProduto extends Dados implements Serializable {
     private List<ProdComposicao> prodComposicoes;
     @OneToMany(mappedBy = "prodProduto", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<ProdGrade> prodGrades;
+    @JoinColumn(name = "prod_produto_ncm", referencedColumnName = "ibpt_codigo", insertable = false, updatable = false)
+    @ManyToOne
+    private Ibpt ibpt;
 
     /**
      * Construtor padrao
@@ -274,5 +278,13 @@ public class ProdProduto extends Dados implements Serializable {
 
     public void setProdGrades(List<ProdGrade> prodGrades) {
         this.prodGrades = prodGrades;
+    }
+
+    public Ibpt getIbpt() {
+        return ibpt;
+    }
+
+    public void setIbpt(Ibpt ibpt) {
+        this.ibpt = ibpt;
     }
 }

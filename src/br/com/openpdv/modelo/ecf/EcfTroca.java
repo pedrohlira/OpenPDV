@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Classe que representa uma troca do consumidor no sistama.
@@ -37,6 +38,10 @@ public class EcfTroca extends Dados implements Serializable {
     private String ecfTrocaCliente;
     @OneToMany(mappedBy = "ecfTroca", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<EcfTrocaProduto> ecfTrocaProdutos;
+    @ManyToOne
+    @JoinColumn(name = "ecf_venda_id")
+    @XmlTransient
+    private EcfVenda ecfVenda;
 
     /**
      * Construtor padrao
@@ -128,4 +133,13 @@ public class EcfTroca extends Dados implements Serializable {
     public void setEcfTrocaProdutos(List<EcfTrocaProduto> ecfTrocaProdutos) {
         this.ecfTrocaProdutos = ecfTrocaProdutos;
     }
+
+    public EcfVenda getEcfVenda() {
+        return ecfVenda;
+    }
+
+    public void setEcfVenda(EcfVenda ecfVenda) {
+        this.ecfVenda = ecfVenda;
+    }
+
 }

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Classe que representa os daods da leitura Z no sistama.
@@ -48,10 +49,10 @@ public class EcfZ extends Dados implements Serializable {
     private EcfImpressora ecfImpressora;
     @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER)
     private List<EcfZTotais> ecfZTotais;
+    @XmlTransient
     @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER)
     private List<EcfVenda> ecfVendas;
-    // somente para salvar no servidor via REST
-    @Transient
+    @OneToMany(mappedBy = "ecfZ", fetch = FetchType.EAGER)
     private List<EcfDocumento> ecfDocumentos;
 
     /**

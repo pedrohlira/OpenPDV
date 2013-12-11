@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.eclipse.persistence.oxm.annotations.XmlInverseReference;
 
 /**
  * Classe que representa um documento impresso pelo sistama.
@@ -38,6 +39,10 @@ public class EcfDocumento extends Dados implements Serializable {
     @JoinColumn(name = "ecf_impressora_id")
     @ManyToOne
     private EcfImpressora ecfImpressora;
+    @ManyToOne
+    @JoinColumn(name = "ecf_z_id")
+    @XmlInverseReference(mappedBy = "ecfDocumentos")
+    private EcfZ ecfZ;
 
     /**
      * Construtor padrao
@@ -137,4 +142,13 @@ public class EcfDocumento extends Dados implements Serializable {
     public void setEcfImpressora(EcfImpressora ecfImpressora) {
         this.ecfImpressora = ecfImpressora;
     }
+
+    public EcfZ getEcfZ() {
+        return ecfZ;
+    }
+
+    public void setEcfZ(EcfZ ecfZ) {
+        this.ecfZ = ecfZ;
+    }
+
 }

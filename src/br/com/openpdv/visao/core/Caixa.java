@@ -3,6 +3,7 @@ package br.com.openpdv.visao.core;
 import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.controlador.core.AsyncDoubleBack;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EModo;
@@ -24,6 +25,7 @@ import br.com.openpdv.visao.principal.*;
 import br.com.openpdv.visao.venda.Fechamento;
 import br.com.openpdv.visao.venda.Grades;
 import br.com.openpdv.visao.venda.Identificar;
+import br.com.openpdv.visao.principal.LeiturasZ;
 import br.com.openpdv.visao.venda.Precos;
 import br.com.phdss.ECF;
 import br.com.phdss.EComandoECF;
@@ -33,6 +35,7 @@ import br.com.phdss.modelo.anexo.v.AnexoV;
 import br.com.phdss.modelo.anexo.v.P1;
 import br.com.phdss.modelo.anexo.v.P2;
 import br.com.phdss.modelo.anexo.v.P9;
+import java.awt.Cursor;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
@@ -64,6 +67,46 @@ public class Caixa extends JFrame {
     private DefaultListModel bobina;
     private KeyEventPostProcessor teclas;
     /**
+     * Variavel de sincronismo dos precos adicionais.
+     */
+    private AsyncDoubleBack<ProdProduto, ProdPreco> asyncPreco = new AsyncDoubleBack<ProdProduto, ProdPreco>() {
+        @Override
+        public void sucesso(ProdProduto prod, ProdPreco preco) {
+            prod.setProdEmbalagem(preco.getProdEmbalagem());
+            prod.setProdProdutoPreco(preco.getProdPrecoValor());
+            try {
+                adicionar(prod, Double.valueOf(txtQuantidade.getText()), preco.getProdPrecoBarra());
+            } catch (OpenPdvException ex) {
+                falha(ex);
+            }
+        }
+
+        @Override
+        public void falha(Exception excecao) {
+            log.error(excecao);
+            JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
+        }
+    };
+    /**
+     * Variavel de sincronismo das grades.
+     */
+    AsyncDoubleBack<ProdProduto, ProdGrade> asyncGrade = new AsyncDoubleBack<ProdProduto, ProdGrade>() {
+        @Override
+        public void sucesso(ProdProduto prod, ProdGrade grade) {
+            try {
+                adicionar(prod, Double.valueOf(txtQuantidade.getText()), grade.getProdGradeBarra());
+            } catch (OpenPdvException ex) {
+                falha(ex);
+            }
+        }
+
+        @Override
+        public void falha(Exception excecao) {
+            log.error(excecao);
+            JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
+        }
+    };
+    /**
      * Variavel que responde de modo assincrono a pesquisa de produto.
      */
     private AsyncCallback<ProdProduto> pesquisado = new AsyncCallback<ProdProduto>() {
@@ -73,37 +116,18 @@ public class Caixa extends JFrame {
                 JOptionPane.showMessageDialog(caixa, "Produto não encontrado.", "Pesquisa", JOptionPane.INFORMATION_MESSAGE);
             } else if (modo == EModo.ABERTO) {
                 if (!prod.getProdPrecos().isEmpty()) {
-                    AsyncCallback<ProdPreco> async = new AsyncCallback<ProdPreco>() {
-                        @Override
-                        public void sucesso(ProdPreco preco) {
-                            prod.setProdEmbalagem(preco.getProdEmbalagem());
-                            prod.setProdProdutoPreco(preco.getProdPrecoValor());
-                            try {
-                                adicionar(prod, Double.valueOf(txtQuantidade.getText()), prod.getProdProdutoBarra());
-                            } catch (OpenPdvException ex) {
-                                falha(ex);
-                            }
-                        }
-
-                        @Override
-                        public void falha(Exception excecao) {
-                            log.error(excecao);
-                            JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
-                        }
-                    };
-
                     // procura a barra nos precos
                     boolean achou = false;
                     for (ProdPreco preco : prod.getProdPrecos()) {
                         if (txtCodigo.getText().equals(preco.getProdPrecoBarra())) {
-                            async.sucesso(preco);
+                            asyncPreco.sucesso(prod, preco);
                             achou = true;
                             break;
                         }
                     }
                     // se nao achou abre janela
                     if (!achou) {
-                        Precos.getInstancia(async, prod).setVisible(true);
+                        Precos.getInstancia(asyncPreco, prod).setVisible(true);
                     }
                 } else if (!prod.getProdComposicoes().isEmpty()) {
                     // abre tela pra informa que o produto e um kit de varios produtos
@@ -131,35 +155,18 @@ public class Caixa extends JFrame {
 
                     Aguarde.getInstancia().setVisible(true);
                 } else if (!prod.getProdGrades().isEmpty()) {
-                    AsyncCallback<ProdGrade> async = new AsyncCallback<ProdGrade>() {
-                        @Override
-                        public void sucesso(ProdGrade grade) {
-                            try {
-                                adicionar(prod, Double.valueOf(txtQuantidade.getText()), grade.getProdGradeBarra());
-                            } catch (OpenPdvException ex) {
-                                falha(ex);
-                            }
-                        }
-
-                        @Override
-                        public void falha(Exception excecao) {
-                            log.error(excecao);
-                            JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
-                        }
-                    };
-
                     // procura a barra nas grades
                     boolean achou = false;
                     for (ProdGrade grade : prod.getProdGrades()) {
                         if (txtCodigo.getText().equals(grade.getProdGradeBarra())) {
-                            async.sucesso(grade);
+                            asyncGrade.sucesso(prod, grade);
                             achou = true;
                             break;
                         }
                     }
                     // se nao achou abre janela
                     if (!achou) {
-                        Grades.getInstancia(async, prod).setVisible(true);
+                        Grades.getInstancia(asyncGrade, prod).setVisible(true);
                     }
                 } else {
                     try {
@@ -320,6 +327,7 @@ public class Caixa extends JFrame {
         mnuClientes = new javax.swing.JMenuItem();
         mnuUsuarios = new javax.swing.JMenuItem();
         mnuTrocas = new javax.swing.JMenuItem();
+        mnuLeiturasZ = new javax.swing.JMenuItem();
         separador2 = new javax.swing.JPopupMenu.Separator();
         mnuTEF = new javax.swing.JMenuItem();
         mnuSincronizacao = new javax.swing.JMenuItem();
@@ -338,6 +346,7 @@ public class Caixa extends JFrame {
         mnuIndice = new javax.swing.JMenuItem();
         mnuParamConfiguracao = new javax.swing.JMenuItem();
         mnuCartao = new javax.swing.JMenuItem();
+        mnuCat52 = new javax.swing.JMenuItem();
         mnuNota = new javax.swing.JMenu();
         mnuNotaConsumidor = new javax.swing.JMenuItem();
         mnuNotaEletronica = new javax.swing.JMenuItem();
@@ -353,7 +362,7 @@ public class Caixa extends JFrame {
         mnuIdentificar = new javax.swing.JMenu();
         mnuSair = new javax.swing.JMenu();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("OpenPDV");
         setMaximumSize(new java.awt.Dimension(1024, 746));
         setMinimumSize(new java.awt.Dimension(1024, 746));
@@ -372,8 +381,9 @@ public class Caixa extends JFrame {
         lblLivre.setMinimumSize(new java.awt.Dimension(957, 450));
         lblLivre.setOpaque(true);
         lblLivre.setPreferredSize(new java.awt.Dimension(957, 450));
+        panCamadas.add(lblLivre);
         lblLivre.setBounds(33, 190, 957, 450);
-        panCamadas.add(lblLivre, javax.swing.JLayeredPane.MODAL_LAYER);
+        panCamadas.setLayer(lblLivre, javax.swing.JLayeredPane.MODAL_LAYER);
 
         lblTitulo.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         lblTitulo.setForeground(new java.awt.Color(255, 255, 255));
@@ -382,30 +392,30 @@ public class Caixa extends JFrame {
         lblTitulo.setFocusable(false);
         lblTitulo.setName("lblTitulo"); // NOI18N
         lblTitulo.setRequestFocusEnabled(false);
+        panCamadas.add(lblTitulo);
         lblTitulo.setBounds(300, 5, 710, 30);
-        panCamadas.add(lblTitulo, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblOperador.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblOperador.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblOperador.setText("Operador :");
         lblOperador.setFocusable(false);
+        panCamadas.add(lblOperador);
         lblOperador.setBounds(674, 60, 310, 14);
-        panCamadas.add(lblOperador, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblCaixa.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblCaixa.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCaixa.setText("Caixa :");
         lblCaixa.setFocusable(false);
+        panCamadas.add(lblCaixa);
         lblCaixa.setBounds(674, 80, 310, 14);
-        panCamadas.add(lblCaixa, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblProduto.setFont(new java.awt.Font("Serif", 1, 56)); // NOI18N
         lblProduto.setForeground(new java.awt.Color(255, 255, 255));
         lblProduto.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblProduto.setFocusable(false);
         lblProduto.setName("lblProduto"); // NOI18N
+        panCamadas.add(lblProduto);
         lblProduto.setBounds(40, 110, 945, 83);
-        panCamadas.add(lblProduto, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         panBobina.setBorder(null);
         panBobina.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -420,16 +430,16 @@ public class Caixa extends JFrame {
         lstBobina.setName("Bobina"); // NOI18N
         panBobina.setViewportView(lstBobina);
 
+        panCamadas.add(panBobina);
         panBobina.setBounds(45, 240, 400, 350);
-        panCamadas.add(panBobina, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblLogo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLogo.setFocusable(false);
         lblLogo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         lblLogo.setName("imageProduto"); // NOI18N
+        panCamadas.add(lblLogo);
         lblLogo.setBounds(730, 250, 250, 250);
-        panCamadas.add(lblLogo, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         txtCodigo.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtCodigo.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -441,8 +451,8 @@ public class Caixa extends JFrame {
                 txtCodigoKeyPressed(evt);
             }
         });
+        panCamadas.add(txtCodigo);
         txtCodigo.setBounds(490, 262, 200, 30);
-        panCamadas.add(txtCodigo, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         txtQuantidade.setEditable(false);
         txtQuantidade.setBorder(null);
@@ -453,8 +463,8 @@ public class Caixa extends JFrame {
         txtQuantidade.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtQuantidade.setName("txtQuantidade"); // NOI18N
         txtQuantidade.setOpaque(true);
+        panCamadas.add(txtQuantidade);
         txtQuantidade.setBounds(490, 362, 200, 30);
-        panCamadas.add(txtQuantidade, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         txtUnitario.setBorder(null);
         txtUnitario.setEditable(false);
@@ -465,8 +475,8 @@ public class Caixa extends JFrame {
         txtUnitario.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtUnitario.setName("txtUnitario"); // NOI18N
         txtUnitario.setOpaque(true);
+        panCamadas.add(txtUnitario);
         txtUnitario.setBounds(490, 462, 200, 30);
-        panCamadas.add(txtUnitario, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         txtTotalItem.setBorder(null);
         txtTotalItem.setEditable(false);
@@ -477,8 +487,8 @@ public class Caixa extends JFrame {
         txtTotalItem.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtTotalItem.setName("txtTotalItem"); // NOI18N
         txtTotalItem.setOpaque(true);
+        panCamadas.add(txtTotalItem);
         txtTotalItem.setBounds(490, 560, 200, 30);
-        panCamadas.add(txtTotalItem, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         txtSubTotal.setBorder(null);
         txtSubTotal.setEditable(false);
@@ -489,8 +499,8 @@ public class Caixa extends JFrame {
         txtSubTotal.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtSubTotal.setName("txtSubTotal"); // NOI18N
         txtSubTotal.setOpaque(true);
+        panCamadas.add(txtSubTotal);
         txtSubTotal.setBounds(730, 560, 250, 30);
-        panCamadas.add(txtSubTotal, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblTotal.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         lblTotal.setForeground(new java.awt.Color(255, 255, 255));
@@ -500,8 +510,8 @@ public class Caixa extends JFrame {
         lblTotal.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         lblTotal.setName("labelMensagens"); // NOI18N
         lblTotal.setPreferredSize(new java.awt.Dimension(772, 20));
+        panCamadas.add(lblTotal);
         lblTotal.setBounds(40, 650, 400, 45);
-        panCamadas.add(lblTotal, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblMensagem.setFont(new java.awt.Font("Serif", 1, 18)); // NOI18N
         lblMensagem.setForeground(new java.awt.Color(255, 255, 204));
@@ -510,15 +520,15 @@ public class Caixa extends JFrame {
         lblMensagem.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         lblMensagem.setName("lblMensagem"); // NOI18N
         lblMensagem.setPreferredSize(new java.awt.Dimension(772, 20));
+        panCamadas.add(lblMensagem);
         lblMensagem.setBounds(485, 650, 500, 45);
-        panCamadas.add(lblMensagem, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         lblFundo.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblFundo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/tela.png"))); // NOI18N
         lblFundo.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         lblFundo.setFocusable(false);
+        panCamadas.add(lblFundo);
         lblFundo.setBounds(0, 0, 1030, 730);
-        panCamadas.add(lblFundo, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         barMenu.setAutoscrolls(true);
         barMenu.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
@@ -668,6 +678,18 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuTrocas);
+
+        mnuLeiturasZ.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuLeiturasZ.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/padrao.png"))); // NOI18N
+        mnuLeiturasZ.setText("Leituras Z");
+        mnuLeiturasZ.setToolTipText("Leituras Z");
+        mnuLeiturasZ.setEnabled(false);
+        mnuLeiturasZ.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuLeiturasZActionPerformed(evt);
+            }
+        });
+        mnuPrincipal.add(mnuLeiturasZ);
         mnuPrincipal.add(separador2);
 
         mnuTEF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -856,6 +878,17 @@ public class Caixa extends JFrame {
             }
         });
         mnuFiscal.add(mnuCartao);
+
+        mnuCat52.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuCat52.setText("CAT52");
+        mnuCat52.setToolTipText("Gerar Arquivo Cat52");
+        mnuCat52.setEnabled(false);
+        mnuCat52.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCat52ActionPerformed(evt);
+            }
+        });
+        mnuFiscal.add(mnuCat52);
 
         barMenu.add(mnuFiscal);
 
@@ -1046,8 +1079,8 @@ public class Caixa extends JFrame {
             .add(panCamadas, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 724, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-1024)/2, (screenSize.height-768)/2, 1024, 768);
+        setSize(new java.awt.Dimension(1024, 768));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void mnuSobreMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuSobreMouseClicked
@@ -1739,34 +1772,30 @@ public class Caixa extends JFrame {
         final int escolha = JOptionPane.showOptionDialog(this, "O que deseja sincronizar?", "OpenPDV",
                 JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Receber", "Enviar", "Cancelar"}, JOptionPane.YES_OPTION);
 
-        if (escolha > -1) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (escolha == JOptionPane.YES_OPTION) {
-                            new ComandoReceberDados().executar();
-                            Aguarde.getInstancia().setVisible(false);
-                            JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data no formato <b>dd/MM/aaaa</b></html>", "Data de Envio", JOptionPane.INFORMATION_MESSAGE);
-                            Date data = Util.formataData(valor, "dd/MM/yyyy");
-                            if (data != null) {
-                                new ComandoEnviarDados(data).executar();
-                                Aguarde.getInstancia().setVisible(false);
-                                JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
-                            } else {
-                                JOptionPane.showMessageDialog(caixa, "Data informada inválida!.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
-                            }
-                        }
-                    } catch (OpenPdvException ex) {
-                        log.error("Não conseguiu sincronizar com o servidor.", ex);
-                        Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(caixa, ex.getMessage(), "Sincronismo", JOptionPane.WARNING_MESSAGE);
+        if (escolha != JOptionPane.CANCEL_OPTION) {
+            try {
+                caixa.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                if (escolha == JOptionPane.YES_OPTION) {
+                    ComandoReceberDados.getInstancia().executar();
+                    JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data inicio no formato <b>dd/MM/aaaa</b></html>", "Data Inicial", JOptionPane.INFORMATION_MESSAGE);
+                    Date inicio = Util.formataData(valor, "dd/MM/yyyy");
+                    String valor1 = JOptionPane.showInputDialog(caixa, "<html>Informe a data fim no formato <b>dd/MM/aaaa</b></html>", "Data Final", JOptionPane.INFORMATION_MESSAGE);
+                    Date fim = Util.formataData(valor1, "dd/MM/yyyy");
+                    if (inicio != null && fim != null) {
+                        ComandoEnviarDados.getInstancia(inicio, fim).executar();
+                        JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(caixa, "Data informada inválida!.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
                     }
                 }
-            }).start();
-            Aguarde.getInstancia().setVisible(true);
+            } catch (OpenPdvException ex) {
+                log.error("Não conseguiu sincronizar com o servidor.", ex);
+                JOptionPane.showMessageDialog(caixa, ex.getMessage(), "Sincronismo", JOptionPane.WARNING_MESSAGE);
+            } finally {
+                caixa.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            }
         }
     }//GEN-LAST:event_mnuSincronizacaoActionPerformed
 
@@ -1807,18 +1836,15 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuTipoGradesActionPerformed
 
     private void mnuCupomPresenteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCupomPresenteActionPerformed
-        String valor = JOptionPane.showInputDialog(caixa, "Insira o número do CCF.\nDeixe em branco para usar o último.");
-        ComandoCupomPresente ccp = null;
-
         try {
-            int ccf = Integer.valueOf(valor);
-            ccp = new ComandoCupomPresente(ccf);
-        } catch (Exception ex) {
-            ccp = new ComandoCupomPresente();
-        } finally {
-            try {
-                ccp.executar();
-            } catch (OpenPdvException ex) {
+            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
+            Integer ccf = vendas.isEmpty() ? 0 : vendas.get(0).getEcfVendaCcf();
+            String valor = JOptionPane.showInputDialog(caixa, "Insira o número do CCF.", ccf);
+
+            ComandoCupomPresente ccp = new ComandoCupomPresente(Integer.valueOf(valor));
+            ccp.executar();
+        } catch (OpenPdvException | NumberFormatException ex) {
+            if (ex instanceof OpenPdvException) {
                 JOptionPane.showMessageDialog(caixa, "CCF não existe ou problemas na impressão!", "Cupom Presente", JOptionPane.INFORMATION_MESSAGE);
             }
         }
@@ -1849,6 +1875,28 @@ public class Caixa extends JFrame {
         });
         janela.setVisible(true);
     }//GEN-LAST:event_mnuTrocasActionPerformed
+
+    private void mnuLeiturasZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLeiturasZActionPerformed
+        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+            @Override
+            public void sucesso(Integer resultado) {
+                janela = LeiturasZ.getInstancia();
+                janela.setVisible(true);
+            }
+
+            @Override
+            public void falha(Exception excecao) {
+                JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        janela.setVisible(true);
+    }//GEN-LAST:event_mnuLeiturasZActionPerformed
+
+    private void mnuCat52ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCat52ActionPerformed
+        janela = PAF_ArquivoCat52.getInstancia();
+        janela.setVisible(true);
+    }//GEN-LAST:event_mnuCat52ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
     private javax.swing.JLabel lblCaixa;
@@ -1866,6 +1914,7 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuCancelarItem;
     private javax.swing.JMenuItem mnuCancelarVenda;
     private javax.swing.JMenuItem mnuCartao;
+    private javax.swing.JMenuItem mnuCat52;
     private javax.swing.JMenuItem mnuClientes;
     private javax.swing.JMenuItem mnuCupomPresente;
     private javax.swing.JMenuItem mnuEmbalagens;
@@ -1879,6 +1928,7 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuLMFC;
     private javax.swing.JMenuItem mnuLMFS;
     private javax.swing.JMenuItem mnuLX;
+    private javax.swing.JMenuItem mnuLeiturasZ;
     private javax.swing.JMenuItem mnuMovimento;
     private javax.swing.JMenu mnuNota;
     private javax.swing.JMenuItem mnuNotaConsumidor;
@@ -1916,7 +1966,8 @@ public class Caixa extends JFrame {
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Metodo que desabilita os menus de venda aberta e seta o modo para disponivel.
+     * Metodo que desabilita os menus de venda aberta e seta o modo para
+     * disponivel.
      */
     public void modoDisponivel() {
         modo = EModo.DISPONIVEL;
@@ -1931,7 +1982,8 @@ public class Caixa extends JFrame {
     }
 
     /**
-     * Metodo que desabilita os menus que usam a ECF e cadastros, seta o modo para indisponivel.
+     * Metodo que desabilita os menus que usam a ECF e cadastros, seta o modo
+     * para indisponivel.
      */
     public void modoIndisponivel() {
         modo = EModo.INDISPONIVEL;
@@ -1944,7 +1996,8 @@ public class Caixa extends JFrame {
     }
 
     /**
-     * Metodo que desabilita os menus que usam para venda e cadastro, seta o modo para consulta.
+     * Metodo que desabilita os menus que usam para venda e cadastro, seta o
+     * modo para consulta.
      */
     public void modoConsulta() {
         modo = EModo.CONSULTA;
@@ -1958,7 +2011,8 @@ public class Caixa extends JFrame {
     }
 
     /**
-     * Metodo que desabilita os demais menus exceto de operacoes de venda e seta o modo para aberto.
+     * Metodo que desabilita os demais menus exceto de operacoes de venda e seta
+     * o modo para aberto.
      */
     public void modoAberto() {
         modo = EModo.ABERTO;
@@ -2003,9 +2057,11 @@ public class Caixa extends JFrame {
 
     /**
      * Metodo que desabilita os menus quando em modo consulta ou fiscal.
+     *
+     * @param atual informa o status atual.
      */
     public void statusMenus(EModo atual) {
-        boolean tipo = atual == EModo.OFF ? false : true;
+        boolean tipo = atual != EModo.OFF;
 
         // habilita todos os menus
         for (MenuElement me : barMenu.getSubElements()) {
@@ -2021,10 +2077,16 @@ public class Caixa extends JFrame {
         // verifica o status do caixa e desabilita os menus que nao podem usar
         switch (atual) {
             case ABERTO:
-                mnuPrincipal.setEnabled(false);
+                // menu principal
+                mnuSuprimento.setEnabled(false);
+                mnuSangria.setEnabled(false);
+                mnuReducaoZ.setEnabled(false);
+                mnuTEF.setEnabled(false);
+                // outros
                 mnuFiscal.setEnabled(false);
                 mnuNota.setEnabled(false);
                 mnuAbrirVenda.setEnabled(false);
+                mnuCupomPresente.setEnabled(false);
                 mnuGaveta.setEnabled(false);
                 if (venda.getSisCliente() != null) {
                     mnuIdentificar.setEnabled(false);
@@ -2066,13 +2128,18 @@ public class Caixa extends JFrame {
         }
 
         // somente habilita o sincronismo nas maquinas host
-        if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+        if (Util.getConfig().get("sinc.tipo").equals("rest") && Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
             mnuSincronizacao.setEnabled(false);
         }
 
         // somente habilita o ADM do TEF se tiver no conf
-        if (Util.getConfig().get("tef.titulo") == null) {
+        if (!Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
             mnuTEF.setEnabled(false);
+        }
+
+        // somente mostra o Cat52 caso esteja setado no config
+        if (!Boolean.valueOf(Util.getConfig().get("ecf.cat52"))) {
+            mnuCat52.setVisible(false);
         }
     }
 

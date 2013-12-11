@@ -23,33 +23,41 @@ import java.util.Map;
 public class ComandoImprimirCartao implements IComando {
 
     private EcfPagamento pag;
-    private double total;
+    private EComandoECF comando = null;
 
     /**
      * Construtor padrao.
+     */
+    public ComandoImprimirCartao() {
+    }
+
+    /**
+     * Metodo que abre as operacoes com cartao
      *
      * @param pag o pagamento em cartao.
      * @param total o total geral de todos os cartoes.
      */
-    public ComandoImprimirCartao(EcfPagamento pag, double total) {
+    public void abrir(EcfPagamento pag, double total) {
         this.pag = pag;
-        this.total = total;
+
+        if (comando == null) {
+            try {
+                // abre o relatorio vinculado
+                String coo = pag.getEcfVenda().getEcfVendaCoo() + "";
+                String codigo = pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo();
+                String valor = Util.formataNumero(total, 1, 2, false).replace(",", ".");
+                ECF.enviar(EComandoECF.ECF_AbreCupomVinculado, coo, codigo, "", valor);
+                comando = EComandoECF.ECF_LinhaCupomVinculado;
+            } catch (Exception ex) {
+                // abre o relatorio gerencial
+                ECF.enviar(EComandoECF.ECF_AbreRelatorioGerencial);
+                comando = EComandoECF.ECF_LinhaRelatorioGerencial;
+            }
+        }
     }
 
     @Override
     public void executar() throws OpenPdvException {
-        EComandoECF comando = null;
-
-        // abre o relatorio vinculado
-        if (comando == null) {
-            String coo = pag.getEcfVenda().getEcfVendaCoo() + "";
-            String codigo = pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo();
-            String valor = Util.formataNumero(total, 1, 2, false).replace(",", ".");
-            ECF.enviar(EComandoECF.ECF_FechaRelatorio);
-            ECF.enviar(EComandoECF.ECF_AbreCupomVinculado, coo, codigo, "", valor);
-            comando = EComandoECF.ECF_LinhaCupomVinculado;
-        }
-
         // imprime as vias
         try {
             String arq = null;
@@ -72,16 +80,26 @@ public class ComandoImprimirCartao implements IComando {
                 String[] resp = ECF.enviar(EComandoECF.ECF_NumGNF);
                 pag.setEcfPagamentoGnf(Integer.valueOf(resp[1]));
 
-                // salva o documento para relatorio e deleta o arquivo
+                // salva o documento para relatorio
                 new ComandoSalvarDocumento(comando == EComandoECF.ECF_LinhaCupomVinculado ? "CC" : "RG").executar();
             }
 
-            // gerar as parcelas e deleta o arquivo
+            // gerar as parcelas
             List<EcfPagamentoParcela> parcelas = gerarParcela(dados, pag);
             pag.setEcfPagamentoParcelas(parcelas);
         } catch (Exception ex) {
-            ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+            fechar();
             throw new OpenPdvException(ex);
+        }
+    }
+
+    /**
+     * Metodo que fecha as operacoes com cartao
+     */
+    public void fechar() {
+        if (comando != null) {
+            comando = null;
+            ECF.enviar(EComandoECF.ECF_FechaRelatorio);
         }
     }
 

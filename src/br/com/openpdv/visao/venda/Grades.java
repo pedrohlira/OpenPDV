@@ -1,6 +1,6 @@
 package br.com.openpdv.visao.venda;
 
-import br.com.openpdv.controlador.core.AsyncCallback;
+import br.com.openpdv.controlador.core.AsyncDoubleBack;
 import br.com.openpdv.controlador.core.TableCellRendererNumber;
 import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdProduto;
@@ -20,7 +20,8 @@ public class Grades extends javax.swing.JDialog {
 
     private static Grades grades;
     private DefaultTableModel dtm;
-    private AsyncCallback<ProdGrade> async;
+    private ProdProduto produto;
+    private AsyncDoubleBack<ProdProduto, ProdGrade> async;
 
     /**
      * Construtor padrao.
@@ -37,14 +38,15 @@ public class Grades extends javax.swing.JDialog {
      * @param produto o produto pesquisado.
      * @return o objeto de Precos.
      */
-    public static Grades getInstancia(AsyncCallback<ProdGrade> async, ProdProduto produto) {
+    public static Grades getInstancia(AsyncDoubleBack<ProdProduto, ProdGrade> async, ProdProduto produto) {
         if (grades == null) {
             grades = new Grades();
         }
 
         grades.dtm = (DefaultTableModel) grades.tabGrade.getModel();
         grades.async = async;
-        grades.setLista(produto);
+        grades.produto = produto;
+        grades.setLista();
         return grades;
     }
 
@@ -86,9 +88,7 @@ public class Grades extends javax.swing.JDialog {
             }
         });
         tabGrade.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabGrade.setCellSelectionEnabled(false);
         tabGrade.setRowHeight(20);
-        tabGrade.setRowSelectionAllowed(true);
         tabGrade.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabGrade.setShowGrid(true);
         tabGrade.setShowVerticalLines(false);
@@ -118,7 +118,7 @@ public class Grades extends javax.swing.JDialog {
         tabGrade.getColumnModel().getColumn(4).setPreferredWidth(100);
         tabGrade.getColumnModel().getColumn(5).setResizable(false);
         tabGrade.getColumnModel().getColumn(5).setPreferredWidth(100);
-        tabGrade.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+        tabGrade.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
 
         getContentPane().add(spGrade, java.awt.BorderLayout.CENTER);
 
@@ -145,7 +145,7 @@ public class Grades extends javax.swing.JDialog {
     /**
      * Metodo que seta os valores dos precos disponiveis.
      */
-    private void setLista(ProdProduto produto) {
+    private void setLista() {
         // limpa
         while (dtm.getRowCount() > 0) {
             dtm.removeRow(0);
@@ -169,7 +169,7 @@ public class Grades extends javax.swing.JDialog {
         int row = tabGrade.convertRowIndexToModel(tabGrade.getSelectedRow());
         if (row >= 0) {
             setVisible(false);
-            async.sucesso((ProdGrade) tabGrade.getModel().getValueAt(row, 0));
+            async.sucesso(produto, (ProdGrade) tabGrade.getModel().getValueAt(row, 0));
             Caixa.getInstancia().setJanela(null);
             dispose();
         }
@@ -184,11 +184,11 @@ public class Grades extends javax.swing.JDialog {
         this.dtm = dtm;
     }
 
-    public AsyncCallback<ProdGrade> getAsync() {
+    public AsyncDoubleBack<ProdProduto, ProdGrade> getAsync() {
         return async;
     }
 
-    public void setAsync(AsyncCallback<ProdGrade> async) {
+    public void setAsync(AsyncDoubleBack<ProdProduto, ProdGrade> async) {
         this.async = async;
     }
 

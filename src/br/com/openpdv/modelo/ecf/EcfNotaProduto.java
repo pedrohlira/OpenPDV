@@ -1,5 +1,6 @@
 package br.com.openpdv.modelo.ecf;
 
+import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdProduto;
@@ -170,5 +171,9 @@ public class EcfNotaProduto extends Dados implements Serializable {
 
     public void setEcfNotaProdutoBarra(String ecfNotaProdutoBarra) {
         this.ecfNotaProdutoBarra = ecfNotaProdutoBarra;
+    }
+    
+    public String getEcfVendaProdutoCodigo() {
+        return ecfNotaProdutoBarra == null || ecfNotaProdutoBarra.equals("") ? Util.formataNumero(prodProduto.getProdProdutoId(), 6, 0, false) : ecfNotaProdutoBarra;
     }
 }

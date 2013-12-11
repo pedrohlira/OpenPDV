@@ -358,7 +358,7 @@ public class ComandoGerarNFe implements IComando {
                 prod.setCProd(pp.getProdProdutoBarra());
             }
             // barra
-            prod.setCEAN(pp.getProdProdutoBarra() == null ? "" : pp.getProdProdutoBarra());
+            prod.setCEAN(np.getEcfVendaProdutoCodigo());
             // descricao
             prod.setXProd(pp.getProdProdutoDescricao().trim());
             // ncm
@@ -377,7 +377,7 @@ public class ComandoGerarNFe implements IComando {
             valorProd += Double.valueOf(strProd);
             prod.setVProd(strProd);
             // barra do tributo
-            prod.setCEANTrib(pp.getProdProdutoBarra() == null ? "" : pp.getProdProdutoBarra());
+            prod.setCEANTrib(np.getEcfVendaProdutoCodigo());
             // unidade do tributo
             prod.setUTrib(pp.getProdEmbalagem().getProdEmbalagemNome());
             // quantidde do tributo

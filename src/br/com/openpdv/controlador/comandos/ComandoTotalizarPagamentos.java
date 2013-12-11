@@ -12,7 +12,6 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.*;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +28,8 @@ public class ComandoTotalizarPagamentos implements IComando {
 
     /**
      * Construtor padrao.
+     *
+     * @param data a data de totalizacao.
      */
     public ComandoTotalizarPagamentos(Date data) {
         this.service = new CoreService();

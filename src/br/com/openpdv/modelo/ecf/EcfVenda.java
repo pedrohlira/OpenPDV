@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.eclipse.persistence.oxm.annotations.XmlInverseReference;
 
 /**
  * Classe que representa a venda do sistama.
@@ -44,6 +43,8 @@ public class EcfVenda extends Dados implements Serializable {
     private boolean ecfVendaFechada;
     @Column(name = "ecf_venda_cancelada")
     private boolean ecfVendaCancelada;
+     @Column(name = "ecf_venda_sinc")
+    private boolean ecfVendaSinc;
     @Column(name = "ecf_venda_observacao")
     private String ecfVendaObservacao;
     @JoinColumn(name = "sis_usuario_id")
@@ -55,20 +56,21 @@ public class EcfVenda extends Dados implements Serializable {
     @JoinColumn(name = "sis_gerente_id", referencedColumnName = "sis_usuario_id")
     @ManyToOne
     private SisUsuario sisGerente;
+    @JoinColumn(name = "ecf_impressora_id")
+    @ManyToOne
+    private EcfImpressora ecfImpressora;
     @JoinColumn(name = "ecf_z_id")
     @ManyToOne
-    @XmlInverseReference(mappedBy = "ecfVendas")
     private EcfZ ecfZ;
     @JoinColumn(name = "sis_cliente_id")
     @ManyToOne
     private SisCliente sisCliente;
-    @JoinColumn(name = "ecf_troca_id")
-    @ManyToOne
-    private EcfTroca ecfTroca;
     @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER)
     private List<EcfVendaProduto> ecfVendaProdutos;
     @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER)
     private List<EcfPagamento> ecfPagamentos;
+    @OneToMany(mappedBy = "ecfVenda", fetch = FetchType.EAGER)
+    private List<EcfTroca> ecfTrocas;
     private transient boolean informouCliente;
 
     /**
@@ -179,6 +181,14 @@ public class EcfVenda extends Dados implements Serializable {
         this.ecfVendaCancelada = ecfVendaCancelada;
     }
 
+    public boolean isEcfVendaSinc() {
+        return ecfVendaSinc;
+    }
+
+    public void setEcfVendaSinc(boolean ecfVendaSinc) {
+        this.ecfVendaSinc = ecfVendaSinc;
+    }
+
     public EcfZ getEcfZ() {
         return ecfZ;
     }
@@ -251,11 +261,20 @@ public class EcfVenda extends Dados implements Serializable {
         this.ecfVendaObservacao = ecfVendaObservacao;
     }
 
-    public EcfTroca getEcfTroca() {
-        return ecfTroca;
+    public List<EcfTroca> getEcfTrocas() {
+        return ecfTrocas;
     }
 
-    public void setEcfTroca(EcfTroca ecfTroca) {
-        this.ecfTroca = ecfTroca;
+    public void setEcfTrocas(List<EcfTroca> ecfTrocas) {
+        this.ecfTrocas = ecfTrocas;
     }
+
+    public EcfImpressora getEcfImpressora() {
+        return ecfImpressora;
+    }
+
+    public void setEcfImpressora(EcfImpressora ecfImpressora) {
+        this.ecfImpressora = ecfImpressora;
+    }
+
 }

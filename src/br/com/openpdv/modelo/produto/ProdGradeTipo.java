@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Classe que representa um sub tipo de produto no sistema.
@@ -17,6 +18,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "prod_grade_tipo")
+@XmlRootElement
 public class ProdGradeTipo extends Dados implements Serializable {
 
     @Id

@@ -1,0 +1,62 @@
+10-23 10:55:44 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Syntax error in SQL statement "UPDATE ECF_TROCA,[*] ECF_VENDA SET ECF_TROCA.ECF_VENDA_ID = ECF_VENDA.ECF_VENDA_ID WHERE NOT ECF_VENDA.ECF_TROCA_ID IS NULL AND ECF_TROCA.ECF_TROCA_ID = ECF_VENDA.ECF_TROCA_ID "; expected "., AS, SET"; SQL statement:
+UPDATE ecf_troca, ecf_venda SET ecf_troca.ecf_venda_id = ecf_venda.ecf_venda_id WHERE NOT ecf_venda.ecf_troca_id IS NULL AND ecf_troca.ecf_troca_id = ecf_venda.ecf_troca_id [42001-170]
+10-23 10:55:44 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Constraint "FK_ECF_VENDA_6" not found; SQL statement:
+ALTER TABLE ecf_venda DROP CONSTRAINT FK_ecf_venda_6 [90057-170]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:329)
+	at org.h2.message.DbException.get(DbException.java:169)
+	at org.h2.message.DbException.get(DbException.java:146)
+	at org.h2.command.ddl.AlterTableDropConstraint.update(AlterTableDropConstraint.java:40)
+	at org.h2.command.CommandContainer.update(CommandContainer.java:75)
+	at org.h2.command.Command.executeUpdate(Command.java:230)
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:177)
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:152)
+	at org.h2.server.web.WebApp.getResult(WebApp.java:1311)
+	at org.h2.server.web.WebApp.query(WebApp.java:1001)
+	at org.h2.server.web.WebApp$1.next(WebApp.java:964)
+	at org.h2.server.web.WebApp$1.next(WebApp.java:953)
+	at org.h2.server.web.WebThread.process(WebThread.java:166)
+	at org.h2.server.web.WebThread.run(WebThread.java:93)
+	at java.lang.Thread.run(Thread.java:724)
+10-23 11:03:02 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Column "V.ECF_VENDA_ID" not found; SQL statement:
+UPDATE ecf_troca t SET t.ecf_venda_id = (SELECT v.ecf_venda_id WHERE NOT v.ecf_troca_id IS NULL AND v.ecf_troca_id = t.ecf_troca_id) [42122-170]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:329)
+	at org.h2.message.DbException.get(DbException.java:169)
+	at org.h2.message.DbException.get(DbException.java:146)
+	at org.h2.expression.ExpressionColumn.optimize(ExpressionColumn.java:141)
+	at org.h2.command.dml.Select.prepare(Select.java:799)
+	at org.h2.expression.Subquery.optimize(Subquery.java:69)
+	at org.h2.command.dml.Update.prepare(Update.java:184)
+	at org.h2.command.Parser.prepareCommand(Parser.java:218)
+	at org.h2.engine.Session.prepareLocal(Session.java:414)
+	at org.h2.engine.Session.prepareCommand(Session.java:363)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1116)
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:164)
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:152)
+	at org.h2.server.web.WebApp.getResult(WebApp.java:1311)
+	at org.h2.server.web.WebApp.query(WebApp.java:1001)
+	at org.h2.server.web.WebApp$1.next(WebApp.java:964)
+	at org.h2.server.web.WebApp$1.next(WebApp.java:953)
+	at org.h2.server.web.WebThread.process(WebThread.java:166)
+	at org.h2.server.web.WebThread.run(WebThread.java:93)
+	at java.lang.Thread.run(Thread.java:724)
+10-23 11:04:41 jdbc[2]: exception
+org.h2.jdbc.JdbcSQLException: Constraint "FK_ECF_VENDA_6" not found; SQL statement:
+ALTER TABLE ecf_venda DROP CONSTRAINT FK_ecf_venda_6 [90057-170]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:329)
+	at org.h2.message.DbException.get(DbException.java:169)
+	at org.h2.message.DbException.get(DbException.java:146)
+	at org.h2.command.ddl.AlterTableDropConstraint.update(AlterTableDropConstraint.java:40)
+	at org.h2.command.CommandContainer.update(CommandContainer.java:75)
+	at org.h2.command.Command.executeUpdate(Command.java:230)
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:177)
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:152)
+	at org.h2.server.web.WebApp.getResult(WebApp.java:1311)
+	at org.h2.server.web.WebApp.query(WebApp.java:1001)
+	at org.h2.server.web.WebApp$1.next(WebApp.java:964)
+	at org.h2.server.web.WebApp$1.next(WebApp.java:953)
+	at org.h2.server.web.WebThread.process(WebThread.java:166)
+	at org.h2.server.web.WebThread.run(WebThread.java:93)
+	at java.lang.Thread.run(Thread.java:724)

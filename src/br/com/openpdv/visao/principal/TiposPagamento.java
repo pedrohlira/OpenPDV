@@ -132,20 +132,22 @@ public class TiposPagamento extends javax.swing.JDialog {
         tabTipoPagamentos.getTableHeader().setReorderingAllowed(false);
         spTipoPagamentos.setViewportView(tabTipoPagamentos);
         tabTipoPagamentos.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabTipoPagamentos.getColumnModel().getColumn(0).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tabTipoPagamentos.getColumnModel().getColumn(1).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(1).setPreferredWidth(75);
-        tabTipoPagamentos.getColumnModel().getColumn(2).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(2).setPreferredWidth(175);
-        tabTipoPagamentos.getColumnModel().getColumn(3).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(3).setPreferredWidth(50);
-        tabTipoPagamentos.getColumnModel().getColumn(4).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(4).setPreferredWidth(75);
-        tabTipoPagamentos.getColumnModel().getColumn(5).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(5).setPreferredWidth(75);
-        tabTipoPagamentos.getColumnModel().getColumn(6).setResizable(false);
-        tabTipoPagamentos.getColumnModel().getColumn(6).setPreferredWidth(125);
+        if (tabTipoPagamentos.getColumnModel().getColumnCount() > 0) {
+            tabTipoPagamentos.getColumnModel().getColumn(0).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tabTipoPagamentos.getColumnModel().getColumn(1).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(1).setPreferredWidth(75);
+            tabTipoPagamentos.getColumnModel().getColumn(2).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(2).setPreferredWidth(175);
+            tabTipoPagamentos.getColumnModel().getColumn(3).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(3).setPreferredWidth(50);
+            tabTipoPagamentos.getColumnModel().getColumn(4).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(4).setPreferredWidth(75);
+            tabTipoPagamentos.getColumnModel().getColumn(5).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(5).setPreferredWidth(75);
+            tabTipoPagamentos.getColumnModel().getColumn(6).setResizable(false);
+            tabTipoPagamentos.getColumnModel().getColumn(6).setPreferredWidth(125);
+        }
 
         panTipoPagamentos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -307,7 +309,7 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(spTipoPagamentos)
                         .add(panTipoPagamentos, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .add(16, 16, 16))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -322,11 +324,11 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .add(23, 23, 23))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-665)/2, (screenSize.height-307)/2, 665, 307);
+        setSize(new java.awt.Dimension(660, 307));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed

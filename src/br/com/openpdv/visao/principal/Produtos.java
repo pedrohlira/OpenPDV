@@ -89,7 +89,8 @@ public class Produtos extends javax.swing.JDialog {
 
         produtos.setEmbalagens();
         produtos.setTipos();
-        produtos.setLista(null);
+        FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, 0);
+        produtos.setLista(fn);
         return produtos;
     }
 
@@ -224,39 +225,43 @@ public class Produtos extends javax.swing.JDialog {
             }
         });
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabProdutos.setCellSelectionEnabled(false);
         tabProdutos.setRowHeight(20);
+        tabProdutos.setRowSelectionAllowed(true);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabProdutos.setShowGrid(true);
         tabProdutos.setShowVerticalLines(false);
         tabProdutos.getTableHeader().setReorderingAllowed(false);
         spProdutos.setViewportView(tabProdutos);
         tabProdutos.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(125);
-        tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(300);
-        tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(80);
-        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(6).setMinWidth(1);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(1);
-        tabProdutos.getColumnModel().getColumn(6).setMaxWidth(1);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(80);
-        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(10).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(11).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(12).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(13).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(13).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(14).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(14).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(15).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(16).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(17).setPreferredWidth(150);
-        tabProdutos.getColumnModel().getColumn(18).setPreferredWidth(150);
-        tabProdutos.getColumnModel().getColumn(19).setPreferredWidth(50);
+        if (tabProdutos.getColumnModel().getColumnCount() > 0) {
+            tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(125);
+            tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(300);
+            tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(80);
+            tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(6).setMinWidth(1);
+            tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(1);
+            tabProdutos.getColumnModel().getColumn(6).setMaxWidth(1);
+            tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(80);
+            tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(10).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(11).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(12).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(13).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(13).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(14).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(14).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(15).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(16).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(17).setPreferredWidth(150);
+            tabProdutos.getColumnModel().getColumn(18).setPreferredWidth(150);
+            tabProdutos.getColumnModel().getColumn(19).setPreferredWidth(50);
+        }
 
         tabProd.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
@@ -571,16 +576,19 @@ public class Produtos extends javax.swing.JDialog {
         tabPreco.setShowVerticalLines(false);
         tabPreco.getTableHeader().setReorderingAllowed(false);
         spPreco.setViewportView(tabPreco);
-        tabPreco.getColumnModel().getColumn(0).setMinWidth(1);
-        tabPreco.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tabPreco.getColumnModel().getColumn(0).setMaxWidth(1);
-        tabPreco.getColumnModel().getColumn(1).setMinWidth(100);
-        tabPreco.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tabPreco.getColumnModel().getColumn(1).setMaxWidth(100);
-        tabPreco.getColumnModel().getColumn(2).setMinWidth(100);
-        tabPreco.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tabPreco.getColumnModel().getColumn(2).setMaxWidth(100);
-        tabPreco.getColumnModel().getColumn(3).setPreferredWidth(150);
+        if (tabPreco.getColumnModel().getColumnCount() > 0) {
+            tabPreco.getColumnModel().getColumn(0).setMinWidth(1);
+            tabPreco.getColumnModel().getColumn(0).setPreferredWidth(1);
+            tabPreco.getColumnModel().getColumn(0).setMaxWidth(1);
+            tabPreco.getColumnModel().getColumn(1).setMinWidth(100);
+            tabPreco.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tabPreco.getColumnModel().getColumn(1).setMaxWidth(100);
+            tabPreco.getColumnModel().getColumn(2).setMinWidth(100);
+            tabPreco.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tabPreco.getColumnModel().getColumn(2).setMaxWidth(100);
+            tabPreco.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabPreco.getColumnModel().getColumn(3).setPreferredWidth(150);
+        }
 
         org.jdesktop.layout.GroupLayout panPrecosLayout = new org.jdesktop.layout.GroupLayout(panPrecos);
         panPrecos.setLayout(panPrecosLayout);
@@ -673,24 +681,28 @@ public class Produtos extends javax.swing.JDialog {
         tabItem.setShowVerticalLines(false);
         tabItem.getTableHeader().setReorderingAllowed(false);
         spItem.setViewportView(tabItem);
-        tabItem.getColumnModel().getColumn(0).setMinWidth(1);
-        tabItem.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tabItem.getColumnModel().getColumn(0).setMaxWidth(1);
-        tabItem.getColumnModel().getColumn(1).setMinWidth(100);
-        tabItem.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tabItem.getColumnModel().getColumn(1).setMaxWidth(100);
-        tabItem.getColumnModel().getColumn(2).setMinWidth(400);
-        tabItem.getColumnModel().getColumn(2).setPreferredWidth(400);
-        tabItem.getColumnModel().getColumn(2).setMaxWidth(400);
-        tabItem.getColumnModel().getColumn(3).setMinWidth(100);
-        tabItem.getColumnModel().getColumn(3).setPreferredWidth(100);
-        tabItem.getColumnModel().getColumn(3).setMaxWidth(100);
-        tabItem.getColumnModel().getColumn(4).setMinWidth(100);
-        tabItem.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tabItem.getColumnModel().getColumn(4).setMaxWidth(100);
-        tabItem.getColumnModel().getColumn(5).setMinWidth(100);
-        tabItem.getColumnModel().getColumn(5).setPreferredWidth(100);
-        tabItem.getColumnModel().getColumn(5).setMaxWidth(100);
+        if (tabItem.getColumnModel().getColumnCount() > 0) {
+            tabItem.getColumnModel().getColumn(0).setMinWidth(1);
+            tabItem.getColumnModel().getColumn(0).setPreferredWidth(1);
+            tabItem.getColumnModel().getColumn(0).setMaxWidth(1);
+            tabItem.getColumnModel().getColumn(1).setMinWidth(100);
+            tabItem.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tabItem.getColumnModel().getColumn(1).setMaxWidth(100);
+            tabItem.getColumnModel().getColumn(2).setMinWidth(400);
+            tabItem.getColumnModel().getColumn(2).setPreferredWidth(400);
+            tabItem.getColumnModel().getColumn(2).setMaxWidth(400);
+            tabItem.getColumnModel().getColumn(3).setMinWidth(100);
+            tabItem.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tabItem.getColumnModel().getColumn(3).setMaxWidth(100);
+            tabItem.getColumnModel().getColumn(4).setMinWidth(100);
+            tabItem.getColumnModel().getColumn(4).setPreferredWidth(100);
+            tabItem.getColumnModel().getColumn(4).setMaxWidth(100);
+            tabItem.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabItem.getColumnModel().getColumn(5).setMinWidth(100);
+            tabItem.getColumnModel().getColumn(5).setPreferredWidth(100);
+            tabItem.getColumnModel().getColumn(5).setMaxWidth(100);
+            tabItem.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+        }
 
         org.jdesktop.layout.GroupLayout panItensLayout = new org.jdesktop.layout.GroupLayout(panItens);
         panItens.setLayout(panItensLayout);
@@ -785,18 +797,21 @@ public class Produtos extends javax.swing.JDialog {
         tabGrade.setShowVerticalLines(false);
         tabGrade.getTableHeader().setReorderingAllowed(false);
         spGrade.setViewportView(tabGrade);
-        tabGrade.getColumnModel().getColumn(0).setMinWidth(1);
-        tabGrade.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tabGrade.getColumnModel().getColumn(0).setMaxWidth(1);
-        tabGrade.getColumnModel().getColumn(1).setPreferredWidth(150);
-        tabGrade.getColumnModel().getColumn(2).setMinWidth(100);
-        tabGrade.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tabGrade.getColumnModel().getColumn(2).setMaxWidth(100);
-        tabGrade.getColumnModel().getColumn(3).setPreferredWidth(100);
-        tabGrade.getColumnModel().getColumn(4).setPreferredWidth(100);
-        tabGrade.getColumnModel().getColumn(5).setMinWidth(100);
-        tabGrade.getColumnModel().getColumn(5).setPreferredWidth(100);
-        tabGrade.getColumnModel().getColumn(5).setMaxWidth(100);
+        if (tabGrade.getColumnModel().getColumnCount() > 0) {
+            tabGrade.getColumnModel().getColumn(0).setMinWidth(1);
+            tabGrade.getColumnModel().getColumn(0).setPreferredWidth(1);
+            tabGrade.getColumnModel().getColumn(0).setMaxWidth(1);
+            tabGrade.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tabGrade.getColumnModel().getColumn(2).setMinWidth(100);
+            tabGrade.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tabGrade.getColumnModel().getColumn(2).setMaxWidth(100);
+            tabGrade.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tabGrade.getColumnModel().getColumn(4).setPreferredWidth(100);
+            tabGrade.getColumnModel().getColumn(5).setMinWidth(100);
+            tabGrade.getColumnModel().getColumn(5).setPreferredWidth(100);
+            tabGrade.getColumnModel().getColumn(5).setMaxWidth(100);
+            tabGrade.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+        }
 
         org.jdesktop.layout.GroupLayout panGradesLayout = new org.jdesktop.layout.GroupLayout(panGrades);
         panGrades.setLayout(panGradesLayout);
@@ -964,8 +979,8 @@ public class Produtos extends javax.swing.JDialog {
                 .addContainerGap(31, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-900)/2, (screenSize.height-662)/2, 900, 662);
+        setSize(new java.awt.Dimension(900, 662));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed

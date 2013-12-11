@@ -6,7 +6,12 @@ import br.com.openpdv.controlador.core.TextFieldLimit;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
+import br.com.openpdv.modelo.core.filtro.FiltroTexto;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
+import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEstado;
 import br.com.openpdv.modelo.sistema.SisMunicipio;
@@ -85,15 +90,11 @@ public class Clientes extends javax.swing.JDialog {
             clientes = new Clientes();
         }
 
-        if (async != null) {
-            clientes.btnNovo.setEnabled(false);
-            clientes.btnExcluir.setEnabled(false);
-        } else {
-            clientes.btnNovo.setEnabled(true);
-            clientes.btnExcluir.setEnabled(true);
-        }
+        clientes.btnNovo.setEnabled(async == null);
+        clientes.btnExcluir.setEnabled(async == null);
         clientes.async = async;
-        clientes.setLista();
+        FiltroNumero fn = new FiltroNumero("sisClienteId", ECompara.IGUAL, 0);
+        clientes.setLista(fn);
         return clientes;
     }
 
@@ -101,9 +102,11 @@ public class Clientes extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        lblFiltro = new javax.swing.JLabel();
+        txtFiltro = new javax.swing.JTextField();
+        btnPesquisar = new javax.swing.JButton();
         spClientes = new javax.swing.JScrollPane();
         tabClientes = new javax.swing.JTable();
-        btnCancelar = new javax.swing.JButton();
         painel = new javax.swing.JPanel();
         lblCPF_CNPJ = new javax.swing.JLabel();
         txtCPF_CNPJ = new javax.swing.JTextField();
@@ -129,9 +132,12 @@ public class Clientes extends javax.swing.JDialog {
         txtTelefone = new javax.swing.JTextField();
         lblEmail = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
+        txtLimite = new javax.swing.JFormattedTextField();
+        lblLimite = new javax.swing.JLabel();
         btnNovo = new javax.swing.JButton();
         btnSalvar = new javax.swing.JButton();
         btnExcluir = new javax.swing.JButton();
+        btnCancelar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Clientes");
@@ -142,6 +148,34 @@ public class Clientes extends javax.swing.JDialog {
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
+            }
+        });
+
+        lblFiltro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblFiltro.setText("Filtro:");
+
+        txtFiltro.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtFiltro.setToolTipText("Digite o texto de busca e precione ENTER. Use % após o texto para filtrar pelo inicio e % antes do texto para filtrar pelo fim.");
+        txtFiltro.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtFiltroKeyPressed(evt);
+            }
+        });
+
+        btnPesquisar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnPesquisar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/pesquisa.png"))); // NOI18N
+        btnPesquisar.setText("Pesquisar");
+        btnPesquisar.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnPesquisar.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnPesquisar.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnPesquisar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPesquisarActionPerformed(evt);
+            }
+        });
+        btnPesquisar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnPesquisarKeyPressed(evt);
             }
         });
 
@@ -178,47 +212,32 @@ public class Clientes extends javax.swing.JDialog {
         tabClientes.getTableHeader().setReorderingAllowed(false);
         spClientes.setViewportView(tabClientes);
         tabClientes.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabClientes.getColumnModel().getColumn(0).setResizable(false);
-        tabClientes.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tabClientes.getColumnModel().getColumn(1).setResizable(false);
-        tabClientes.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tabClientes.getColumnModel().getColumn(2).setResizable(false);
-        tabClientes.getColumnModel().getColumn(2).setPreferredWidth(200);
-        tabClientes.getColumnModel().getColumn(3).setResizable(false);
-        tabClientes.getColumnModel().getColumn(3).setPreferredWidth(50);
-        tabClientes.getColumnModel().getColumn(4).setResizable(false);
-        tabClientes.getColumnModel().getColumn(4).setPreferredWidth(200);
-        tabClientes.getColumnModel().getColumn(5).setResizable(false);
-        tabClientes.getColumnModel().getColumn(5).setPreferredWidth(50);
-        tabClientes.getColumnModel().getColumn(6).setResizable(false);
-        tabClientes.getColumnModel().getColumn(6).setPreferredWidth(100);
-        tabClientes.getColumnModel().getColumn(7).setResizable(false);
-        tabClientes.getColumnModel().getColumn(7).setPreferredWidth(100);
-        tabClientes.getColumnModel().getColumn(8).setResizable(false);
-        tabClientes.getColumnModel().getColumn(8).setPreferredWidth(50);
-        tabClientes.getColumnModel().getColumn(9).setResizable(false);
-        tabClientes.getColumnModel().getColumn(9).setPreferredWidth(100);
-        tabClientes.getColumnModel().getColumn(10).setResizable(false);
-        tabClientes.getColumnModel().getColumn(10).setPreferredWidth(100);
-        tabClientes.getColumnModel().getColumn(11).setResizable(false);
-        tabClientes.getColumnModel().getColumn(11).setPreferredWidth(200);
-
-        btnCancelar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cancelar.png"))); // NOI18N
-        btnCancelar.setText("Cancelar");
-        btnCancelar.setMaximumSize(new java.awt.Dimension(100, 30));
-        btnCancelar.setMinimumSize(new java.awt.Dimension(100, 30));
-        btnCancelar.setPreferredSize(new java.awt.Dimension(100, 30));
-        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelarActionPerformed(evt);
-            }
-        });
-        btnCancelar.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                btnCancelarKeyPressed(evt);
-            }
-        });
+        if (tabClientes.getColumnModel().getColumnCount() > 0) {
+            tabClientes.getColumnModel().getColumn(0).setResizable(false);
+            tabClientes.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tabClientes.getColumnModel().getColumn(1).setResizable(false);
+            tabClientes.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tabClientes.getColumnModel().getColumn(2).setResizable(false);
+            tabClientes.getColumnModel().getColumn(2).setPreferredWidth(200);
+            tabClientes.getColumnModel().getColumn(3).setResizable(false);
+            tabClientes.getColumnModel().getColumn(3).setPreferredWidth(50);
+            tabClientes.getColumnModel().getColumn(4).setResizable(false);
+            tabClientes.getColumnModel().getColumn(4).setPreferredWidth(200);
+            tabClientes.getColumnModel().getColumn(5).setResizable(false);
+            tabClientes.getColumnModel().getColumn(5).setPreferredWidth(50);
+            tabClientes.getColumnModel().getColumn(6).setResizable(false);
+            tabClientes.getColumnModel().getColumn(6).setPreferredWidth(100);
+            tabClientes.getColumnModel().getColumn(7).setResizable(false);
+            tabClientes.getColumnModel().getColumn(7).setPreferredWidth(100);
+            tabClientes.getColumnModel().getColumn(8).setResizable(false);
+            tabClientes.getColumnModel().getColumn(8).setPreferredWidth(50);
+            tabClientes.getColumnModel().getColumn(9).setResizable(false);
+            tabClientes.getColumnModel().getColumn(9).setPreferredWidth(100);
+            tabClientes.getColumnModel().getColumn(10).setResizable(false);
+            tabClientes.getColumnModel().getColumn(10).setPreferredWidth(100);
+            tabClientes.getColumnModel().getColumn(11).setResizable(false);
+            tabClientes.getColumnModel().getColumn(11).setPreferredWidth(200);
+        }
 
         painel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -317,7 +336,7 @@ public class Clientes extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(lblMunicipio)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(cmbMunicipio, 0, 236, Short.MAX_VALUE)
+                        .add(cmbMunicipio, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(lblTelefone)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -400,6 +419,20 @@ public class Clientes extends javax.swing.JDialog {
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        txtLimite.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtLimite.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtLimite.setText("100");
+        txtLimite.setToolTipText("Número máximo de registros na listagem. [0] para todos");
+        txtLimite.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtLimite.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtLimiteFocusLost(evt);
+            }
+        });
+
+        lblLimite.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblLimite.setText("Limite de registros.");
+
         btnNovo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnNovo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/novo.png"))); // NOI18N
         btnNovo.setText("Novo");
@@ -451,47 +484,82 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
 
+        btnCancelar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cancelar.png"))); // NOI18N
+        btnCancelar.setText("Cancelar");
+        btnCancelar.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnCancelar.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnCancelar.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelarActionPerformed(evt);
+            }
+        });
+        btnCancelar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnCancelarKeyPressed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(painel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .add(layout.createSequentialGroup()
-                        .add(0, 6, Short.MAX_VALUE)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                            .add(layout.createSequentialGroup()
-                                .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                            .add(spClientes, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 774, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-                .add(16, 16, 16))
+            .add(layout.createSequentialGroup()
+                .addContainerGap()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
+                        .add(lblFiltro)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(txtFiltro)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 92, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, painel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, spClientes)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
+                            .add(txtLimite, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 89, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(6, 6, 6)
+                            .add(lblLimite)
+                            .add(170, 170, 170)
+                            .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                            .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                            .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                            .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(6, 6, 6)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(lblFiltro)
+                    .add(txtFiltro, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(btnPesquisar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(spClientes, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 216, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(painel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(txtLimite, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(layout.createSequentialGroup()
+                            .add(6, 6, 6)
+                            .add(lblLimite))))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-796)/2, (screenSize.height-414)/2, 796, 414);
+        setSize(new java.awt.Dimension(804, 458));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -541,10 +609,49 @@ public class Clientes extends javax.swing.JDialog {
             excluir();
         }
     }//GEN-LAST:event_btnExcluirKeyPressed
+
+    private void txtLimiteFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLimiteFocusLost
+        try {
+            int limite = Integer.valueOf(txtLimite.getText());
+            if (limite < 0) {
+                txtLimite.setText("100");
+            }
+        } catch (NumberFormatException ex) {
+            txtLimite.setText("100");
+        }
+    }//GEN-LAST:event_txtLimiteFocusLost
+
+    private void txtFiltroKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFiltroKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnPesquisarActionPerformed(null);
+        }
+    }//GEN-LAST:event_txtFiltroKeyPressed
+
+    private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
+        String texto = txtFiltro.getText().toUpperCase();
+        if (texto.equals("")) {
+            setLista(null);
+        } else {
+            GrupoFiltro filtro = new GrupoFiltro();
+            FiltroTexto ft = new FiltroTexto("sisClienteNome", ECompara.CONTEM, texto);
+            filtro.add(ft, EJuncao.OU);
+            FiltroTexto ft1 = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto.replaceAll("\\D", ""));
+            filtro.add(ft1);
+            setLista(filtro);
+        }
+    }//GEN-LAST:event_btnPesquisarActionPerformed
+
+    private void btnPesquisarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnPesquisarKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnPesquisarActionPerformed(null);
+        }
+    }//GEN-LAST:event_btnPesquisarKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnExcluir;
     private javax.swing.JButton btnNovo;
+    private javax.swing.JButton btnPesquisar;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JComboBox cmbMunicipio;
     private javax.swing.JComboBox cmbUF;
@@ -554,6 +661,8 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JLabel lblComplemento;
     private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblEndereco;
+    private javax.swing.JLabel lblFiltro;
+    private javax.swing.JLabel lblLimite;
     private javax.swing.JLabel lblMunicipio;
     private javax.swing.JLabel lblNome;
     private javax.swing.JLabel lblNumero;
@@ -569,6 +678,8 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JTextField txtComplemento;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtEndereco;
+    private javax.swing.JTextField txtFiltro;
+    private javax.swing.JFormattedTextField txtLimite;
     private javax.swing.JTextField txtNome;
     private javax.swing.JFormattedTextField txtNumero;
     private javax.swing.JTextField txtRG_IE;
@@ -612,7 +723,7 @@ public class Clientes extends javax.swing.JDialog {
                     async.sucesso(cliente);
                     dispose();
                 } else {
-                    setLista();
+                    btnPesquisarActionPerformed(null);
                 }
             } catch (OpenPdvException ex) {
                 log.error("Erro ao salvar a embalagem.", ex);
@@ -631,7 +742,7 @@ public class Clientes extends javax.swing.JDialog {
             if (escolha == 0) {
                 try {
                     service.deletar(new SisCliente(cod));
-                    setLista();
+                    btnPesquisarActionPerformed(null);
                 } catch (OpenPdvException ex) {
                     log.debug("Erro ao excluir o cliente -> " + cod, ex);
                     JOptionPane.showMessageDialog(this, "Esta registro não pode ser excluído!", "Clientes", JOptionPane.WARNING_MESSAGE);
@@ -675,10 +786,10 @@ public class Clientes extends javax.swing.JDialog {
     /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
      */
-    private void setLista() {
+    private void setLista(IFiltro filtro) {
         try {
-            List<SisCliente> clis = service.selecionar(new SisCliente(), 0, 0, null);
-
+            int limite = Integer.valueOf(txtLimite.getText());
+            List<SisCliente> clis = service.selecionar(new SisCliente(), 0, limite, filtro);
             while (dtm.getRowCount() > 0) {
                 dtm.removeRow(0);
             }

@@ -47,9 +47,11 @@ public class ComandoSalvarPagamento implements IComando {
         }
 
         // percorre os pagamentos para inserir no banco e imprimir cartoes
+        ComandoImprimirCartao cmdCartao = new ComandoImprimirCartao();
         for (EcfPagamento pag : pagamentos) {
-            if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && Util.getConfig().get("tef.titulo") != null) {
-                new ComandoImprimirCartao(pag, valCard).executar();
+            if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
+                cmdCartao.abrir(pag, valCard);
+                cmdCartao.executar();
                 impressos.add(new File(pag.getArquivo()));
             } else if (pag.getEcfPagamentoParcelas() == null) {
                 List<EcfPagamentoParcela> parcelas = new ArrayList<>();
@@ -60,10 +62,10 @@ public class ComandoSalvarPagamento implements IComando {
                 parcelas.add(parcela);
                 pag.setEcfPagamentoParcelas(parcelas);
             }
-
             // salva o pagamento
             salvarPagamento(pag);
         }
+        cmdCartao.fechar();
 
         // caso todos os cartoes tenham todas as vias impressas, deleta os arquivos pendentes dos mesmos
         for (File file : impressos) {

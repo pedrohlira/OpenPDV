@@ -28,7 +28,7 @@ public class ComandoAbrirVenda implements IComando {
     private String[] resp;
 
     /**
-     * Costrutor usado na recuperacao de venda aberta.
+     * Costrutor padrao.
      */
     public ComandoAbrirVenda() {
         this(null);
@@ -85,6 +85,7 @@ public class ComandoAbrirVenda implements IComando {
      */
     public void AbrirVendaBanco() throws OpenPdvException {
         EcfVenda venda = new EcfVenda();
+        venda.setEcfImpressora(Caixa.getInstancia().getImpressora());
         venda.setSisUsuario(Login.getOperador());
         if (cliente != null) {
             venda.setSisVendedor(cliente.getVendedor());

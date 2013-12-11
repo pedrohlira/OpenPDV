@@ -6,10 +6,15 @@ import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
+import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.core.filtro.FiltroTexto;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
 import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
+import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
 import br.com.openpdv.modelo.ecf.*;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdProduto;
@@ -21,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -54,7 +61,8 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que cadastra na base do server as notas de consumidor emitidas pelos sistemas em modo client.
+     * Metodo que cadastra na base do server as notas de consumidor emitidas
+     * pelos sistemas em modo client.
      *
      * @param ecfNota um objeto do tipo Nota.
      * @throws RestException em caso de nao conseguir acessar a informacao.
@@ -115,7 +123,8 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que cadastra na base do server as nfe emitidas pelos sistemas em modo client.
+     * Metodo que cadastra na base do server as nfe emitidas pelos sistemas em
+     * modo client.
      *
      * @param ecfNfe um objeto do tipo NFe.
      * @throws RestException em caso de nao conseguir acessar a informacao.
@@ -240,7 +249,91 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que cadastra na base do server as reducoes Z, totais, vendas, produtos vendidos, pagamentos, documentos emitidos pelos sistemas em modo client.
+     * Metodo que cadastra na base do server as vendas, produtos vendidos,
+     * pagamentos emitidos pelos sistemas em modo client.
+     *
+     * @param venda um objeto do tipo Venda.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
+    @Path("/venda")
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void setVenda(EcfVenda venda) throws RestException {
+        autorizar();
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
+        try {
+            emf = Conexao.getInstancia();
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            // pega a impressora correta no sistema
+            EcfImpressora imp = getImp(venda.getEcfImpressora().getEcfImpressoraSerie());
+            venda.setEcfImpressora(imp);
+
+            // identifica o cliente
+            if (venda.getSisCliente() != null) {
+                SisCliente cliente = getCliente(em, venda.getSisCliente());
+                venda.setSisCliente(cliente);
+            }
+
+            // guarda os produtos vendidos , pagamentos e trocas
+            List<EcfVendaProduto> vps = venda.getEcfVendaProdutos();
+            List<EcfPagamento> pags = venda.getEcfPagamentos();
+            List<EcfTroca> trocas = venda.getEcfTrocas();
+
+            // salva a venda
+            venda.setId(0);
+            venda.setEcfVendaProdutos(null);
+            venda.setEcfPagamentos(null);
+            venda.setEcfTrocas(null);
+            venda = (EcfVenda) service.salvar(em, venda);
+
+            // salva os produtos e atualiza o estoque
+            for (EcfVendaProduto vp : vps) {
+                vp.setId(0);
+                vp.setEcfVenda(venda);
+                vp = (EcfVendaProduto) service.salvar(em, vp);
+
+                if (!vp.getEcfVendaProdutoCancelado()) {
+                    service.executar(em, getEstoque(vp.getEcfVendaProdutoQuantidade(), vp.getProdEmbalagem(), vp.getProdProduto()));
+                }
+            }
+
+            // salva os pagamentos
+            for (EcfPagamento pag : pags) {
+                pag.setEcfVenda(venda);
+                salvarPagamento(em, pag);
+            }
+
+            // salva as trocas
+            if (trocas != null) {
+                for (EcfTroca troca : trocas) {
+                    troca.setEcfVenda(venda);
+                    salvarTroca(em, troca);
+                }
+            }
+
+            em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            log.error("Erro ao salvar venda.", ex);
+            throw new RestException(ex.getMessage());
+        } finally {
+            if (em != null) {
+                em.close();
+                emf.close();
+            }
+        }
+    }
+
+    /**
+     * Metodo que cadastra na base do server as reducoes Z, totais, documentos
+     * emitidos pelos sistemas em modo client.
      *
      * @param ecfZ um objeto do tipo ReducaoZ com a lista de documentos anexada.
      * @throws RestException em caso de nao conseguir acessar a informacao.
@@ -264,7 +357,6 @@ public class RestServidor extends ARest {
 
             // guarda os totais e vendas e docs
             List<EcfZTotais> totais = ecfZ.getEcfZTotais();
-            List<EcfVenda> vendas = ecfZ.getEcfVendas();
             List<EcfDocumento> docs = ecfZ.getEcfDocumentos();
 
             // salva a reduzaoZ
@@ -281,18 +373,28 @@ public class RestServidor extends ARest {
                 service.salvar(em, tot);
             }
 
-            // salva as vendas
-            for (EcfVenda venda : vendas) {
-                venda.setEcfZ(ecfZ);
-                salvarVenda(em, venda);
-            }
-
             // salva os documentos
             for (EcfDocumento doc : docs) {
                 doc.setEcfImpressora(imp);
+                doc.setEcfZ(ecfZ);
                 doc.setId(0);
                 service.salvar(em, doc);
             }
+
+            // atualiza as vendas
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(ecfZ.getEcfZMovimento());
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            Date fim = cal.getTime();
+
+            FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, imp);
+            FiltroData fd = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, ecfZ.getEcfZMovimento());
+            FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MENOR, fim);
+            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd, fd1});
+            ParametroObjeto po = new ParametroObjeto("ecfZ", ecfZ);
+
+            Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf, po);
+            service.executar(em, sql);
 
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -311,62 +413,13 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que salva as vendas no sistema fazendo as validacoes.
-     *
-     * @param em um objeto de transacao.
-     * @param venda o objeto de venda.
-     * @throws OpenPdvException dispara em caso de erro ao salvar.
-     */
-    private void salvarVenda(EntityManager em, EcfVenda venda) throws OpenPdvException {
-        // identifica o cliente
-        if (venda.getSisCliente() != null) {
-            SisCliente cliente = getCliente(em, venda.getSisCliente());
-            venda.setSisCliente(cliente);
-        }
-
-        // verifica se tem troca vinculada
-        if (venda.getEcfTroca() != null) {
-            EcfTroca troca = getTroca(em, venda.getEcfTroca());
-            venda.setEcfTroca(troca);
-        }
-
-        // guarda os produtos vendidos e pagamentos
-        List<EcfVendaProduto> vps = venda.getEcfVendaProdutos();
-        List<EcfPagamento> pags = venda.getEcfPagamentos();
-
-        // salva a venda
-        venda.setId(0);
-        venda.setEcfVendaProdutos(null);
-        venda.setEcfPagamentos(null);
-        venda = (EcfVenda) service.salvar(em, venda);
-
-        // salva os produtos e atualiza o estoque
-        for (EcfVendaProduto vp : vps) {
-            vp.setId(0);
-            vp.setEcfVenda(venda);
-            vp = (EcfVendaProduto) service.salvar(em, vp);
-
-            if (!vp.getEcfVendaProdutoCancelado()) {
-                service.executar(em, getEstoque(vp.getEcfVendaProdutoQuantidade(), vp.getProdEmbalagem(), vp.getProdProduto()));
-            }
-        }
-
-        // salva os pagamentos
-        for (EcfPagamento pag : pags) {
-            pag.setEcfVenda(venda);
-            salvarPagamento(em, pag);
-        }
-    }
-
-    /**
      * Metodo que salva a troca no sistema fazendo as validacoes.
      *
      * @param em um objeto de transacao.
      * @param troca o objeto de troca.
-     * @return a troca salva no sistama.
      * @throws OpenPdvException dispara em caso de erro ao salvar.
      */
-    private EcfTroca getTroca(EntityManager em, EcfTroca troca) throws OpenPdvException {
+    private void salvarTroca(EntityManager em, EcfTroca troca) throws OpenPdvException {
         // guarda os produtos da troca
         List<EcfTrocaProduto> tps = troca.getEcfTrocaProdutos();
 
@@ -381,8 +434,6 @@ public class RestServidor extends ARest {
             tp.setEcfTroca(troca);
             service.salvar(em, tp);
         }
-
-        return troca;
     }
 
     /**
@@ -410,7 +461,8 @@ public class RestServidor extends ARest {
     }
 
     /**
-     * Metodo que encontra o cliente dentro do sistema usando os dados do cliente enviado, como o CNPJ.
+     * Metodo que encontra o cliente dentro do sistema usando os dados do
+     * cliente enviado, como o CNPJ.
      *
      * @param em um objeto de transacao.
      * @param sisCliente o obejto de cliente.
@@ -441,7 +493,8 @@ public class RestServidor extends ARest {
      * @param emb o tipo de embalagem usada na venda.
      * @param prod o produto que foi vendido.
      * @return uma instrucao de SQL no formato de objeto para ser executada.
-     * @throws OpenPdvException dispara caso nao consiga gerar o sql de atualizacao.
+     * @throws OpenPdvException dispara caso nao consiga gerar o sql de
+     * atualizacao.
      */
     private Sql getEstoque(double qtd, ProdEmbalagem emb, ProdProduto prod) throws OpenPdvException {
         // fatorando a quantida no estoque

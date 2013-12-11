@@ -74,6 +74,9 @@
 
     <target name="-post-jar">
         <mkdir dir="${dist.jar.dir}/arquivos"/>
+        <mkdir dir="${dist.jar.dir}/arquivos/exportar"/>
+        <mkdir dir="${dist.jar.dir}/arquivos/importar"/>
+        <mkdir dir="${dist.jar.dir}/arquivos/cat52"/>
         <mkdir dir="${dist.jar.dir}/db"/>
         <mkdir dir="${dist.jar.dir}/dlls"/>
         <mkdir dir="${dist.jar.dir}/logs"/>

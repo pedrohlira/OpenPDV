@@ -34,6 +34,7 @@ SET default_with_oids = false;
 
 CREATE TABLE ecf_documento (
     ecf_documento_id integer NOT NULL,
+    ecf_z_id integer DEFAULT NULL,
     ecf_impressora_id integer NOT NULL,
     ecf_documento_usuario integer NOT NULL,
     ecf_documento_coo integer NOT NULL,
@@ -401,6 +402,7 @@ ALTER SEQUENCE ecf_pagamento_totais_ecf_pagamento_totais_id_seq OWNED BY ecf_pag
 
 CREATE TABLE ecf_troca (
     ecf_troca_id integer NOT NULL,
+    ecf_venda_id integer,
     ecf_troca_cliente character varying(18) NOT NULL,
     ecf_troca_data timestamp without time zone NOT NULL,
     ecf_troca_valor numeric(10,2) NOT NULL,
@@ -483,8 +485,8 @@ CREATE TABLE ecf_venda (
     sis_vendedor_id integer,
     sis_gerente_id integer,
     sis_cliente_id integer,
+    ecf_impressora_id integer NOT NULL,
     ecf_z_id integer,
-    ecf_troca_id integer,
     ecf_venda_ccf integer NOT NULL,
     ecf_venda_coo integer NOT NULL,
     ecf_venda_data timestamp without time zone NOT NULL,
@@ -494,6 +496,7 @@ CREATE TABLE ecf_venda (
     ecf_venda_liquido numeric(10,2) NOT NULL,
     ecf_venda_fechada boolean NOT NULL,
     ecf_venda_cancelada boolean NOT NULL,
+    ecf_venda_sinc boolean NOT NULL,
     ecf_venda_observacao character varying(255)
 );
 
@@ -19259,6 +19262,13 @@ CREATE INDEX ik_prod_produto_8 ON prod_produto USING btree (prod_produto_ativo);
 ALTER TABLE ONLY ecf_documento
     ADD CONSTRAINT fk_ecf_documento_1 FOREIGN KEY (ecf_impressora_id) REFERENCES ecf_impressora(ecf_impressora_id);
 
+--
+-- Name: fk_ecf_documento_2; Type: FK CONSTRAINT; Schema: public; Owner: openpdv
+--
+
+ALTER TABLE ONLY ecf_documento
+    ADD CONSTRAINT fk_ecf_documento_2 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z(ecf_z_id);
+
 
 --
 -- Name: fk_ecf_nota_1; Type: FK CONSTRAINT; Schema: public; Owner: openpdv
@@ -19401,7 +19411,15 @@ ALTER TABLE ONLY ecf_venda
 --
 
 ALTER TABLE ONLY ecf_venda
-    ADD CONSTRAINT fk_ecf_venda_6 FOREIGN KEY (ecf_troca_id) REFERENCES ecf_troca(ecf_troca_id);
+    ADD CONSTRAINT fk_ecf_venda_6 FOREIGN KEY (ecf_impressora_id) REFERENCES ecf_impressora(ecf_impressora_id);
+
+
+--
+-- Name: fk_ecf_troca_1; Type: FK CONSTRAINT; Schema: public; Owner: openpdv
+--
+
+ALTER TABLE ONLY ecf_troca
+    ADD CONSTRAINT fk_ecf_troca_1 FOREIGN KEY (ecf_venda_id) REFERENCES ecf_venda(ecf_venda_id);
 
 
 --

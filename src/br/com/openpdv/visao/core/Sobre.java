@@ -48,6 +48,11 @@ public class Sobre extends JDialog {
             sobre.getLblValidadeNome().setText(data);
         }
 
+        sobre.lblVersaoNome.setText(PAF.AUXILIAR.getProperty("paf.versao"));
+        sobre.lblSiteNome.setText(Util.getConfig().get("openpdv.site"));
+        sobre.lblEmailNome.setText(Util.getConfig().get("openpdv.email"));
+        sobre.lblTelefoneNome.setText(Util.getConfig().get("openpdv.telefone"));
+        sobre.lblSkypeNome.setText(Util.getConfig().get("openpdv.skype"));
         return sobre;
     }
 
@@ -119,7 +124,7 @@ public class Sobre extends JDialog {
         lblEmpresaNome.setText("PhD - Systems Solutions");
 
         lblVersaoNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
-        lblVersaoNome.setText("1.03");
+        lblVersaoNome.setText("1.00");
 
         lblAutorNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblAutorNome.setText("Pedro Henrique de Lira");

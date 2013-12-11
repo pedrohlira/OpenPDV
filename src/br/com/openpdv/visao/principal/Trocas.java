@@ -1,20 +1,19 @@
 package br.com.openpdv.visao.principal;
 
 import br.com.openpdv.controlador.core.*;
-import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
-import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
-import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.ecf.EcfTroca;
 import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
+import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.openpdv.visao.venda.Grades;
 import br.com.openpdv.visao.venda.Precos;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
@@ -56,31 +55,24 @@ public class Trocas extends javax.swing.JDialog {
         public void sucesso(final ProdProduto prod) {
             if (prod == null) {
                 JOptionPane.showMessageDialog(trocas, "Produto não encontrado.", "Pesquisa", JOptionPane.INFORMATION_MESSAGE);
-                btnAdicionar.requestFocus();
             } else {
                 if (!prod.getProdPrecos().isEmpty()) {
-                    Precos.getInstancia(new AsyncCallback<ProdPreco>() {
+                    Precos.getInstancia(new AsyncDoubleBack<ProdProduto, ProdPreco>() {
                         @Override
-                        public void sucesso(ProdPreco preco) {
-                            // se selecionou
-                            if (preco != null) {
+                        public void sucesso(ProdProduto produto, ProdPreco preco) {
+                            try {
                                 prod.setProdEmbalagem(preco.getProdEmbalagem());
                                 prod.setProdProdutoPreco(preco.getProdPrecoValor());
                                 prod.setProdProdutoBarra(preco.getProdPrecoBarra());
+                                adicionar(produto, 1.00);
+                            } catch (OpenPdvException ex) {
+                                erro(ex);
                             }
-                            falha(null);
                         }
 
                         @Override
                         public void falha(Exception excecao) {
-                            try {
-                                adicionar(prod, 1.00);
-                            } catch (OpenPdvException ex) {
-                                log.error(ex);
-                                JOptionPane.showMessageDialog(trocas, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
-                            } finally {
-                                btnAdicionar.requestFocus();
-                            }
+                            erro(excecao);
                         }
                     }, prod).setVisible(true);
                 } else if (!prod.getProdComposicoes().isEmpty()) {
@@ -93,30 +85,41 @@ public class Trocas extends javax.swing.JDialog {
                         try {
                             adicionar(item, comp.getProdComposicaoQuantidade());
                         } catch (OpenPdvException ex) {
-                            log.error(ex);
-                            JOptionPane.showMessageDialog(trocas, "Não foi possível adicionar um item!\nCancele os itens adicionados.", "Pesquisa", JOptionPane.WARNING_MESSAGE);
+                            erro(ex);
                             break;
                         }
                     }
-                    btnAdicionar.requestFocus();
+                } else if (!prod.getProdGrades().isEmpty()) {
+                    Grades.getInstancia(new AsyncDoubleBack<ProdProduto, ProdGrade>() {
+                        @Override
+                        public void sucesso(ProdProduto produto, ProdGrade grade) {
+                            try {
+                                prod.setProdProdutoBarra(grade.getProdGradeBarra());
+                                adicionar(prod, 1.00);
+                            } catch (OpenPdvException ex) {
+                                erro(ex);
+                            }
+                        }
+
+                        @Override
+                        public void falha(Exception excecao) {
+                            erro(excecao);
+                        }
+                    }, prod).setVisible(true);
                 } else {
                     try {
                         adicionar(prod, 1.00);
                     } catch (OpenPdvException ex) {
-                        log.error(ex);
-                        JOptionPane.showMessageDialog(trocas, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
-                    } finally {
-                        btnAdicionar.requestFocus();
+                        erro(ex);
                     }
                 }
             }
+            btnAdicionar.requestFocus();
         }
 
         @Override
         public void falha(Exception excecao) {
-            log.error("Problemas na pesquisa de produtos.", excecao);
-            JOptionPane.showMessageDialog(trocas, "Erro ao pesquisar o produto.", "Pesquisa", JOptionPane.ERROR_MESSAGE);
-            btnAdicionar.requestFocus();
+            erro(excecao);
         }
 
         private void adicionar(ProdProduto prod, double qtd) throws OpenPdvException {
@@ -124,6 +127,12 @@ public class Trocas extends javax.swing.JDialog {
                 qtd, prod.getProdProdutoPreco(), prod.getProdProdutoPreco(), dtmProdutos.getRowCount() + 1};
             dtmProdutos.addRow(obj);
             totalizar();
+        }
+        
+        private void erro(Exception ex) {
+            log.error(ex);
+            JOptionPane.showMessageDialog(trocas, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
+            btnAdicionar.requestFocus();
         }
     };
 
@@ -682,8 +691,8 @@ public class Trocas extends javax.swing.JDialog {
      * Metodo que salva um novo registro.
      */
     private void salvar() {
-        if (txtCpfCnpj.getText().equals("") || txtECF.getText().equals("") || txtCOO.getText().equals("") || txtValor.getText().equals("0,00")) {
-            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!\nAdicione também produtos com valor maior que zero.", "Trocas", JOptionPane.INFORMATION_MESSAGE);
+        if (txtCpfCnpj.getText().equals("") || txtECF.getText().equals("") || txtECF.getText().equals("0") || txtCOO.getText().equals("") || txtCOO.getText().equals("0") || txtValor.getText().equals("0,00")) {
+            JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios e não podem ser zeros!\nAdicione também produtos com valor maior que zero.", "Trocas", JOptionPane.INFORMATION_MESSAGE);
         } else {
             EntityManagerFactory emf = null;
             EntityManager em = null;
@@ -781,6 +790,7 @@ public class Trocas extends javax.swing.JDialog {
                 tp.setEcfTroca(troca);
                 tp.setProdProduto((ProdProduto) dtmProdutos.getValueAt(i, 1));
                 tp.setProdEmbalagem(new ProdEmbalagem(Integer.valueOf(emb[0])));
+                tp.setEcfTrocaProdutoBarra(tp.getProdProduto().getProdProdutoBarra());
                 tp.setEcfTrocaProdutoQuantidade(qtd);
                 tp.setEcfTrocaProdutoValor(valor);
                 tp.setEcfTrocaProdutoTotal((Double) dtmProdutos.getValueAt(i, 6));

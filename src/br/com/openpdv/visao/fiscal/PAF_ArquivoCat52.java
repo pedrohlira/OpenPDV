@@ -1,40 +1,42 @@
 package br.com.openpdv.visao.fiscal;
 
-import br.com.openpdv.controlador.comandos.ComandoEmitirMovimentoECF;
+import br.com.openpdv.controlador.comandos.ComandoGerarCat52;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.FiltroNumero;
-import br.com.openpdv.modelo.ecf.EcfImpressora;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.FiltroData;
+import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
+import br.com.openpdv.modelo.core.filtro.IFiltro;
+import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
+import org.apache.log4j.Logger;
 
 /**
  * Classe que representa os menus de memoria fiscal exigidos pelo PAF.
  *
  * @author Pedro H. Lira
  */
-public class PAF_MovimentosECF extends JDialog {
+public class PAF_ArquivoCat52 extends JDialog {
 
-    private static PAF_MovimentosECF paf_movimento;
-    private CoreService service;
-    private int impressoraId;
+    private static PAF_ArquivoCat52 paf_cat52;
     private Date inicio;
     private Date fim;
 
     /**
      * Construtor padrao.
      */
-    private PAF_MovimentosECF() {
+    private PAF_ArquivoCat52() {
         super(Caixa.getInstancia());
         initComponents();
-        service = new CoreService();
-        carregaEcfs();
     }
 
     /**
@@ -42,14 +44,14 @@ public class PAF_MovimentosECF extends JDialog {
      *
      * @return o objeto de PAF_PAGAMENTO.
      */
-    public static PAF_MovimentosECF getInstancia() {
-        if (paf_movimento == null) {
-            paf_movimento = new PAF_MovimentosECF();
+    public static PAF_ArquivoCat52 getInstancia() {
+        if (paf_cat52 == null) {
+            paf_cat52 = new PAF_ArquivoCat52();
         }
 
-        paf_movimento.txtDtInicio.setText(null);
-        paf_movimento.txtDtFim.setText(null);
-        return paf_movimento;
+        paf_cat52.txtDtInicio.setText(null);
+        paf_cat52.txtDtFim.setText(null);
+        return paf_cat52;
     }
 
     @SuppressWarnings("unchecked")
@@ -58,8 +60,6 @@ public class PAF_MovimentosECF extends JDialog {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
-        lblECF = new javax.swing.JLabel();
-        cmbECF = new javax.swing.JComboBox();
         lblDtInicio = new javax.swing.JLabel();
         txtDtInicio = new javax.swing.JFormattedTextField();
         lblDtFim = new javax.swing.JLabel();
@@ -69,7 +69,7 @@ public class PAF_MovimentosECF extends JDialog {
         btnCancelar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Movimentos por ECF");
+        setTitle("Gerar Arquivo Cat52");
         setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         setIconImage(null);
         setModal(true);
@@ -79,11 +79,6 @@ public class PAF_MovimentosECF extends JDialog {
                 formWindowClosing(evt);
             }
         });
-
-        lblECF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        lblECF.setText("ECF:");
-
-        cmbECF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
         lblDtInicio.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblDtInicio.setText("Data inicial:");
@@ -140,10 +135,6 @@ public class PAF_MovimentosECF extends JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(separador, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(lblECF)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbECF, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(lblDtInicio)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtDtInicio, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -162,10 +153,6 @@ public class PAF_MovimentosECF extends JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblECF)
-                    .addComponent(cmbECF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblDtInicio)
                     .addComponent(txtDtInicio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblDtFim)
@@ -176,11 +163,11 @@ public class PAF_MovimentosECF extends JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-323)/2, (screenSize.height-160)/2, 323, 160);
+        setSize(new java.awt.Dimension(323, 129));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
@@ -213,28 +200,12 @@ public class PAF_MovimentosECF extends JDialog {
     private javax.swing.JButton btnOk;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
-    private javax.swing.JComboBox cmbECF;
     private javax.swing.JLabel lblDtFim;
     private javax.swing.JLabel lblDtInicio;
-    private javax.swing.JLabel lblECF;
     private javax.swing.JSeparator separador;
     private javax.swing.JFormattedTextField txtDtFim;
     private javax.swing.JFormattedTextField txtDtInicio;
     // End of variables declaration//GEN-END:variables
-
-    /**
-     * Metodo que carrega as impressoras na combo box
-     */
-    private void carregaEcfs() {
-        try {
-            List<EcfImpressora> ecfs = service.selecionar(new EcfImpressora(), 0, 0, null);
-            for (EcfImpressora ecf : ecfs) {
-                cmbECF.addItem(ecf.getId() + " - [" + ecf.getEcfImpressoraSerie() + "]");
-            }
-        } catch (OpenPdvException ex) {
-            JOptionPane.showMessageDialog(this, "Não foi possível carregar as ECFs do sistema!", "Movimentos por ECF", JOptionPane.WARNING_MESSAGE);
-        }
-    }
 
     /**
      * Metodo que tem a acao do botao OK.
@@ -245,18 +216,34 @@ public class PAF_MovimentosECF extends JDialog {
 
                 @Override
                 public void run() {
+                    boolean sucesso = true;
+                    List<EcfZ> zs = new ArrayList<>();
+
                     try {
-                        FiltroNumero fn1 = new FiltroNumero("ecfImpressoraId", ECompara.IGUAL, impressoraId);
-                        EcfImpressora ecf = (EcfImpressora) service.selecionar(new EcfImpressora(), fn1);
-
-                        ComandoEmitirMovimentoECF movimento = new ComandoEmitirMovimentoECF(ecf, inicio, fim);
-                        movimento.executar();
-
-                        Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(paf_movimento, "Arquivo gerado com sucesso em:\n" + movimento.getPath(), "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                        // seleciona as Zs deste periodo
+                        CoreService service = new CoreService();
+                        FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
+                        FiltroData dt1 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
+                        FiltroData dt2 = new FiltroData("ecfZMovimento", ECompara.MENOR_IGUAL, fim);
+                        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, dt1, dt2});
+                        zs = service.selecionar(new EcfZ(), 0, 0, gf);
                     } catch (OpenPdvException ex) {
-                        Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(paf_movimento, "Não foi possível gerar o arquivo!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
+                        sucesso = false;
+                    }
+
+                    for (EcfZ z : zs) {
+                        try {
+                            new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), z).executar();
+                        } catch (OpenPdvException ex) {
+                            sucesso = false;
+                        }
+                    }
+
+                    Aguarde.getInstancia().setVisible(false);
+                    if (sucesso) {
+                        JOptionPane.showMessageDialog(paf_cat52, "Arquivos gerados com sucesso!", "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(paf_cat52, "Alguns arquivo não foram gerados!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
                     }
                 }
             }).start();
@@ -272,23 +259,21 @@ public class PAF_MovimentosECF extends JDialog {
      */
     private boolean validar() {
         boolean retorno = true;
-        String[] ecf = cmbECF.getSelectedItem().toString().split(" - ");
-        impressoraId = Integer.valueOf(ecf[0]);
 
         if (txtDtInicio.getText().equals("") || txtDtFim.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "As duas informações são necessárias!", "Movimentos por ECF", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "As duas informações são necessárias!", "Gerar Arquivo Cat52", JOptionPane.WARNING_MESSAGE);
             retorno = false;
         } else {
             inicio = Util.getData(txtDtInicio.getText());
             fim = Util.getData(txtDtFim.getText());
             if (inicio == null || fim == null) {
-                JOptionPane.showMessageDialog(this, "As duas datas precisam ser válidas!", "Movimentos por ECF", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "As duas datas precisam ser válidas!", "Gerar Arquivo Cat52", JOptionPane.WARNING_MESSAGE);
                 retorno = false;
             } else if (inicio.compareTo(fim) > 0) {
-                JOptionPane.showMessageDialog(this, "A data inicial não pode ser maior que a data final!", "Movimentos por ECF", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "A data inicial não pode ser maior que a data final!", "Gerar Arquivo Cat52", JOptionPane.WARNING_MESSAGE);
                 retorno = false;
             } else if (fim.compareTo(new Date()) > 0) {
-                JOptionPane.showMessageDialog(this, "A data final não pode ser maior que a data atual!", "Movimentos por ECF", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "A data final não pode ser maior que a data atual!", "Gerar Arquivo Cat52", JOptionPane.WARNING_MESSAGE);
                 retorno = false;
             }
         }

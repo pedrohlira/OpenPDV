@@ -8,9 +8,13 @@ import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
+import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
+import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.ecf.EcfZTotais;
@@ -24,7 +28,6 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 import org.ini4j.Wini;
 
@@ -38,7 +41,6 @@ public class ComandoEmitirReducaoZ implements IComando {
     private Logger log;
     private CoreService service;
     private Date dataMovimento;
-    private int zId;
 
     /**
      * Construtor padrao.
@@ -57,14 +59,16 @@ public class ComandoEmitirReducaoZ implements IComando {
         // salva os dados no banco
         emitirReducaoZBanco();
         // gera o arquivo Movimento do ECF do dia
-        ComandoEmitirMovimentoECF movimento = new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento);
-        movimento.executar();
+        new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento).executar();
         // gera os totais dos pagamentos
-        ComandoTotalizarPagamentos totalizar = new ComandoTotalizarPagamentos(dataMovimento);
-        totalizar.executar();
+        new ComandoTotalizarPagamentos(dataMovimento).executar();
+        // gera o arquivo do cat52
+        if (Boolean.valueOf(Util.getConfig().get("ecf.cat52"))) {
+            new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();
+        }
         // atualizando o servidor
-        if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
-            new ComandoEnviarDados().executar();
+        if (Util.getConfig().get("sinc.tipo").equals("arquivo") || !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+            ComandoEnviarDados.getInstancia().executar();
         }
     }
 
@@ -79,32 +83,34 @@ public class ComandoEmitirReducaoZ implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void emitirReducaoZEcf() throws OpenPdvException {
-        String[] resp = ECF.enviar(EComandoECF.ECF_ReducaoZ);
+        ECF.enviar(EComandoECF.ECF_ReducaoZ);
 
-        if (ECF.ERRO.equals(resp[0])) {
-            // enquanto o estado nao for bloquado(Z emitida), espera
-            EEstadoECF estado;
-            do {
-                int escolha = JOptionPane.showOptionDialog(null, "O documento ainda está sendo impresso?", "Redução Z",
-                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
-                if (escolha == JOptionPane.YES_OPTION) {
-                    try {
-                        // aguarda meio minuto
-                        Thread.sleep(30000);
-                    } catch (InterruptedException ex) {
-                    }
-                } else {
-                    break;
-                }
+        // enquanto o estado nao for bloquado(Z emitida) ou o limite superar 3 tentativas
+        EEstadoECF estado;
+        int tempo = Integer.valueOf(Util.getConfig().get("ecf.tempo"));
+        int tentativas = Integer.valueOf(Util.getConfig().get("ecf.tentativas"));
 
-                // recupera o estado
+        do {
+            // recupera o estado
+            try {
+                estado = ECF.validarEstado();
+            } catch (Exception ex) {
+                estado = EEstadoECF.estDesconhecido;
+            } finally {
+                tentativas--;
+            }
+
+            // espera alguns segundos
+            if (estado != EEstadoECF.estBloqueada) {
                 try {
-                    estado = ECF.validarEstado();
-                } catch (Exception ex) {
-                    estado = EEstadoECF.estDesconhecido;
+                    Thread.sleep(tempo * 1000);
+                } catch (InterruptedException ex) {
+                    // nao faz nada
                 }
-            } while (estado != EEstadoECF.estBloqueada);
-        }
+            } else {
+                break;
+            }
+        } while (tentativas > 0);
     }
 
     /**
@@ -124,8 +130,8 @@ public class ComandoEmitirReducaoZ implements IComando {
                 int cooIni;
                 EcfZ ultZ = new EcfZ();
                 ultZ.setOrdemDirecao(EDirecao.DESC);
-                FiltroObjeto fobj = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
-                List<EcfZ> zs = service.selecionar(ultZ, 0, 1, fobj);
+                FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
+                List<EcfZ> zs = service.selecionar(ultZ, 0, 1, fo);
                 if (zs == null || zs.isEmpty()) {
                     cooIni = 1;
                 } else {
@@ -150,12 +156,24 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // salva EcfZ
                 z = (EcfZ) service.salvar(z);
                 dataMovimento = z.getEcfZMovimento();
-                zId = z.getId();
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(dataMovimento);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
 
                 // atualiza as vendas, marcando que pertence a esta Z
                 ParametroObjeto po = new ParametroObjeto("ecfZ", z);
-                FiltroObjeto fo = new FiltroObjeto("ecfZ", ECompara.NULO, null);
-                Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fo, po);
+                FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, dataMovimento);
+                FiltroData fd2 = new FiltroData("ecfVendaData", ECompara.MENOR, cal.getTime());
+                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
+                Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf, po);
+                service.executar(sql);
+
+                // atualiza os documentos, marcando que pertence a esta Z
+                fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
+                fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());
+                gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
+                sql = new Sql(new EcfDocumento(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(sql);
 
                 // gera os registros EcfZTotais
@@ -283,13 +301,12 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // salva os totais do z
                 service.salvar(totais.values());
             } catch (Exception ex) {
-                log.error("Erro ao gerar ao salvar os dados da reducao Z.", ex);
-                log.error(resp);
-                throw new OpenPdvException(ex);
+                log.error("Erro ao gerar ao salvar os dados da reducao Z -> " + resp[1], ex);
+                throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
             }
         } else {
             log.error("Erro ao pegar os dados da ultima reducao Z -> " + resp[1]);
-            throw new OpenPdvException(resp[1]);
+            throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
         }
     }
 
@@ -330,21 +347,5 @@ public class ComandoEmitirReducaoZ implements IComando {
             String fim = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
             PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
         }
-    }
-
-    public Date getDataMovimento() {
-        return dataMovimento;
-    }
-
-    public void setDataMovimento(Date dataMovimento) {
-        this.dataMovimento = dataMovimento;
-    }
-
-    public int getzId() {
-        return zId;
-    }
-
-    public void setzId(int zId) {
-        this.zId = zId;
     }
 }

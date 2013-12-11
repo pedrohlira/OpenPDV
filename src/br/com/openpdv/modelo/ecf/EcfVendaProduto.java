@@ -247,6 +247,6 @@ public class EcfVendaProduto extends Dados implements Serializable {
     }
 
     public String getEcfVendaProdutoCodigo() {
-        return prodProduto.getProdProdutoBarra() == null || prodProduto.getProdProdutoBarra().equals("") ? Util.formataNumero(prodProduto.getId(), 6, 0, false) : prodProduto.getProdProdutoBarra();
+        return ecfVendaProdutoBarra == null || ecfVendaProdutoBarra.equals("") ? Util.formataNumero(prodProduto.getProdProdutoId(), 6, 0, false) : ecfVendaProdutoBarra;
     }
 }

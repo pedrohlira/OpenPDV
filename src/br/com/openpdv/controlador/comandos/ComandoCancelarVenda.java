@@ -12,6 +12,7 @@ import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.core.parametro.ParametroNumero;
 import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
+import br.com.openpdv.modelo.ecf.EcfTroca;
 import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
@@ -40,6 +41,8 @@ public class ComandoCancelarVenda implements IComando {
 
     /**
      * Construtor padrao.
+     *
+     * @param auto define se o cancelamento foi automatico.
      */
     public ComandoCancelarVenda(boolean auto) {
         this(auto, null);
@@ -47,6 +50,8 @@ public class ComandoCancelarVenda implements IComando {
 
     /**
      * Construtor padrao.
+     *
+     * @param gerente informa o gerente que cancelou.
      */
     public ComandoCancelarVenda(SisUsuario gerente) {
         this(false, gerente);
@@ -54,6 +59,9 @@ public class ComandoCancelarVenda implements IComando {
 
     /**
      * Construtor padrao.
+     *
+     * @param auto define se o cancelamento foi automatico.
+     * @param gerente informa o gerente que cancelou.
      */
     public ComandoCancelarVenda(boolean auto, SisUsuario gerente) {
         this.log = Logger.getLogger(ComandoCancelarVenda.class);
@@ -79,17 +87,17 @@ public class ComandoCancelarVenda implements IComando {
                 cancelarVendaECF();
                 // cancela a venda no BD.
                 cancelarVendaBanco();
+                // cancela na tela
+                cancelarVendaTela();
             } catch (OpenPdvException ex) {
-                // caso o cancelamente nao seja automatico, dispara a excecao
                 if (!auto) {
-                    cancelarVendaTela();
                     throw new OpenPdvException("A última venda já está cancelada.");
                 }
             }
 
             // cancela os cartoes
             try {
-                if (Util.getConfig().get("tef.titulo") != null) {
+                if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
                     new ComandoCancelarPagamento(venda.getEcfPagamentos(), auto).executar();
                 }
                 Caixa.getInstancia().modoDisponivel();
@@ -161,34 +169,36 @@ public class ComandoCancelarVenda implements IComando {
         }
 
         // remove a troca caso exista uma vinculada
-        if (venda.getEcfTroca() != null) {
-            FiltroNumero fn = new FiltroNumero("ecfTrocaId", ECompara.IGUAL, venda.getEcfTroca().getId());
-            Sql sql = new Sql(venda.getEcfTroca(), EComandoSQL.EXCLUIR, fn);
-            sqls.add(sql);
-
-            // atualiza o estoque
-            for (EcfTrocaProduto tp : venda.getEcfTroca().getEcfTrocaProdutos()) {
-                // fatorando a quantida no estoque
-                double qtd = tp.getEcfTrocaProdutoQuantidade();
-                if (tp.getProdEmbalagem().getProdEmbalagemId() != tp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
-                    qtd *= tp.getProdEmbalagem().getProdEmbalagemUnidade();
-                    qtd /= tp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
-                }
+        if (venda.getEcfTrocas() != null) {
+            for (EcfTroca troca : venda.getEcfTrocas()) {
+                FiltroNumero fn = new FiltroNumero("ecfTrocaId", ECompara.IGUAL, troca.getId());
+                Sql sql = new Sql(troca, EComandoSQL.EXCLUIR, fn);
+                sqls.add(sql);
 
                 // atualiza o estoque
-                ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
-                FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, tp.getProdProduto().getId());
-                Sql sql1 = new Sql(tp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                sqls.add(sql1);
-                // remove estoque da grade caso o produto tenha
-                if (tp.getProdProduto().getProdGrades() != null) {
-                    for (ProdGrade grade : tp.getProdProduto().getProdGrades()) {
-                        if (grade.getProdGradeBarra().equals(tp.getEcfTrocaProdutoBarra())) {
-                            ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
-                            FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
-                            Sql sql2 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
-                            sqls.add(sql2);
-                            break;
+                for (EcfTrocaProduto tp : troca.getEcfTrocaProdutos()) {
+                    // fatorando a quantida no estoque
+                    double qtd = tp.getEcfTrocaProdutoQuantidade();
+                    if (tp.getProdEmbalagem().getProdEmbalagemId() != tp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                        qtd *= tp.getProdEmbalagem().getProdEmbalagemUnidade();
+                        qtd /= tp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
+                    }
+
+                    // atualiza o estoque
+                    ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
+                    FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, tp.getProdProduto().getId());
+                    Sql sql1 = new Sql(tp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
+                    sqls.add(sql1);
+                    // remove estoque da grade caso o produto tenha
+                    if (tp.getProdProduto().getProdGrades() != null) {
+                        for (ProdGrade grade : tp.getProdProduto().getProdGrades()) {
+                            if (grade.getProdGradeBarra().equals(tp.getEcfTrocaProdutoBarra())) {
+                                ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
+                                FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                                Sql sql2 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
+                                sqls.add(sql2);
+                                break;
+                            }
                         }
                     }
                 }
@@ -208,8 +218,6 @@ public class ComandoCancelarVenda implements IComando {
         gp.add(pb);
         ParametroObjeto po = new ParametroObjeto("sisGerente", venda.getSisGerente());
         gp.add(po);
-        ParametroObjeto po1 = new ParametroObjeto("ecfTroca", null);
-        gp.add(po1);
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 

@@ -2,7 +2,6 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.*;
@@ -58,7 +57,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
             r01.setSerie(impressora.getEcfImpressoraSerie());
             r01.setMfAdicional(impressora.getEcfImpressoraMfadicional());
             r01.setModeloECF(impressora.getEcfImpressoraModelo());
-            r01.setUsuario(Login.getOperador() == null ? 0 : Login.getOperador().getId());
+            r01.setUsuario(1);
             r01.setTipoECF(impressora.getEcfImpressoraTipo());
             r01.setMarcaECF(impressora.getEcfImpressoraMarca());
             String[] resp = ECF.enviar(EComandoECF.ECF_NumVersao);
@@ -88,15 +87,9 @@ public class ComandoEmitirMovimentoECF implements IComando {
             r01.setInicio(inicio);
             r01.setFim(fim);
 
-            // ajustando a data fim para documento, pois o mesmo usa datetime
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(fim);
-            cal.add(Calendar.DAY_OF_MONTH, 1);
-            fim = cal.getTime();
-
             // r02
             FiltroData dt1 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
-            FiltroData dt2 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
+            FiltroData dt2 = new FiltroData("ecfZMovimento", ECompara.MENOR_IGUAL, fim);
             FiltroObjeto fo1 = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, impressora);
             GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{dt1, dt2, fo1});
             List<EcfZ> ecfZs = service.selecionar(new EcfZ(), 0, 0, gf);
@@ -116,18 +109,18 @@ public class ComandoEmitirMovimentoECF implements IComando {
                 listaR02.add(r02);
                 // r03
                 Set<String> totalizadores = new HashSet<>();
-                for (EcfZTotais totais : ecfz.getEcfZTotais()) {
+                for (EcfZTotais total : ecfz.getEcfZTotais()) {
                     R03 r03 = new R03();
                     r03.setSerie(impressora.getEcfImpressoraSerie());
                     r03.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                     r03.setModeloECF(impressora.getEcfImpressoraModelo());
-                    r03.setUsuario(ecfz.getEcfZUsuario());
+                    r03.setUsuario(1);
                     r03.setCrz(ecfz.getEcfZCrz());
-                    r03.setTotalizador(totais.getEcfZTotaisCodigo());
-                    r03.setValor(totais.getEcfZTotaisValor());
+                    r03.setTotalizador(total.getEcfZTotaisCodigo());
+                    r03.setValor(total.getEcfZTotaisValor());
                     listaR03.add(r03);
                     // para uso nos itens da venda
-                    totalizadores.add(totais.getEcfZTotaisCodigo());
+                    totalizadores.add(total.getEcfZTotaisCodigo());
                 }
                 // r04
                 for (EcfVenda venda : ecfz.getEcfVendas()) {
@@ -135,7 +128,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
                     r04.setSerie(impressora.getEcfImpressoraSerie());
                     r04.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                     r04.setModeloECF(impressora.getEcfImpressoraModelo());
-                    r04.setUsuario(venda.getSisUsuario().getId());
+                    r04.setUsuario(1);
                     r04.setDocumento(venda.getEcfVendaCcf());
                     r04.setCoo(venda.getEcfVendaCoo());
                     r04.setData(venda.getEcfVendaData());
@@ -159,7 +152,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
                         r05.setSerie(impressora.getEcfImpressoraSerie());
                         r05.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                         r05.setModeloECF(impressora.getEcfImpressoraModelo());
-                        r05.setUsuario(venda.getSisUsuario().getId());
+                        r05.setUsuario(1);
                         r05.setDocumento(venda.getEcfVendaCcf());
                         r05.setCoo(venda.getEcfVendaCoo());
                         r05.setItem(vp.getEcfVendaProdutoOrdem());
@@ -182,9 +175,15 @@ public class ComandoEmitirMovimentoECF implements IComando {
                         } else {
                             r05.setTotalizador(vp.getEcfVendaProdutoTributacao() + "1");
                         }
-                        r05.setCancelado(vp.getEcfVendaProdutoCancelado() ? 'S' : 'N');
-                        r05.setCanceladoQtd(0.00);
-                        r05.setCanceladoValor(0.00);
+                        if (vp.getEcfVendaProdutoCancelado()) {
+                            r05.setCancelado('S');
+                            r05.setCanceladoQtd(vp.getEcfVendaProdutoQuantidade());
+                            r05.setCanceladoValor(vp.getEcfVendaProdutoTotal());
+                        } else {
+                            r05.setCancelado('N');
+                            r05.setCanceladoQtd(0.00);
+                            r05.setCanceladoValor(0.00);
+                        }
                         r05.setCanceladoAcrescimo(0.00);
                         r05.setIat(vp.getProdProduto().getProdProdutoIat());
                         r05.setIppt(vp.getProdProduto().getProdProdutoIppt());
@@ -198,7 +197,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
                         r07.setSerie(impressora.getEcfImpressoraSerie());
                         r07.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                         r07.setModeloECF(impressora.getEcfImpressoraModelo());
-                        r07.setUsuario(venda.getSisUsuario().getId());
+                        r07.setUsuario(1);
                         r07.setCoo(venda.getEcfVendaCoo());
                         r07.setCcf(venda.getEcfVendaCcf());
                         r07.setGnf(vp.getEcfPagamentoGnf());
@@ -210,27 +209,21 @@ public class ComandoEmitirMovimentoECF implements IComando {
                         listaR07.add(r07);
                     }
                 }
-            }
-
-            // r06
-            dt1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, inicio);
-            dt2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, fim);
-            fo1 = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, impressora);
-            gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{dt1, dt2, fo1});
-            List<EcfDocumento> ecfDocumentos = service.selecionar(new EcfDocumento(), 0, 0, gf);
-            for (EcfDocumento doc : ecfDocumentos) {
-                R06 r06 = new R06();
-                r06.setSerie(impressora.getEcfImpressoraSerie());
-                r06.setMfAdicional(impressora.getEcfImpressoraMfadicional());
-                r06.setModeloECF(impressora.getEcfImpressoraModelo());
-                r06.setUsuario(doc.getEcfDocumentoUsuario());
-                r06.setCoo(doc.getEcfDocumentoCoo());
-                r06.setGnf(doc.getEcfDocumentoGnf());
-                r06.setGrg(doc.getEcfDocumentoGrg());
-                r06.setCdc(doc.getEcfDocumentoCdc());
-                r06.setTipo(doc.getEcfDocumentoTipo());
-                r06.setData(doc.getEcfDocumentoData());
-                listaR06.add(r06);
+                // r06
+                for (EcfDocumento doc : ecfz.getEcfDocumentos()) {
+                    R06 r06 = new R06();
+                    r06.setSerie(impressora.getEcfImpressoraSerie());
+                    r06.setMfAdicional(impressora.getEcfImpressoraMfadicional());
+                    r06.setModeloECF(impressora.getEcfImpressoraModelo());
+                    r06.setUsuario(1);
+                    r06.setCoo(doc.getEcfDocumentoCoo());
+                    r06.setGnf(doc.getEcfDocumentoGnf());
+                    r06.setGrg(doc.getEcfDocumentoGrg());
+                    r06.setCdc(doc.getEcfDocumentoCdc());
+                    r06.setTipo(doc.getEcfDocumentoTipo());
+                    r06.setData(doc.getEcfDocumentoData());
+                    listaR06.add(r06);
+                }
             }
 
             // seta os dados

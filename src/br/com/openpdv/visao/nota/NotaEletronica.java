@@ -12,12 +12,14 @@ import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfNotaProduto;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
+import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.openpdv.visao.principal.Pesquisa;
+import br.com.openpdv.visao.venda.Grades;
 import br.com.openpdv.visao.venda.Precos;
 import br.com.opensig.eventocancnfe.TEvento;
 import br.com.opensig.inutnfe.TInutNFe;
@@ -62,30 +64,24 @@ public class NotaEletronica extends javax.swing.JDialog {
         public void sucesso(final ProdProduto prod) {
             if (prod == null) {
                 JOptionPane.showMessageDialog(notaEletronica, "Produto não encontrado.", "Pesquisa", JOptionPane.INFORMATION_MESSAGE);
-                btnAdicionar.requestFocus();
             } else {
                 if (!prod.getProdPrecos().isEmpty()) {
-                    Precos.getInstancia(new AsyncCallback<ProdPreco>() {
+                    Precos.getInstancia(new AsyncDoubleBack<ProdProduto, ProdPreco>() {
                         @Override
-                        public void sucesso(ProdPreco preco) {
-                            // se selecionou
-                            if (preco != null) {
+                        public void sucesso(ProdProduto produto, ProdPreco preco) {
+                            try {
                                 prod.setProdEmbalagem(preco.getProdEmbalagem());
                                 prod.setProdProdutoPreco(preco.getProdPrecoValor());
+                                prod.setProdProdutoBarra(preco.getProdPrecoBarra());
+                                adicionar(produto, 1.00);
+                            } catch (OpenPdvException ex) {
+                                erro(ex);
                             }
-                            falha(null);
                         }
 
                         @Override
                         public void falha(Exception excecao) {
-                            try {
-                                adicionar(prod, 1.00);
-                            } catch (OpenPdvException ex) {
-                                log.error(ex);
-                                JOptionPane.showMessageDialog(notaEletronica, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
-                            } finally {
-                                btnAdicionar.requestFocus();
-                            }
+                            erro(excecao);
                         }
                     }, prod).setVisible(true);
                 } else if (!prod.getProdComposicoes().isEmpty()) {
@@ -98,30 +94,41 @@ public class NotaEletronica extends javax.swing.JDialog {
                         try {
                             adicionar(item, comp.getProdComposicaoQuantidade());
                         } catch (OpenPdvException ex) {
-                            log.error(ex);
-                            JOptionPane.showMessageDialog(notaEletronica, "Não foi possível adicionar um item!\nCancele os itens adicionados.", "Pesquisa", JOptionPane.WARNING_MESSAGE);
+                            erro(ex);
                             break;
                         }
                     }
-                    btnAdicionar.requestFocus();
+                } else if (!prod.getProdGrades().isEmpty()) {
+                    Grades.getInstancia(new AsyncDoubleBack<ProdProduto, ProdGrade>() {
+                        @Override
+                        public void sucesso(ProdProduto produto, ProdGrade grade) {
+                            try {
+                                prod.setProdProdutoBarra(grade.getProdGradeBarra());
+                                adicionar(prod, 1.00);
+                            } catch (OpenPdvException ex) {
+                                erro(ex);
+                            }
+                        }
+
+                        @Override
+                        public void falha(Exception excecao) {
+                            erro(excecao);
+                        }
+                    }, prod).setVisible(true);
                 } else {
                     try {
                         adicionar(prod, 1.00);
                     } catch (OpenPdvException ex) {
-                        log.error(ex);
-                        JOptionPane.showMessageDialog(notaEletronica, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
-                    } finally {
-                        btnAdicionar.requestFocus();
+                        erro(ex);
                     }
                 }
             }
+            btnAdicionar.requestFocus();
         }
 
         @Override
         public void falha(Exception excecao) {
-            log.error("Problemas na pesquisa de produtos.", excecao);
-            JOptionPane.showMessageDialog(notaEletronica, "Erro ao pesquisar o produto.", "Pesquisa", JOptionPane.ERROR_MESSAGE);
-            btnAdicionar.requestFocus();
+            erro(excecao);
         }
 
         private void adicionar(ProdProduto prod, double qtd) throws OpenPdvException {
@@ -129,6 +136,12 @@ public class NotaEletronica extends javax.swing.JDialog {
                 qtd, prod.getProdProdutoPreco(), 0.00, prod.getProdProdutoPreco(), prod.getProdProdutoPreco(), dtmProdutos.getRowCount() + 1};
             dtmProdutos.addRow(obj);
             totalizar();
+        }
+
+        private void erro(Exception ex) {
+            log.error(ex);
+            JOptionPane.showMessageDialog(notaEletronica, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
+            btnAdicionar.requestFocus();
         }
     };
 
@@ -867,23 +880,23 @@ public class NotaEletronica extends javax.swing.JDialog {
     private boolean validarProdutos(List<EcfNotaProduto> produtos) {
         try {
             for (int i = 0; i < dtmProdutos.getRowCount(); i++) {
+                String[] emb = dtmProdutos.getValueAt(i, 3).toString().split(" - ");
+                Double bruto = (Double) dtmProdutos.getValueAt(i, 5);
+                Double qtd = (Double) dtmProdutos.getValueAt(i, 4);
+                Double desconto = (Double) dtmProdutos.getValueAt(i, 6);
+                if (qtd <= 0.00 || bruto <= 0.00 || desconto < 0.00 || desconto >= bruto) {
+                    throw new Exception();
+                }
+                
                 EcfNotaProduto np = new EcfNotaProduto();
                 np.setProdProduto((ProdProduto) dtmProdutos.getValueAt(i, 1));
-                String[] emb = dtmProdutos.getValueAt(i, 3).toString().split(" - ");
+                np.setEcfNotaProdutoBarra(np.getProdProduto().getProdProdutoBarra());
                 np.setProdEmbalagem(new ProdEmbalagem(Integer.valueOf(emb[0])));
-                Double qtd = (Double) dtmProdutos.getValueAt(i, 4);
-                if (qtd <= 0.00) {
-                    throw new Exception();
-                }
                 np.setEcfNotaProdutoQuantidade(qtd);
-                np.setEcfNotaProdutoBruto((Double) dtmProdutos.getValueAt(i, 5));
-                Double desconto = (Double) dtmProdutos.getValueAt(i, 6);
-                if (desconto < 0.00 || desconto > np.getEcfNotaProdutoBruto()) {
-                    throw new Exception();
-                }
+                np.setEcfNotaProdutoBruto(bruto);
                 np.setEcfNotaProdutoDesconto(desconto);
                 np.setEcfNotaProdutoLiquido((Double) dtmProdutos.getValueAt(i, 7));
-                np.setEcfNotaProdutoIcms(np.getEcfNotaProdutoLiquido() * np.getProdProduto().getProdProdutoIcms() / 100);
+                np.setEcfNotaProdutoIcms(np.getProdProduto().getProdProdutoIcms());
                 np.setEcfNotaProdutoIpi(0.00);
                 np.setEcfNotaProdutoOrdem((Integer) dtmProdutos.getValueAt(i, 9));
                 produtos.add(np);
