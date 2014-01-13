@@ -3,6 +3,7 @@ package br.com.openpdv.rest;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
+import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.core.util.Base64;
 import javax.ws.rs.core.Context;
@@ -98,7 +99,7 @@ public abstract class ARest {
             header = header.substring("Basic ".length());
             String[] creds = Base64.base64Decode(header).split(":");
             cnpj = creds[0];
-            serie = PAF.descriptar(creds[1]);
+            serie = Util.descriptar(creds[1]);
 
             // realiza a validacao
             if (cnpj.equals(PAF.AUXILIAR.getProperty("cli.cnpj"))) {

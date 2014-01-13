@@ -1,7 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
@@ -21,7 +21,8 @@ import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -38,6 +39,7 @@ public class ComandoCancelarVenda implements IComando {
     private CoreService service;
     private EcfVenda venda;
     private boolean auto;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
@@ -67,6 +69,7 @@ public class ComandoCancelarVenda implements IComando {
         this.log = Logger.getLogger(ComandoCancelarVenda.class);
         this.service = new CoreService();
         this.auto = auto;
+        this.ecf = ECF.getInstancia();
 
         try {
             List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
@@ -89,6 +92,28 @@ public class ComandoCancelarVenda implements IComando {
                 cancelarVendaBanco();
                 // cancela na tela
                 cancelarVendaTela();
+                // atualizando o servidor
+                if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+                    new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                List<EcfVenda> lista = new ArrayList<>();
+                                lista.add(venda);
+                                lista = ComandoEnviarDados.getInstancia().enviar("venda", lista);
+                                // marca a venda como sincronizada
+                                if (!lista.isEmpty()) {
+                                    CoreService service = new CoreService();
+                                    venda.setEcfVendaSinc(true);
+                                    service.salvar(venda);
+                                }
+                            } catch (Exception ex) {
+                                log.error("Nao enviou no momento a venda com id -> " + venda.getId(), ex);
+                            }
+                        }
+                    }).start();
+                }
             } catch (OpenPdvException ex) {
                 if (!auto) {
                     throw new OpenPdvException("A última venda já está cancelada.");
@@ -106,12 +131,11 @@ public class ComandoCancelarVenda implements IComando {
                 Caixa.getInstancia().modoIndisponivel();
                 JOptionPane.showMessageDialog(null, "Ocorreram problemas ao cancelar os cartões!\nSistema ficará indisponível até resolver o problema!", "TEF", JOptionPane.ERROR_MESSAGE);
             }
+            // cancela a venda na tela
+            cancelarVendaTela();
         } else {
             throw new OpenPdvException("A última venda já está cancelada.");
         }
-
-        // cancela a venda na tela
-        cancelarVendaTela();
     }
 
     @Override
@@ -125,8 +149,8 @@ public class ComandoCancelarVenda implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void cancelarVendaECF() throws OpenPdvException {
-        String[] resp = ECF.enviar(EComandoECF.ECF_CancelaCupom);
-        if (ECF.ERRO.equals(resp[0])) {
+        String[] resp = ecf.enviar(EComando.ECF_CancelaCupom, venda.getEcfVendaCcf() + "", venda.getEcfVendaCoo() + "", venda.getEcfVendaLiquido().toString());
+        if (IECF.ERRO.equals(resp[0])) {
             log.error("Erro ao cancelar a venda. -> " + resp[1]);
             throw new OpenPdvException(resp[1]);
         }
@@ -216,6 +240,8 @@ public class ComandoCancelarVenda implements IComando {
         }
         ParametroBinario pb = new ParametroBinario("ecfVendaCancelada", true);
         gp.add(pb);
+        ParametroBinario pb1 = new ParametroBinario("ecfVendaSinc", false);
+        gp.add(pb1);
         ParametroObjeto po = new ParametroObjeto("sisGerente", venda.getSisGerente());
         gp.add(po);
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);

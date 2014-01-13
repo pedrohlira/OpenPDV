@@ -2,7 +2,7 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.rest.RestContexto;
-import br.com.phdss.controlador.PAF;
+import br.com.phdss.Util;
 import com.sun.jersey.api.client.GenericType;
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class ComandoReceberDadosLocal extends ComandoReceberDados {
 
     @Override
     public <E extends Dados> List<E> receber(String tipo, GenericType<List<E>> classe) throws Exception {
-        StringBuilder sb = new StringBuilder(PAF.getPathArquivos());
+        StringBuilder sb = new StringBuilder(Util.getPathArquivos());
         sb.append("importar").append(System.getProperty("file.separator"));
         sb.append(tipo).append(".json");
         arq = new File(sb.toString());

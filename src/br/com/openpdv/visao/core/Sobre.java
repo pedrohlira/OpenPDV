@@ -1,6 +1,7 @@
 package br.com.openpdv.visao.core;
 
-import br.com.openpdv.controlador.core.Util;
+import br.com.openpdv.controlador.core.Conexao;
+import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -358,7 +359,7 @@ public class Sobre extends JDialog {
 
                     if (local != null && !local.equals("")) {
                         // enviando o auxiliar local e recebendo o novo do servidor
-                        Client c = Util.getClientRest();
+                        Client c = Conexao.getClientRest();
                         WebResource wr = c.resource(Util.getConfig().get("openpdv.url"));
                         String remoto = wr.type(MediaType.TEXT_PLAIN).accept(MediaType.TEXT_PLAIN).put(String.class, local);
 

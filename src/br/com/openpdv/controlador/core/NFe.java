@@ -2,6 +2,7 @@ package br.com.openpdv.controlador.core;
 
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
+import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import br.inf.portalfiscal.www.nfe.wsdl.nfeinutilizacao2.NfeInutilizacao2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.nferecepcao2.NfeRecepcao2Stub;
@@ -332,7 +333,7 @@ public class NFe {
         // chave
         PrivateKey pk = null;
         // descriptografa a senha
-        String senha = PAF.descriptar(Util.getConfig().get("nfe.senha"));
+        String senha = Util.descriptar(Util.getConfig().get("nfe.senha"));
 
         // le o certificado
         InputStream entrada = new FileInputStream("nfe/certificado.pfx");

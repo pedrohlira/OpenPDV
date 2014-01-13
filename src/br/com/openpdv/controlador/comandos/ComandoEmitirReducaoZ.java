@@ -1,8 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
-import br.com.openpdv.controlador.permissao.Login;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.OpenPdvException;
@@ -20,8 +19,9 @@ import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.ecf.EcfZTotais;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
-import br.com.phdss.EEstadoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.EEstado;
+import br.com.phdss.IECF;
 import br.com.phdss.controlador.PAF;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -41,6 +41,7 @@ public class ComandoEmitirReducaoZ implements IComando {
     private Logger log;
     private CoreService service;
     private Date dataMovimento;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
@@ -48,6 +49,7 @@ public class ComandoEmitirReducaoZ implements IComando {
     public ComandoEmitirReducaoZ() {
         this.log = Logger.getLogger(ComandoEmitirReducaoZ.class);
         this.service = new CoreService();
+        this.ecf = ECF.getInstancia();
     }
 
     @Override
@@ -63,7 +65,7 @@ public class ComandoEmitirReducaoZ implements IComando {
         // gera os totais dos pagamentos
         new ComandoTotalizarPagamentos(dataMovimento).executar();
         // gera o arquivo do cat52
-        if (Boolean.valueOf(Util.getConfig().get("ecf.cat52"))) {
+       if (Util.getConfig().get("ecf.cat52") != null) {
             new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();
         }
         // atualizando o servidor
@@ -83,25 +85,25 @@ public class ComandoEmitirReducaoZ implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void emitirReducaoZEcf() throws OpenPdvException {
-        ECF.enviar(EComandoECF.ECF_ReducaoZ);
+        ecf.enviar(EComando.ECF_ReducaoZ);
 
-        // enquanto o estado nao for bloquado(Z emitida) ou o limite superar 3 tentativas
-        EEstadoECF estado;
+        // enquanto o estado nao for bloqueado(Z emitida) ou o limite superar 3 tentativas
+        EEstado estado;
         int tempo = Integer.valueOf(Util.getConfig().get("ecf.tempo"));
         int tentativas = Integer.valueOf(Util.getConfig().get("ecf.tentativas"));
 
         do {
             // recupera o estado
             try {
-                estado = ECF.validarEstado();
+                estado = ecf.validarEstado();
             } catch (Exception ex) {
-                estado = EEstadoECF.estDesconhecido;
+                estado = EEstado.estDesconhecido;
             } finally {
                 tentativas--;
             }
 
             // espera alguns segundos
-            if (estado != EEstadoECF.estBloqueada) {
+            if (estado != EEstado.estBloqueada) {
                 try {
                     Thread.sleep(tempo * 1000);
                 } catch (InterruptedException ex) {
@@ -119,8 +121,8 @@ public class ComandoEmitirReducaoZ implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void emitirReducaoZBanco() throws OpenPdvException {
-        String[] resp = ECF.enviar(EComandoECF.ECF_DadosUltimaReducaoZ);
-        if (ECF.OK.equals(resp[0])) {
+        String[] resp = ecf.enviar(EComando.ECF_DadosUltimaReducaoZ);
+        if (IECF.OK.equals(resp[0])) {
             try {
                 // pega os dados
                 InputStream stream = new ByteArrayInputStream(resp[1].replace(",", ".").getBytes("UTF-8"));
@@ -141,7 +143,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // gera o registro EcfZ
                 EcfZ z = new EcfZ();
                 z.setEcfImpressora(Caixa.getInstancia().getImpressora());
-                z.setEcfZUsuario(Login.getOperador() == null ? 0 : Login.getOperador().getId());
+                z.setEcfZUsuario(1);
                 z.setEcfZCrz(ini.get("ECF", "NumCRZ", int.class));
                 z.setEcfZCooIni(cooIni);
                 z.setEcfZCooFin(ini.get("ECF", "NumCOO", int.class));
@@ -301,7 +303,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // salva os totais do z
                 service.salvar(totais.values());
             } catch (Exception ex) {
-                log.error("Erro ao gerar ao salvar os dados da reducao Z -> " + resp[1], ex);
+                log.error("Erro ao gerar e salvar os dados da reducao Z -> " + resp[1], ex);
                 throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
             }
         } else {
@@ -319,8 +321,8 @@ public class ComandoEmitirReducaoZ implements IComando {
         Date data;
 
         // data atual do ECF
-        String[] resp = ECF.enviar(EComandoECF.ECF_DataHora);
-        if (ECF.OK.equals(resp[0])) {
+        String[] resp = ecf.enviar(EComando.ECF_DataHora);
+        if (IECF.OK.equals(resp[0])) {
             try {
                 data = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]);
             } catch (ParseException ex) {
@@ -345,7 +347,7 @@ public class ComandoEmitirReducaoZ implements IComando {
             String inicio = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
             cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
             String fim = new SimpleDateFormat("dd/MM/yyyy").format(cal.getTime());
-            PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
+            PAF.leituraMF(EComando.ECF_PafMf_Lmfc_Impressao, new String[]{inicio, fim});
         }
     }
 }

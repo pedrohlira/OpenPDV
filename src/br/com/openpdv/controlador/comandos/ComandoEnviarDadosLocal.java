@@ -2,7 +2,7 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.rest.RestContexto;
-import br.com.phdss.controlador.PAF;
+import br.com.phdss.Util;
 import java.io.FileWriter;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +30,7 @@ public class ComandoEnviarDadosLocal extends ComandoEnviarDados {
 
     @Override
     protected <E extends Dados> List<E> enviar(String tipo, List<E> lista) throws Exception {
-        StringBuilder sb = new StringBuilder(PAF.getPathArquivos());
+        StringBuilder sb = new StringBuilder(Util.getPathArquivos());
         sb.append("exportar").append(System.getProperty("file.separator"));
         sb.append(tipo).append("_").append(new Date().getTime()).append(".json");
         fw = new FileWriter(sb.toString());

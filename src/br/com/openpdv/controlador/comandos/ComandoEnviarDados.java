@@ -1,14 +1,13 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
-import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
 import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
@@ -223,7 +222,7 @@ public abstract class ComandoEnviarDados implements IComando {
     private void salvar() throws OpenPdvException {
         try {
             PAF.AUXILIAR.setProperty("out.recebimento", Util.getData(new Date()));
-            PAF.criptografar();
+            Util.criptografar(null, PAF.AUXILIAR);
         } catch (Exception ex) {
             throw new OpenPdvException("Erro ao salvar no arquivo auxiliar.\nVerifique o log do sistema.", ex);
         }

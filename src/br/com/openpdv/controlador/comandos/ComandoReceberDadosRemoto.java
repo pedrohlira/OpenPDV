@@ -1,6 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.core.Util;
+import br.com.openpdv.controlador.core.Conexao;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.Dados;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
@@ -19,14 +20,14 @@ public class ComandoReceberDadosRemoto extends ComandoReceberDados {
 
     @Override
     public <E extends Dados> List<E> receber(String tipo, GenericType<List<E>> classe) throws Exception {
-        wr = Util.getRest(Util.getConfig().get("sinc.host") + "/" + tipo);
+        wr = Conexao.getRest(Util.getConfig().get("sinc.host") + "/" + tipo);
         List<E> lista = wr.accept(MediaType.APPLICATION_JSON).get(classe);
         return lista;
     }
 
     @Override
     public <E extends Dados> List<E> receber(String tipo, GenericType<List<E>> classe, MultivaluedMap<String, String> mm) throws Exception {
-        wr = Util.getRest(Util.getConfig().get("sinc.host") + "/" + tipo);
+        wr = Conexao.getRest(Util.getConfig().get("sinc.host") + "/" + tipo);
         List<E> lista = wr.queryParams(mm).accept(MediaType.APPLICATION_JSON).get(classe);
         return lista;
     }

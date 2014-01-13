@@ -4,16 +4,16 @@ import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.TEF;
-import static br.com.phdss.TEF.lerArquivo;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
@@ -42,8 +42,9 @@ import org.apache.log4j.PropertyConfigurator;
  */
 public class Splash extends JFrame {
 
-    private static Logger log;
     private static Splash splash;
+    private Logger log;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
@@ -69,8 +70,8 @@ public class Splash extends JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            log.error("Problemas ao mudar LaF.", ex);
+        } catch (Exception ex) {
+            // Nao mudou o visual.
         }
 
         // abre uma thread para iniciar a aplicacao
@@ -249,7 +250,7 @@ public class Splash extends JFrame {
                                 break;
                             }
                         }
-                        dados = PAF.descriptar(dados);
+                        dados = Util.descriptar(dados);
 
                         // executa as instrucoes
                         for (String sql : dados.split("\n")) {
@@ -275,12 +276,12 @@ public class Splash extends JFrame {
                 boolean login = true;
                 try {
                     splash.pgBarra.setString("Lendo arquivo auxiliar...");
-                    PAF.descriptografar();
+                    Util.descriptografar(null, PAF.AUXILIAR);
                     splash.pgBarra.setValue(30);
                 } catch (Exception ex) {
                     // caso tenha algum problema tenta recuperar usando o backup
                     try {
-                        PAF.descriptografar("conf" + System.getProperty("file.separator") + "auxiliar.bak", PAF.AUXILIAR);
+                        Util.descriptografar("conf" + System.getProperty("file.separator") + "auxiliar.bak", PAF.AUXILIAR);
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(new Date());
                         PAF.AUXILIAR.setProperty("out.recebimento", Util.getData(cal.getTime()));
@@ -326,11 +327,14 @@ public class Splash extends JFrame {
                 // valida a comunicao e ativacao com o ECF
                 boolean ecfAtivo = false;
                 try {
+                    ECF.setInstancia(Util.getConfig().get("ecf.marca"));
+                    ecf = ECF.getInstancia();
+                    
                     splash.pgBarra.setString("Conectando no ECF...");
-                    ECF.conectar(Util.getConfig().get("ecf.servidor"), Integer.valueOf(Util.getConfig().get("ecf.porta")));
+                    ecf.conectar(Util.getConfig().get("ecf.porta"), Integer.valueOf(Util.getConfig().get("ecf.velocidade")), Integer.valueOf(Util.getConfig().get("ecf.modelo")));
 
                     splash.pgBarra.setString("Ativando o ECF...");
-                    ECF.ativar();
+                    ecf.ativar();
                     splash.pgBarra.setValue(50);
                     ecfAtivo = true;
                 } catch (Exception ex) {
@@ -349,7 +353,7 @@ public class Splash extends JFrame {
 
                     if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
                         try {
-                            String arquivo = lerArquivo(TEF.getRespIntPos001(), 0);
+                            String arquivo = TEF.lerArquivo(TEF.getRespIntPos001(), 0);
                             boolean pendente = false;
                             if (arquivo != null) {
                                 Map<String, String> mapa = TEF.iniToMap(arquivo);
@@ -382,8 +386,8 @@ public class Splash extends JFrame {
                     splash.pgBarra.setValue(70);
                     GrupoFiltro gf = new GrupoFiltro();
                     if (ecfAtivo) {
-                        String[] resp = ECF.enviar(EComandoECF.ECF_NumSerie);
-                        if (ECF.OK.equals(resp[0])) {
+                        String[] resp = ecf.enviar(EComando.ECF_NumSerie);
+                        if (IECF.OK.equals(resp[0])) {
                             FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, resp[1]);
                             gf.add(ft, EJuncao.E);
                         }
@@ -410,7 +414,7 @@ public class Splash extends JFrame {
                     // valida o serial do ECF
                     try {
                         splash.pgBarra.setString("Validando Nº Série do ECF...");
-                        ECF.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
+                        ecf.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
                     } catch (Exception ex) {
                         String msg = PAF.AUXILIAR.size() == 0 ? "Número de Série do arquivo auxiliar não reconhecido!" : ex.getMessage();
                         login = false;
@@ -423,10 +427,10 @@ public class Splash extends JFrame {
                         splash.pgBarra.setString("Validando GT do ECF...");
                         splash.pgBarra.setValue(80);
                         double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
-                        double novoGT = ECF.validarGT(gt);
+                        double novoGT = ecf.validarGT(gt);
                         if (novoGT > 0.00) {
                             PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
-                            PAF.criptografar();
+                            Util.criptografar(null, PAF.AUXILIAR);
                             JOptionPane.showMessageDialog(splash, "Valor do GT recomposto no arquivo auxiliar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                         }
                     } catch (Exception ex) {
@@ -447,8 +451,8 @@ public class Splash extends JFrame {
                 // recupera a data do ECF ou do sistema
                 Date atual = new Date();
                 if (ecfAtivo) {
-                    String[] resp = ECF.enviar(EComandoECF.ECF_DataHora);
-                    if (ECF.OK.equals(resp[0])) {
+                    String[] resp = ecf.enviar(EComando.ECF_DataHora);
+                    if (IECF.OK.equals(resp[0])) {
                         try {
                             atual = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]);
                         } catch (ParseException ex) {
@@ -482,12 +486,12 @@ public class Splash extends JFrame {
                         caixa.statusMenus(EModo.OFF);
                         caixa.setJanela(Autenticacao.getInstancia());
 
-                        switch (ECF.validarEstado()) {
+                        switch (ecf.validarEstado()) {
                             case estNaoInicializada:
                             case estDesconhecido:
                                 throw new OpenPdvException("Estado do ECF não inicializado ou desconhecido.");
                             case estRelatorio:
-                                ECF.enviar(EComandoECF.ECF_CorrigeEstadoErro);
+                                ecf.enviar(EComando.ECF_CorrigeEstadoErro);
                                 break;
                             case estBloqueada:
                                 login = false;

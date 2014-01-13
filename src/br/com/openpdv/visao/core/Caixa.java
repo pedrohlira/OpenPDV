@@ -4,7 +4,7 @@ import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.AsyncDoubleBack;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
@@ -28,7 +28,8 @@ import br.com.openpdv.visao.venda.Identificar;
 import br.com.openpdv.visao.principal.LeiturasZ;
 import br.com.openpdv.visao.venda.Precos;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.TEF;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.anexo.v.AnexoV;
@@ -66,6 +67,7 @@ public class Caixa extends JFrame {
     private JOptionPane option;
     private DefaultListModel bobina;
     private KeyEventPostProcessor teclas;
+    private IECF ecf;
     /**
      * Variavel de sincronismo dos precos adicionais.
      */
@@ -208,12 +210,13 @@ public class Caixa extends JFrame {
         ImageIcon logo = new ImageIcon("conf" + System.getProperty("file.separator") + "logo.png");
         lblLivre.setIcon(logo);
         modo = EModo.OFF;
+        ecf = ECF.getInstancia();
 
         // mapeando as teclas apertadas
         teclas = new KeyEventPostProcessor() {
             @Override
             public boolean postProcessKeyEvent(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_F1) { // Sobre
+                if (e.getKeyCode() == KeyEvent.VK_F1 && mnuSobre.isEnabled()) { // Sobre
                     mnuSobreMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_F2 && mnuPrincipal.isEnabled() && janela == null) { // Menu Principal
                     mnuPrincipal.doClick();
@@ -228,21 +231,21 @@ public class Caixa extends JFrame {
                     mnuFiscal.doClick();
                 } else if (e.getKeyCode() == KeyEvent.VK_F4 && mnuNota.isEnabled()) { // Nota Fiscal
                     mnuNota.doClick();
-                } else if (e.getKeyCode() == KeyEvent.VK_F5) { // Pesquisa
+                } else if (e.getKeyCode() == KeyEvent.VK_F5 && mnuPesquisa.isEnabled()) { // Pesquisa
                     mnuPesquisaMouseClicked(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F6) { // Menu Gaveta
+                } else if (e.getKeyCode() == KeyEvent.VK_F6 && mnuGaveta.isEnabled()) { // Menu Gaveta
                     mnuGavetaMouseClicked(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F7 && mnuAbrirVenda.isEnabled()) { // Abrir Venda
+                } else if (e.getKeyCode() == KeyEvent.VK_F7 && mnuVenda.isEnabled() && mnuAbrirVenda.isEnabled()) { // Abrir Venda
                     mnuAbrirVendaActionPerformed(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F8 && mnuFecharVenda.isEnabled()) { // Fechar Venda
+                } else if (e.getKeyCode() == KeyEvent.VK_F8 && mnuVenda.isEnabled() && mnuFecharVenda.isEnabled()) { // Fechar Venda
                     mnuFecharVendaActionPerformed(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F9 && mnuCancelarItem.isEnabled()) { // Cancelar Item
+                } else if (e.getKeyCode() == KeyEvent.VK_F9 && mnuVenda.isEnabled() && mnuCancelarItem.isEnabled()) { // Cancelar Item
                     mnuCancelarItemActionPerformed(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F10 && mnuCancelarVenda.isEnabled()) { // Cancelar Venda
+                } else if (e.getKeyCode() == KeyEvent.VK_F10 && mnuVenda.isEnabled() && mnuCancelarVenda.isEnabled()) { // Cancelar Venda
                     mnuCancelarVendaActionPerformed(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F11) { // Identificar
+                } else if (e.getKeyCode() == KeyEvent.VK_F11 && mnuIdentificar.isEnabled()) { // Identificar
                     mnuIdentificarMouseClicked(null);
-                } else if (e.getKeyCode() == KeyEvent.VK_F12) { // Sair
+                } else if (e.getKeyCode() == KeyEvent.VK_F12 && mnuSair.isEnabled()) { // Sair
                     mnuSairMouseClicked(null);
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) { // ESC
                     if (janela != null && !(janela instanceof Aguarde) && !(janela instanceof Autenticacao)) {
@@ -1140,22 +1143,22 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuSobreKeyPressed
 
     private void mnuLMFCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLMFCActionPerformed
-        janela = PAF_MF.getInstancia(EComandoECF.ECF_PafMf_Lmfc_Impressao);
+        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Lmfc_Impressao);
         janela.setVisible(true);
     }//GEN-LAST:event_mnuLMFCActionPerformed
 
     private void mnuLMFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLMFSActionPerformed
-        janela = PAF_MF.getInstancia(EComandoECF.ECF_PafMf_Lmfs_Impressao);
+        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Lmfs_Impressao);
         janela.setVisible(true);
     }//GEN-LAST:event_mnuLMFSActionPerformed
 
     private void mnuEspelhoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEspelhoActionPerformed
-        janela = PAF_MF.getInstancia(EComandoECF.ECF_PafMf_Mfd_Espelho);
+        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Mfd_Espelho);
         janela.setVisible(true);
     }//GEN-LAST:event_mnuEspelhoActionPerformed
 
     private void mnuArquivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuArquivoActionPerformed
-        janela = PAF_MF.getInstancia(EComandoECF.ECF_PafMf_Mfd_Cotepe1704);
+        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Mfd_Cotepe1704);
         janela.setVisible(true);
     }//GEN-LAST:event_mnuArquivoActionPerformed
 
@@ -1163,7 +1166,7 @@ public class Caixa extends JFrame {
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
-                ECF.enviar(EComandoECF.ECF_AbreGaveta);
+                ecf.enviar(EComando.ECF_AbreGaveta);
                 String texto = JOptionPane.showInputDialog(caixa, "Digite o valor do suprimento.", "Suprimento", JOptionPane.OK_CANCEL_OPTION);
 
                 if (texto != null) {
@@ -1171,9 +1174,9 @@ public class Caixa extends JFrame {
                     try {
                         double valor = Double.valueOf(texto);
                         String[] param = new String[]{valor + "", "", Util.getConfig().get("ecf.suprimento"), "DINHEIRO"};
-                        String[] resp = ECF.enviar(EComandoECF.ECF_Suprimento, param);
+                        String[] resp = ecf.enviar(EComando.ECF_Suprimento, param);
 
-                        if (ECF.OK.equals(resp[0])) {
+                        if (IECF.OK.equals(resp[0])) {
                             new ComandoSalvarDocumento("CN").executar();
                         } else {
                             log.error("Não foi possivel realizar o Suprimento! -> " + resp[1]);
@@ -1199,7 +1202,7 @@ public class Caixa extends JFrame {
         janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
-                ECF.enviar(EComandoECF.ECF_AbreGaveta);
+                ecf.enviar(EComando.ECF_AbreGaveta);
                 String texto = JOptionPane.showInputDialog(caixa, "Digite o valor da sangria.", "Sangria", JOptionPane.OK_CANCEL_OPTION);
 
                 if (texto != null) {
@@ -1207,9 +1210,9 @@ public class Caixa extends JFrame {
                     try {
                         double valor = Double.valueOf(texto);
                         String[] param = new String[]{valor + "", "", Util.getConfig().get("ecf.sangria"), "DINHEIRO"};
-                        String[] resp = ECF.enviar(EComandoECF.ECF_Sangria, param);
+                        String[] resp = ecf.enviar(EComando.ECF_Sangria, param);
 
-                        if (ECF.OK.equals(resp[0])) {
+                        if (IECF.OK.equals(resp[0])) {
                             new ComandoSalvarDocumento("CN").executar();
                         } else {
                             log.error("Não foi possivel realizar a Sangria! -> " + resp[1]);
@@ -1464,7 +1467,7 @@ public class Caixa extends JFrame {
 
         // valida o serial do ECF
         try {
-            ECF.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
+            ecf.validarSerial(PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
         } catch (Exception ex) {
             permite = false;
             log.error("Problemas ao validar o serial.", ex);
@@ -1474,10 +1477,10 @@ public class Caixa extends JFrame {
         // valida o GT do ECF
         try {
             double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
-            double novoGT = ECF.validarGT(gt);
+            double novoGT = ecf.validarGT(gt);
             if (novoGT > 0.00) {
                 PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
-                PAF.criptografar();
+                Util.criptografar(null, PAF.AUXILIAR);
             }
         } catch (Exception ex) {
             permite = false;
@@ -1493,9 +1496,9 @@ public class Caixa extends JFrame {
                 @Override
                 public void sucesso(SisCliente resultado) {
                     if (resultado != null && resultado.getSisClienteId() > 0) {
-                        String[] resp = ECF.enviar(EComandoECF.ECF_IdentificaConsumidor,
+                        String[] resp = ecf.enviar(EComando.ECF_IdentificaConsumidor,
                                 resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
-                        if (ECF.ERRO.equals(resp[0])) {
+                        if (ecf.ERRO.equals(resp[0])) {
                             falha(new Exception(resp[1]));
                         }
                     }
@@ -1628,12 +1631,12 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuFecharVendaActionPerformed
 
     private void mnuGavetaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuGavetaMouseClicked
-        if (mnuVenda.isEnabled() && janela == null) {
+        if (mnuGaveta.isEnabled() && janela == null) {
             janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
                 @Override
                 public void sucesso(Integer resultado) {
-                    String[] resp = ECF.enviar(EComandoECF.ECF_AbreGaveta);
-                    if (ECF.ERRO.equals(resp[0])) {
+                    String[] resp = ecf.enviar(EComando.ECF_AbreGaveta);
+                    if (IECF.ERRO.equals(resp[0])) {
                         log.error("Erro ao abrir a gaveta. -> " + resp[1]);
                         JOptionPane.showMessageDialog(caixa, "Não foi possível abrir a gaveta!", "OpenPDV", JOptionPane.INFORMATION_MESSAGE);
                     }
@@ -1730,15 +1733,15 @@ public class Caixa extends JFrame {
 
                                 try {
                                     TEF.bloquear(true);
-                                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
-                                    ECF.enviar(EComandoECF.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.reltef"));
-                                    TEF.imprimirVias(TEF.getDados(), EComandoECF.ECF_LinhaRelatorioGerencial);
-                                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                                    ecf.enviar(EComando.ECF_FechaRelatorio);
+                                    ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.reltef"));
+                                    TEF.imprimirVias(TEF.getDados(), EComando.ECF_LinhaRelatorioGerencial);
+                                    ecf.enviar(EComando.ECF_FechaRelatorio);
                                     TEF.bloquear(false);
                                     TEF.confirmarTransacao(id, true);
                                 } catch (Exception ex) {
                                     TEF.bloquear(false);
-                                    ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                                    ecf.enviar(EComando.ECF_FechaRelatorio);
                                     TEF.confirmarTransacao(id, false);
                                     throw new Exception("Impressora não responde!");
                                 } finally {
@@ -2087,7 +2090,6 @@ public class Caixa extends JFrame {
                 mnuNota.setEnabled(false);
                 mnuAbrirVenda.setEnabled(false);
                 mnuCupomPresente.setEnabled(false);
-                mnuGaveta.setEnabled(false);
                 if (venda.getSisCliente() != null) {
                     mnuIdentificar.setEnabled(false);
                 }
@@ -2098,7 +2100,6 @@ public class Caixa extends JFrame {
                 mnuNota.setEnabled(false);
                 mnuVenda.setEnabled(false);
                 mnuIdentificar.setEnabled(false);
-                mnuGaveta.setEnabled(false);
                 break;
             case DISPONIVEL:
                 mnuFecharVenda.setEnabled(false);
@@ -2121,7 +2122,6 @@ public class Caixa extends JFrame {
                 mnuPAF.setEnabled(false);
                 mnuParamConfiguracao.setEnabled(false);
                 // outros
-                mnuGaveta.setEnabled(false);
                 mnuVenda.setEnabled(false);
                 mnuIdentificar.setEnabled(false);
                 break;
@@ -2138,7 +2138,7 @@ public class Caixa extends JFrame {
         }
 
         // somente mostra o Cat52 caso esteja setado no config
-        if (!Boolean.valueOf(Util.getConfig().get("ecf.cat52"))) {
+        if (Util.getConfig().get("ecf.cat52") == null) {
             mnuCat52.setVisible(false);
         }
     }

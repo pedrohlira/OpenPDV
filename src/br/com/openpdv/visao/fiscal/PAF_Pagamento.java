@@ -3,7 +3,7 @@ package br.com.openpdv.visao.fiscal;
 import br.com.openpdv.controlador.comandos.ComandoSalvarDocumento;
 import br.com.openpdv.controlador.comandos.ComandoTotalizarPagamentos;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTotais;
 import br.com.openpdv.visao.core.Aguarde;

@@ -1,7 +1,7 @@
 package br.com.openpdv.visao.fiscal;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
@@ -10,8 +10,6 @@ import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.anexo.iv.AnexoIV;
 import br.com.phdss.modelo.anexo.iv.E1;

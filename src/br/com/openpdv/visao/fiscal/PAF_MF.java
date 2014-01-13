@@ -1,10 +1,10 @@
 package br.com.openpdv.visao.fiscal;
 
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.fiscal.ACBR;
+import br.com.phdss.EComando;
 import br.com.phdss.controlador.PAF;
 import java.awt.Cursor;
 import java.awt.Rectangle;
@@ -23,7 +23,7 @@ public class PAF_MF extends JDialog {
 
     private static PAF_MF paf_mf;
     private Logger log;
-    private EComandoECF comando;
+    private EComando comando;
     private String param1;
     private String param2;
     private String param3;
@@ -43,7 +43,7 @@ public class PAF_MF extends JDialog {
      * @param comando informa o tipo de comando.
      * @return o objeto de PAF_MF.
      */
-    public static PAF_MF getInstancia(EComandoECF comando) {
+    public static PAF_MF getInstancia(EComando comando) {
         if (paf_mf == null) {
             paf_mf = new PAF_MF();
         }
@@ -445,17 +445,17 @@ public class PAF_MF extends JDialog {
                         resp = PAF.leituraMF(comando, new String[]{param1, param2});
                     } else {
                         String nome = getTitle() + "_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".txt";
-                        param3 = PAF.getPathArquivos() + nome;
+                        param3 = Util.getPathArquivos() + nome;
                         switch (comando) {
                             case ECF_PafMf_Lmfc_Impressao:
                                 if (radEspelho.isSelected()) {
-                                    resp = PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Espelho, new String[]{param1, param2, param3});
+                                    resp = PAF.leituraMF(EComando.ECF_PafMf_Lmfc_Espelho, new String[]{param1, param2, param3});
                                 } else {
-                                    resp = PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfc_Cotepe1704, new String[]{param1, param2, param3});
+                                    resp = PAF.leituraMF(EComando.ECF_PafMf_Lmfc_Cotepe1704, new String[]{param1, param2, param3});
                                 }
                                 break;
                             case ECF_PafMf_Lmfs_Impressao:
-                                resp = PAF.leituraMF(EComandoECF.ECF_PafMf_Lmfs_Espelho, new String[]{param1, param2, param3});
+                                resp = PAF.leituraMF(EComando.ECF_PafMf_Lmfs_Espelho, new String[]{param1, param2, param3});
                                 break;
                             default:
                                 resp = PAF.leituraMF(comando, new String[]{param1, param2, param3});
@@ -463,9 +463,9 @@ public class PAF_MF extends JDialog {
                     }
 
                     Aguarde.getInstancia().setVisible(false);
-                    if (ECF.OK.equals(resp[0]) && param3 != null) {
+                    if (ACBR.OK.equals(resp[0]) && param3 != null) {
                         JOptionPane.showMessageDialog(paf_mf, "Arquivo gerado com sucesso em:\n" + param3, getTitle(), JOptionPane.INFORMATION_MESSAGE);
-                    } else if (ECF.ERRO.equals(resp[0])) {
+                    } else if (ACBR.ERRO.equals(resp[0])) {
                         if (param3 == null) {
                             log.error("Nao foi possivel emitir a leitura fiscal " + getTitle() + "! -> " + resp[1]);
                             JOptionPane.showMessageDialog(paf_mf, "Não foi possível emitir a leitura de " + getTitle() + "!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
@@ -566,11 +566,11 @@ public class PAF_MF extends JDialog {
         this.buttonGroup2 = buttonGroup2;
     }
 
-    public EComandoECF getComando() {
+    public EComando getComando() {
         return comando;
     }
 
-    public void setComando(EComandoECF comando) {
+    public void setComando(EComando comando) {
         this.comando = comando;
     }
 

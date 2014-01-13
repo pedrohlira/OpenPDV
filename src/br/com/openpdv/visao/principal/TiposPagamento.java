@@ -2,7 +2,7 @@ package br.com.openpdv.visao.principal;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.TextFieldLimit;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.visao.core.Caixa;

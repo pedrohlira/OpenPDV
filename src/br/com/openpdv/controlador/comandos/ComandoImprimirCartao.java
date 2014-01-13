@@ -1,11 +1,12 @@
 package br.com.openpdv.controlador.comandos;
 
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
 import br.com.openpdv.modelo.ecf.EcfPagamentoParcela;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.TEF;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,21 +24,24 @@ import java.util.Map;
 public class ComandoImprimirCartao implements IComando {
 
     private EcfPagamento pag;
-    private EComandoECF comando = null;
+    private EComando comando = null;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
      */
     public ComandoImprimirCartao() {
+        this.ecf = ECF.getInstancia();
     }
 
     /**
      * Metodo que abre as operacoes com cartao
      *
      * @param pag o pagamento em cartao.
-     * @param total o total geral de todos os cartoes.
+     * @param vCard o total geral de todos os cartoes.
+     * @param total o total da venda.
      */
-    public void abrir(EcfPagamento pag, double total) {
+    public void abrir(EcfPagamento pag, double vCard, double total) {
         this.pag = pag;
 
         if (comando == null) {
@@ -45,13 +49,14 @@ public class ComandoImprimirCartao implements IComando {
                 // abre o relatorio vinculado
                 String coo = pag.getEcfVenda().getEcfVendaCoo() + "";
                 String codigo = pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo();
-                String valor = Util.formataNumero(total, 1, 2, false).replace(",", ".");
-                ECF.enviar(EComandoECF.ECF_AbreCupomVinculado, coo, codigo, "", valor);
-                comando = EComandoECF.ECF_LinhaCupomVinculado;
+                String sCard = Util.formataNumero(vCard, 1, 2, false).replace(",", ".");
+                String sTotal = Util.formataNumero(total, 1, 2, false).replace(",", ".");
+                ecf.enviar(EComando.ECF_AbreCupomVinculado, coo, codigo, "", sCard, sTotal);
+                comando = EComando.ECF_LinhaCupomVinculado;
             } catch (Exception ex) {
                 // abre o relatorio gerencial
-                ECF.enviar(EComandoECF.ECF_AbreRelatorioGerencial);
-                comando = EComandoECF.ECF_LinhaRelatorioGerencial;
+                ecf.enviar(EComando.ECF_AbreRelatorioGerencial);
+                comando = EComando.ECF_LinhaRelatorioGerencial;
             }
         }
     }
@@ -73,15 +78,15 @@ public class ComandoImprimirCartao implements IComando {
             // se for o pendente, precisa confirmar no GP e sera o ultimo cartao
             if (pag.getArquivo().contains("pendente")) {
                 String id = pag.getArquivo().replaceAll("\\D", "");
-                ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+                ecf.enviar(EComando.ECF_FechaRelatorio);
                 TEF.confirmarTransacao(id, true);
 
                 // pega o numero GNF da impressao do cartao
-                String[] resp = ECF.enviar(EComandoECF.ECF_NumGNF);
+                String[] resp = ecf.enviar(EComando.ECF_NumGNF);
                 pag.setEcfPagamentoGnf(Integer.valueOf(resp[1]));
 
                 // salva o documento para relatorio
-                new ComandoSalvarDocumento(comando == EComandoECF.ECF_LinhaCupomVinculado ? "CC" : "RG").executar();
+                new ComandoSalvarDocumento(comando == EComando.ECF_LinhaCupomVinculado ? "CC" : "RG").executar();
             }
 
             // gerar as parcelas
@@ -99,7 +104,7 @@ public class ComandoImprimirCartao implements IComando {
     public void fechar() {
         if (comando != null) {
             comando = null;
-            ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+            ecf.enviar(EComando.ECF_FechaRelatorio);
         }
     }
 
@@ -109,7 +114,8 @@ public class ComandoImprimirCartao implements IComando {
     }
 
     /**
-     * Metodo que adiciona a lista de parcelas as parcelas correspondente do pagamento informado.
+     * Metodo que adiciona a lista de parcelas as parcelas correspondente do
+     * pagamento informado.
      *
      * @param dados o mapa de dados lidos do arquivo.
      * @param pagamento o objeto de pagamento a ser considerado.

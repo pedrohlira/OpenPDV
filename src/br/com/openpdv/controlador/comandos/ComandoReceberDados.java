@@ -2,7 +2,7 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.core.EBusca;
 import br.com.openpdv.modelo.core.EComandoSQL;
@@ -106,6 +106,12 @@ public abstract class ComandoReceberDados implements IComando {
                 throw new OpenPdvException(erros.toString());
             }
         }
+
+        // fecha a conexao
+        if (em != null && emf != null) {
+            em.close();
+            emf.close();
+        }
     }
 
     @Override
@@ -163,22 +169,22 @@ public abstract class ComandoReceberDados implements IComando {
      * Metodo que salva os clientes.
      */
     private void clientes() {
+        MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
         try {
+            Date da = (Date) service.buscar(new SisCliente(), "sisClienteData", EBusca.MAXIMO, null);
+            mm.putSingle("data", da != null ? Util.getData(da) : "");
             List<SisCliente> clientes = receber("cliente", new GenericType<List<SisCliente>>() {
-            });
+            }, mm);
+            em.getTransaction().begin();
             for (SisCliente cli : clientes) {
-                try {
-                    em.getTransaction().begin();
-                    service.salvar(em, cli);
-                    em.getTransaction().commit();
-                } catch (Exception ex) {
-                    if (em != null && em.getTransaction().isActive()) {
-                        em.getTransaction().rollback();
-                    }
-                }
+                service.salvar(em, cli);
             }
+            em.getTransaction().commit();
             log.info("Dados clientes recebidos -> " + clientes.size());
         } catch (Exception ex) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             erros.append("Erro no recebimento dos Clientes.\n");
             log.error("Erro no recebimento dos Clientes.", ex);
         }
@@ -421,6 +427,9 @@ public abstract class ComandoReceberDados implements IComando {
                         }
                         em.getTransaction().commit();
                     } catch (Exception ex) {
+                        if (em != null && em.getTransaction().isActive()) {
+                            em.getTransaction().rollback();
+                        }
                         prodSinc = false;
                         log.error("Nao atualizou o produto com ID = " + prod.getProdProdutoId(), ex);
                     }
@@ -442,7 +451,7 @@ public abstract class ComandoReceberDados implements IComando {
     private void salvar() throws OpenPdvException {
         try {
             PAF.AUXILIAR.setProperty("out.recebimento", Util.getData(new Date()));
-            PAF.criptografar();
+            Util.criptografar(null, PAF.AUXILIAR);
         } catch (Exception ex) {
             throw new OpenPdvException("Erro ao salvar no arquivo auxiliar.\nVerifique o log do sistema.", ex);
         }

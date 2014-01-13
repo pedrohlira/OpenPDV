@@ -1,7 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.EJuncao;
@@ -18,7 +18,8 @@ import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.ecf.EcfZTotais;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.cat52.Cat52;
 import br.com.phdss.modelo.cat52.E00;
@@ -50,6 +51,8 @@ public class ComandoGerarCat52 implements IComando {
     private EcfImpressora impressora;
     private EcfZ ecfZ;
     private String path;
+    private IECF ecf;
+    private final int usuario = 1;
 
     /**
      * Construtor padrao passando os parametros necessarios.
@@ -62,6 +65,7 @@ public class ComandoGerarCat52 implements IComando {
         this.log = Logger.getLogger(ComandoGerarCat52.class);
         this.empresa = empresa;
         this.impressora = impressora;
+        this.ecf = ECF.getInstancia();
 
         // seleciona a Z
         CoreService service = new CoreService();
@@ -108,7 +112,7 @@ public class ComandoGerarCat52 implements IComando {
                 e00.setSerie(impressora.getEcfImpressoraSerie());
                 e00.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                 e00.setModelo(impressora.getEcfImpressoraModelo());
-                e00.setUsuario(1);
+                e00.setUsuario(usuario);
                 e00.setTipoEcf(impressora.getEcfImpressoraTipo());
                 e00.setMarcaEcf(impressora.getEcfImpressoraMarca());
                 e00.setCnpj_cpf(PAF.AUXILIAR.getProperty("sh.cnpj").replaceAll("\\D", ""));
@@ -122,20 +126,13 @@ public class ComandoGerarCat52 implements IComando {
                 e01.setSerie(impressora.getEcfImpressoraSerie());
                 e01.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                 e01.setModelo(impressora.getEcfImpressoraModelo());
-                e01.setUsuario(1);
-                String[] resp = ECF.enviar(EComandoECF.ECF_NumVersao);
-                if (ECF.OK.equals(resp[0])) {
-                    e01.setVersaoSB(resp[1]);
-                } else {
-                    e01.setVersaoSB("01.00.00");
-                }
-                resp = ECF.enviar(EComandoECF.ECF_DataHoraSB);
-                Date dataSB;
-                if (ECF.OK.equals(resp[0])) {
-                    dataSB = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]);
-                } else {
-                    dataSB = new Date();
-                }
+                e01.setTipoEcf(impressora.getEcfImpressoraTipo());
+                e01.setMarcaEcf(impressora.getEcfImpressoraMarca());
+                String[] resp = ecf.enviar(EComando.ECF_NumVersao);
+                String versaoSB = IECF.OK.equals(resp[0]) ? resp[1] : "010000";
+                e01.setVersaoSB(versaoSB.substring(0, 2) + "." + versaoSB.substring(2, 4) + "." + versaoSB.substring(4));
+                resp = ecf.enviar(EComando.ECF_DataHoraSB);
+                Date dataSB = IECF.OK.equals(resp[0]) ? new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]) : new Date();
                 e01.setDataSB(dataSB);
                 e01.setSequencial(impressora.getEcfImpressoraCaixa());
                 e01.setCnpj(empresa.getSisEmpresaCnpj().replaceAll("\\D", ""));
@@ -152,7 +149,7 @@ public class ComandoGerarCat52 implements IComando {
                 e02.setSerie(impressora.getEcfImpressoraSerie());
                 e02.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                 e02.setModelo(impressora.getEcfImpressoraModelo());
-                e02.setUsuario(1);
+                e02.setUsuario(usuario);
                 e02.setCnpj(empresa.getSisEmpresaCnpj().replaceAll("\\D", ""));
                 e02.setIe(empresa.getSisEmpresaIe().replaceAll("\\D", ""));
                 e02.setRazao(empresa.getSisEmpresaRazao());
@@ -165,7 +162,7 @@ public class ComandoGerarCat52 implements IComando {
                 e12.setSerie(impressora.getEcfImpressoraSerie());
                 e12.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                 e12.setModelo(impressora.getEcfImpressoraModelo());
-                e12.setUsuario(1);
+                e12.setUsuario(usuario);
                 e12.setCrz(ecfZ.getEcfZCrz());
                 e12.setCoo(ecfZ.getEcfZCooFin());
                 e12.setCro(ecfZ.getEcfZCro());
@@ -181,7 +178,7 @@ public class ComandoGerarCat52 implements IComando {
                     e13.setSerie(impressora.getEcfImpressoraSerie());
                     e13.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                     e13.setModelo(impressora.getEcfImpressoraModelo());
-                    e13.setUsuario(1);
+                    e13.setUsuario(usuario);
                     e13.setCrz(ecfZ.getEcfZCrz());
                     e13.setTotalizador(total.getEcfZTotaisCodigo());
                     e13.setValor(total.getEcfZTotaisValor());
@@ -196,7 +193,7 @@ public class ComandoGerarCat52 implements IComando {
                     e14.setSerie(impressora.getEcfImpressoraSerie());
                     e14.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                     e14.setModelo(impressora.getEcfImpressoraModelo());
-                    e14.setUsuario(1);
+                    e14.setUsuario(usuario);
                     e14.setCcf(venda.getEcfVendaCcf());
                     e14.setCoo(venda.getEcfVendaCoo());
                     e14.setData(venda.getEcfVendaData());
@@ -221,7 +218,7 @@ public class ComandoGerarCat52 implements IComando {
                         e15.setSerie(impressora.getEcfImpressoraSerie());
                         e15.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                         e15.setModelo(impressora.getEcfImpressoraModelo());
-                        e15.setUsuario(1);
+                        e15.setUsuario(usuario);
                         e15.setCoo(venda.getEcfVendaCoo());
                         e15.setCcf(venda.getEcfVendaCcf());
                         e15.setItem(vp.getEcfVendaProdutoOrdem());
@@ -266,7 +263,7 @@ public class ComandoGerarCat52 implements IComando {
                         e21.setSerie(impressora.getEcfImpressoraSerie());
                         e21.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                         e21.setModelo(impressora.getEcfImpressoraModelo());
-                        e21.setUsuario(1);
+                        e21.setUsuario(usuario);
                         e21.setCoo(venda.getEcfVendaCoo());
                         e21.setCcf(venda.getEcfVendaCcf());
                         e21.setGnf(pag.getEcfPagamentoGnf());
@@ -282,7 +279,7 @@ public class ComandoGerarCat52 implements IComando {
                             e21a.setSerie(impressora.getEcfImpressoraSerie());
                             e21a.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                             e21a.setModelo(impressora.getEcfImpressoraModelo());
-                            e21a.setUsuario(1);
+                            e21a.setUsuario(usuario);
                             e21a.setCoo(venda.getEcfVendaCoo());
                             e21a.setCcf(venda.getEcfVendaCcf());
                             e21a.setGnf(pag.getEcfPagamentoGnf());
@@ -301,7 +298,7 @@ public class ComandoGerarCat52 implements IComando {
                     e16.setSerie(impressora.getEcfImpressoraSerie());
                     e16.setMfAdicional(impressora.getEcfImpressoraMfadicional());
                     e16.setModelo(impressora.getEcfImpressoraModelo());
-                    e16.setUsuario(1);
+                    e16.setUsuario(usuario);
                     e16.setCoo(doc.getEcfDocumentoCoo());
                     e16.setGnf(doc.getEcfDocumentoGnf());
                     e16.setGrg(doc.getEcfDocumentoGrg());
@@ -325,7 +322,7 @@ public class ComandoGerarCat52 implements IComando {
                 cat52.setListaE21(listaE21);
 
                 // gera o arquivo
-                path = PAF.gerarArquivoCat52(cat52);
+                path = PAF.gerarArquivoCat52(cat52, Util.getConfig().get("ecf.cat52"));
             }
         } catch (Exception ex) {
             log.error("Erro ao gerar o arquivo cat52 do ECF.", ex);

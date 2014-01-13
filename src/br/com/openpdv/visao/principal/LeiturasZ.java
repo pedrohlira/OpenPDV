@@ -1,6 +1,5 @@
 package br.com.openpdv.visao.principal;
 
-import br.com.openpdv.visao.principal.*;
 import br.com.openpdv.controlador.core.*;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EComandoSQL;
@@ -70,6 +69,7 @@ public class LeiturasZ extends javax.swing.JDialog {
         txtCRZ.setDocument(new TextFieldLimit(8, true));
         txtBruto.setDocument(new TextFieldLimit(16));
         txtTotal.setDocument(new TextFieldLimit(16));
+        txtLimite.setText("10");
     }
 
     /**
@@ -117,6 +117,9 @@ public class LeiturasZ extends javax.swing.JDialog {
         btnNovo = new javax.swing.JButton();
         btnSalvar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
+        txtLimite = new javax.swing.JFormattedTextField();
+        lblLimite = new javax.swing.JLabel();
+        btnPesquisar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Leituras Z");
@@ -453,6 +456,42 @@ public class LeiturasZ extends javax.swing.JDialog {
             }
         });
 
+        txtLimite.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtLimite.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtLimite.setText("10");
+        txtLimite.setToolTipText("Número máximo de registros na listagem. [0] para todos");
+        txtLimite.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        txtLimite.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtLimiteFocusLost(evt);
+            }
+        });
+        txtLimite.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtLimiteKeyPressed(evt);
+            }
+        });
+
+        lblLimite.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblLimite.setText("Limite de registros.");
+
+        btnPesquisar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnPesquisar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/pesquisa.png"))); // NOI18N
+        btnPesquisar.setText("Pesquisar");
+        btnPesquisar.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnPesquisar.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnPesquisar.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnPesquisar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPesquisarActionPerformed(evt);
+            }
+        });
+        btnPesquisar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btnPesquisarKeyPressed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -468,7 +507,13 @@ public class LeiturasZ extends javax.swing.JDialog {
                         .addContainerGap()
                         .add(panLeitura, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(0, 0, Short.MAX_VALUE)
+                        .addContainerGap()
+                        .add(txtLimite, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 89, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(6, 6, 6)
+                        .add(lblLimite)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -486,10 +531,16 @@ public class LeiturasZ extends javax.swing.JDialog {
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(tabTotais, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 208, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(txtLimite, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(layout.createSequentialGroup()
+                        .add(6, 6, 6)
+                        .add(lblLimite)))
                 .addContainerGap(46, Short.MAX_VALUE))
         );
 
@@ -553,10 +604,38 @@ public class LeiturasZ extends javax.swing.JDialog {
         Caixa.getInstancia().setJanela(null);
     }//GEN-LAST:event_formWindowClosing
 
+    private void txtLimiteFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLimiteFocusLost
+        try {
+            int limite = Integer.valueOf(txtLimite.getText());
+            if (limite < 0) {
+                txtLimite.setText("10");
+            }
+        } catch (NumberFormatException ex) {
+            txtLimite.setText("10");
+        }
+    }//GEN-LAST:event_txtLimiteFocusLost
+
+    private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
+        setLista();
+    }//GEN-LAST:event_btnPesquisarActionPerformed
+
+    private void btnPesquisarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnPesquisarKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            setLista();
+        }
+    }//GEN-LAST:event_btnPesquisarKeyPressed
+
+    private void txtLimiteKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtLimiteKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            setLista();
+        }
+    }//GEN-LAST:event_txtLimiteKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdicionar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnNovo;
+    private javax.swing.JButton btnPesquisar;
     private javax.swing.JButton btnRemover;
     private javax.swing.JButton btnSalvar;
     private javax.swing.JCheckBox chkIssqn;
@@ -566,6 +645,7 @@ public class LeiturasZ extends javax.swing.JDialog {
     private javax.swing.JLabel lblCRO;
     private javax.swing.JLabel lblCRZ;
     private javax.swing.JLabel lblData;
+    private javax.swing.JLabel lblLimite;
     private javax.swing.JLabel lblTotal;
     private javax.swing.JPanel panLeitura;
     private javax.swing.JPanel panTotais;
@@ -580,6 +660,7 @@ public class LeiturasZ extends javax.swing.JDialog {
     private javax.swing.JTextField txtCRO;
     private javax.swing.JTextField txtCRZ;
     private javax.swing.JFormattedTextField txtData;
+    private javax.swing.JFormattedTextField txtLimite;
     private javax.swing.JFormattedTextField txtTotal;
     // End of variables declaration//GEN-END:variables
 
@@ -715,9 +796,10 @@ public class LeiturasZ extends javax.swing.JDialog {
      */
     private void setLista() {
         try {
+            int limite = Integer.valueOf(txtLimite.getText());
             EcfZ ecfZ = new EcfZ();
             ecfZ.setOrdemDirecao(EDirecao.DESC);
-            List<EcfZ> lista = service.selecionar(ecfZ, 0, 0, null);
+            List<EcfZ> lista = service.selecionar(ecfZ, 0, limite, null);
             while (dtmZ.getRowCount() > 0) {
                 dtmZ.removeRow(0);
             }

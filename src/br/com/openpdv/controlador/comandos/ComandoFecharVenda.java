@@ -1,7 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
@@ -17,7 +17,8 @@ import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.TEF;
 import br.com.phdss.controlador.PAF;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class ComandoFecharVenda implements IComando {
     private double acres_desc;
     private String obs;
     private EcfVenda venda;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
@@ -58,6 +60,7 @@ public class ComandoFecharVenda implements IComando {
         this.acres_desc = acres_desc;
         this.venda = Caixa.getInstancia().getVenda();
         this.obs = obs;
+        this.ecf = ECF.getInstancia();
     }
 
     @Override
@@ -85,11 +88,13 @@ public class ComandoFecharVenda implements IComando {
                             List<EcfVenda> lista = new ArrayList<>();
                             venda.setEcfPagamentos(pagamentos);
                             lista.add(venda);
-                            ComandoEnviarDados.getInstancia().enviar("venda", lista);
+                            lista = ComandoEnviarDados.getInstancia().enviar("venda", lista);
                             // marca a venda como sincronizada
-                            CoreService service = new CoreService();
-                            venda.setEcfVendaSinc(true);
-                            service.salvar(venda);
+                            if (!lista.isEmpty()) {
+                                CoreService service = new CoreService();
+                                venda.setEcfVendaSinc(true);
+                                service.salvar(venda);
+                            }
                         } catch (Exception ex) {
                             log.error("Nao enviou no momento a venda com id -> " + venda.getId(), ex);
                         }
@@ -119,27 +124,25 @@ public class ComandoFecharVenda implements IComando {
             // sub totaliza
             String AD = Util.formataNumero(acres_desc, 1, 2, false).replace(",", ".");
             StringBuilder sb = new StringBuilder();
-            //sb.append(Util.formataTexto("MD5: " + PAF.AUXILIAR.getProperty("out.autenticado"), " ", ECF.COL, true));
-            // @TODO remover esta linha abaixo.
-            sb.append(Util.formataTexto("MD5: 33b5a11f390b986c5b2163270db0b6c6", " ", ECF.COL, true));
-            
+            sb.append("MD5: ").append(PAF.AUXILIAR.getProperty("out.autenticado")).append(IECF.SL);
+
             // identifica o operador do caixa e o vendedor
             String operador = "OPERADOR: " + venda.getSisUsuario().getSisUsuarioLogin();
             if (venda.getSisVendedor() != null) {
                 operador += " - VENDEDOR: " + venda.getSisVendedor().getSisUsuarioLogin();
             }
-            sb.append(Util.formataTexto(operador, " ", ECF.COL, true));
+            sb.append(operador).append(IECF.SL);
 
             // caso nao tenha sido informado o cliente
             if (venda.getSisCliente() == null) {
-                sb.append(Util.formataTexto("CONSUMIDOR NAO INFORMOU O CPF/CNPJ", " ", ECF.COL, true));
+                sb.append("CONSUMIDOR NAO INFORMOU O CPF/CNPJ").append(IECF.SL);
             } else if (Caixa.getInstancia().getVenda().isInformouCliente() == false) {
-                sb.append("CNPJ/CPF: ").append(venda.getSisCliente().getSisClienteDoc()).append(ECF.SL);
+                sb.append("CNPJ/CPF consumidor:").append(venda.getSisCliente().getSisClienteDoc()).append(IECF.SL);
                 if (!venda.getSisCliente().getSisClienteNome().equals("")) {
-                    sb.append("NOME:     ").append(venda.getSisCliente().getSisClienteNome()).append(ECF.SL);
+                    sb.append("NOME:").append(venda.getSisCliente().getSisClienteNome()).append(IECF.SL);
                 }
                 if (!venda.getSisCliente().getSisClienteEndereco().equals("")) {
-                    sb.append("ENDEREÇO: ").append(venda.getSisCliente().getSisClienteEndereco()).append(ECF.SL);
+                    sb.append("END:").append(venda.getSisCliente().getSisClienteEndereco()).append(IECF.SL);
                 }
             }
 
@@ -148,15 +151,15 @@ public class ComandoFecharVenda implements IComando {
                 sb.append("MINAS LEGAL: ");
                 sb.append(PAF.AUXILIAR.getProperty("cli.cnpj")).append(" ");
                 sb.append(Util.formataData(venda.getEcfVendaData(), "ddMMyyyy")).append(" ");
-                sb.append(Util.formataNumero(bruto + acres_desc, 0, 2, true).replace(",", ""));
+                sb.append(Util.formataNumero(bruto + acres_desc, 0, 2, true).replace(",", "")).append(IECF.SL);
             } else if (PAF.AUXILIAR.getProperty("paf.cupom_mania").equalsIgnoreCase("SIM")) {
                 // caso seja no estado de RJ, colocar o cupom mania
-                sb.append(Util.formataTexto("CUPOM MANIA - CONCORRA A PREMIOS", " ", ECF.COL, true));
+                sb.append("CUPOM MANIA - CONCORRA A PREMIOS").append(IECF.SL);
                 sb.append("ENVIE SMS P/ 6789: ");
                 sb.append(Util.formataNumero(PAF.AUXILIAR.getProperty("cli.ie"), 8, 0, false));
                 sb.append(Util.formataData(venda.getEcfVendaData(), "ddMMyyyy"));
                 sb.append(Util.formataNumero(venda.getEcfVendaCoo(), 6, 0, false));
-                sb.append(Util.formataNumero(Caixa.getInstancia().getImpressora().getEcfImpressoraCaixa(), 3, 0, false));
+                sb.append(Util.formataNumero(Caixa.getInstancia().getImpressora().getEcfImpressoraCaixa(), 3, 0, false)).append(IECF.SL);
             }
 
             // caso a opcao de mostrar os valores de impostos esteja ativa
@@ -176,11 +179,11 @@ public class ComandoFecharVenda implements IComando {
                 double porcentagem = impostos / (bruto + acres_desc) * 100;
                 sb.append("Val Aprox Trib R$ ");
                 sb.append(Util.formataNumero(impostos, 1, 2, false).replace(",", ".")).append(" [");
-                sb.append(Util.formataNumero(porcentagem, 1, 2, false).replace(",", ".")).append("%] Fonte: IBPT").append(ECF.SL);
+                sb.append(Util.formataNumero(porcentagem, 1, 2, false).replace(",", ".")).append("%] Fonte: IBPT").append(IECF.SL);
             }
 
-            String[] resp = ECF.enviar(EComandoECF.ECF_SubtotalizaCupom, AD, sb.toString());
-            if (ECF.ERRO.equals(resp[0])) {
+            String[] resp = ecf.enviar(EComando.ECF_SubtotalizaCupom, AD, sb.toString());
+            if (IECF.ERRO.equals(resp[0])) {
                 log.error("Erro ao fechar a venda. -> " + resp[1]);
                 throw new OpenPdvException(resp[1]);
             }
@@ -198,8 +201,8 @@ public class ComandoFecharVenda implements IComando {
             String dinheiro = Util.getConfig().get("ecf.dinheiro");
             if (pags.containsKey(dinheiro)) {
                 String valor = Util.formataNumero(pags.remove(dinheiro), 1, 2, false).replace(",", ".");
-                resp = ECF.enviar(EComandoECF.ECF_EfetuaPagamento, dinheiro, valor);
-                if (ECF.ERRO.equals(resp[0])) {
+                resp = ecf.enviar(EComando.ECF_EfetuaPagamento, dinheiro, valor);
+                if (IECF.ERRO.equals(resp[0])) {
                     log.error("Erro ao fechar a venda. -> " + resp[1]);
                     throw new OpenPdvException(resp[1]);
                 }
@@ -208,8 +211,8 @@ public class ComandoFecharVenda implements IComando {
             String troca = Util.getConfig().get("ecf.troca");
             if (pags.containsKey(troca)) {
                 String valor = Util.formataNumero(pags.remove(troca), 1, 2, false).replace(",", ".");
-                resp = ECF.enviar(EComandoECF.ECF_EfetuaPagamento, troca, valor);
-                if (ECF.ERRO.equals(resp[0])) {
+                resp = ecf.enviar(EComando.ECF_EfetuaPagamento, troca, valor);
+                if (IECF.ERRO.equals(resp[0])) {
                     log.error("Erro ao fechar a venda. -> " + resp[1]);
                     throw new OpenPdvException(resp[1]);
                 }
@@ -217,24 +220,24 @@ public class ComandoFecharVenda implements IComando {
             // imprime os demais
             for (Entry<String, Double> pag : pags.entrySet()) {
                 String valor = Util.formataNumero(pag.getValue(), 1, 2, false).replace(",", ".");
-                resp = ECF.enviar(EComandoECF.ECF_EfetuaPagamento, pag.getKey(), valor);
-                if (ECF.ERRO.equals(resp[0])) {
+                resp = ecf.enviar(EComando.ECF_EfetuaPagamento, pag.getKey(), valor);
+                if (IECF.ERRO.equals(resp[0])) {
                     log.error("Erro ao fechar a venda. -> " + resp[1]);
                     throw new OpenPdvException(resp[1]);
                 }
             }
             // fecha a venda
-            resp = ECF.enviar(EComandoECF.ECF_FechaCupom);
-            if (ECF.ERRO.equals(resp[0])) {
+            resp = ecf.enviar(EComando.ECF_FechaCupom);
+            if (IECF.ERRO.equals(resp[0])) {
                 log.error("Erro ao fechar a venda. -> " + resp[1]);
                 throw new OpenPdvException(resp[1]);
             } else {
                 // atualiza o gt
                 try {
-                    resp = ECF.enviar(EComandoECF.ECF_GrandeTotal);
-                    if (ECF.OK.equals(resp[0])) {
+                    resp = ecf.enviar(EComando.ECF_GrandeTotal);
+                    if (IECF.OK.equals(resp[0])) {
                         PAF.AUXILIAR.setProperty("ecf.gt", resp[1]);
-                        PAF.criptografar();
+                        Util.criptografar(null, PAF.AUXILIAR);
                     } else {
                         throw new Exception(resp[1]);
                     }
@@ -243,7 +246,7 @@ public class ComandoFecharVenda implements IComando {
                     throw new OpenPdvException("Erro ao atualizar o GT.");
                 }
             }
-        } catch (Exception ex) {
+        } catch (OpenPdvException ex) {
             TEF.bloquear(false);
             int escolha = JOptionPane.showOptionDialog(null, "Impressora não responde, tentar novamente?", "TEF",
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"SIM", "NÃO"}, JOptionPane.YES_OPTION);

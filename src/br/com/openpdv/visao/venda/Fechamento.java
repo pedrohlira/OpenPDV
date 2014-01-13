@@ -5,7 +5,7 @@ import br.com.openpdv.controlador.comandos.ComandoFecharVenda;
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.TableCellRendererNumber;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
@@ -16,7 +16,7 @@ import br.com.openpdv.visao.core.Caixa;
 import br.com.openpdv.visao.core.Gerente;
 import br.com.openpdv.visao.principal.Trocas;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
 import br.com.phdss.TEF;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
@@ -1094,7 +1094,7 @@ public class Fechamento extends javax.swing.JDialog {
             public void run() {
                 try {
                     if (pagDinheiro) {
-                        ECF.enviar(EComandoECF.ECF_AbreGaveta);
+                        ECF.getInstancia().enviar(EComando.ECF_AbreGaveta);
                     }
                     new ComandoFecharVenda(getPagamentos(), total.doubleValue(), acres.subtract(desc).doubleValue(), troco.doubleValue(), obs).executar();
                 } catch (OpenPdvException ex) {

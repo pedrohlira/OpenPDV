@@ -1,12 +1,13 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.*;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.anexo.vi.*;
 import java.text.SimpleDateFormat;
@@ -26,6 +27,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
     private Date inicio;
     private Date fim;
     private String path;
+    private IECF ecf;
 
     /**
      * Construtor padrao passando os parametros necessarios.
@@ -40,6 +42,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
         this.inicio = inicio;
         this.fim = fim;
         this.service = new CoreService();
+        this.ecf = ECF.getInstancia();
     }
 
     @Override
@@ -60,12 +63,12 @@ public class ComandoEmitirMovimentoECF implements IComando {
             r01.setUsuario(1);
             r01.setTipoECF(impressora.getEcfImpressoraTipo());
             r01.setMarcaECF(impressora.getEcfImpressoraMarca());
-            String[] resp = ECF.enviar(EComandoECF.ECF_NumVersao);
-            if (ECF.OK.equals(resp[0])) {
+            String[] resp = ecf.enviar(EComando.ECF_NumVersao);
+            if (IECF.OK.equals(resp[0])) {
                 r01.setVersaoSB(resp[1]);
             }
-            resp = ECF.enviar(EComandoECF.ECF_DataHoraSB);
-            if (ECF.OK.equals(resp[0])) {
+            resp = ecf.enviar(EComando.ECF_DataHoraSB);
+            if (IECF.OK.equals(resp[0])) {
                 r01.setDataSB(new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(resp[1]));
             }
             r01.setNumeroECF(impressora.getEcfImpressoraCaixa());
@@ -82,7 +85,7 @@ public class ComandoEmitirMovimentoECF implements IComando {
             arquivoMD5.append("arquivos");
             arquivoMD5.append(System.getProperty("file.separator"));
             arquivoMD5.append("arquivoMD5.txt");
-            r01.setPafMD5(PAF.gerarMD5(arquivoMD5.toString()));
+            r01.setPafMD5(Util.gerarMD5(arquivoMD5.toString()));
             r01.setPafER(PAF.AUXILIAR.getProperty("paf.er"));
             r01.setInicio(inicio);
             r01.setFim(fim);

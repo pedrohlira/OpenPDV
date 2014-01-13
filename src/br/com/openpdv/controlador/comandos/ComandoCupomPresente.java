@@ -1,7 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
@@ -9,7 +9,8 @@ import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ public class ComandoCupomPresente implements IComando {
     private Logger log = Logger.getLogger(ComandoCupomPresente.class);
     private CoreService service = new CoreService();
     private EcfVenda venda;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
@@ -38,6 +40,8 @@ public class ComandoCupomPresente implements IComando {
             this.venda = (EcfVenda) service.selecionar(new EcfVenda(), fn);
         } catch (OpenPdvException ex) {
             this.venda = null;
+        } finally {
+            this.ecf = ECF.getInstancia();
         }
     }
 
@@ -48,6 +52,7 @@ public class ComandoCupomPresente implements IComando {
      */
     public ComandoCupomPresente(EcfVenda venda) {
         this.venda = venda;
+        this.ecf = ECF.getInstancia();
     }
 
     @Override
@@ -112,7 +117,7 @@ public class ComandoCupomPresente implements IComando {
                     try {
                         int item = Integer.valueOf(texto);
                         if (item < 1 || item > venda.getEcfVendaProdutos().size()) {
-                            JOptionPane.showMessageDialog(Caixa.getInstancia(), "O número informado não corresponde a nenhum item da venda.", "Cancelar Item", JOptionPane.WARNING_MESSAGE);
+                            JOptionPane.showMessageDialog(Caixa.getInstancia(), "O número informado não corresponde a nenhum item da venda.", "Cupom Presente", JOptionPane.WARNING_MESSAGE);
                         } else {
                             EcfVendaProduto vp = venda.getEcfVendaProdutos().get(item - 1);
                             if (vp.getEcfVendaProdutoCancelado() == false) {
@@ -128,7 +133,7 @@ public class ComandoCupomPresente implements IComando {
                             }
                         }
                     } catch (NumberFormatException nfe) {
-                        JOptionPane.showMessageDialog(Caixa.getInstancia(), "Não foi informado um número inteiro.", "Cancelar Item", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(Caixa.getInstancia(), "Não foi informado um número inteiro.", "Cupom Presente", JOptionPane.WARNING_MESSAGE);
                     }
                 }
             }
@@ -144,9 +149,9 @@ public class ComandoCupomPresente implements IComando {
 
     private void abrirCupom() throws OpenPdvException {
         // abrindo o relatorio
-        String[] resp = ECF.enviar(EComandoECF.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.relpresente"));
+        String[] resp = ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.relpresente"));
         if (resp[0].equals("ERRO")) {
-            ECF.enviar(EComandoECF.ECF_CorrigeEstadoErro);
+            ecf.enviar(EComando.ECF_CorrigeEstadoErro);
             throw new OpenPdvException(resp[1]);
         }
     }
@@ -154,16 +159,16 @@ public class ComandoCupomPresente implements IComando {
     private String cabecalho() {
         StringBuilder sb = new StringBuilder();
         // cabecalho
-        sb.append(ECF.LD).append(ECF.SL);
-        sb.append("<CE><N>CUPOM PRESENTE</N></CE>").append(ECF.SL);
-        sb.append(ECF.LD).append(ECF.SL);
+        sb.append(IECF.LD).append(IECF.SL);
+        sb.append("<N>").append(Util.formataTexto("CUPOM PRESENTE", " ", IECF.COL, Util.EDirecao.AMBOS)).append("</N>").append(IECF.SL);
+        sb.append(IECF.LD).append(IECF.SL);
         // dados da venda
-        sb.append("<N>Venda: </N>").append(new SimpleDateFormat("dd/MM/yyyy").format(venda.getEcfVendaData()));
+        sb.append("Venda: ").append(new SimpleDateFormat("dd/MM/yyyy").format(venda.getEcfVendaData()));
         sb.append(" CCF: ").append(Util.formataNumero(venda.getEcfVendaCcf(), 6, 0, false));
         sb.append(" COO: ").append(Util.formataNumero(venda.getEcfVendaCoo(), 6, 0, false));
-        sb.append(ECF.SL);
-        sb.append("ITEM CODIGO         DESCRICAO               QTD.").append(ECF.SL);
-        sb.append(ECF.LS);
+        sb.append(IECF.SL);
+        sb.append("ITEM CODIGO         DESCRICAO               QTD.").append(IECF.SL);
+        sb.append(IECF.LS).append(IECF.SL);
         return sb.toString();
     }
 
@@ -171,37 +176,37 @@ public class ComandoCupomPresente implements IComando {
         StringBuilder sb = new StringBuilder();
         sb.append(Util.formataNumero(vp.getEcfVendaProdutoOrdem(), 3, 0, false));
         sb.append("  ");
-        sb.append(Util.formataTexto(vp.getEcfVendaProdutoCodigo(), " ", 14, true));
+        sb.append(Util.formataTexto(vp.getEcfVendaProdutoCodigo(), " ", 14, Util.EDirecao.DIREITA));
         sb.append(" ");
         String desc = vp.getProdProduto().getProdProdutoDescricao().length() > 23 ? vp.getProdProduto().getProdProdutoDescricao().substring(0, 23) : vp.getProdProduto().getProdProdutoDescricao();
-        sb.append(Util.formataTexto(desc, " ", 23, true));
+        sb.append(Util.formataTexto(desc, " ", 23, Util.EDirecao.DIREITA));
         sb.append("  ");
-        sb.append(Util.formataTexto(Util.formataNumero(vp.getEcfVendaProdutoQuantidade(), 1, 0, false), " ", 3, false));
-        sb.append(ECF.SL);
+        sb.append(Util.formataTexto(Util.formataNumero(vp.getEcfVendaProdutoQuantidade(), 1, 0, false), " ", 3, Util.EDirecao.ESQUERDA));
+        sb.append(IECF.SL);
         return sb.toString();
     }
 
     private String rodape() {
         StringBuilder sb = new StringBuilder();
         // rodape
-        sb.append(ECF.LD).append(ECF.SL);
-        sb.append(Util.getConfig().get("ecf.msgpresente")).append(ECF.SL);
+        sb.append(IECF.LD).append(IECF.SL);
+        sb.append(Util.getConfig().get("ecf.msgpresente")).append(IECF.SL);
         sb.append("OPERADOR: ").append(venda.getSisUsuario().getSisUsuarioLogin());
         if (venda.getSisVendedor() != null) {
             sb.append(" - VENDEDOR: ").append(venda.getSisVendedor().getSisUsuarioLogin());
         }
-        sb.append(ECF.SL).append(ECF.LD).append(ECF.SL);
+        sb.append(IECF.SL).append(IECF.LD).append(IECF.SL);
         return sb.toString();
     }
 
     private void fecharCupom(String texto) throws OpenPdvException {
         // envia o comando com todo o texto
-        String[] resp = ECF.enviar(EComandoECF.ECF_LinhaRelatorioGerencial, texto);
-        if (resp[0].equals("ERRO")) {
-            ECF.enviar(EComandoECF.ECF_CorrigeEstadoErro);
+        String[] resp = ecf.enviar(EComando.ECF_LinhaRelatorioGerencial, texto);
+        if (resp[0].equals(IECF.ERRO)) {
+            ecf.enviar(EComando.ECF_CorrigeEstadoErro);
             throw new OpenPdvException(resp[1]);
         } else {
-            ECF.enviar(EComandoECF.ECF_FechaRelatorio);
+            ecf.enviar(EComando.ECF_FechaRelatorio);
         }
     }
 }

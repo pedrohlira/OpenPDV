@@ -1,5 +1,5 @@
 ## Leiame ##
 
-# Descompacte o zip correspondente da impressora que ira usar, e coloque todos os arquivos dentro da pasta ACBrMonitor.
+# Descompacte o zip correspondente da impressora que ira usar, e coloque todos os arquivos dentro da pasta ACBrMonitor caso utilize o ACRB, se for usar acesso direto coloque os arquivos na pasta C:\Windows\system32\
 
-# Caso nao tenha um zip para sua impressora entre no site do fabricante para fazer o download, ou melhor entre em contato conosco suporte@phdss.com.br
+# Caso nao tenha um zip para sua impressora entre no site do fabricante para fazer o download, ou se desejar entre em contato conosco suporte@phdss.com.br

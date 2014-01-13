@@ -1,12 +1,13 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
+import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.controlador.PAF;
 import org.apache.log4j.Logger;
 
@@ -19,6 +20,7 @@ public class ComandoAdicionarItem implements IComando {
 
     private Logger log;
     private EcfVendaProduto vendaProduto;
+    private IECF ecf;
 
     /**
      * Construtor padrao.
@@ -35,6 +37,7 @@ public class ComandoAdicionarItem implements IComando {
     public ComandoAdicionarItem(EcfVendaProduto vendaProduto) {
         this.log = Logger.getLogger(ComandoCancelarItem.class);
         this.vendaProduto = vendaProduto;
+        this.ecf = ECF.getInstancia();
     }
 
     @Override
@@ -42,7 +45,7 @@ public class ComandoAdicionarItem implements IComando {
         // adicionar o item no ECF
         adicionarItemEcf();
         // pega o ultimo numero
-        String[] resp = ECF.enviar(EComandoECF.ECF_NumUltItem);
+        String[] resp = ecf.enviar(EComando.ECF_NumUltItem);
         // salva no bd
         adicionarItemBanco(resp[1]);
         // mostra na tela
@@ -66,18 +69,18 @@ public class ComandoAdicionarItem implements IComando {
         String qtd = Util.formataNumero(vendaProduto.getEcfVendaProdutoQuantidade(), 1, 2, false).replace(",", ".");
         String valor = Util.formataNumero(vendaProduto.getEcfVendaProdutoBruto(), 1, 2, false).replace(",", ".");
         String und = vendaProduto.getProdEmbalagem().getProdEmbalagemNome();
-        if (und.length() > 3) {
-            und = und.substring(0, 3);
+        if (und.length() > 2) {
+            und = und.substring(0, 2);
         }
 
-        String[] resp = ECF.enviar(EComandoECF.ECF_VendeItem, new String[]{codigo, descricao, aliquota, qtd, valor, "0", und});
-        if (ECF.OK.equals(resp[0])) {
+        String[] resp = ecf.enviar(EComando.ECF_VendeItem, new String[]{codigo, descricao, aliquota, qtd, valor, "0", und});
+        if (IECF.OK.equals(resp[0])) {
             // atualiza o gt
             try {
-                resp = ECF.enviar(EComandoECF.ECF_GrandeTotal);
-                if (ECF.OK.equals(resp[0])) {
+                resp = ecf.enviar(EComando.ECF_GrandeTotal);
+                if (IECF.OK.equals(resp[0])) {
                     PAF.AUXILIAR.setProperty("ecf.gt", resp[1]);
-                    PAF.criptografar();
+                    Util.criptografar(null, PAF.AUXILIAR);
                 } else {
                     throw new Exception(resp[1]);
                 }
@@ -117,21 +120,21 @@ public class ComandoAdicionarItem implements IComando {
         StringBuilder linha1 = new StringBuilder();
         linha1.append(Util.formataNumero(ordem, 3, 0, false));
         linha1.append("  ");
-        linha1.append(Util.formataTexto(vendaProduto.getEcfVendaProdutoCodigo(), " ", 14, false));
+        linha1.append(Util.formataTexto(vendaProduto.getEcfVendaProdutoCodigo(), " ", 14, Util.EDirecao.ESQUERDA));
         linha1.append(" ");
         linha1.append(vendaProduto.getProdProduto().getProdProdutoDescricao().length() > 28
                 ? vendaProduto.getProdProduto().getProdProdutoDescricao().substring(0, 28) : vendaProduto.getProdProduto().getProdProdutoDescricao());
         Caixa.getInstancia().getBobina().addElement(linha1.toString());
         // linha 2
         StringBuilder linha2 = new StringBuilder();
-        linha2.append(Util.formataTexto(Util.formataNumero(vendaProduto.getEcfVendaProdutoQuantidade(), 1, 2, false), " ", 8, true));
+        linha2.append(Util.formataTexto(Util.formataNumero(vendaProduto.getEcfVendaProdutoQuantidade(), 1, 2, false), " ", 8, Util.EDirecao.DIREITA));
         linha2.append(" ");
         linha2.append(vendaProduto.getProdEmbalagem().getProdEmbalagemNome().length() > 3
                 ? vendaProduto.getProdEmbalagem().getProdEmbalagemNome().subSequence(0, 3) : vendaProduto.getProdEmbalagem().getProdEmbalagemNome());
         linha2.append(" x ");
-        linha2.append(Util.formataTexto(Util.formataNumero(vendaProduto.getEcfVendaProdutoLiquido(), 1, 2, false), " ", 13, true));
-        linha2.append(Util.formataTexto(getAliquota(), " ", 5, false));
-        linha2.append(Util.formataTexto(Util.formataNumero(vendaProduto.getEcfVendaProdutoTotal(), 1, 2, false), " ", 13, false));
+        linha2.append(Util.formataTexto(Util.formataNumero(vendaProduto.getEcfVendaProdutoLiquido(), 1, 2, false), " ", 13, Util.EDirecao.DIREITA));
+        linha2.append(Util.formataTexto(getAliquota(), " ", 5, Util.EDirecao.ESQUERDA));
+        linha2.append(Util.formataTexto(Util.formataNumero(vendaProduto.getEcfVendaProdutoTotal(), 1, 2, false), " ", 13, Util.EDirecao.ESQUERDA));
         Caixa.getInstancia().getBobina().addElement(linha2.toString());
         // colocando no foco selecionado
         Caixa.getInstancia().getLstBobina().setSelectedIndex(Caixa.getInstancia().getBobina().getSize() - 1);

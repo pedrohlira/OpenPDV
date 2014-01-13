@@ -2,7 +2,7 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.NFe;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
@@ -202,7 +202,7 @@ public class ComandoGerarSintegra implements IComando {
                 Util.normaliza(d50);
                 ld50.add(d50);
             } catch (Exception ex) {
-                continue;
+                // nada
             }
         }
 
@@ -258,7 +258,7 @@ public class ComandoGerarSintegra implements IComando {
                     }
                 }
             } catch (Exception ex) {
-                continue;
+                // nada
             }
         }
 

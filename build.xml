@@ -77,6 +77,7 @@
         <mkdir dir="${dist.jar.dir}/arquivos/exportar"/>
         <mkdir dir="${dist.jar.dir}/arquivos/importar"/>
         <mkdir dir="${dist.jar.dir}/arquivos/cat52"/>
+        <mkdir dir="${dist.jar.dir}/arquivos/modelo"/>
         <mkdir dir="${dist.jar.dir}/db"/>
         <mkdir dir="${dist.jar.dir}/dlls"/>
         <mkdir dir="${dist.jar.dir}/logs"/>
@@ -93,7 +94,7 @@
         </copy>
 
         <copy todir="${dist.jar.dir}/conf">
-            <fileset dir="conf" includes="**" excludes="auxiliar.properties"/>
+            <fileset dir="conf" includes="**" excludes="auxiliar.properties,chave_privada.pcks8,chave_privada.rsa,modulos.key"/>
         </copy>
 
         <copy todir="${dist.jar.dir}/nfe">
@@ -102,6 +103,10 @@
 
         <copy todir="${dist.jar.dir}/ACBrMonitor">
             <fileset dir="ACBrMonitor" includes="**"/>
+        </copy>
+        
+        <copy todir="${dist.jar.dir}/arquivos/modelo">
+            <fileset dir="arquivos/modelo" includes="**"/>
         </copy>
 
         <delete file="${dist.jar.dir}/README.TXT"/>

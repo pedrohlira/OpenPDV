@@ -3,8 +3,9 @@ package br.com.openpdv.visao.core;
 import br.com.openpdv.controlador.comandos.ComandoRecuperarVenda;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.phdss.ECF;
-import br.com.phdss.EComandoECF;
-import br.com.phdss.EEstadoECF;
+import br.com.phdss.fiscal.ACBR;
+import br.com.phdss.EComando;
+import br.com.phdss.EEstado;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
@@ -307,14 +308,14 @@ public class Autenticacao extends JDialog {
             try {
                 Login.logar(txtOperadorUsuario.getText(), senhaOp);
                 Caixa.getInstancia().getLblOperador().setText("Operador : " + txtOperadorUsuario.getText().toUpperCase());
-                Caixa.getInstancia().getLblCaixa().setText("Caixa : " + ECF.enviar(EComandoECF.ECF_NumECF)[1]);
+                Caixa.getInstancia().getLblCaixa().setText("Caixa : " + ECF.getInstancia().enviar(EComando.ECF_NumECF)[1]);
                 txtOperadorUsuario.setText("");
                 pswOperadorSenha.setText("");
                 Caixa.getInstancia().setJanela(null);
                 dispose();
 
-                EEstadoECF estado = ECF.validarEstado();
-                if (estado == EEstadoECF.estVenda || estado == EEstadoECF.estPagamento) {
+                EEstado estado = ECF.getInstancia().validarEstado();
+                if (estado == EEstado.estVenda || estado == EEstado.estPagamento) {
                     new ComandoRecuperarVenda().executar();
                     Caixa.getInstancia().modoAberto();
                 } else {

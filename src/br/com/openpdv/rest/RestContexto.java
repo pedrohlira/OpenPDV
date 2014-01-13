@@ -23,8 +23,8 @@ import org.eclipse.persistence.jaxb.rs.MOXyJsonProvider;
 @Provider
 public class RestContexto extends MOXyJsonProvider implements ContextResolver<JAXBContext> {
 
-    private JAXBContext context;
-    private Class[] types = {SisEmpresa.class, SisEstado.class, SisMunicipio.class, SisUsuario.class, SisCliente.class,
+    private final JAXBContext context;
+    private final Class[] types = {SisEmpresa.class, SisEstado.class, SisMunicipio.class, SisUsuario.class, SisCliente.class,
         EcfPagamentoTipo.class, ProdEmbalagem.class, ProdProduto.class, ProdPreco.class, ProdComposicao.class, ProdGrade.class, ProdGradeTipo.class,
         EcfImpressora.class, EcfDocumento.class, EcfNota.class, EcfNotaProduto.class, EcfNotaEletronica.class, ENotaStatus.class,
         EcfZ.class, EcfZTotais.class, EcfVenda.class, EcfVendaProduto.class, EcfPagamentoTipo.class, EcfPagamento.class,

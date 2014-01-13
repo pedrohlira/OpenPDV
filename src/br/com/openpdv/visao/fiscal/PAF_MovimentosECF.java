@@ -2,7 +2,7 @@ package br.com.openpdv.visao.fiscal;
 
 import br.com.openpdv.controlador.comandos.ComandoEmitirMovimentoECF;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;

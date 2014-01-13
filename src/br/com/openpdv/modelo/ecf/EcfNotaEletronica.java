@@ -3,7 +3,6 @@ package br.com.openpdv.modelo.ecf;
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.sistema.SisCliente;
-import br.com.openpdv.modelo.sistema.SisEmpresa;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;

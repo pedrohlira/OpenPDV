@@ -26,6 +26,7 @@ import br.com.opensig.inutnfe.TInutNFe;
 import br.com.opensig.nfe.TNFe;
 import br.com.opensig.nfe.TNFe.InfNFe.Det;
 import br.com.opensig.nfe.TNfeProc;
+import br.com.phdss.Util;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;

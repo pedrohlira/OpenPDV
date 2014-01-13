@@ -2,7 +2,7 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
 import br.com.openpdv.modelo.ecf.EcfPagamentoParcela;
@@ -38,19 +38,21 @@ public class ComandoSalvarPagamento implements IComando {
     public void executar() throws OpenPdvException {
         List<File> impressos = new ArrayList<>();
 
-        // soma os valores de todos os cartoes, para colocar no CCD
+        // soma os valores de todos os cartoes, para colocar no CCD e o total da venda
         double valCard = 0.00;
+        double total = 0.00;
         for (EcfPagamento pag : pagamentos) {
             if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef()) {
                 valCard += pag.getEcfPagamentoValor();
             }
+            total += pag.getEcfPagamentoValor();
         }
 
         // percorre os pagamentos para inserir no banco e imprimir cartoes
         ComandoImprimirCartao cmdCartao = new ComandoImprimirCartao();
         for (EcfPagamento pag : pagamentos) {
             if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
-                cmdCartao.abrir(pag, valCard);
+                cmdCartao.abrir(pag, valCard, total);
                 cmdCartao.executar();
                 impressos.add(new File(pag.getArquivo()));
             } else if (pag.getEcfPagamentoParcelas() == null) {
@@ -79,7 +81,8 @@ public class ComandoSalvarPagamento implements IComando {
     }
 
     /**
-     * Metodo que a operacao de salvar os dados no banco de dados para posterior uso, ate mesmo de cancelamento.
+     * Metodo que a operacao de salvar os dados no banco de dados para posterior
+     * uso, ate mesmo de cancelamento.
      *
      * @param pagamento objeto de pagamento a ser salvo.
      * @throws OpenPdvException dispara caso nao consiga salvar.

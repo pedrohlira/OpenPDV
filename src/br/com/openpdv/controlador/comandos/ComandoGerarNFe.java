@@ -1,7 +1,8 @@
 package br.com.openpdv.controlador.comandos;
 
+import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.openpdv.controlador.core.Util;
+import br.com.phdss.Util;
 import br.com.openpdv.modelo.Ibpt;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
@@ -52,7 +53,6 @@ import br.com.opensig.nfe.TNFe.InfNFe.Total.ICMSTot;
 import br.com.opensig.nfe.TNFe.InfNFe.Transp;
 import br.com.opensig.nfe.TUf;
 import br.com.opensig.nfe.TUfEmi;
-import br.com.phdss.ECF;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.WebResource;
 import java.util.Date;
@@ -134,7 +134,7 @@ public class ComandoGerarNFe implements IComando {
             nfe.setInfNFe(infNFe);
 
             element = new br.com.opensig.nfe.ObjectFactory().createNFe(nfe);
-        } catch (Exception ex) {
+        } catch (OpenPdvException ex) {
             log.error("Erro na montagem do xml.", ex);
             throw new OpenPdvException(ex);
         }
@@ -169,7 +169,7 @@ public class ComandoGerarNFe implements IComando {
                 numero += Integer.valueOf(Util.getConfig().get("nfe.numero")) + 1;
             }
         } else {
-            WebResource wr = Util.getRest(Util.getConfig().get("sinc.host") + "/nfe");
+            WebResource wr = Conexao.getRest(Util.getConfig().get("sinc.host") + "/nfe");
             numero += wr.accept(MediaType.TEXT_PLAIN_TYPE).get(String.class);
         }
 
