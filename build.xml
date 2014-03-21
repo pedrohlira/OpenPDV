@@ -94,7 +94,7 @@
         </copy>
 
         <copy todir="${dist.jar.dir}/conf">
-            <fileset dir="conf" includes="**" excludes="auxiliar.properties,chave_privada.pcks8,chave_privada.rsa,modulos.key"/>
+            <fileset dir="conf" includes="**" excludes="auxiliar.properties"/>
         </copy>
 
         <copy todir="${dist.jar.dir}/nfe">

@@ -82,6 +82,7 @@ public class Identificar extends javax.swing.JDialog {
         separador1 = new javax.swing.JSeparator();
         txtCCF = new javax.swing.JTextField();
         btnCadastrar = new javax.swing.JButton();
+        chkCPF = new javax.swing.JCheckBox();
         btnOK = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
 
@@ -232,6 +233,9 @@ public class Identificar extends javax.swing.JDialog {
             }
         });
 
+        chkCPF.setSelected(true);
+        chkCPF.setText("CPF no Cupom");
+
         btnOK.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnOK.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/salvar.png"))); // NOI18N
         btnOK.setText("OK");
@@ -275,6 +279,8 @@ public class Identificar extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
                     .add(layout.createSequentialGroup()
                         .add(btnCadastrar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 181, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(chkCPF)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(btnOK, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -293,7 +299,7 @@ public class Identificar extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtCCF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 88, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(org.jdesktop.layout.GroupLayout.LEADING, separador1))
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -314,11 +320,12 @@ public class Identificar extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnOK, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(btnCadastrar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(btnCadastrar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(chkCPF))
                 .addContainerGap(26, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(524, 210));
+        setSize(new java.awt.Dimension(546, 210));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -429,10 +436,12 @@ public class Identificar extends javax.swing.JDialog {
             btnCadastrarActionPerformed(null);
         }
     }//GEN-LAST:event_btnCadastrarKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCadastrar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnOK;
+    private javax.swing.JCheckBox chkCPF;
     private javax.swing.JCheckBox chkRecuperar;
     private javax.swing.JLabel lblCPF_CNPJ;
     private javax.swing.JLabel lblCodigo;
@@ -475,6 +484,7 @@ public class Identificar extends javax.swing.JDialog {
                 cliente.setSisClienteData(new Date());
                 cliente = (SisCliente) service.salvar(cliente);
                 cliente.setVendedor(vendedor);
+                cliente.setCpfCupom(chkCPF.isSelected());
 
                 async.sucesso(cliente);
             } catch (OpenPdvException ex) {
@@ -540,6 +550,7 @@ public class Identificar extends javax.swing.JDialog {
         txtVendedor.setText("");
         txtCCF.setText("");
         chkRecuperar.setSelected(false);
+        chkCPF.setSelected(true);
         txtCPF_CNPJ.requestFocus();
     }
 

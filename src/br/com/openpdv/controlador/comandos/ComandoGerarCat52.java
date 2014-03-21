@@ -51,7 +51,7 @@ public class ComandoGerarCat52 implements IComando {
     private EcfImpressora impressora;
     private EcfZ ecfZ;
     private String path;
-    private IECF ecf;
+    private final IECF ecf;
     private final int usuario = 1;
 
     /**
@@ -91,6 +91,7 @@ public class ComandoGerarCat52 implements IComando {
         this.empresa = empresa;
         this.impressora = impressora;
         this.ecfZ = ecfZ;
+        this.ecf = ECF.getInstancia();
     }
 
     @Override
@@ -141,8 +142,7 @@ public class ComandoGerarCat52 implements IComando {
                 e01.setCrzFim(ecfZ.getEcfZCrz());
                 e01.setDataIni(ecfZ.getEcfZMovimento());
                 e01.setDataFim(ecfZ.getEcfZMovimento());
-                String id = impressora.getEcfImpressoraIdentificacao();
-                e01.setBiblioteca(id.substring(0, 2) + "." + id.substring(2, 4) + "." + id.substring(4));
+                e01.setBiblioteca("01.00.00");
                 e01.setAtoCotepe("PC5207 01.00.00");
 
                 // e02
@@ -209,6 +209,9 @@ public class ComandoGerarCat52 implements IComando {
                     if (venda.getSisCliente() != null) {
                         e14.setCliente(venda.getSisCliente().getSisClienteNome());
                         e14.setCnpj_cpf(venda.getSisCliente().getSisClienteDoc().replaceAll("\\D", ""));
+                    } else {
+                        e14.setCliente("");
+                        e14.setCnpj_cpf("0");
                     }
                     listaE14.add(e14);
 
@@ -227,8 +230,8 @@ public class ComandoGerarCat52 implements IComando {
                         e15.setQtd(vp.getEcfVendaProdutoQuantidade());
                         e15.setUnd(vp.getProdEmbalagem().getProdEmbalagemNome());
                         e15.setBruto(vp.getEcfVendaProdutoBruto());
-                        e15.setDesconto(vp.getEcfVendaProdutoDesconto());
-                        e15.setAcrescimo(vp.getEcfVendaProdutoAcrescimo());
+                        e15.setDesconto(vp.getEcfVendaProdutoDesconto() * vp.getEcfVendaProdutoQuantidade());
+                        e15.setAcrescimo(vp.getEcfVendaProdutoAcrescimo() * vp.getEcfVendaProdutoQuantidade());
                         e15.setLiquido(vp.getEcfVendaProdutoTotal());
                         if (vp.getEcfVendaProdutoTributacao() == 'T' || vp.getEcfVendaProdutoTributacao() == 'S') {
                             String sufixo = vp.getEcfVendaProdutoTributacao() + Util.formataNumero(vp.getEcfVendaProdutoIcms(), 2, 2, false).replace(",", "");
@@ -244,7 +247,10 @@ public class ComandoGerarCat52 implements IComando {
                         if (vp.getEcfVendaProdutoCancelado()) {
                             e15.setCancelado('S');
                             e15.setQtdCancelado(vp.getEcfVendaProdutoQuantidade());
-                            e15.setValorCancelado(vp.getEcfVendaProdutoTotal());
+                            e15.setDesconto(0.00);
+                            e15.setAcrescimo(0.00);
+                            e15.setLiquido(vp.getEcfVendaProdutoBruto() * vp.getEcfVendaProdutoQuantidade());
+                            e15.setValorCancelado(vp.getEcfVendaProdutoBruto() * vp.getEcfVendaProdutoQuantidade());
                         } else {
                             e15.setCancelado('N');
                             e15.setQtdCancelado(0.00);

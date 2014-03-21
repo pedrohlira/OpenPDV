@@ -43,7 +43,7 @@ public class EcfVenda extends Dados implements Serializable {
     private boolean ecfVendaFechada;
     @Column(name = "ecf_venda_cancelada")
     private boolean ecfVendaCancelada;
-     @Column(name = "ecf_venda_sinc")
+    @Column(name = "ecf_venda_sinc")
     private boolean ecfVendaSinc;
     @Column(name = "ecf_venda_observacao")
     private String ecfVendaObservacao;

@@ -44,11 +44,17 @@ public class SisCliente extends Dados implements Serializable {
     @Column(name = "sis_cliente_data")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sisClienteData;
+    @Column(name = "sis_cliente_observacao")
+    private String sisClienteObservacao;
+    @Column(name = "sis_cliente_sinc")
+    private boolean sisClienteSinc;
     @JoinColumn(name = "sis_municipio_id", referencedColumnName = "sis_municipio_id")
     @ManyToOne
     private SisMunicipio sisMunicipio;
     // usado somente na identificacao
     private transient SisUsuario vendedor;
+    // usado somente na identificacao
+    private transient boolean cpfCupom;
 
     /**
      * Construtor padrao
@@ -183,6 +189,22 @@ public class SisCliente extends Dados implements Serializable {
         this.sisClienteData = sisClienteData;
     }
 
+    public String getSisClienteObservacao() {
+        return sisClienteObservacao;
+    }
+
+    public void setSisClienteObservacao(String sisClienteObservacao) {
+        this.sisClienteObservacao = sisClienteObservacao;
+    }
+
+    public boolean isSisClienteSinc() {
+        return sisClienteSinc;
+    }
+
+    public void setSisClienteSinc(boolean sisClienteSinc) {
+        this.sisClienteSinc = sisClienteSinc;
+    }
+
     public SisUsuario getVendedor() {
         return vendedor;
     }
@@ -190,4 +212,13 @@ public class SisCliente extends Dados implements Serializable {
     public void setVendedor(SisUsuario vendedor) {
         this.vendedor = vendedor;
     }
+
+    public boolean isCpfCupom() {
+        return cpfCupom;
+    }
+
+    public void setCpfCupom(boolean cpfCupom) {
+        this.cpfCupom = cpfCupom;
+    }
+
 }

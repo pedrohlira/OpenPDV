@@ -24,3 +24,9 @@ UPDATE ecf_venda SET ecf_venda_sinc = 1;
 ALTER TABLE ecf_documento ADD COLUMN ecf_z_id int(11) DEFAULT NULL BEFORE ecf_documento_usuario;
 ALTER TABLE ecf_documento ADD CONSTRAINT FK_ecf_documento_2 FOREIGN KEY (ecf_z_id) REFERENCES ecf_z (ecf_z_id) ON DELETE NO ACTION ON UPDATE NO ACTION;
 UPDATE ecf_documento AS d SET d.ecf_z_id = (SELECT z.ecf_z_id FROM ecf_z AS z WHERE d.ecf_documento_data >= z.ecf_z_movimento AND d.ecf_documento_data <= z.ecf_z_emissao);
+
+/* Adicionando o campo de observacao e sinc nos clientes, para poder sincronizar isolado e aumentando o tamanho do telefone */
+ALTER TABLE sis_cliente ADD COLUMN sis_cliente_observacao varchar(255) NOT NULL;
+ALTER TABLE sis_cliente ADD COLUMN sis_cliente_sinc bit(1) NOT NULL;
+ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_telefone varchar(100) NOT NULL;
+UPDATE sis_cliente SET sis_cliente_observacao = '', sis_cliente_sinc = 0;

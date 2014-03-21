@@ -1,9 +1,3 @@
 /build/
 /dist/
-/src/META-INF/private.key
-/teste.h2.db
-/teste.trace.db
-/arquivos/modelo/mfd.txt
-/arquivos/modelo/leitura.txt
-/arquivos/modelo/rodape.txt
-/arquivos/modelo/cabecalho.txt
+/arquivos/modelo/

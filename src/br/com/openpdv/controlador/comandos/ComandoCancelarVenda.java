@@ -100,6 +100,8 @@ public class ComandoCancelarVenda implements IComando {
                         public void run() {
                             try {
                                 List<EcfVenda> lista = new ArrayList<>();
+                                venda.setEcfVendaCancelada(true);
+                                venda.setEcfTrocas(null);
                                 lista.add(venda);
                                 lista = ComandoEnviarDados.getInstancia().enviar("venda", lista);
                                 // marca a venda como sincronizada

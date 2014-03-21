@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -76,13 +77,15 @@ public class Clientes extends javax.swing.JDialog {
         txtComplemento.setDocument(new TextFieldLimit(100));
         txtBairro.setDocument(new TextFieldLimit(100));
         txtCEP.setDocument(new TextFieldLimit(9));
-        txtTelefone.setDocument(new TextFieldLimit(20));
+        txtTelefone.setDocument(new TextFieldLimit(100));
         txtEmail.setDocument(new TextFieldLimit(100));
+        taObs.setDocument(new TextFieldLimit(255));
     }
 
     /**
      * Metodo que retorna a instancia do componente.
      *
+     * @param async o objeto de acesso assincrono.
      * @return o objeto do componente.
      */
     public static Clientes getInstancia(AsyncCallback<SisCliente> async) {
@@ -132,6 +135,9 @@ public class Clientes extends javax.swing.JDialog {
         txtTelefone = new javax.swing.JTextField();
         lblEmail = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
+        lblObs = new javax.swing.JLabel();
+        spObs = new javax.swing.JScrollPane();
+        taObs = new javax.swing.JTextArea();
         txtLimite = new javax.swing.JFormattedTextField();
         lblLimite = new javax.swing.JLabel();
         btnNovo = new javax.swing.JButton();
@@ -186,14 +192,14 @@ public class Clientes extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Cod", "CPF/CNPJ", "Nome", "IE", "Endereço", "Nº", "Complemento", "Bairro", "CEP", "Município", "Telefone", "E-mail"
+                "Cod", "CPF/CNPJ", "Nome", "IE", "Endereço", "Nº", "Complemento", "Bairro", "CEP", "Município", "Telefone", "E-mail", "OBS", "Sinc"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -205,6 +211,7 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
         tabClientes.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabClientes.setColumnSelectionAllowed(true);
         tabClientes.setRowHeight(20);
         tabClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabClientes.setShowGrid(true);
@@ -237,6 +244,10 @@ public class Clientes extends javax.swing.JDialog {
             tabClientes.getColumnModel().getColumn(10).setPreferredWidth(100);
             tabClientes.getColumnModel().getColumn(11).setResizable(false);
             tabClientes.getColumnModel().getColumn(11).setPreferredWidth(200);
+            tabClientes.getColumnModel().getColumn(12).setResizable(false);
+            tabClientes.getColumnModel().getColumn(12).setPreferredWidth(200);
+            tabClientes.getColumnModel().getColumn(13).setResizable(false);
+            tabClientes.getColumnModel().getColumn(13).setPreferredWidth(50);
         }
 
         painel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -322,14 +333,24 @@ public class Clientes extends javax.swing.JDialog {
         txtEmail.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         txtEmail.setToolTipText("Nome ou Razão Social.");
 
+        lblObs.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblObs.setText("OBS:");
+
+        taObs.setColumns(50);
+        taObs.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        taObs.setLineWrap(true);
+        taObs.setRows(4);
+        taObs.setTabSize(5);
+        spObs.setViewportView(taObs);
+
         org.jdesktop.layout.GroupLayout painelLayout = new org.jdesktop.layout.GroupLayout(painel);
         painel.setLayout(painelLayout);
         painelLayout.setHorizontalGroup(
             painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(painelLayout.createSequentialGroup()
                 .addContainerGap()
-                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(painelLayout.createSequentialGroup()
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, painelLayout.createSequentialGroup()
                         .add(lblUF)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(cmbUF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 85, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -346,7 +367,7 @@ public class Clientes extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 162, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(1, 1, 1))
-                    .add(painelLayout.createSequentialGroup()
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, painelLayout.createSequentialGroup()
                         .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(lblEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 59, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .add(lblCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 63, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
@@ -380,7 +401,11 @@ public class Clientes extends javax.swing.JDialog {
                                 .add(9, 9, 9)))
                         .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                             .add(txtBairro)
-                            .add(txtCEP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE))))
+                            .add(txtCEP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)))
+                    .add(painelLayout.createSequentialGroup()
+                        .add(lblObs)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(spObs)))
                 .addContainerGap())
         );
         painelLayout.setVerticalGroup(
@@ -416,6 +441,10 @@ public class Clientes extends javax.swing.JDialog {
                     .add(lblEmail)
                     .add(txtEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(lblObs)
+                    .add(spObs, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -508,12 +537,12 @@ public class Clientes extends javax.swing.JDialog {
             .add(layout.createSequentialGroup()
                 .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
+                    .add(layout.createSequentialGroup()
                         .add(lblFiltro)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(txtFiltro)
+                        .add(txtFiltro, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 621, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 92, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE))
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
                         .add(org.jdesktop.layout.GroupLayout.LEADING, painel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(org.jdesktop.layout.GroupLayout.LEADING, spClientes)
@@ -529,7 +558,7 @@ public class Clientes extends javax.swing.JDialog {
                             .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                             .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -555,10 +584,10 @@ public class Clientes extends javax.swing.JDialog {
                         .add(layout.createSequentialGroup()
                             .add(6, 6, 6)
                             .add(lblLimite))))
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap(50, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(804, 458));
+        setSize(new java.awt.Dimension(804, 533));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -666,11 +695,14 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JLabel lblMunicipio;
     private javax.swing.JLabel lblNome;
     private javax.swing.JLabel lblNumero;
+    private javax.swing.JLabel lblObs;
     private javax.swing.JLabel lblRG_IE;
     private javax.swing.JLabel lblTelefone;
     private javax.swing.JLabel lblUF;
     private javax.swing.JPanel painel;
     private javax.swing.JScrollPane spClientes;
+    private javax.swing.JScrollPane spObs;
+    private javax.swing.JTextArea taObs;
     private javax.swing.JTable tabClientes;
     private javax.swing.JTextField txtBairro;
     private javax.swing.JFormattedTextField txtCEP;
@@ -714,6 +746,8 @@ public class Clientes extends javax.swing.JDialog {
             cliente.setSisClienteTelefone(txtTelefone.getText());
             cliente.setSisClienteEmail(txtEmail.getText());
             cliente.setSisClienteData(new Date());
+            cliente.setSisClienteObservacao(taObs.getText());
+            cliente.setSisClienteSinc(false);
 
             try {
                 cliente = (SisCliente) service.salvar(cliente);
@@ -797,7 +831,7 @@ public class Clientes extends javax.swing.JDialog {
             for (SisCliente cli : clis) {
                 Object[] obj = new Object[]{cli.getSisClienteId(), cli.getSisClienteDoc(), cli.getSisClienteNome(), cli.getSisClienteDoc1(), cli.getSisClienteEndereco(),
                     cli.getSisClienteNumero(), cli.getSisClienteComplemento(), cli.getSisClienteBairro(), cli.getSisClienteCep(),
-                    cli.getSisMunicipio(), cli.getSisClienteTelefone(), cli.getSisClienteEmail()
+                    cli.getSisMunicipio(), cli.getSisClienteTelefone(), cli.getSisClienteEmail(), cli.getSisClienteObservacao(), cli.isSisClienteSinc()
                 };
                 dtm.addRow(obj);
             }
@@ -827,6 +861,7 @@ public class Clientes extends javax.swing.JDialog {
             Util.selecionarCombo(cmbMunicipio, Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisMunicipioDescricao());
             txtTelefone.setText("");
             txtEmail.setText("");
+            taObs.setText("");
         } else {
             int rowModel = tabClientes.convertRowIndexToModel(row);
             cod = Integer.valueOf(tabClientes.getModel().getValueAt(rowModel, 0).toString());
@@ -843,6 +878,7 @@ public class Clientes extends javax.swing.JDialog {
             Util.selecionarCombo(cmbMunicipio, mun.getSisMunicipioDescricao());
             txtTelefone.setText(tabClientes.getModel().getValueAt(rowModel, 10).toString());
             txtEmail.setText(tabClientes.getModel().getValueAt(rowModel, 11).toString());
+            taObs.setText(tabClientes.getModel().getValueAt(rowModel, 12).toString());
         }
     }
 
@@ -1176,6 +1212,70 @@ public class Clientes extends javax.swing.JDialog {
 
     public void setTxtRG_IE(JTextField txtRG_IE) {
         this.txtRG_IE = txtRG_IE;
+    }
+
+    public JButton getBtnPesquisar() {
+        return btnPesquisar;
+    }
+
+    public void setBtnPesquisar(JButton btnPesquisar) {
+        this.btnPesquisar = btnPesquisar;
+    }
+
+    public JLabel getLblFiltro() {
+        return lblFiltro;
+    }
+
+    public void setLblFiltro(JLabel lblFiltro) {
+        this.lblFiltro = lblFiltro;
+    }
+
+    public JLabel getLblLimite() {
+        return lblLimite;
+    }
+
+    public void setLblLimite(JLabel lblLimite) {
+        this.lblLimite = lblLimite;
+    }
+
+    public JLabel getLblObs() {
+        return lblObs;
+    }
+
+    public void setLblObs(JLabel lblObs) {
+        this.lblObs = lblObs;
+    }
+
+    public JScrollPane getSpObs() {
+        return spObs;
+    }
+
+    public void setSpObs(JScrollPane spObs) {
+        this.spObs = spObs;
+    }
+
+    public JTextArea getTaObs() {
+        return taObs;
+    }
+
+    public void setTaObs(JTextArea taObs) {
+        this.taObs = taObs;
+    }
+
+    public JTextField getTxtFiltro() {
+        return txtFiltro;
+    }
+
+    public void setTxtFiltro(JTextField txtFiltro) {
+        this.txtFiltro = txtFiltro;
+    }
+
+    public JFormattedTextField getTxtLimite() {
+        return txtLimite;
+    }
+
+    public void setTxtLimite(JFormattedTextField txtLimite) {
+        this.txtLimite = txtLimite;
     }
 
     public AsyncCallback<SisCliente> getAsync() {

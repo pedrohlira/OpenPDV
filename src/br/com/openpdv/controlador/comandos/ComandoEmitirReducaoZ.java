@@ -56,16 +56,26 @@ public class ComandoEmitirReducaoZ implements IComando {
     public void executar() throws OpenPdvException {
         // verifica se e a primeira Z do mes
         emitirLMFC();
+        // pega os dados da z antes de imprimir
+        String[] antesZ = ecf.enviar(EComando.ECF_DadosReducaoz);
         // emite a reducao no ECF
         emitirReducaoZEcf();
-        // salva os dados no banco
-        emitirReducaoZBanco();
+        // pega os dados da z depois de imprimir
+        String[] depoisZ = ecf.enviar(EComando.ECF_DadosUltimaReducaoZ);
+        try {
+            // salva os dados no banco com a reducao depois de impressao
+            emitirReducaoZBanco(depoisZ);
+        } catch (OpenPdvException ex) {
+            // caso aconteca um erro, tenta com os dados antes da impressao
+            emitirReducaoZBanco(antesZ);
+        }
+
         // gera o arquivo Movimento do ECF do dia
         new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento).executar();
         // gera os totais dos pagamentos
         new ComandoTotalizarPagamentos(dataMovimento).executar();
         // gera o arquivo do cat52
-       if (Util.getConfig().get("ecf.cat52") != null) {
+        if (Util.getConfig().get("ecf.cat52") != null) {
             new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();
         }
         // atualizando o servidor
@@ -118,14 +128,14 @@ public class ComandoEmitirReducaoZ implements IComando {
     /**
      * Metodo que emite salva os dados da ultima Reducao Z no Banco.
      *
+     * @param dados informacoes da z.
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
-    public void emitirReducaoZBanco() throws OpenPdvException {
-        String[] resp = ecf.enviar(EComando.ECF_DadosUltimaReducaoZ);
-        if (IECF.OK.equals(resp[0])) {
+    public void emitirReducaoZBanco(String[] dados) throws OpenPdvException {
+        if (IECF.OK.equals(dados[0])) {
             try {
                 // pega os dados
-                InputStream stream = new ByteArrayInputStream(resp[1].replace(",", ".").getBytes("UTF-8"));
+                InputStream stream = new ByteArrayInputStream(dados[1].replace(",", ".").getBytes("UTF-8"));
                 Wini ini = new Wini(stream);
 
                 // recuperando a ultima Z emitida desta impressora e pega o ultimo coo
@@ -148,8 +158,12 @@ public class ComandoEmitirReducaoZ implements IComando {
                 z.setEcfZCooIni(cooIni);
                 z.setEcfZCooFin(ini.get("ECF", "NumCOO", int.class));
                 z.setEcfZCro(ini.get("ECF", "NumCRO", int.class));
-                String movimento = ini.get("ECF", "DataMovimento");
-                z.setEcfZMovimento(new SimpleDateFormat("dd/MM/yy").parse(movimento));
+                try {
+                    String movimento = ini.get("ECF", "DataMovimento");
+                    z.setEcfZMovimento(new SimpleDateFormat("dd/MM/yy").parse(movimento));
+                } catch (ParseException ex) {
+                    z.setEcfZMovimento(new Date());
+                }
                 z.setEcfZEmissao(new Date());
                 z.setEcfZBruto(ini.get("Totalizadores", "VendaBruta", double.class));
                 z.setEcfZGt(ini.get("Totalizadores", "GrandeTotal", double.class));
@@ -303,11 +317,11 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // salva os totais do z
                 service.salvar(totais.values());
             } catch (Exception ex) {
-                log.error("Erro ao gerar e salvar os dados da reducao Z -> " + resp[1], ex);
+                log.error("Erro ao gerar e salvar os dados da reducao Z -> " + dados[1], ex);
                 throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
             }
         } else {
-            log.error("Erro ao pegar os dados da ultima reducao Z -> " + resp[1]);
+            log.error("Erro ao pegar os dados da ultima reducao Z -> " + dados[1]);
             throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
         }
     }
@@ -331,7 +345,7 @@ public class ComandoEmitirReducaoZ implements IComando {
             }
         } else {
             log.error("Erro ao recuperar a data do ECF -> " + resp[1]);
-            throw new OpenPdvException(resp[1]);
+            data = new Date();
         }
 
         // transforma a data para o dia 1º do mes

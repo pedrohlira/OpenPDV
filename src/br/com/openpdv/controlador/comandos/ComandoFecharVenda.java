@@ -136,7 +136,7 @@ public class ComandoFecharVenda implements IComando {
             // caso nao tenha sido informado o cliente
             if (venda.getSisCliente() == null) {
                 sb.append("CONSUMIDOR NAO INFORMOU O CPF/CNPJ").append(IECF.SL);
-            } else if (Caixa.getInstancia().getVenda().isInformouCliente() == false) {
+            } else if (Caixa.getInstancia().getVenda().isInformouCliente() == false && venda.getSisCliente().isCpfCupom()) {
                 sb.append("CNPJ/CPF consumidor:").append(venda.getSisCliente().getSisClienteDoc()).append(IECF.SL);
                 if (!venda.getSisCliente().getSisClienteNome().equals("")) {
                     sb.append("NOME:").append(venda.getSisCliente().getSisClienteNome()).append(IECF.SL);

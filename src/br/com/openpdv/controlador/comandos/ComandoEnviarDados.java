@@ -13,6 +13,7 @@ import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfZ;
+import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.controlador.PAF;
 import java.util.Calendar;
@@ -79,6 +80,8 @@ public abstract class ComandoEnviarDados implements IComando {
         notas();
         // enviando as nfes
         nfes();
+        // enviando os clientes nao sincronizados
+        clientes();
         // enviando as vendas nao sincronizadas
         vendas();
         // enviando as Z
@@ -162,20 +165,34 @@ public abstract class ComandoEnviarDados implements IComando {
     }
 
     /**
+     * Metodo que envia os clientes.
+     */
+    private void clientes() {
+        try {
+            FiltroBinario fb = new FiltroBinario("sisClienteSinc", ECompara.IGUAL, false);
+            List<SisCliente> clientes = service.selecionar(new SisCliente(), 0, 0, fb);
+            if (!clientes.isEmpty()) {
+                clientes = enviar("cliente", clientes);
+                for (SisCliente cliente : clientes) {
+                    // marca a venda como sincronizada
+                    cliente.setSisClienteSinc(true);
+                    service.salvar(cliente);
+                }
+                log.info("Clientes enviados = " + clientes.size());
+            }
+        } catch (Exception ex) {
+            erros.append("Erro no envio de alguns clientes.\n");
+            log.error("Erro no envio de alguns clientes.", ex);
+        }
+    }
+
+    /**
      * Metodo que envia as vendas.
      */
     private void vendas() {
         try {
-            GrupoFiltro filtro = new GrupoFiltro();
             FiltroBinario fb = new FiltroBinario("ecfVendaSinc", ECompara.IGUAL, false);
-            filtro.add(fb, EJuncao.E);
-            FiltroData fd = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, inicio);
-            filtro.add(fd, EJuncao.E);
-            if (fim != null) {
-                FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MENOR, fim);
-                filtro.add(fd1, EJuncao.E);
-            }
-            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 0, filtro);
+            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 0, fb);
             if (!vendas.isEmpty()) {
                 vendas = enviar("venda", vendas);
                 for (EcfVenda venda : vendas) {
@@ -221,7 +238,7 @@ public abstract class ComandoEnviarDados implements IComando {
      */
     private void salvar() throws OpenPdvException {
         try {
-            PAF.AUXILIAR.setProperty("out.recebimento", Util.getData(new Date()));
+            PAF.AUXILIAR.setProperty("out.envio", Util.getData(new Date()));
             Util.criptografar(null, PAF.AUXILIAR);
         } catch (Exception ex) {
             throw new OpenPdvException("Erro ao salvar no arquivo auxiliar.\nVerifique o log do sistema.", ex);

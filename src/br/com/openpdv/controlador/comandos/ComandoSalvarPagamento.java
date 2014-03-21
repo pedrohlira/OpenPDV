@@ -60,7 +60,7 @@ public class ComandoSalvarPagamento implements IComando {
                 EcfPagamentoParcela parcela = new EcfPagamentoParcela();
                 parcela.setEcfPagamentoParcelaData(pag.getEcfPagamentoData());
                 parcela.setEcfPagamentoParcelaValor(pag.getEcfPagamentoValor());
-                parcela.setEcfPagamentoParcelaNsu("");
+                parcela.setEcfPagamentoParcelaNsu(pag.getEcfPagamentoNsu());
                 parcelas.add(parcela);
                 pag.setEcfPagamentoParcelas(parcelas);
             }

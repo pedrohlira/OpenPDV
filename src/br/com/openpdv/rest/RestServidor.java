@@ -263,6 +263,41 @@ public class RestServidor extends ARest {
     }
 
     /**
+     * Metodo que cadastra na base do server os clientesclieados pelos sistemas
+     * em modo client.
+     *
+     * @param cliente um objeto do tipo SisCliente.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
+    @Path("/cliente")
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void setCliente(SisCliente cliente) throws RestException {
+        autorizar();
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
+        try {
+            emf = Conexao.getInstancia();
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+            getCliente(em, cliente);
+            em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            log.error("Erro ao salvar cliente.", ex);
+            throw new RestException(ex.getMessage());
+        } finally {
+            if (em != null) {
+                em.close();
+                emf.close();
+            }
+        }
+    }
+
+    /**
      * Metodo que cadastra na base do server as vendas, produtos vendidos,
      * pagamentos emitidos pelos sistemas em modo client.
      *
@@ -522,13 +557,10 @@ public class RestServidor extends ARest {
             FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, sisCliente.getSisClienteDoc().replaceAll("\\D", ""));
             SisCliente aux = (SisCliente) service.selecionar(sisCliente, ft);
 
-            // se existir retornar, senao cria um novo
-            if (aux != null) {
-                return aux;
-            } else {
-                sisCliente.setId(0);
-                return (SisCliente) service.salvar(em, sisCliente);
-            }
+            // se existir atualiza, senao cria um novo
+            sisCliente.setId(aux != null ? aux.getSisClienteId() : 0);
+            sisCliente.setSisClienteSinc(true);
+            return (SisCliente) service.salvar(em, sisCliente);
         } catch (OpenPdvException ex) {
             return null;
         }

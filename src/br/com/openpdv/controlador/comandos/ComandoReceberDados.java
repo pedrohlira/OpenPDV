@@ -177,6 +177,7 @@ public abstract class ComandoReceberDados implements IComando {
             }, mm);
             em.getTransaction().begin();
             for (SisCliente cli : clientes) {
+                cli.setSisClienteSinc(true);
                 service.salvar(em, cli);
             }
             em.getTransaction().commit();

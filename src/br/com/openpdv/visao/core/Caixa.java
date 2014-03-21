@@ -1495,10 +1495,10 @@ public class Caixa extends JFrame {
             AsyncCallback<SisCliente> async = new AsyncCallback<SisCliente>() {
                 @Override
                 public void sucesso(SisCliente resultado) {
-                    if (resultado != null && resultado.getSisClienteId() > 0) {
+                    if (resultado != null && resultado.getSisClienteId() > 0 && resultado.isCpfCupom()) {
                         String[] resp = ecf.enviar(EComando.ECF_IdentificaConsumidor,
                                 resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
-                        if (ecf.ERRO.equals(resp[0])) {
+                        if (IECF.ERRO.equals(resp[0])) {
                             falha(new Exception(resp[1]));
                         }
                     }
