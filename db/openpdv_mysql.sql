@@ -669,7 +669,7 @@ CREATE TABLE `sis_cliente` (
   `sis_municipio_id` int(11) NOT NULL,
   `sis_cliente_doc` varchar(20) NOT NULL,
   `sis_cliente_doc1` varchar(20) NOT NULL,
-  `sis_cliente_nome` varchar(100) NOT NULL,
+  `sis_cliente_nome` varchar(60) NOT NULL,
   `sis_cliente_endereco` varchar(100) NOT NULL,
   `sis_cliente_numero` int(11) NOT NULL,
   `sis_cliente_complemento` varchar(100) NOT NULL,

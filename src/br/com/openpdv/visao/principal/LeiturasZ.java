@@ -836,7 +836,6 @@ public class LeiturasZ extends javax.swing.JDialog {
             txtBruto.setText("");
             txtTotal.setText("");
             chkIssqn.setSelected(false);
-            btnSalvar.setEnabled(true);
         } else {
             int rowModel = tabLeituras.convertRowIndexToModel(row);
             cod = Integer.valueOf(tabLeituras.getModel().getValueAt(rowModel, 0).toString());
@@ -848,7 +847,6 @@ public class LeiturasZ extends javax.swing.JDialog {
             txtBruto.setText(tabLeituras.getModel().getValueAt(rowModel, 6).toString().replace(".", ","));
             txtTotal.setText(tabLeituras.getModel().getValueAt(rowModel, 7).toString().replace(".", ","));
             chkIssqn.setSelected(Boolean.valueOf(tabLeituras.getModel().getValueAt(rowModel, 8).toString()));
-            btnSalvar.setEnabled(false);
 
             try {
                 // recupera o z para colocar os totais

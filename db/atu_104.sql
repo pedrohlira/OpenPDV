@@ -30,3 +30,6 @@ ALTER TABLE sis_cliente ADD COLUMN sis_cliente_observacao varchar(255) NOT NULL;
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_sinc bit(1) NOT NULL;
 ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_telefone varchar(100) NOT NULL;
 UPDATE sis_cliente SET sis_cliente_observacao = '', sis_cliente_sinc = 0;
+
+/* 16/04/2014 atualizar daqui */ 
+ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_nome varchar(60) NOT NULL;

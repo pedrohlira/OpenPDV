@@ -906,7 +906,7 @@ CREATE TABLE sis_cliente (
     sis_municipio_id integer NOT NULL,
     sis_cliente_doc character varying(20) NOT NULL,
     sis_cliente_doc1 character varying(20) NOT NULL,
-    sis_cliente_nome character varying(100) NOT NULL,
+    sis_cliente_nome character varying(60) NOT NULL,
     sis_cliente_endereco character varying(100) NOT NULL,
     sis_cliente_numero integer NOT NULL,
     sis_cliente_complemento character varying(100) NOT NULL,

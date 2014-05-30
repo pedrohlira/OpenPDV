@@ -2,13 +2,18 @@ package br.com.openpdv.visao.core;
 
 import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.AsyncCallback;
-import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.AsyncDoubleBack;
-import br.com.phdss.Util;
+import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
+import br.com.openpdv.modelo.core.filtro.ECompara;
+import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.FiltroData;
+import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
 import br.com.openpdv.modelo.core.filtro.IFiltro;
+import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
+import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
@@ -22,15 +27,16 @@ import br.com.openpdv.visao.fiscal.*;
 import br.com.openpdv.visao.nota.NotaConsumidor;
 import br.com.openpdv.visao.nota.NotaEletronica;
 import br.com.openpdv.visao.principal.*;
+import br.com.openpdv.visao.principal.LeiturasZ;
 import br.com.openpdv.visao.venda.Fechamento;
 import br.com.openpdv.visao.venda.Grades;
 import br.com.openpdv.visao.venda.Identificar;
-import br.com.openpdv.visao.principal.LeiturasZ;
 import br.com.openpdv.visao.venda.Precos;
 import br.com.phdss.ECF;
 import br.com.phdss.EComando;
 import br.com.phdss.IECF;
 import br.com.phdss.TEF;
+import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.anexo.v.AnexoV;
 import br.com.phdss.modelo.anexo.v.P1;
@@ -42,7 +48,9 @@ import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
@@ -1245,9 +1253,32 @@ public class Caixa extends JFrame {
                         @Override
                         public void run() {
                             try {
-                                new ComandoEmitirReducaoZ().executar();
-                                Aguarde.getInstancia().setVisible(false);
-                                modoConsulta();
+                                // dia atua formatado
+                                Date dataMovimento = Util.getData(Util.getData(new Date()));
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(dataMovimento);
+                                cal.add(Calendar.DAY_OF_MONTH, 1);
+
+                                // verifica se tem vendas efetuadas no dia atual
+                                FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, dataMovimento);
+                                FiltroData fd2 = new FiltroData("ecfVendaData", ECompara.MENOR, cal.getTime());
+                                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                                List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 0, gf);
+
+                                // verifica se tem documentos efetuadas no dia atual
+                                fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
+                                fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());
+                                gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                                List<EcfDocumento> documentos = service.selecionar(new EcfDocumento(), 0, 0, gf);
+
+                                if (vendas.size() > 0 || documentos.size() > 0) {
+                                    new ComandoEmitirReducaoZ().executar();
+                                    Aguarde.getInstancia().setVisible(false);
+                                    modoConsulta();
+                                } else {
+                                    Aguarde.getInstancia().setVisible(false);
+                                    JOptionPane.showMessageDialog(caixa, "Não houve movimento fiscal hoje, então não precisa emititr a Redução Z!", "Redução Z", JOptionPane.INFORMATION_MESSAGE);
+                                }
                             } catch (OpenPdvException ex) {
                                 Aguarde.getInstancia().setVisible(false);
                                 log.error("Não foi possivel realizar a ReducaoZ.", ex);

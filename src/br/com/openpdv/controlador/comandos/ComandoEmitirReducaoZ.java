@@ -8,6 +8,7 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
@@ -56,20 +57,18 @@ public class ComandoEmitirReducaoZ implements IComando {
     public void executar() throws OpenPdvException {
         // verifica se e a primeira Z do mes
         emitirLMFC();
-        // pega os dados da z antes de imprimir
-        String[] antesZ = ecf.enviar(EComando.ECF_DadosReducaoz);
         // emite a reducao no ECF
         emitirReducaoZEcf();
-        // pega os dados da z depois de imprimir
-        String[] depoisZ = ecf.enviar(EComando.ECF_DadosUltimaReducaoZ);
-        try {
-            // salva os dados no banco com a reducao depois de impressao
-            emitirReducaoZBanco(depoisZ);
-        } catch (OpenPdvException ex) {
-            // caso aconteca um erro, tenta com os dados antes da impressao
-            emitirReducaoZBanco(antesZ);
+        // salva os dados no banco com a reducao depois de impressao
+        emitirReducaoZBanco();
+        // atualizando o servidor
+        if (Util.getConfig().get("sinc.tipo").equals("arquivo") || !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+            try {
+                ComandoEnviarDados.getInstancia().executar();
+            } catch (OpenPdvException ex) {
+                log.error("Nao enviou os dados para o servidor!", ex);
+            }
         }
-
         // gera o arquivo Movimento do ECF do dia
         new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento).executar();
         // gera os totais dos pagamentos
@@ -77,10 +76,6 @@ public class ComandoEmitirReducaoZ implements IComando {
         // gera o arquivo do cat52
         if (Util.getConfig().get("ecf.cat52") != null) {
             new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();
-        }
-        // atualizando o servidor
-        if (Util.getConfig().get("sinc.tipo").equals("arquivo") || !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
-            ComandoEnviarDados.getInstancia().executar();
         }
     }
 
@@ -128,10 +123,10 @@ public class ComandoEmitirReducaoZ implements IComando {
     /**
      * Metodo que emite salva os dados da ultima Reducao Z no Banco.
      *
-     * @param dados informacoes da z.
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
-    public void emitirReducaoZBanco(String[] dados) throws OpenPdvException {
+    public void emitirReducaoZBanco() throws OpenPdvException {
+        String[] dados = ecf.enviar(EComando.ECF_DadosUltimaReducaoZ);
         if (IECF.OK.equals(dados[0])) {
             try {
                 // pega os dados
@@ -160,8 +155,12 @@ public class ComandoEmitirReducaoZ implements IComando {
                 z.setEcfZCro(ini.get("ECF", "NumCRO", int.class));
                 try {
                     String movimento = ini.get("ECF", "DataMovimento");
-                    z.setEcfZMovimento(new SimpleDateFormat("dd/MM/yy").parse(movimento));
-                } catch (ParseException ex) {
+                    if (movimento.equals("00/00/00")) {
+                        z.setEcfZMovimento(new Date());
+                    } else {
+                        z.setEcfZMovimento(new SimpleDateFormat("dd/MM/yy").parse(movimento));
+                    }
+                } catch (Exception ex) {
                     z.setEcfZMovimento(new Date());
                 }
                 z.setEcfZEmissao(new Date());
@@ -184,6 +183,11 @@ public class ComandoEmitirReducaoZ implements IComando {
                 GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
                 Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(sql);
+
+                // recupera as vendas canceladas, mesmo que sem valor
+                FiltroBinario fb = new FiltroBinario("ecfVendaCancelada", ECompara.IGUAL, true);
+                gf.add(fb);
+                List<EcfVenda> vendasCanceladas = service.selecionar(new EcfVenda(), 0, 0, gf);
 
                 // atualiza os documentos, marcando que pertence a esta Z
                 fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
@@ -294,7 +298,7 @@ public class ComandoEmitirReducaoZ implements IComando {
 
                 // cancelamentos
                 double canT = ini.get("Totalizadores", "TotalCancelamentos", double.class);
-                if (canT > 0.00) {
+                if (canT > 0.00 || vendasCanceladas.size() > 0) {
                     EcfZTotais total = new EcfZTotais();
                     total.setEcfZ(z);
                     total.setEcfZTotaisCodigo("Can-T");
