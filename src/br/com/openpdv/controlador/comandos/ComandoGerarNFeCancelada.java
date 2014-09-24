@@ -3,9 +3,9 @@ package br.com.openpdv.controlador.comandos;
 import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
-import br.com.opensig.eventocancnfe.TEvento;
-import br.com.opensig.eventocancnfe.TEvento.InfEvento;
-import br.com.opensig.eventocancnfe.TEvento.InfEvento.DetEvento;
+import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento;
+import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento.InfEvento;
+import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento.InfEvento.DetEvento;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
@@ -36,14 +36,14 @@ public class ComandoGerarNFeCancelada implements IComando {
             String cnpj = chave.substring(6, 20);
             String data = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").format(agora);
             String tipo = "110111";
-            String versao = Util.getConfig().get("nfe.evento");
+            String versao = Util.getConfig().getProperty("nfe.evento");
             String seq = "1";
 
             // informacoes
             InfEvento infEvento = new InfEvento();
             infEvento.setId("ID" + tipo + chave + "01");
             infEvento.setCOrgao(uf);
-            infEvento.setTpAmb(Util.getConfig().get("nfe.tipoamb"));
+            infEvento.setTpAmb(Util.getConfig().getProperty("nfe.tipoamb"));
             infEvento.setCNPJ(cnpj);
             infEvento.setChNFe(chave);
             infEvento.setDhEvento(data.replace("GMT", ""));
@@ -65,7 +65,7 @@ public class ComandoGerarNFeCancelada implements IComando {
             evento.setVersao(versao);
 
             // transforma em string o xml e salva
-            element = new br.com.opensig.eventocancnfe.ObjectFactory().createEvento(evento);
+            element = new br.inf.portalfiscal.nfe.schema.eventoCancNFe.ObjectFactory().createEvento(evento);
         } catch (Exception e) {
             throw new OpenPdvException(e.getMessage());
         }

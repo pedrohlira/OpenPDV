@@ -6,12 +6,11 @@ import br.com.openpdv.controlador.core.TextFieldLimit;
 import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.core.filtro.FiltroTexto;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
+import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEstado;
 import br.com.openpdv.modelo.sistema.SisMunicipio;
@@ -211,10 +210,10 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
         tabClientes.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabClientes.setColumnSelectionAllowed(true);
+        tabClientes.setCellSelectionEnabled(false);
         tabClientes.setRowHeight(20);
+        tabClientes.setRowSelectionAllowed(true);
         tabClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabClientes.setShowGrid(true);
         tabClientes.setShowVerticalLines(false);
         tabClientes.getTableHeader().setReorderingAllowed(false);
         spClientes.setViewportView(tabClientes);
@@ -542,7 +541,7 @@ public class Clientes extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtFiltro, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 621, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE))
+                        .add(btnPesquisar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
                         .add(org.jdesktop.layout.GroupLayout.LEADING, painel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(org.jdesktop.layout.GroupLayout.LEADING, spClientes)
@@ -558,7 +557,7 @@ public class Clientes extends javax.swing.JDialog {
                             .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                             .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -584,10 +583,10 @@ public class Clientes extends javax.swing.JDialog {
                         .add(layout.createSequentialGroup()
                             .add(6, 6, 6)
                             .add(lblLimite))))
-                .addContainerGap(50, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(804, 533));
+        setSize(new java.awt.Dimension(811, 541));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -661,11 +660,9 @@ public class Clientes extends javax.swing.JDialog {
         if (texto.equals("")) {
             setLista(null);
         } else {
-            GrupoFiltro filtro = new GrupoFiltro();
             FiltroTexto ft = new FiltroTexto("sisClienteNome", ECompara.CONTEM, texto);
-            filtro.add(ft, EJuncao.OU);
             FiltroTexto ft1 = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto.replaceAll("\\D", ""));
-            filtro.add(ft1);
+            FiltroGrupo filtro = new FiltroGrupo(Filtro.OU, ft, ft1);
             setLista(filtro);
         }
     }//GEN-LAST:event_btnPesquisarActionPerformed
@@ -820,7 +817,7 @@ public class Clientes extends javax.swing.JDialog {
     /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
      */
-    private void setLista(IFiltro filtro) {
+    private void setLista(Filtro filtro) {
         try {
             int limite = Integer.valueOf(txtLimite.getText());
             List<SisCliente> clis = service.selecionar(new SisCliente(), 0, limite, filtro);

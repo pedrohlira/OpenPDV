@@ -1,6 +1,7 @@
 package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.controlador.permissao.Login;
 import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
@@ -35,7 +36,9 @@ public class ComandoCancelarPagamento implements IComando {
     public void executar() throws OpenPdvException {
         try {
             // cancela primeiro os pendentes ou backup
-            TEF.cancelarPendentes(auto);
+            if (Boolean.valueOf(Util.getConfig().getProperty("pag.tef"))) {
+                TEF.cancelarPendentes(auto);
+            }
             // depois cancela os registros que ja foram salvos em BD.
             cancelarSalvos();
         } catch (Exception ex) {
@@ -60,8 +63,10 @@ public class ComandoCancelarPagamento implements IComando {
                     pag.setEcfPagamentoEstorno('S');
                     pag.setEcfPagamentoEstornoData(new Date());
                     pag.setEcfPagamentoEstornoValor(pag.getEcfPagamentoValor());
-                    if (!auto && pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && !pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.cheque")) && !pag.getEcfPagamentoNsu().startsWith("DV")) {
+                    if (!auto && pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && !pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().getProperty("ecf.cheque")) && !pag.getEcfPagamentoNsu().startsWith("DV")) {
                         new ComandoCancelarCartao(pag).executar();
+                    } else if (pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().getProperty("ecf.presente"))) {
+                        new ComandoCartaoPresente("ativarCartao", pag.getEcfPagamentoNsu(), Login.getOperador()).executar();
                     }
                     service.salvar(pag);
                 }

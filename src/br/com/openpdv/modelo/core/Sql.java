@@ -1,7 +1,7 @@
 package br.com.openpdv.modelo.core;
 
-import br.com.openpdv.modelo.core.filtro.IFiltro;
-import br.com.openpdv.modelo.core.parametro.IParametro;
+import br.com.openpdv.modelo.core.filtro.Filtro;
+import br.com.openpdv.modelo.core.parametro.Parametro;
 
 /**
  * Classe de abstrae os dados das classes POJOs que representam os dados das
@@ -13,8 +13,8 @@ public class Sql<E extends Dados>{
 
     private E classe;
     private EComandoSQL comando;
-    private IParametro parametro;
-    private IFiltro filtro;
+    private Parametro parametro;
+    private Filtro filtro;
 
     /**
      * Construtor padrão.
@@ -41,7 +41,7 @@ public class Sql<E extends Dados>{
      * @param filtro o filtro utilizado pelo comando para agir somente nos
      * registros especificos.
      */
-    public Sql(E classe, EComandoSQL comando, IFiltro filtro) {
+    public Sql(E classe, EComandoSQL comando, Filtro filtro) {
         this(classe, comando, filtro, null);
     }
 
@@ -54,7 +54,7 @@ public class Sql<E extends Dados>{
      * registros especificos.
      * @param parametro o parametro utilizado para atualização dos dados.
      */
-    public Sql(E classe, EComandoSQL comando, IFiltro filtro, IParametro parametro) {
+    public Sql(E classe, EComandoSQL comando, Filtro filtro, Parametro parametro) {
         this.classe = classe;
         this.comando = comando;
         this.filtro = filtro;
@@ -78,19 +78,19 @@ public class Sql<E extends Dados>{
         this.comando = comando;
     }
 
-    public IFiltro getFiltro() {
+    public Filtro getFiltro() {
         return filtro;
     }
 
-    public void setFiltro(IFiltro filtro) {
+    public void setFiltro(Filtro filtro) {
         this.filtro = filtro;
     }
 
-    public IParametro getParametro() {
+    public Parametro getParametro() {
         return parametro;
     }
 
-    public void setParametro(IParametro parametro) {
+    public void setParametro(Parametro parametro) {
         this.parametro = parametro;
     }
 }

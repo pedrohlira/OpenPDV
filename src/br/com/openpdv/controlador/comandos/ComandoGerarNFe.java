@@ -2,63 +2,61 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
-import br.com.phdss.Util;
 import br.com.openpdv.modelo.Ibpt;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.Filtro;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.filtro.FiltroTexto;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfNotaProduto;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.opensig.nfe.TEnderEmi;
-import br.com.opensig.nfe.TEndereco;
-import br.com.opensig.nfe.TNFe;
-import br.com.opensig.nfe.TNFe.InfNFe;
-import br.com.opensig.nfe.TNFe.InfNFe.Dest;
-import br.com.opensig.nfe.TNFe.InfNFe.Det;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSAliq;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSOutr;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS00;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS30;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS40;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS60;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS90;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN101;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN102;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN201;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN202;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN500;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN900;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.IPI;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.IPI.IPITrib;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISAliq;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISOutr;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Prod;
-import br.com.opensig.nfe.TNFe.InfNFe.Emit;
-import br.com.opensig.nfe.TNFe.InfNFe.Ide;
-import br.com.opensig.nfe.TNFe.InfNFe.InfAdic;
-import br.com.opensig.nfe.TNFe.InfNFe.Total;
-import br.com.opensig.nfe.TNFe.InfNFe.Total.ICMSTot;
-import br.com.opensig.nfe.TNFe.InfNFe.Transp;
-import br.com.opensig.nfe.TUf;
-import br.com.opensig.nfe.TUfEmi;
+import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
+import br.inf.portalfiscal.nfe.schema.nfe.TEnderEmi;
+import br.inf.portalfiscal.nfe.schema.nfe.TEndereco;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Dest;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSAliq;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.COFINS.COFINSOutr;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS00;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS30;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS40;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS60;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMS90;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN101;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN102;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN201;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN202;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN500;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS.ICMSSN900;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.PIS;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISAliq;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.PIS.PISOutr;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Prod;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Emit;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Ide;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.InfAdic;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Total;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Total.ICMSTot;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Transp;
+import br.inf.portalfiscal.nfe.schema.nfe.TUf;
+import br.inf.portalfiscal.nfe.schema.nfe.TUfEmi;
 import com.sun.jersey.api.client.WebResource;
 import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import org.apache.log4j.Logger;
 
 /**
@@ -112,7 +110,7 @@ public class ComandoGerarNFe implements IComando {
             // informacoes da NFe
             InfNFe infNFe = new InfNFe();
             infNFe.setId("NFe" + chave);
-            infNFe.setVersao(Util.getConfig().get("nfe.versao"));
+            infNFe.setVersao(Util.getConfig().getProperty("nfe.versao"));
             // no do ide
             infNFe.setIde(getIde());
             // no do emissor
@@ -133,7 +131,7 @@ public class ComandoGerarNFe implements IComando {
             TNFe nfe = new TNFe();
             nfe.setInfNFe(infNFe);
 
-            element = new br.com.opensig.nfe.ObjectFactory().createNFe(nfe);
+            element = new br.inf.portalfiscal.nfe.schema.nfe.ObjectFactory().createNFe(nfe);
         } catch (OpenPdvException ex) {
             log.error("Erro na montagem do xml.", ex);
             throw new OpenPdvException(ex);
@@ -161,15 +159,15 @@ public class ComandoGerarNFe implements IComando {
      */
     private void getNumero() throws OpenPdvException {
         String numero = "";
-        if (Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+        if (Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
             List<EcfNotaEletronica> nfes = servico.selecionar(new EcfNotaEletronica(), 0, 1, null);
             if (nfes != null && nfes.size() == 1) {
                 numero += nfes.get(0).getEcfNotaEletronicaNumero() + 1;
             } else {
-                numero += Integer.valueOf(Util.getConfig().get("nfe.numero")) + 1;
+                numero += Integer.valueOf(Util.getConfig().getProperty("nfe.numero")) + 1;
             }
         } else {
-            WebResource wr = Conexao.getRest(Util.getConfig().get("sinc.host") + "/nfe");
+            WebResource wr = Conexao.getRest(Util.getConfig().getProperty("sinc.host") + "/nfe");
             numero += wr.accept(MediaType.TEXT_PLAIN_TYPE).get(String.class);
         }
 
@@ -190,7 +188,7 @@ public class ComandoGerarNFe implements IComando {
         // / modo
         sb.append("55");
         // serie
-        sb.append(Util.formataNumero(Util.getConfig().get("nfe.serie"), 3, 0, false));
+        sb.append(Util.formataNumero(Util.getConfig().getProperty("nfe.serie"), 3, 0, false));
         // numero nf
         sb.append(nNF);
         // tipo emissao
@@ -223,13 +221,13 @@ public class ComandoGerarNFe implements IComando {
         // modo
         ide.setMod("55");
         // serie
-        ide.setSerie(Util.getConfig().get("nfe.serie"));
+        ide.setSerie(Util.getConfig().getProperty("nfe.serie"));
         // numero nf
         ide.setNNF(Integer.valueOf(nNF) + "");
         // data emissao
-        ide.setDEmi(Util.formataData(data, "yyyy-MM-dd"));
+        ide.setDhEmi(Util.formataData(data, "yyyy-MM-dd"));
         // data saida
-        ide.setDSaiEnt(Util.formataData(data, "yyyy-MM-dd"));
+        ide.setDhSaiEnt(Util.formataData(data, "yyyy-MM-dd"));
         // operacao
         ide.setTpNF("1");
         // municipio
@@ -241,7 +239,7 @@ public class ComandoGerarNFe implements IComando {
         // verificador
         ide.setCDV(cDV);
         // ambiente
-        ide.setTpAmb(Util.getConfig().get("nfe.tipoamb"));
+        ide.setTpAmb(Util.getConfig().getProperty("nfe.tipoamb"));
         // finalidade
         ide.setFinNFe("1");
         // processo emissao
@@ -260,7 +258,7 @@ public class ComandoGerarNFe implements IComando {
     private Emit getEmissor() {
         Emit emit = new Emit();
         // crt
-        emit.setCRT(Util.getConfig().get("nfe.crt"));
+        emit.setCRT(Util.getConfig().getProperty("nfe.crt"));
         // empresa
         emit.setCNPJ(empresa.getSisEmpresaCnpj().replaceAll("\\D", ""));
         String razao = empresa.getSisEmpresaRazao();
@@ -303,7 +301,7 @@ public class ComandoGerarNFe implements IComando {
         nome = nome.length() > 60 ? nome.substring(0, 60) : nome;
 
         // empresa
-        if (Util.getConfig().get("nfe.tipoamb").equals("2")) {
+        if (Util.getConfig().getProperty("nfe.tipoamb").equals("2")) {
             dest.setCNPJ("99999999000191");
             dest.setXNome("NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL");
             dest.setIE("");
@@ -404,19 +402,21 @@ public class ComandoGerarNFe implements IComando {
      */
     private Imposto getImposto(EcfNotaProduto np, double totalLiquido) {
         Imposto imposto = new Imposto();
-
+        ICMS icms;
         // icms
-        if (Util.getConfig().get("nfe.crt").equals("1")) {
-            imposto.setICMS(getSimples(np, totalLiquido));
+        if (Util.getConfig().getProperty("nfe.crt").equals("1")) {
+            icms = getSimples(np, totalLiquido);
         } else {
-            imposto.setICMS(getNormal(np, totalLiquido));
+            icms = getNormal(np, totalLiquido);
         }
-        // ipi
-        imposto.setIPI(getIpi());
+        JAXBElement<ICMS> icmsElement = new JAXBElement<>(new QName("ICMS"), ICMS.class, icms);
+        imposto.getContent().add(icmsElement);
         // pis
-        imposto.setPIS(getPIS(totalLiquido));
+        JAXBElement<PIS> pisElement = new JAXBElement<>(new QName("PIS"), PIS.class, getPIS(totalLiquido));
+        imposto.getContent().add(pisElement);
         // confins
-        imposto.setCOFINS(getCOFINS(totalLiquido));
+        JAXBElement<COFINS> cofinsElement = new JAXBElement<>(new QName("COFINS"), COFINS.class, getCOFINS(totalLiquido));
+        imposto.getContent().add(cofinsElement);
 
         return imposto;
     }
@@ -438,7 +438,7 @@ public class ComandoGerarNFe implements IComando {
                 ICMSSN101 icmssn101 = new ICMSSN101();
                 icmssn101.setOrig(origem);
                 icmssn101.setCSOSN(cson);
-                double porcento = Double.valueOf(Util.getConfig().get("nfe.cson"));
+                double porcento = Double.valueOf(Util.getConfig().getProperty("nfe.cson"));
                 icmssn101.setPCredSN(getValorNfe(porcento, 2));
                 double valor = totalLiquido * porcento / 100;
                 icmssn101.setVCredICMSSN(getValorNfe(valor, 2));
@@ -454,7 +454,7 @@ public class ComandoGerarNFe implements IComando {
                 ICMSSN201 icmssn201 = new ICMSSN201();
                 icmssn201.setOrig(origem);
                 icmssn201.setCSOSN(cson);
-                icmssn201.setModBCST(Util.getConfig().get("nfe.modocalcst"));
+                icmssn201.setModBCST(Util.getConfig().getProperty("nfe.modocalcst"));
                 icmssn201.setVBCST("0.00");
                 icmssn201.setPICMSST("0.00");
                 icmssn201.setVICMSST("0.00");
@@ -466,7 +466,7 @@ public class ComandoGerarNFe implements IComando {
                 ICMSSN202 icmssn202 = new ICMSSN202();
                 icmssn202.setOrig(origem);
                 icmssn202.setCSOSN(cson);
-                icmssn202.setModBCST(Util.getConfig().get("nfe.modocalcst"));
+                icmssn202.setModBCST(Util.getConfig().getProperty("nfe.modocalcst"));
                 icmssn202.setVBCST("0.00");
                 icmssn202.setPICMSST("0.00");
                 icmssn202.setVICMSST("0.00");
@@ -519,7 +519,7 @@ public class ComandoGerarNFe implements IComando {
                 ICMS00 icms00 = new ICMS00();
                 icms00.setOrig(origem);
                 icms00.setCST(cst);
-                icms00.setModBC(Util.getConfig().get("nfe.modocalc"));
+                icms00.setModBC(Util.getConfig().getProperty("nfe.modocalc"));
                 // valor da base de calculo
                 double porcento = np.getProdProduto().getProdProdutoIcms();
                 String strBase = porcento == 0.00 ? "0.00" : getValorNfe(totalLiquido, 2);
@@ -539,7 +539,7 @@ public class ComandoGerarNFe implements IComando {
                 ICMS30 icms30 = new ICMS30();
                 icms30.setOrig(origem);
                 icms30.setCST(cst);
-                icms30.setModBCST(Util.getConfig().get("nfe.modocalcst"));
+                icms30.setModBCST(Util.getConfig().getProperty("nfe.modocalcst"));
                 icms30.setVBCST("0.00");
                 icms30.setPICMSST("0.00");
                 icms30.setVICMSST("0.00");
@@ -571,25 +571,6 @@ public class ComandoGerarNFe implements IComando {
     }
 
     /**
-     * Metodo que faz o calculo de ipi por produto.
-     *
-     * @return o objeto requerido.
-     */
-    private IPI getIpi() {
-        IPITrib trib = new IPITrib();
-        trib.setCST("99");
-        trib.setVBC("0.00");
-        trib.setPIPI("0.00");
-        trib.setVIPI("0.00");
-
-        IPI ipi = new IPI();
-        ipi.setIPITrib(trib);
-        ipi.setCEnq("999");
-
-        return ipi;
-    }
-
-    /**
      * Metodo que faz o calculo de pis por produto.
      *
      * @param totalLiquido o valor total liquido deste produto.
@@ -598,7 +579,7 @@ public class ComandoGerarNFe implements IComando {
     private PIS getPIS(double totalLiquido) {
         PIS pis = new PIS();
         // faz o calculo do valor e define
-        double porcento = Double.valueOf(Util.getConfig().get("nfe.pis"));
+        double porcento = Double.valueOf(Util.getConfig().getProperty("nfe.pis"));
         double valor = totalLiquido * porcento / 100;
         String strValor = getValorNfe(valor, 2);
         valorPis += Double.valueOf(strValor);
@@ -632,7 +613,7 @@ public class ComandoGerarNFe implements IComando {
     private COFINS getCOFINS(double totalLiquido) {
         COFINS cofins = new COFINS();
         // faz o calculo do valor e define
-        double porcento = Double.valueOf(Util.getConfig().get("nfe.cofins"));
+        double porcento = Double.valueOf(Util.getConfig().getProperty("nfe.cofins"));
         double valor = totalLiquido * porcento / 100;
         String strValor = getValorNfe(valor, 2);
         valorCofins += Double.valueOf(strValor);
@@ -693,18 +674,18 @@ public class ComandoGerarNFe implements IComando {
         // adiciona o MD5 do auxiliar.txt
         sb.append("MD5: ").append(PAF.AUXILIAR.getProperty("out.autenticado"));
         // uma mensagem padrao se precisar
-        if (Util.getConfig().get("nfe.info") != null) {
-            sb.append("#").append(Util.getConfig().get("nfe.info"));
+        if (Util.getConfig().getProperty("nfe.info") != null) {
+            sb.append("#").append(Util.getConfig().getProperty("nfe.info"));
         }
         // caso a opcao de mostrar os valores de impostos esteja ativa
-        boolean mostraIbpt = Boolean.valueOf(Util.getConfig().get("nfe.ibpt"));
+        boolean mostraIbpt = Boolean.valueOf(Util.getConfig().getProperty("nfe.ibpt"));
         if (mostraIbpt) {
             double impostos = 0.00;
 
             for (EcfNotaProduto np : produtos) {
                 FiltroTexto ft = new FiltroTexto("ibptCodigo", ECompara.IGUAL, np.getProdProduto().getProdProdutoNcm());
                 FiltroNumero fn = new FiltroNumero("ibptTabela", ECompara.IGUAL, np.getProdProduto().getProdProdutoTipo().equals("09") ? 1 : 0);
-                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft, fn});
+                FiltroGrupo gf = new FiltroGrupo(Filtro.E, ft, fn);
                 Ibpt ibpt;
                 try {
                     ibpt = (Ibpt) servico.selecionar(new Ibpt(), gf);

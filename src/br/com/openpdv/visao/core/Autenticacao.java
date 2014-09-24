@@ -3,7 +3,6 @@ package br.com.openpdv.visao.core;
 import br.com.openpdv.controlador.comandos.ComandoRecuperarVenda;
 import br.com.openpdv.controlador.permissao.Login;
 import br.com.phdss.ECF;
-import br.com.phdss.fiscal.ACBR;
 import br.com.phdss.EComando;
 import br.com.phdss.EEstado;
 import java.awt.Toolkit;
@@ -62,10 +61,9 @@ public class Autenticacao extends JDialog {
         pswOperadorSenha = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setAlwaysOnTop(true);
         setModal(true);
-        setResizable(false);
         setUndecorated(true);
+        setResizable(false);
 
         btnEntrar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnEntrar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/entrar.png"))); // NOI18N
@@ -202,8 +200,8 @@ public class Autenticacao extends JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnSair, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 98, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(separador)
-                    .add(panOperador, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 404, Short.MAX_VALUE))
-                .addContainerGap(45, Short.MAX_VALUE))
+                    .add(panOperador, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 422, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -221,8 +219,8 @@ public class Autenticacao extends JDialog {
                 .addContainerGap())
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-455)/2, (screenSize.height-175)/2, 455, 175);
+        setSize(new java.awt.Dimension(442, 169));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEntrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntrarActionPerformed

@@ -83,7 +83,6 @@
         <mkdir dir="${dist.jar.dir}/logs"/>
         <mkdir dir="${dist.jar.dir}/conf"/>
         <mkdir dir="${dist.jar.dir}/nfe"/>
-        <mkdir dir="${dist.jar.dir}/ACBrMonitor"/>
 
         <copy todir="${dist.jar.dir}/db">
             <fileset dir="db" includes="openpdv.h2.db,banco.txt"/>
@@ -101,10 +100,6 @@
             <fileset dir="nfe" includes="**" excludes="*.jrxml"/>
         </copy>
 
-        <copy todir="${dist.jar.dir}/ACBrMonitor">
-            <fileset dir="ACBrMonitor" includes="**"/>
-        </copy>
-        
         <copy todir="${dist.jar.dir}/arquivos/modelo">
             <fileset dir="arquivos/modelo" includes="**"/>
         </copy>

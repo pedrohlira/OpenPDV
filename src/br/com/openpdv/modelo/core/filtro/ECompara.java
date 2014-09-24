@@ -20,22 +20,22 @@ public enum ECompara {
     DIFERENTE,
     /**
      * Informa que o valor do campo deve ser
-     * <code>></code> ao valor informado.
+     * <code>&gt;</code> ao valor informado.
      */
     MAIOR,
     /**
      * Informa que o valor do campo deve ser
-     * <code><</code> ao valor informado.
+     * <code>&lt;</code> ao valor informado.
      */
     MENOR,
     /**
      * Informa que o valor do campo deve ser
-     * <code>>=</code> ao valor informado.
+     * <code>&gt;=</code> ao valor informado.
      */
     MAIOR_IGUAL,
     /**
      * Informa que o valor do campo deve ser
-     * <code><=</code> ao valor informado.
+     * <code>&lt;=</code> ao valor informado.
      */
     MENOR_IGUAL,
     /**

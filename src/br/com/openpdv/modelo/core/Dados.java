@@ -1,8 +1,11 @@
 package br.com.openpdv.modelo.core;
 
 import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Classe de abstrai os dados das classes POJOs que representam os dados das
@@ -10,9 +13,16 @@ import javax.xml.bind.annotation.XmlAccessorType;
  *
  * @author Pedro H. Lira
  */
+@XmlRootElement
+@MappedSuperclass
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class Dados implements Serializable {
 
+    /**
+     * Chave EAD que cria o hash da linha.
+     */
+    @Column(name = "ead")
+    private String ead;
     /**
      * Nome do objeto que representa a tabela
      */
@@ -97,6 +107,14 @@ public abstract class Dados implements Serializable {
     public abstract void setId(Integer id);
 
     // GETs e SETs
+    public String getEad() {
+        return ead;
+    }
+
+    public void setEad(String ead) {
+        this.ead = ead;
+    }
+    
     public EDirecao getOrdemDirecao() {
         return ordemDirecao;
     }

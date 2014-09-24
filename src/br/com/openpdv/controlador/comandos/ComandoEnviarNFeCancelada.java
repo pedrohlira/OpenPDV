@@ -5,8 +5,8 @@ import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
-import br.com.opensig.eventocancnfe.TEvento;
-import br.com.opensig.retenveventocancnfe.TRetEnvEvento;
+import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento;
+import br.inf.portalfiscal.nfe.schema.retEnvEventoCancNFe.TRetEnvEvento;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -40,7 +40,7 @@ public class ComandoEnviarNFeCancelada implements IComando {
             if (xml.indexOf("<envEvento") < 0) {
                 int eveINI = xml.indexOf("<evento");
                 int eveFIM = xml.indexOf("</evento>");
-                xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><envEvento xmlns=\"http://www.portalfiscal.inf.br/nfe\" versao=\"" + Util.getConfig().get("nfe.evento") + "\"><idLote>" + id
+                xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><envEvento xmlns=\"http://www.portalfiscal.inf.br/nfe\" versao=\"" + Util.getConfig().getProperty("nfe.evento") + "\"><idLote>" + id
                         + "</idLote>" + xml.substring(eveINI, eveFIM) + "</evento></envEvento>";
             }
 
@@ -57,7 +57,7 @@ public class ComandoEnviarNFeCancelada implements IComando {
             if (ret.getCStat().equals("128")) {
                 nota.setEcfNotaEletronicaStatus(ENotaStatus.CANCELADO.toString());
                 nota.setEcfNotaEletronicaProtocoloCancelado(ret.getRetEvento().get(0).getInfEvento().getNProt());
-                nota.setEcfNotaEletronicaXmlCancelado(montaProcCancNfe(nota.getEcfNotaEletronicaXmlCancelado(), proc, Util.getConfig().get("nfe.evento")));
+                nota.setEcfNotaEletronicaXmlCancelado(montaProcCancNfe(nota.getEcfNotaEletronicaXmlCancelado(), proc, Util.getConfig().getProperty("nfe.evento")));
             } else {
                 throw new OpenPdvException(ret.getXMotivo());
             }

@@ -299,7 +299,7 @@ public class Identificar extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtCCF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 88, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(org.jdesktop.layout.GroupLayout.LEADING, separador1))
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -322,10 +322,10 @@ public class Identificar extends javax.swing.JDialog {
                     .add(btnOK, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnCadastrar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(chkCPF))
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(546, 210));
+        setSize(new java.awt.Dimension(522, 211));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -497,6 +497,7 @@ public class Identificar extends javax.swing.JDialog {
         } else if (txtCPF_CNPJ.getText().equals("")) {
             cliente = new SisCliente();
             cliente.setVendedor(vendedor);
+            cliente.setCpfCupom(false);
             async.sucesso(cliente);
             Caixa.getInstancia().setJanela(null);
             dispose();
@@ -580,7 +581,7 @@ public class Identificar extends javax.swing.JDialog {
         if (!txtCodigo.getText().equals("")) {
             FiltroNumero fn = new FiltroNumero("sisUsuarioId", ECompara.IGUAL, txtCodigo.getText());
             FiltroBinario fb1 = new FiltroBinario("sisUsuarioAtivo", ECompara.IGUAL, true);
-            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fn, fb1});
+            FiltroGrupo gf = new FiltroGrupo(Filtro.E, fn, fb1);
 
             try {
                 vendedor = (SisUsuario) service.selecionar(new SisUsuario(), gf);

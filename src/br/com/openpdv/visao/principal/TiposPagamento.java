@@ -127,7 +127,6 @@ public class TiposPagamento extends javax.swing.JDialog {
         tabTipoPagamentos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabTipoPagamentos.setRowHeight(20);
         tabTipoPagamentos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabTipoPagamentos.setShowGrid(true);
         tabTipoPagamentos.setShowVerticalLines(false);
         tabTipoPagamentos.getTableHeader().setReorderingAllowed(false);
         spTipoPagamentos.setViewportView(tabTipoPagamentos);
@@ -324,10 +323,10 @@ public class TiposPagamento extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(23, 23, 23))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(660, 307));
+        setSize(new java.awt.Dimension(634, 317));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 

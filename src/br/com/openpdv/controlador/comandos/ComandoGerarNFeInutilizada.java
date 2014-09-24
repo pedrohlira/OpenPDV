@@ -5,8 +5,8 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.opensig.inutnfe.TInutNFe;
-import br.com.opensig.inutnfe.TInutNFe.InfInut;
+import br.inf.portalfiscal.nfe.schema.inutnfe.TInutNFe;
+import br.inf.portalfiscal.nfe.schema.inutnfe.TInutNFe.InfInut;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 
@@ -36,14 +36,14 @@ public class ComandoGerarNFeInutilizada implements IComando {
             String ano = Util.formataData(new Date(), "yyyy").substring(2, 4);
             String cnpj = empresa.getSisEmpresaCnpj().replaceAll("\\D", "");
             String modo = "55";
-            String serie = Util.formataNumero(Util.getConfig().get("nfe.serie"), 3, 0, false);
+            String serie = Util.formataNumero(Util.getConfig().getProperty("nfe.serie"), 3, 0, false);
             String nfIni = Util.formataNumero(numero, 9, 0, false);
             String nfFim = Util.formataNumero(numero, 9, 0, false);
             String id = "ID" + uf + ano + cnpj + modo + serie + nfIni + nfFim;
 
             // gerar o objeto
             InfInut infInut = new InfInut();
-            infInut.setTpAmb(Util.getConfig().get("nfe.tipoamb"));
+            infInut.setTpAmb(Util.getConfig().getProperty("nfe.tipoamb"));
             infInut.setId(id);
             infInut.setCUF(uf);
             infInut.setAno(ano);
@@ -56,9 +56,9 @@ public class ComandoGerarNFeInutilizada implements IComando {
             infInut.setXServ("INUTILIZAR");
             TInutNFe inutNfe = new TInutNFe();
             inutNfe.setInfInut(infInut);
-            inutNfe.setVersao(Util.getConfig().get("nfe.versao"));
+            inutNfe.setVersao(Util.getConfig().getProperty("nfe.versao"));
 
-            element = new br.com.opensig.inutnfe.ObjectFactory().createInutNFe(inutNfe);
+            element = new br.inf.portalfiscal.nfe.schema.inutnfe.ObjectFactory().createInutNFe(inutNfe);
         } catch (Exception e) {
             throw new OpenPdvException(e.getMessage());
         }

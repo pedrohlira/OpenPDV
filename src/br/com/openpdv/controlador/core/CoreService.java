@@ -2,15 +2,18 @@ package br.com.openpdv.controlador.core;
 
 import br.com.openpdv.modelo.core.*;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.FiltroCampo;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
-import br.com.openpdv.modelo.core.parametro.IParametro;
-import br.com.openpdv.modelo.core.parametro.ParametroException;
+import br.com.openpdv.modelo.core.filtro.Filtro;
+import br.com.openpdv.modelo.core.parametro.Parametro;
+import br.com.openpdv.modelo.ecf.EcfDocumento;
+import br.com.openpdv.modelo.produto.ProdProduto;
+import br.com.phdss.Util;
+import br.com.phdss.controlador.PAF;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
@@ -56,10 +59,8 @@ public class CoreService<E extends Dados> {
      * @return uma lista de elementos informado, encontrado no BD.
      * @throws OpenPdvException dispara caso nao seja possivel selecionar os
      * dados.
-     * @throws ParametroException dispara se algum parametro for passado
-     * incorreto.
      */
-    public List<E> selecionar(E dados, int inicio, int limite, IFiltro filtro) throws OpenPdvException, ParametroException {
+    public List<E> selecionar(E dados, int inicio, int limite, Filtro filtro) throws OpenPdvException {
         // mosta a instrucao padrao
         String sql = String.format("SELECT DISTINCT t FROM %s t ", dados.getTabela());
         sql += getColecao(dados.getColecao());
@@ -109,9 +110,9 @@ public class CoreService<E extends Dados> {
             // se foi passados filtros coloca agora os valores nos devidos
             // campos
             if (filtro != null) {
-                Collection<IFiltro> params = filtro.getParametro();
-                for (IFiltro fil : params) {
-                    if (!(fil instanceof FiltroCampo) && fil.getCompara() != ECompara.NULO && fil.getCompara() != ECompara.VAZIO) {
+                Collection<Filtro> params = filtro.getParametro();
+                for (Filtro fil : params) {
+                    if (fil.getCompara() != ECompara.NULO && fil.getCompara() != ECompara.VAZIO) {
                         rs.setParameter(fil.getCampoId(), fil.getValor());
                     }
                 }
@@ -130,7 +131,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao selecionar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -146,10 +147,8 @@ public class CoreService<E extends Dados> {
      * encontrar.
      * @throws OpenPdvException dispara caso nao seja possivel selecionar os
      * dados.
-     * @throws ParametroException dispara se algum parametro for passado
-     * incorreto.
      */
-    public E selecionar(E dados, IFiltro filtro) throws OpenPdvException, ParametroException {
+    public E selecionar(E dados, Filtro filtro) throws OpenPdvException {
         // formata o sql
         String sql = String.format("SELECT DISTINCT t FROM %s t ", dados.getTabela());
         sql += getColecao(dados.getColecao());
@@ -169,10 +168,8 @@ public class CoreService<E extends Dados> {
      * encontrar.
      * @throws OpenPdvException dispara caso nao seja possivel selecionar os
      * dados.
-     * @throws ParametroException dispara se algum parametro for passado
-     * incorreto.
      */
-    public E buscar(E dados, String campo, EBusca busca) throws OpenPdvException, ParametroException {
+    public E buscar(E dados, String campo, EBusca busca) throws OpenPdvException {
         // formata o sql
         String sql = String.format("SELECT t FROM %s t WHERE t.%s = (SELECT %s(t1.%s) FROM %s t1)", dados.getTabela(), campo, busca.toString(), campo, dados.getTabela());
 
@@ -193,10 +190,8 @@ public class CoreService<E extends Dados> {
      * encontrar.
      * @throws OpenPdvException dispara caso nao seja possivel selecionar os
      * dados.
-     * @throws ParametroException dispara se algum parametro for passado
-     * incorreto.
      */
-    public Object buscar(E dados, String campo, EBusca busca, IFiltro filtro) throws OpenPdvException, ParametroException {
+    public Object buscar(E dados, String campo, EBusca busca, Filtro filtro) throws OpenPdvException {
         Pattern pat = Pattern.compile("^t\\d*\\.");
         Matcher mat = pat.matcher(campo);
         if (!mat.find()) {
@@ -222,10 +217,8 @@ public class CoreService<E extends Dados> {
      * @return um unidade de classe de acordo com a generic.
      * @throws OpenPdvException dispara caso nao seja possivel selecionar os
      * dados.
-     * @throws ParametroException dispara se algum parametro for passado
-     * incorreto.
      */
-    public Object getResultado(String sql, IFiltro filtro) throws OpenPdvException, ParametroException {
+    public Object getResultado(String sql, Filtro filtro) throws OpenPdvException {
         EntityManagerFactory emf = null;
         EntityManager em = null;
 
@@ -247,10 +240,10 @@ public class CoreService<E extends Dados> {
             // se foi passados filtros coloca agora os valores nos devidos
             // campos
             if (filtro != null) {
-                Collection<IFiltro> params = filtro.getParametro();
+                Collection<Filtro> params = filtro.getParametro();
 
-                for (IFiltro fil : params) {
-                    if (!(fil instanceof FiltroCampo) && fil.getCompara() != ECompara.NULO && fil.getCompara() != ECompara.VAZIO) {
+                for (Filtro fil : params) {
+                    if (fil.getCompara() != ECompara.NULO && fil.getCompara() != ECompara.VAZIO) {
                         rs.setParameter(fil.getCampoId(), fil.getValor());
                     }
                 }
@@ -271,7 +264,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao pegar resultado", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -304,7 +297,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao salvar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -354,7 +347,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao salvar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -371,14 +364,16 @@ public class CoreService<E extends Dados> {
      */
     public E salvar(EntityManager em, E unidade) throws OpenPdvException {
         try {
+            padronizaLetras(unidade, unidade.getTipoLetra());
+            String ead = Util.encriptar(unidade);
+            unidade.setEad(ead);
             if (unidade.getId() == null || unidade.getId() == 0) {
                 unidade.setId(null);
-                padronizaLetras(unidade, unidade.getTipoLetra());
                 em.persist(unidade);
             } else {
-                padronizaLetras(unidade, unidade.getTipoLetra());
                 em.merge(unidade);
             }
+            PAF.validarPAF(unidade, 1);
             return unidade;
         } catch (Exception ex) {
             log.error("Erro ao salvar", ex);
@@ -413,7 +408,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao deletar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -457,7 +452,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao deletar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -475,13 +470,14 @@ public class CoreService<E extends Dados> {
         try {
             unidade = (E) em.find(unidade.getClass(), unidade.getId());
             em.remove(unidade);
+            PAF.validarPAF(unidade, -1);
         } catch (Exception ex) {
             log.error("Erro ao deletar", ex);
             throw new OpenPdvException(ex.getMessage());
         }
     }
 
-   /**
+    /**
      * Metodo para executar instrucões diretas no BD com uma nova transacao.
      *
      * @param sqls as instruções Sqls em formato de objeto.
@@ -512,7 +508,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao executar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -573,9 +569,9 @@ public class CoreService<E extends Dados> {
             // se foi passados filtros coloca agora os valores nos
             // devidos campos
             if (sql.getFiltro() != null) {
-                Collection<IFiltro> params = sql.getFiltro().getParametro();
-                for (IFiltro fil : params) {
-                    if (!(fil instanceof FiltroCampo) && fil.getCompara() != ECompara.NULO && fil.getCompara() != ECompara.VAZIO) {
+                Collection<Filtro> params = sql.getFiltro().getParametro();
+                for (Filtro fil : params) {
+                    if (fil.getCompara() != ECompara.NULO && fil.getCompara() != ECompara.VAZIO) {
                         rs.setParameter(fil.getCampoId(), fil.getValor());
                     }
                 }
@@ -584,8 +580,8 @@ public class CoreService<E extends Dados> {
             // se foi passados parametros coloca agora os valores nos
             // devidos campos
             if (sql.getParametro() != null) {
-                Collection<IParametro> params = sql.getParametro().getParametro();
-                for (IParametro par : params) {
+                Collection<Parametro> params = sql.getParametro().getParametro();
+                for (Parametro par : params) {
                     rs.setParameter(par.getCampoId(), par.getValor());
                 }
             }
@@ -597,7 +593,7 @@ public class CoreService<E extends Dados> {
         return resultado;
     }
 
-   /**
+    /**
      * Metodo para executar instrucões diretas no BD com uma nova transacao.
      *
      * @param sql a instrucao Sql em formato de objeto.
@@ -627,7 +623,7 @@ public class CoreService<E extends Dados> {
             log.error("Erro ao executar", ex);
             throw new OpenPdvException(ex.getMessage());
         } finally {
-            if (em != null) {
+            if (em != null && emf != null) {
                 em.close();
                 emf.close();
             }
@@ -645,7 +641,7 @@ public class CoreService<E extends Dados> {
      * @return um inteiro informando a quantidade de registros afetados.
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
-    protected Integer atualizar(EntityManager em, Sql<E> sql) throws OpenPdvException {
+    private Integer atualizar(EntityManager em, Sql<E> sql) throws OpenPdvException {
         int resultado = 0;
         String nMet = "set" + sql.getParametro().getCampo().replaceAll("t\\d*\\.", "");
 
@@ -659,7 +655,7 @@ public class CoreService<E extends Dados> {
                 // os metodos do objeto
                 for (Method met : obj.getClass().getMethods()) {
                     // verifica se é o get e retorna List
-                    if (isGetter(met) && met.getReturnType() == List.class) {
+                    if (Util.isGetter(met) && met.getReturnType() == List.class) {
                         List<E> vMet = (List<E>) met.invoke(obj, new Object[]{});
                         // percorre as colecoes
                         for (Colecao col : dado.getColecao()) {
@@ -670,7 +666,7 @@ public class CoreService<E extends Dados> {
                                     // percorre os metodos do objeto final
                                     for (Method subMet : subObj.getClass().getMethods()) {
                                         // verifica se é set e tem o mesmo nome
-                                        if (isSetter(subMet) && subMet.getName().equalsIgnoreCase(nMet)) {
+                                        if (Util.isSetter(subMet) && subMet.getName().equalsIgnoreCase(nMet)) {
                                             // seta o valor
                                             setValor(subMet, subObj, sql);
                                             break;
@@ -684,7 +680,7 @@ public class CoreService<E extends Dados> {
                             }
                         }
                         // verifica se é set e tem o mesmo nome
-                    } else if (isSetter(met) && met.getName().equalsIgnoreCase(nMet)) {
+                    } else if (Util.isSetter(met) && met.getName().equalsIgnoreCase(nMet)) {
                         // seta o valor
                         setValor(met, obj, sql);
                         resultado++;
@@ -708,7 +704,7 @@ public class CoreService<E extends Dados> {
      * @param sql a instrucao que contem o valor.
      * @throws Exception caso ocorra alguma excecao.
      */
-    protected void setValor(Method sMet, E obj, Sql<E> sql) throws Exception {
+    private void setValor(Method sMet, E obj, Sql<E> sql) throws Exception {
         String nomeGet = sMet.getName().replace("set", "get");
         Method gMet = obj.getClass().getMethod(nomeGet);
         String valor = sql.getParametro().getValor().toString();
@@ -745,7 +741,7 @@ public class CoreService<E extends Dados> {
      * @return um inteiro informando a quantidade de registros afetados.
      * @throws OpenPdvException dispara uma excecao em caso de erro.
      */
-    protected Integer excluir(EntityManager em, Sql<E> sql) throws OpenPdvException {
+    private Integer excluir(EntityManager em, Sql<E> sql) throws OpenPdvException {
         // faz a selecao dos objetos
         E dado = sql.getClasse();
         Collection<E> lista = selecionar(dado, 0, 0, sql.getFiltro());
@@ -760,7 +756,7 @@ public class CoreService<E extends Dados> {
      * @param colecao um array de colecoes de tabelas.
      * @return uma string no formato de busca.
      */
-    protected String getColecao(Colecao[] colecao) {
+    private String getColecao(Colecao[] colecao) {
         String sql = "";
         if (colecao != null) {
             for (Colecao col : colecao) {
@@ -776,11 +772,11 @@ public class CoreService<E extends Dados> {
      * @param unidade o objeto a ser salvo.
      * @param tipo o tipo de letra padrao usado.
      */
-    protected void padronizaLetras(Object unidade, ELetra tipo) {
+    private void padronizaLetras(Object unidade, ELetra tipo) {
         if (tipo != ELetra.NORMAL) {
             for (Method metodo : unidade.getClass().getMethods()) {
                 try {
-                    if (isGetter(metodo)) {
+                    if (Util.isGetter(metodo)) {
                         Object valorMetodo = metodo.invoke(unidade, new Object[]{});
                         if (valorMetodo != null) {
                             if (metodo.getReturnType() == String.class) {
@@ -788,53 +784,15 @@ public class CoreService<E extends Dados> {
                                 Method set = unidade.getClass().getMethod(nomeMetodo, new Class[]{String.class});
                                 String valor = tipo == ELetra.GRANDE ? valorMetodo.toString().trim().toUpperCase() : valorMetodo.toString().trim().toLowerCase();
                                 set.invoke(unidade, new Object[]{valor});
-                            } else if (metodo.getReturnType().getSuperclass() == Dados.class && valorMetodo != null) {
+                            } else if (metodo.getReturnType().getSuperclass() == Dados.class) {
                                 padronizaLetras(valorMetodo, tipo);
                             }
                         }
                     }
                 } catch (Exception ex) {
-                    // nao precisa modificar.
+                    // nada
                 }
             }
         }
-    }
-
-    /**
-     * Metodo que informa se o metodo da classe é do tipo GET.
-     *
-     * @param method usando reflection para descrobrir os metodos.
-     * @return verdadeiro se o metodo for GET, falso caso contrario.
-     */
-    public static boolean isGetter(Method method) {
-        if (!method.getName().startsWith("get")) {
-            return false;
-        }
-        if (method.getParameterTypes().length != 0) {
-            return false;
-        }
-        if (void.class.equals(method.getReturnType())) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Metodo que informa se o metodo da classe é do tipo SET.
-     *
-     * @param method usando reflection para descrobrir os metodos.
-     * @return verdadeiro se o metodo for SET, falso caso contrario.
-     */
-    public static boolean isSetter(Method method) {
-        if (!method.getName().startsWith("set")) {
-            return false;
-        }
-        if (method.getParameterTypes().length == 0) {
-            return false;
-        }
-        if (!void.class.equals(method.getReturnType())) {
-            return false;
-        }
-        return true;
     }
 }

@@ -6,8 +6,8 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.opensig.inutnfe.TInutNFe;
-import br.com.opensig.retinutnfe.TRetInutNFe;
+import br.inf.portalfiscal.nfe.schema.inutnfe.TInutNFe;
+import br.inf.portalfiscal.nfe.schema.retinutnfe.TRetInutNFe;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -42,7 +42,7 @@ public class ComandoEnviarNFeInutilizada implements IComando {
 
             // envia para sefaz
             String uf = Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisEstado().getSisEstadoIbge() + "";
-            String ambiente = Util.getConfig().get("nfe.tipoamb");
+            String ambiente = Util.getConfig().getProperty("nfe.tipoamb");
             String inut = nfe.inutilizar(xml, uf, ambiente);
 
             // analisa o retorno e seta os status
@@ -104,7 +104,7 @@ public class ComandoEnviarNFeInutilizada implements IComando {
         // unifica
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        sb.append("<ProcInutNFe versao=\"").append(Util.getConfig().get("nfe.versao")).append("\" xmlns=\"http://www.portalfiscal.inf.br/nfe\">");
+        sb.append("<ProcInutNFe versao=\"").append(Util.getConfig().getProperty("nfe.versao")).append("\" xmlns=\"http://www.portalfiscal.inf.br/nfe\">");
         sb.append(inut.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
         sb.append(proc.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
         sb.append("</ProcInutNFe>");

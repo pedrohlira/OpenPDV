@@ -274,41 +274,42 @@ public class NotaConsumidor extends javax.swing.JDialog {
         tabNotas.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabNotas.setRowHeight(20);
         tabNotas.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabNotas.setShowGrid(true);
         tabNotas.getTableHeader().setReorderingAllowed(false);
         spNotas.setViewportView(tabNotas);
-        tabNotas.getColumnModel().getColumn(0).setMinWidth(0);
-        tabNotas.getColumnModel().getColumn(0).setPreferredWidth(0);
-        tabNotas.getColumnModel().getColumn(0).setMaxWidth(0);
-        tabNotas.getColumnModel().getColumn(1).setResizable(false);
-        tabNotas.getColumnModel().getColumn(1).setPreferredWidth(50);
-        tabNotas.getColumnModel().getColumn(2).setResizable(false);
-        tabNotas.getColumnModel().getColumn(2).setPreferredWidth(75);
-        tabNotas.getColumnModel().getColumn(3).setResizable(false);
-        tabNotas.getColumnModel().getColumn(3).setPreferredWidth(50);
-        tabNotas.getColumnModel().getColumn(4).setResizable(false);
-        tabNotas.getColumnModel().getColumn(4).setPreferredWidth(75);
-        tabNotas.getColumnModel().getColumn(5).setResizable(false);
-        tabNotas.getColumnModel().getColumn(5).setPreferredWidth(100);
-        tabNotas.getColumnModel().getColumn(6).setResizable(false);
-        tabNotas.getColumnModel().getColumn(6).setPreferredWidth(100);
-        tabNotas.getColumnModel().getColumn(7).setResizable(false);
-        tabNotas.getColumnModel().getColumn(7).setPreferredWidth(75);
-        tabNotas.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabNotas.getColumnModel().getColumn(8).setResizable(false);
-        tabNotas.getColumnModel().getColumn(8).setPreferredWidth(75);
-        tabNotas.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabNotas.getColumnModel().getColumn(9).setResizable(false);
-        tabNotas.getColumnModel().getColumn(9).setPreferredWidth(75);
-        tabNotas.getColumnModel().getColumn(9).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabNotas.getColumnModel().getColumn(10).setResizable(false);
-        tabNotas.getColumnModel().getColumn(10).setPreferredWidth(50);
-        tabNotas.getColumnModel().getColumn(10).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabNotas.getColumnModel().getColumn(11).setResizable(false);
-        tabNotas.getColumnModel().getColumn(11).setPreferredWidth(50);
-        tabNotas.getColumnModel().getColumn(11).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabNotas.getColumnModel().getColumn(12).setResizable(false);
-        tabNotas.getColumnModel().getColumn(12).setPreferredWidth(75);
+        if (tabNotas.getColumnModel().getColumnCount() > 0) {
+            tabNotas.getColumnModel().getColumn(0).setMinWidth(0);
+            tabNotas.getColumnModel().getColumn(0).setPreferredWidth(0);
+            tabNotas.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabNotas.getColumnModel().getColumn(1).setResizable(false);
+            tabNotas.getColumnModel().getColumn(1).setPreferredWidth(50);
+            tabNotas.getColumnModel().getColumn(2).setResizable(false);
+            tabNotas.getColumnModel().getColumn(2).setPreferredWidth(75);
+            tabNotas.getColumnModel().getColumn(3).setResizable(false);
+            tabNotas.getColumnModel().getColumn(3).setPreferredWidth(50);
+            tabNotas.getColumnModel().getColumn(4).setResizable(false);
+            tabNotas.getColumnModel().getColumn(4).setPreferredWidth(75);
+            tabNotas.getColumnModel().getColumn(5).setResizable(false);
+            tabNotas.getColumnModel().getColumn(5).setPreferredWidth(100);
+            tabNotas.getColumnModel().getColumn(6).setResizable(false);
+            tabNotas.getColumnModel().getColumn(6).setPreferredWidth(100);
+            tabNotas.getColumnModel().getColumn(7).setResizable(false);
+            tabNotas.getColumnModel().getColumn(7).setPreferredWidth(75);
+            tabNotas.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabNotas.getColumnModel().getColumn(8).setResizable(false);
+            tabNotas.getColumnModel().getColumn(8).setPreferredWidth(75);
+            tabNotas.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabNotas.getColumnModel().getColumn(9).setResizable(false);
+            tabNotas.getColumnModel().getColumn(9).setPreferredWidth(75);
+            tabNotas.getColumnModel().getColumn(9).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabNotas.getColumnModel().getColumn(10).setResizable(false);
+            tabNotas.getColumnModel().getColumn(10).setPreferredWidth(50);
+            tabNotas.getColumnModel().getColumn(10).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabNotas.getColumnModel().getColumn(11).setResizable(false);
+            tabNotas.getColumnModel().getColumn(11).setPreferredWidth(50);
+            tabNotas.getColumnModel().getColumn(11).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabNotas.getColumnModel().getColumn(12).setResizable(false);
+            tabNotas.getColumnModel().getColumn(12).setPreferredWidth(75);
+        }
 
         lblSerie.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblSerie.setText("Série:");
@@ -412,7 +413,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
 
         spProdutos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         spProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        spProdutos.setRowHeaderView(null);
 
         tabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabProdutos.setModel(new javax.swing.table.DefaultTableModel(
@@ -441,37 +441,38 @@ public class NotaConsumidor extends javax.swing.JDialog {
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabProdutos.setRowHeight(20);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.setShowGrid(true);
         tabProdutos.getTableHeader().setReorderingAllowed(false);
         spProdutos.setViewportView(tabProdutos);
-        tabProdutos.getColumnModel().getColumn(0).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(0).setMaxWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
-        tabProdutos.getColumnModel().getColumn(2).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(400);
-        tabProdutos.getColumnModel().getColumn(3).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(4).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(5).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(6).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(7).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(8).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(100);
-        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(9).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(9).setMaxWidth(0);
+        if (tabProdutos.getColumnModel().getColumnCount() > 0) {
+            tabProdutos.getColumnModel().getColumn(0).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
+            tabProdutos.getColumnModel().getColumn(2).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(400);
+            tabProdutos.getColumnModel().getColumn(3).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(4).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(5).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(6).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(7).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(8).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(100);
+            tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(9).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(9).setMaxWidth(0);
+        }
 
         btnNovo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnNovo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/novo.png"))); // NOI18N
@@ -560,7 +561,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(lblLiquido)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtLiquido, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE))
+                                .add(txtLiquido))
                             .add(layout.createSequentialGroup()
                                 .add(txtSubSerie, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 47, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
@@ -583,7 +584,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
                                 .add(lblCOFINS)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(txtCOFINS, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 126, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                            .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)))
+                            .add(txtCPF_CNPJ)))
                     .add(org.jdesktop.layout.GroupLayout.LEADING, layout.createSequentialGroup()
                         .add(btnAdicionar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(6, 6, 6)
@@ -592,7 +593,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
                     .add(org.jdesktop.layout.GroupLayout.LEADING, spNotas)
                     .add(org.jdesktop.layout.GroupLayout.LEADING, separador1)
                     .add(org.jdesktop.layout.GroupLayout.LEADING, spProdutos))
-                .add(26, 26, 26))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -641,8 +642,8 @@ public class NotaConsumidor extends javax.swing.JDialog {
                 .add(68, 68, 68))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-895)/2, (screenSize.height-510)/2, 895, 510);
+        setSize(new java.awt.Dimension(859, 508));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -1010,8 +1011,8 @@ public class NotaConsumidor extends javax.swing.JDialog {
             desconto += np.getEcfNotaProdutoDesconto() * np.getEcfNotaProdutoQuantidade();
             liquido += np.getEcfNotaProdutoLiquido() * np.getEcfNotaProdutoQuantidade();
         }
-        Double pis = liquido * Double.valueOf(Util.getConfig().get("nfe.pis")) / 100;
-        Double cofins = liquido * Double.valueOf(Util.getConfig().get("nfe.cofins")) / 100;
+        Double pis = liquido * Double.valueOf(Util.getConfig().getProperty("nfe.pis")) / 100;
+        Double cofins = liquido * Double.valueOf(Util.getConfig().getProperty("nfe.cofins")) / 100;
 
         txtBruto.setValue(bruto);
         txtDesconto.setValue(desconto);

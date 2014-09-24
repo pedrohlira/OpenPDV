@@ -120,23 +120,22 @@ public class Embalagens extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabEmbalagens.setCellSelectionEnabled(false);
         tabEmbalagens.setRowHeight(20);
-        tabEmbalagens.setRowSelectionAllowed(true);
         tabEmbalagens.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabEmbalagens.setShowGrid(true);
         tabEmbalagens.setShowVerticalLines(false);
         tabEmbalagens.getTableHeader().setReorderingAllowed(false);
         spEmbalagens.setViewportView(tabEmbalagens);
         tabEmbalagens.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabEmbalagens.getColumnModel().getColumn(0).setResizable(false);
-        tabEmbalagens.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tabEmbalagens.getColumnModel().getColumn(1).setResizable(false);
-        tabEmbalagens.getColumnModel().getColumn(1).setPreferredWidth(50);
-        tabEmbalagens.getColumnModel().getColumn(2).setResizable(false);
-        tabEmbalagens.getColumnModel().getColumn(2).setPreferredWidth(50);
-        tabEmbalagens.getColumnModel().getColumn(3).setResizable(false);
-        tabEmbalagens.getColumnModel().getColumn(3).setPreferredWidth(400);
+        if (tabEmbalagens.getColumnModel().getColumnCount() > 0) {
+            tabEmbalagens.getColumnModel().getColumn(0).setResizable(false);
+            tabEmbalagens.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tabEmbalagens.getColumnModel().getColumn(1).setResizable(false);
+            tabEmbalagens.getColumnModel().getColumn(1).setPreferredWidth(50);
+            tabEmbalagens.getColumnModel().getColumn(2).setResizable(false);
+            tabEmbalagens.getColumnModel().getColumn(2).setPreferredWidth(50);
+            tabEmbalagens.getColumnModel().getColumn(3).setResizable(false);
+            tabEmbalagens.getColumnModel().getColumn(3).setPreferredWidth(400);
+        }
 
         panEmbalagens.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -271,7 +270,7 @@ public class Embalagens extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
                         .add(spEmbalagens, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 648, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(27, Short.MAX_VALUE))
+                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .add(layout.createSequentialGroup()
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
                             .add(layout.createSequentialGroup()
@@ -298,11 +297,11 @@ public class Embalagens extends javax.swing.JDialog {
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-681)/2, (screenSize.height-308)/2, 681, 308);
+        setSize(new java.awt.Dimension(684, 314));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed

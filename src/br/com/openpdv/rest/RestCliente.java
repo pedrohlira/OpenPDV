@@ -62,7 +62,7 @@ public class RestCliente extends ARest {
             if (nfe != null && nfe.intValue() > 0) {
                 resp = nfe.intValue() + 1;
             } else {
-                resp = Integer.valueOf(Util.getConfig().get("nfe.numero")) + 1;
+                resp = Integer.valueOf(Util.getConfig().getProperty("nfe.numero")) + 1;
             }
             return resp.toString();
         } catch (OpenPdvException ex) {
@@ -84,31 +84,6 @@ public class RestCliente extends ARest {
         autorizar();
         try {
             return service.selecionar(new SisUsuario(), 0, 0, null);
-        } catch (Exception ex) {
-            log.error(ex);
-            throw new RestException(ex);
-        }
-    }
-
-    /**
-     * Metodo que retorna a lista de cliente do sistema.
-     *
-     * @param data data usada como corte para considerar novo cliente.
-     * @return uma lista de objetos cliente em formato JSON.
-     * @throws RestException em caso de nao conseguir acessar a informacao.
-     */
-    @Path("/cliente")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<SisCliente> getClientes(@QueryParam("data") String data) throws RestException {
-        autorizar();
-        try {
-            Date dt = Util.formataData(data, "dd/MM/yyyy");
-            FiltroData fd = null;
-            if (dt != null) {
-                fd = new FiltroData("sisClienteData", ECompara.MAIOR_IGUAL, dt);
-            }
-            return service.selecionar(new SisCliente(), 0, 0, fd);
         } catch (Exception ex) {
             log.error(ex);
             throw new RestException(ex);
@@ -213,16 +188,43 @@ public class RestCliente extends ARest {
         autorizar();
         try {
             Date alterado = Util.formataData(data, "dd/MM/yyyy");
-            IFiltro filtro = null;
+            Filtro filtro = null;
             if (alterado != null) {
                 FiltroData fd1 = new FiltroData("prodProdutoAlterado", ECompara.MAIOR, alterado);
                 FiltroData fd2 = new FiltroData("prodProdutoCadastrado", ECompara.MENOR, alterado);
-                filtro = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                filtro = new FiltroGrupo(Filtro.E, fd1, fd2);
             }
 
             ProdProduto prod = new ProdProduto();
             prod.setCampoOrdem("prodProdutoAlterado");
             return service.selecionar(prod, pagina * limite, limite, filtro);
+        } catch (Exception ex) {
+            log.error(ex);
+            throw new RestException(ex);
+        }
+    }
+    
+    /**
+     * Metodo que retorna a lista de cliente do sistema.
+     *
+     * @param data data usada como corte para considerar novo cliente.
+     * @param pagina numero da pagina de retorno dos dados comecando pelo ZERO.
+     * @param limite limite de registros a serem retornados.
+     * @return uma lista de objetos cliente em formato JSON.
+     * @throws RestException em caso de nao conseguir acessar a informacao.
+     */
+    @Path("/cliente")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<SisCliente> getClientes(@QueryParam("data") String data, @QueryParam("pagina") int pagina, @QueryParam("limite") int limite) throws RestException {
+        autorizar();
+        try {
+            Date dt = Util.formataData(data, "dd/MM/yyyy");
+            FiltroData fd = null;
+            if (dt != null) {
+                fd = new FiltroData("sisClienteData", ECompara.MAIOR_IGUAL, dt);
+            }
+            return service.selecionar(new SisCliente(), pagina * limite, limite, fd);
         } catch (Exception ex) {
             log.error(ex);
             throw new RestException(ex);

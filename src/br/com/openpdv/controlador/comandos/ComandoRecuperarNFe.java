@@ -5,9 +5,9 @@ import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
-import br.com.opensig.consrecinfe.TConsReciNFe;
-import br.com.opensig.retconsrecinfe.TProtNFe.InfProt;
-import br.com.opensig.retconsrecinfe.TRetConsReciNFe;
+import br.inf.portalfiscal.nfe.schema.consrecinfe.TConsReciNFe;
+import br.inf.portalfiscal.nfe.schema.retconsrecinfe.TProtNFe.InfProt;
+import br.inf.portalfiscal.nfe.schema.retconsrecinfe.TRetConsReciNFe;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import org.w3c.dom.Document;
@@ -35,10 +35,10 @@ public class ComandoRecuperarNFe implements IComando {
             Thread.sleep(5000);
             // monta o xml de recuperacao
             TConsReciNFe reci = new TConsReciNFe();
-            reci.setVersao(Util.getConfig().get("nfe.versao"));
-            reci.setTpAmb(Util.getConfig().get("nfe.tipoamb"));
+            reci.setVersao(Util.getConfig().getProperty("nfe.versao"));
+            reci.setTpAmb(Util.getConfig().getProperty("nfe.tipoamb"));
             reci.setNRec(nota.getEcfNotaEletronicaRecibo());
-            JAXBElement<TConsReciNFe> element = new br.com.opensig.consrecinfe.ObjectFactory().createConsReciNFe(reci);
+            JAXBElement<TConsReciNFe> element = new br.inf.portalfiscal.nfe.schema.consrecinfe.ObjectFactory().createConsReciNFe(reci);
             String xml = NFe.objToXml(element, TConsReciNFe.class);
             
             // envia para sefaz
@@ -91,7 +91,7 @@ public class ComandoRecuperarNFe implements IComando {
         // unifica
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        sb.append("<nfeProc versao=\"").append(Util.getConfig().get("nfe.versao")).append("\" xmlns=\"http://www.portalfiscal.inf.br/nfe\">");
+        sb.append("<nfeProc versao=\"").append(Util.getConfig().getProperty("nfe.versao")).append("\" xmlns=\"http://www.portalfiscal.inf.br/nfe\">");
         sb.append(xml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
         sb.append(proc.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
         sb.append("</nfeProc>");

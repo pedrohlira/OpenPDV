@@ -90,14 +90,11 @@ public class Conexao {
      */
     public static WebResource getRest(String path) {
         Client c = getClientRest();
-
         // set a url completa
         StringBuilder sb = new StringBuilder();
-        sb.append(Util.getConfig().get("sinc.servidor")).append(":");
-        sb.append(Util.getConfig().get("sinc.porta")).append(path);
-        WebResource wr = c.resource(sb.toString());
-
-        return wr;
+        sb.append(Util.getConfig().getProperty("sinc.servidor")).append(":");
+        sb.append(Util.getConfig().getProperty("sinc.porta")).append(path);
+        return c.resource(sb.toString());
     }
 
     /**
@@ -112,15 +109,15 @@ public class Conexao {
         cc.getClasses().add(RestContexto.class);
         Client c = Client.create(cc);
         c.setFollowRedirects(true);
-        c.setConnectTimeout(Integer.valueOf(Util.getConfig().get("sinc.timeout")) * 1000);
-        c.setReadTimeout(Integer.valueOf(Util.getConfig().get("sinc.timeout")) * 1000);
+        c.setConnectTimeout(Integer.valueOf(Util.getConfig().getProperty("sinc.timeout")) * 1000);
+        c.setReadTimeout(Integer.valueOf(Util.getConfig().getProperty("sinc.timeout")) * 1000);
 
         // cria a autenticacao
         String usuario = PAF.AUXILIAR.getProperty("cli.cnpj");
         String senha = PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0];
 
         // criptografa a senha se estiver setado no config
-        if (Boolean.valueOf(Util.getConfig().get("sinc.criptografar"))) {
+        if (Boolean.valueOf(Util.getConfig().getProperty("sinc.criptografar"))) {
             senha = Util.encriptar(senha);
         }
 

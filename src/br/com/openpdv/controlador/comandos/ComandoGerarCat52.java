@@ -4,11 +4,10 @@ import br.com.openpdv.controlador.core.CoreService;
 import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
+import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.ecf.EcfPagamento;
@@ -71,7 +70,7 @@ public class ComandoGerarCat52 implements IComando {
         CoreService service = new CoreService();
         FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, impressora);
         FiltroData dt = new FiltroData("ecfZMovimento", ECompara.IGUAL, data);
-        GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, dt});
+        FiltroGrupo gf = new FiltroGrupo(Filtro.E, fo, dt);
         try {
             this.ecfZ = (EcfZ) service.selecionar(new EcfZ(), gf);
         } catch (OpenPdvException ex) {
@@ -328,7 +327,7 @@ public class ComandoGerarCat52 implements IComando {
                 cat52.setListaE21(listaE21);
 
                 // gera o arquivo
-                path = PAF.gerarArquivoCat52(cat52, Util.getConfig().get("ecf.cat52"));
+                path = PAF.gerarArquivoCat52(cat52, Util.getConfig().getProperty("ecf.cat52"));
             }
         } catch (Exception ex) {
             log.error("Erro ao gerar o arquivo cat52 do ECF.", ex);

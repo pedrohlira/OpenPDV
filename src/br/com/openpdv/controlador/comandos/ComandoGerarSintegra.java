@@ -10,7 +10,7 @@ import br.com.openpdv.modelo.ecf.*;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.opensig.nfe.TNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.sintegra.*;
 import java.util.*;
@@ -53,7 +53,7 @@ public class ComandoGerarSintegra implements IComando {
         // recupera as nfes emitidas no periodo
         FiltroData fd1 = new FiltroData("ecfNotaEletronicaData", ECompara.MAIOR_IGUAL, inicio);
         FiltroData fd2 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR, fim);
-        GrupoFiltro gp1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+        FiltroGrupo gp1 = new FiltroGrupo(Filtro.E, fd1, fd2);
         EcfNotaEletronica ene = new EcfNotaEletronica();
         ene.setOrdemDirecao(EDirecao.ASC);
         nfes = service.selecionar(ene, 0, 0, gp1);
@@ -61,7 +61,7 @@ public class ComandoGerarSintegra implements IComando {
         // recupera as notas emitidas no periodo
         FiltroData fd3 = new FiltroData("ecfNotaData", ECompara.MAIOR_IGUAL, inicio);
         FiltroData fd4 = new FiltroData("ecfNotaData", ECompara.MENOR, fim);
-        GrupoFiltro gp2 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
+        FiltroGrupo gp2 = new FiltroGrupo(Filtro.E, fd3, fd4);
         EcfNota en = new EcfNota();
         en.setOrdemDirecao(EDirecao.ASC);
         notas = service.selecionar(en, 0, 0, gp2);
@@ -69,7 +69,7 @@ public class ComandoGerarSintegra implements IComando {
         // recupera as leituras Z no periodo
         FiltroData fd7 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
         FiltroData fd8 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
-        GrupoFiltro gf4 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd7, fd8});
+        FiltroGrupo gf4 = new FiltroGrupo(Filtro.E, fd7, fd8);
         EcfZ ez = new EcfZ();
         ez.setOrdemDirecao(EDirecao.ASC);
         zs = service.selecionar(ez, 0, 0, gf4);
@@ -176,7 +176,7 @@ public class ComandoGerarSintegra implements IComando {
                     d50.setData(nfe.getEcfNotaEletronicaData());
                     d50.setUf(emp.getSisMunicipio().getSisEstado().getSisEstadoSigla());
                     d50.setModelo(55);
-                    d50.setSerie(Util.getConfig().get("nfe.serie"));
+                    d50.setSerie(Util.getConfig().getProperty("nfe.serie"));
                     d50.setNumero(nfe.getEcfNotaEletronicaNumero());
                     d50.setCfop(5201);
                     d50.setEmitente("P");
@@ -193,7 +193,7 @@ public class ComandoGerarSintegra implements IComando {
                     d50.setData(nfe.getEcfNotaEletronicaData());
                     d50.setUf(emp.getSisMunicipio().getSisEstado().getSisEstadoSigla());
                     d50.setModelo(55);
-                    d50.setSerie(Util.getConfig().get("nfe.serie"));
+                    d50.setSerie(Util.getConfig().getProperty("nfe.serie"));
                     d50.setNumero(nfe.getEcfNotaEletronicaNumero());
                     d50.setEmitente("P");
                     d50.setSituacao("4");
@@ -223,7 +223,7 @@ public class ComandoGerarSintegra implements IComando {
 
                     for (TNFe.InfNFe.Det det : tnfe.getInfNFe().getDet()) {
                         // encontro o produto
-                        IFiltro filtro;
+                        Filtro filtro;
                         if (det.getProd().getCEAN().equals("")) {
                             filtro = new FiltroNumero("prodProdutoId", ECompara.IGUAL, det.getProd().getCProd());
                         } else {
@@ -234,7 +234,7 @@ public class ComandoGerarSintegra implements IComando {
                         Dados54 d54 = new Dados54();
                         d54.setCnpj(nfe.getSisCliente().getSisClienteDoc());
                         d54.setModelo(55);
-                        d54.setSerie(Util.getConfig().get("nfe.serie"));
+                        d54.setSerie(Util.getConfig().getProperty("nfe.serie"));
                         d54.setNumero(nfe.getEcfNotaEletronicaNumero());
                         d54.setCfop(Integer.valueOf(det.getProd().getCFOP()));
                         if (prod.getProdProdutoCstCson().length() == 3) {

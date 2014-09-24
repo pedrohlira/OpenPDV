@@ -149,7 +149,7 @@ public class ComandoCupomPresente implements IComando {
 
     private void abrirCupom() throws OpenPdvException {
         // abrindo o relatorio
-        String[] resp = ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.relpresente"));
+        String[] resp = ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().getProperty("ecf.relpresente"));
         if (resp[0].equals("ERRO")) {
             ecf.enviar(EComando.ECF_CorrigeEstadoErro);
             throw new OpenPdvException(resp[1]);
@@ -190,7 +190,7 @@ public class ComandoCupomPresente implements IComando {
         StringBuilder sb = new StringBuilder();
         // rodape
         sb.append(IECF.LD).append(IECF.SL);
-        sb.append(Util.getConfig().get("ecf.msgpresente")).append(IECF.SL);
+        sb.append(Util.getConfig().getProperty("ecf.msgpresente")).append(IECF.SL);
         sb.append("OPERADOR: ").append(venda.getSisUsuario().getSisUsuarioLogin());
         if (venda.getSisVendedor() != null) {
             sb.append(" - VENDEDOR: ").append(venda.getSisVendedor().getSisUsuarioLogin());

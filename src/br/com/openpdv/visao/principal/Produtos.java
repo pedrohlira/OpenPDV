@@ -226,11 +226,8 @@ public class Produtos extends javax.swing.JDialog {
             }
         });
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabProdutos.setCellSelectionEnabled(false);
         tabProdutos.setRowHeight(20);
-        tabProdutos.setRowSelectionAllowed(true);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.setShowGrid(true);
         tabProdutos.setShowVerticalLines(false);
         tabProdutos.getTableHeader().setReorderingAllowed(false);
         spProdutos.setViewportView(tabProdutos);
@@ -573,7 +570,6 @@ public class Produtos extends javax.swing.JDialog {
         });
         tabPreco.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabPreco.setRowHeight(20);
-        tabPreco.setShowGrid(true);
         tabPreco.setShowVerticalLines(false);
         tabPreco.getTableHeader().setReorderingAllowed(false);
         spPreco.setViewportView(tabPreco);
@@ -678,7 +674,6 @@ public class Produtos extends javax.swing.JDialog {
         });
         tabItem.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabItem.setRowHeight(20);
-        tabItem.setShowGrid(true);
         tabItem.setShowVerticalLines(false);
         tabItem.getTableHeader().setReorderingAllowed(false);
         spItem.setViewportView(tabItem);
@@ -794,7 +789,6 @@ public class Produtos extends javax.swing.JDialog {
         });
         tabGrade.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabGrade.setRowHeight(20);
-        tabGrade.setShowGrid(true);
         tabGrade.setShowVerticalLines(false);
         tabGrade.getTableHeader().setReorderingAllowed(false);
         spGrade.setViewportView(tabGrade);
@@ -933,7 +927,7 @@ public class Produtos extends javax.swing.JDialog {
                         .add(txtLimite, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 89, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(6, 6, 6)
                         .add(lblLimite)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 284, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 263, Short.MAX_VALUE)
                         .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
@@ -977,10 +971,10 @@ public class Produtos extends javax.swing.JDialog {
                         .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(900, 662));
+        setSize(new java.awt.Dimension(900, 658));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1027,7 +1021,7 @@ public class Produtos extends javax.swing.JDialog {
     }//GEN-LAST:event_btnExcluirKeyPressed
 
     private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
-        IFiltro filtro = Pesquisa.pesquisar(txtFiltro.getText().toUpperCase());
+        Filtro filtro = Pesquisa.pesquisar(txtFiltro.getText().toUpperCase());
         setLista(filtro);
     }//GEN-LAST:event_btnPesquisarActionPerformed
 
@@ -1196,101 +1190,106 @@ public class Produtos extends javax.swing.JDialog {
                 || txtCST_CSON.getText().equals("") || txtICMS.getText().equals("") || txtISSQN.getText().equals("")) {
             JOptionPane.showMessageDialog(this, "Todos os campos são obrigatórios!", "Produtos", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            EntityManagerFactory emf = null;
-            EntityManager em = null;
+            double preco = Double.valueOf(txtPreco.getText().replace(",", "."));
+            if (preco <= 0.00) {
+                JOptionPane.showMessageDialog(this, "O preço deve ser maior que zero.", "Produtos", JOptionPane.WARNING_MESSAGE);
+            } else {
+                EntityManagerFactory emf = null;
+                EntityManager em = null;
 
-            try {
-                ProdProduto prod = new ProdProduto(cod);
-                prod.setProdProdutoNcm(txtNCM.getText());
-                prod.setProdProdutoBarra(txtBarra.getText().equals("") ? null : txtBarra.getText());
-                prod.setProdProdutoDescricao(txtDescricao.getText());
-                prod.setProdProdutoReferencia(txtREF.getText());
-                prod.setProdProdutoPreco(Double.valueOf(txtPreco.getText().replace(",", ".")));
-                // embalagem
-                String[] emb = cmbEmbalagem.getSelectedItem().toString().split(" - ");
-                ProdEmbalagem embalagem = new ProdEmbalagem(Integer.valueOf(emb[0]));
-                prod.setProdEmbalagem(embalagem);
-                prod.setProdProdutoEstoque(Double.valueOf(txtEstoque.getText().replace(",", ".")));
-                // origem
-                String[] ori = cmbOrigem.getSelectedItem().toString().split(" - ");
-                prod.setProdProdutoOrigem(ori[0].charAt(0));
-                prod.setProdProdutoCstCson(txtCST_CSON.getText());
-                // tributacao
-                String[] trib = cmbTributacao.getSelectedItem().toString().split(" - ");
-                prod.setProdProdutoTributacao(trib[0].charAt(0));
-                prod.setProdProdutoIcms(Double.valueOf(txtICMS.getText().replace(",", ".")));
-                prod.setProdProdutoIssqn(Double.valueOf(txtISSQN.getText().replace(",", ".")));
-                // iat
-                String[] iat = cmbIAT.getSelectedItem().toString().split(" - ");
-                prod.setProdProdutoIat(iat[0].charAt(0));
-                // ippt
-                String[] ippt = cmbIPPT.getSelectedItem().toString().split(" - ");
-                prod.setProdProdutoIppt(ippt[0].charAt(0));
-                // tipo
-                String[] tp = cmbTipo.getSelectedItem().toString().split(" - ");
-                prod.setProdProdutoTipo(tp[0]);
-                if (cod == 0) {
-                    prod.setProdProdutoCadastrado(new Date());
-                    prod.setProdProdutoAlterado(null);
-                } else {
-                    Date cadastro = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(tabProdutos.getModel().getValueAt(row, 17).toString());
-                    prod.setProdProdutoCadastrado(cadastro);
-                    prod.setProdProdutoAlterado(new Date());
-                }
-                prod.setProdProdutoAtivo(chkAtivo.isSelected());
-
-                // salva
-                service.salvar(prod);
-                if (prod.getProdProdutoId() == null || prod.getProdProdutoId() == 0) {
-                    prod = (ProdProduto) service.buscar(new ProdProduto(), "prodProdutoId", EBusca.MAXIMO);
-                }
-
-                // recupera uma instancia do gerenciador de entidades
-                emf = Conexao.getInstancia();
-                em = emf.createEntityManager();
-                em.getTransaction().begin();
-
-                // valida sub-listas
-                int subListas = 0;
-                List<ProdPreco> precos = new ArrayList<>();
-                List<ProdComposicao> itens = new ArrayList<>();
-                List<ProdGrade> grades = new ArrayList<>();
-                if (validaPrecos(precos, prod) && validaItens(itens, prod) && validarGrades(grades, prod)) {
-                    if (!precos.isEmpty()) {
-                        subListas++;
-                    }
-                    if (!itens.isEmpty()) {
-                        subListas++;
-                    }
-                    if (!grades.isEmpty()) {
-                        subListas++;
-                    }
-                    if (subListas > 1) {
-                        em.getTransaction().rollback();
-                        JOptionPane.showMessageDialog(this, "O produto somente pode ter um das 3 sub listas.", "Produtos", JOptionPane.WARNING_MESSAGE);
+                try {
+                    ProdProduto prod = new ProdProduto(cod);
+                    prod.setProdProdutoNcm(txtNCM.getText());
+                    prod.setProdProdutoBarra(txtBarra.getText().equals("") ? null : txtBarra.getText());
+                    prod.setProdProdutoDescricao(txtDescricao.getText());
+                    prod.setProdProdutoReferencia(txtREF.getText());
+                    prod.setProdProdutoPreco(preco);
+                    // embalagem
+                    String[] emb = cmbEmbalagem.getSelectedItem().toString().split(" - ");
+                    ProdEmbalagem embalagem = new ProdEmbalagem(Integer.valueOf(emb[0]));
+                    prod.setProdEmbalagem(embalagem);
+                    prod.setProdProdutoEstoque(Double.valueOf(txtEstoque.getText().replace(",", ".")));
+                    // origem
+                    String[] ori = cmbOrigem.getSelectedItem().toString().split(" - ");
+                    prod.setProdProdutoOrigem(ori[0].charAt(0));
+                    prod.setProdProdutoCstCson(txtCST_CSON.getText());
+                    // tributacao
+                    String[] trib = cmbTributacao.getSelectedItem().toString().split(" - ");
+                    prod.setProdProdutoTributacao(trib[0].charAt(0));
+                    prod.setProdProdutoIcms(Double.valueOf(txtICMS.getText().replace(",", ".")));
+                    prod.setProdProdutoIssqn(Double.valueOf(txtISSQN.getText().replace(",", ".")));
+                    // iat
+                    String[] iat = cmbIAT.getSelectedItem().toString().split(" - ");
+                    prod.setProdProdutoIat(iat[0].charAt(0));
+                    // ippt
+                    String[] ippt = cmbIPPT.getSelectedItem().toString().split(" - ");
+                    prod.setProdProdutoIppt(ippt[0].charAt(0));
+                    // tipo
+                    String[] tp = cmbTipo.getSelectedItem().toString().split(" - ");
+                    prod.setProdProdutoTipo(tp[0]);
+                    if (cod == 0) {
+                        prod.setProdProdutoCadastrado(new Date());
+                        prod.setProdProdutoAlterado(null);
                     } else {
-                        // precos
-                        salvarPrecos(em, prod, precos);
-                        // itens
-                        salvarItens(em, prod, itens);
-                        // grades
-                        salvarGrades(em, prod, grades);
-                        em.getTransaction().commit();
-                        JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Produtos", JOptionPane.INFORMATION_MESSAGE);
-                        btnPesquisarActionPerformed(null);
+                        Date cadastro = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(tabProdutos.getModel().getValueAt(row, 17).toString());
+                        prod.setProdProdutoCadastrado(cadastro);
+                        prod.setProdProdutoAlterado(new Date());
                     }
-                } else {
-                    em.getTransaction().rollback();
+                    prod.setProdProdutoAtivo(chkAtivo.isSelected());
+
+                    // salva
+                    service.salvar(prod);
+                    if (prod.getProdProdutoId() == null || prod.getProdProdutoId() == 0) {
+                        prod = (ProdProduto) service.buscar(new ProdProduto(), "prodProdutoId", EBusca.MAXIMO);
+                    }
+
+                    // recupera uma instancia do gerenciador de entidades
+                    emf = Conexao.getInstancia();
+                    em = emf.createEntityManager();
+                    em.getTransaction().begin();
+
+                    // valida sub-listas
+                    int subListas = 0;
+                    List<ProdPreco> precos = new ArrayList<>();
+                    List<ProdComposicao> itens = new ArrayList<>();
+                    List<ProdGrade> grades = new ArrayList<>();
+                    if (validaPrecos(precos, prod) && validaItens(itens, prod) && validarGrades(grades, prod)) {
+                        if (!precos.isEmpty()) {
+                            subListas++;
+                        }
+                        if (!itens.isEmpty()) {
+                            subListas++;
+                        }
+                        if (!grades.isEmpty()) {
+                            subListas++;
+                        }
+                        if (subListas > 1) {
+                            em.getTransaction().rollback();
+                            JOptionPane.showMessageDialog(this, "O produto somente pode ter um das 3 sub listas.", "Produtos", JOptionPane.WARNING_MESSAGE);
+                        } else {
+                            // precos
+                            salvarPrecos(em, prod, precos);
+                            // itens
+                            salvarItens(em, prod, itens);
+                            // grades
+                            salvarGrades(em, prod, grades);
+                            em.getTransaction().commit();
+                            JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Produtos", JOptionPane.INFORMATION_MESSAGE);
+                            btnPesquisarActionPerformed(null);
+                        }
+                    } else {
+                        em.getTransaction().rollback();
+                    }
+                } catch (Exception ex) {
+                    if (em != null && em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    log.error("Erro ao salvar o produto.", ex);
+                    JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Produtos", JOptionPane.WARNING_MESSAGE);
+                } finally {
+                    em.close();
+                    emf.close();
                 }
-            } catch (Exception ex) {
-                if (em != null && em.getTransaction().isActive()) {
-                    em.getTransaction().rollback();
-                }
-                log.error("Erro ao salvar o produto.", ex);
-                JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Produtos", JOptionPane.WARNING_MESSAGE);
-            } finally {
-                em.close();
-                emf.close();
             }
         }
     }
@@ -1482,7 +1481,7 @@ public class Produtos extends javax.swing.JDialog {
     /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
      */
-    private void setLista(IFiltro filtro) {
+    private void setLista(Filtro filtro) {
         try {
             int limite = Integer.valueOf(txtLimite.getText());
             List<ProdProduto> lista = service.selecionar(new ProdProduto(), 0, limite, filtro);

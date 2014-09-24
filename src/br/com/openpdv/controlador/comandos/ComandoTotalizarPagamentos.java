@@ -51,7 +51,7 @@ public class ComandoTotalizarPagamentos implements IComando {
         // deleta os totais dos pagamento da data passada.
         FiltroData fdDel1 = new FiltroData("ecfPagamentoTotaisData", ECompara.MAIOR_IGUAL, data);
         FiltroData fdDel2 = new FiltroData("ecfPagamentoTotaisData", ECompara.MENOR, cal.getTime());
-        GrupoFiltro gfDel = new GrupoFiltro(EJuncao.E, new IFiltro[]{fdDel1, fdDel2});
+        FiltroGrupo gfDel = new FiltroGrupo(Filtro.E, fdDel1, fdDel2);
         Sql sql = new Sql(new EcfPagamentoTotais(), EComandoSQL.EXCLUIR, gfDel);
         service.executar(sql);
 
@@ -60,7 +60,7 @@ public class ComandoTotalizarPagamentos implements IComando {
         for (EcfPagamentoTipo tipo : tipos) {
             // soma todos os valores pagos no dia pelo tipo nao estornado
             FiltroObjeto fo = new FiltroObjeto("ecfPagamentoTipo", ECompara.IGUAL, tipo);
-            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, ft, fd1, fd2});
+            FiltroGrupo gf = new FiltroGrupo(Filtro.E, fo, ft, fd1, fd2);
             Object obj = service.buscar(new EcfPagamento(), "ecfPagamentoValor", EBusca.SOMA, gf);
             double valor = Double.valueOf(obj != null ? obj.toString() : "0");
 
@@ -74,40 +74,30 @@ public class ComandoTotalizarPagamentos implements IComando {
                 service.salvar(ept);
             }
 
-            // caso o tipo seja dinheiro, adiciona os pagamentos das NF e NFe
-            if (tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().get("ecf.dinheiro"))) {
+            // caso o tipo seja dinheiro, adiciona os pagamentos das Notas Fiscais
+            if (tipo.getEcfPagamentoTipoCodigo().equals(Util.getConfig().getProperty("ecf.dinheiro"))) {
                 // soma as notas fiscais do dia que nao foram canceladas
                 FiltroData fd = new FiltroData("ecfNotaData", ECompara.IGUAL, data);
                 FiltroBinario fb = new FiltroBinario("ecfNotaCancelada", ECompara.IGUAL, false);
-                GrupoFiltro gf1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd, fb});
+                FiltroGrupo gf1 = new FiltroGrupo(Filtro.E, fd, fb);
                 Object obj1 = service.buscar(new EcfNota(), "ecfNotaLiquido", EBusca.SOMA, gf1);
                 double valor1 = Double.valueOf(obj1 != null ? obj1.toString() : "0");
-
-                // se valor maior que zero adicionar a tabela
-                if (valor1 > 0.00) {
-                    EcfPagamentoTotais ept = new EcfPagamentoTotais();
-                    ept.setEcfPagamentoTipo(tipo);
-                    ept.setEcfPagamentoTotaisData(data);
-                    ept.setEcfPagamentoTotaisValor(valor1);
-                    ept.setEcfPagamentoTotaisDocumento("NOTA FISCAL");
-                    service.salvar(ept);
-                }
 
                 // somas as nfe do dia que nao foram canceladas ou inutilizadas
                 FiltroTexto ft1 = new FiltroTexto("ecfNotaEletronicaStatus", ECompara.IGUAL, ENotaStatus.AUTORIZADO.toString());
                 FiltroData fd3 = new FiltroData("ecfNotaEletronicaData", ECompara.MAIOR_IGUAL, data);
                 FiltroData fd4 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR, cal.getTime());
-                GrupoFiltro gf2 = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft1, fd3, fd4});
+                FiltroGrupo gf2 = new FiltroGrupo(Filtro.E, ft1, fd3, fd4);
                 Object obj2 = service.buscar(new EcfNotaEletronica(), "ecfNotaEletronicaValor", EBusca.SOMA, gf2);
                 double valor2 = Double.valueOf(obj2 != null ? obj2.toString() : "0");
 
-                // se valor maior que zero adicionar a tabela
-                if (valor2 > 0.00) {
+                // se valor1 ou valor2 for maior que zero adicionar a tabela
+                if (valor1 > 0.00 || valor2 > 0.00) {
                     EcfPagamentoTotais ept = new EcfPagamentoTotais();
                     ept.setEcfPagamentoTipo(tipo);
                     ept.setEcfPagamentoTotaisData(data);
-                    ept.setEcfPagamentoTotaisValor(valor2);
-                    ept.setEcfPagamentoTotaisDocumento("NFE");
+                    ept.setEcfPagamentoTotaisValor(valor1 + valor2);
+                    ept.setEcfPagamentoTotaisDocumento("NOTA FISCAL");
                     service.salvar(ept);
                 }
             }

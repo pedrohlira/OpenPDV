@@ -6,13 +6,12 @@ import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.core.filtro.FiltroTexto;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
+import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
 import br.com.openpdv.modelo.ecf.*;
@@ -20,8 +19,8 @@ import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
-import br.com.opensig.nfe.TNFe;
-import br.com.opensig.nfe.TNfeProc;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNfeProc;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -81,7 +80,7 @@ public class RestServidor extends ARest {
             FiltroTexto ft = new FiltroTexto("ecfNotaSerie", ECompara.IGUAL, ecfNota.getEcfNotaSerie());
             FiltroTexto ft1 = new FiltroTexto("ecfNotaSubserie", ECompara.IGUAL, ecfNota.getEcfNotaSubserie());
             FiltroNumero fn = new FiltroNumero("ecfNotaNumero", ECompara.IGUAL, ecfNota.getEcfNotaNumero());
-            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft, ft1, fn});
+            FiltroGrupo gf = new FiltroGrupo(Filtro.E, ft, ft1, fn);
             EcfNota aux = (EcfNota) service.selecionar(ecfNota, gf);
 
             if (aux == null) {
@@ -171,7 +170,7 @@ public class RestServidor extends ARest {
                     List<Sql> sqls = new ArrayList<>();
                     for (TNFe.InfNFe.Det det : produtos.getNFe().getInfNFe().getDet()) {
                         // achando o produto
-                        IFiltro filtro;
+                        Filtro filtro;
                         if (det.getProd().getCEAN() == null || det.getProd().getCEAN().equals("")) {
                             filtro = new FiltroNumero("prodProdutoId", ECompara.IGUAL, det.getProd().getCProd());
                         } else {
@@ -211,7 +210,7 @@ public class RestServidor extends ARest {
                     List<Sql> sqls = new ArrayList<>();
                     for (TNFe.InfNFe.Det det : produtos.getNFe().getInfNFe().getDet()) {
                         // achando o produto
-                        IFiltro filtro;
+                        Filtro filtro;
                         if (det.getProd().getCEAN() == null || det.getProd().getCEAN().equals("")) {
                             filtro = new FiltroNumero("prodProdutoId", ECompara.IGUAL, det.getProd().getCProd());
                         } else {
@@ -339,7 +338,7 @@ public class RestServidor extends ARest {
                 FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, imp);
                 FiltroNumero fn = new FiltroNumero("ecfVendaCcf", ECompara.IGUAL, venda.getEcfVendaCcf());
                 FiltroNumero fn1 = new FiltroNumero("ecfVendaCoo", ECompara.IGUAL, venda.getEcfVendaCoo());
-                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fn, fn1});
+                FiltroGrupo gf = new FiltroGrupo(Filtro.E, fo, fn, fn1);
                 // executa o comando
                 Sql sql = new Sql(venda, EComandoSQL.EXCLUIR, gf);
                 List<Integer> resp = service.executar(sql);
@@ -375,7 +374,9 @@ public class RestServidor extends ARest {
             for (Sql sql : sqls) {
                 service.executar(em, sql);
             }
+            em.getTransaction().commit();
 
+            em.getTransaction().begin();
             if (!venda.getEcfVendaCancelada()) {
                 // salva os pagamentos
                 for (EcfPagamento pag : pags) {
@@ -430,7 +431,7 @@ public class RestServidor extends ARest {
             // valida se ja existe
             FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, imp);
             FiltroNumero fn = new FiltroNumero("ecfZCrz", ECompara.IGUAL, ecfZ.getEcfZCrz());
-            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fn});
+            FiltroGrupo gf = new FiltroGrupo(Filtro.E, fo, fn);
             EcfZ aux = (EcfZ) service.selecionar(ecfZ, gf);
 
             if (aux == null) {
@@ -473,7 +474,7 @@ public class RestServidor extends ARest {
 
                 FiltroData fd = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, ecfZ.getEcfZMovimento());
                 FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MENOR, fim);
-                GrupoFiltro gf1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd, fd1});
+                FiltroGrupo gf1 = new FiltroGrupo(Filtro.E, fo, fd, fd1);
                 ParametroObjeto po = new ParametroObjeto("ecfZ", ecfZ);
 
                 Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf1, po);
@@ -596,7 +597,7 @@ public class RestServidor extends ARest {
             ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
             FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
             FiltroTexto ft = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, barra);
-            GrupoFiltro gf1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, ft});
+            FiltroGrupo gf1 = new FiltroGrupo(Filtro.E, fo, ft);
             // busca o item
             Sql sql1 = new Sql(new ProdGrade(), EComandoSQL.ATUALIZAR, gf1, pf2);
             sqls.add(sql1);

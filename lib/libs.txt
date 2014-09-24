@@ -73,10 +73,10 @@ mysql-connector-java-5.1.18-bin.jar
 postgresql-9.2-1000.jdbc4.jar
 
 # ECFs
-jna.jar
-plataform.jar
+jna-4.1.0.jar
+jna-plataform-4.1.0.jar
 BematechFrameworkJNA.jar
-FrameworkJNA.jar
+DarumaFrameworkJNA.jar
 
 # Arquivos
 jasypt-1.9.0.jar

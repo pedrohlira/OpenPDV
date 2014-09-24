@@ -3,11 +3,10 @@ package br.com.openpdv.controlador.core;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.phdss.Util;
-import br.com.phdss.controlador.PAF;
-import br.inf.portalfiscal.www.nfe.wsdl.nfeinutilizacao2.NfeInutilizacao2Stub;
-import br.inf.portalfiscal.www.nfe.wsdl.nferecepcao2.NfeRecepcao2Stub;
-import br.inf.portalfiscal.www.nfe.wsdl.nferetrecepcao2.NfeRetRecepcao2Stub;
+import br.inf.portalfiscal.www.nfe.wsdl.inutilizacao.NfeInutilizacao2Stub;
+import br.inf.portalfiscal.www.nfe.wsdl.recepcao.NfeRecepcao2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.recepcaoevento.RecepcaoEventoStub;
+import br.inf.portalfiscal.www.nfe.wsdl.retrecepcao.NfeRetRecepcao2Stub;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.security.KeyStore;
@@ -182,7 +181,7 @@ public class NFe {
 
             NfeRecepcao2Stub.NfeCabecMsg nfeCabecMsg = new NfeRecepcao2Stub.NfeCabecMsg();
             nfeCabecMsg.setCUF(uf);
-            nfeCabecMsg.setVersaoDados(Util.getConfig().get("nfe.versao"));
+            nfeCabecMsg.setVersaoDados(Util.getConfig().getProperty("nfe.versao"));
 
             NfeRecepcao2Stub.NfeCabecMsgE nfeCabecMsgE = new NfeRecepcao2Stub.NfeCabecMsgE();
             nfeCabecMsgE.setNfeCabecMsg(nfeCabecMsg);
@@ -218,7 +217,7 @@ public class NFe {
 
             NfeRetRecepcao2Stub.NfeCabecMsg nfeCabecMsg = new NfeRetRecepcao2Stub.NfeCabecMsg();
             nfeCabecMsg.setCUF(uf);
-            nfeCabecMsg.setVersaoDados(Util.getConfig().get("nfe.versao"));
+            nfeCabecMsg.setVersaoDados(Util.getConfig().getProperty("nfe.versao"));
 
             NfeRetRecepcao2Stub.NfeCabecMsgE nfeCabecMsgE = new NfeRetRecepcao2Stub.NfeCabecMsgE();
             nfeCabecMsgE.setNfeCabecMsg(nfeCabecMsg);
@@ -288,7 +287,7 @@ public class NFe {
 
             NfeInutilizacao2Stub.NfeCabecMsg nfeCabecMsg = new NfeInutilizacao2Stub.NfeCabecMsg();
             nfeCabecMsg.setCUF(uf);
-            nfeCabecMsg.setVersaoDados(Util.getConfig().get("nfe.versao"));
+            nfeCabecMsg.setVersaoDados(Util.getConfig().getProperty("nfe.versao"));
 
             NfeInutilizacao2Stub.NfeCabecMsgE nfeCabecMsgE = new NfeInutilizacao2Stub.NfeCabecMsgE();
             nfeCabecMsgE.setNfeCabecMsg(nfeCabecMsg);
@@ -333,7 +332,7 @@ public class NFe {
         // chave
         PrivateKey pk = null;
         // descriptografa a senha
-        String senha = Util.descriptar(Util.getConfig().get("nfe.senha"));
+        String senha = Util.descriptar(Util.getConfig().getProperty("nfe.senha"));
 
         // le o certificado
         InputStream entrada = new FileInputStream("nfe/certificado.pfx");
@@ -408,6 +407,7 @@ public class NFe {
     /**
      * Metodo que Converte XML em Objeto.
      *
+     * @param <T> o tipo de objeto para retorno.
      * @param xml o arquivo em formato string.
      * @param classe o nome da classe especifica.
      * @return T o tipo passado de Objeto.
@@ -451,11 +451,15 @@ public class NFe {
         // retira acentos
         xml = Util.normaliza(xml);
         // remove alguns caracteres especiais
-        xml = xml.replaceAll(Util.getConfig().get("nfe.regexp"), "");
+        xml = xml.replaceAll(Util.getConfig().getProperty("nfe.regexp"), "");
         return xml;
     }
 
     /**
+     * Metodo que transforma uma string em documento xml.
+     *
+     * @param xml na forma de texto.
+     * @return um DOM do xml ou null caso aconteca algum erro.
      * @see #getXml(java.lang.String, java.lang.String, org.xml.sax.ErrorHandler)
      */
     public static Document getXml(String xml) {

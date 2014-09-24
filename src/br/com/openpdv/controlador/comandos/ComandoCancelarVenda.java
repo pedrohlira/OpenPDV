@@ -7,7 +7,7 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
-import br.com.openpdv.modelo.core.parametro.GrupoParametro;
+import br.com.openpdv.modelo.core.parametro.ParametroGrupo;
 import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.core.parametro.ParametroNumero;
@@ -93,7 +93,7 @@ public class ComandoCancelarVenda implements IComando {
                 // cancela na tela
                 cancelarVendaTela();
                 // atualizando o servidor
-                if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+                if (!Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
                     new Thread(new Runnable() {
 
                         @Override
@@ -124,9 +124,7 @@ public class ComandoCancelarVenda implements IComando {
 
             // cancela os cartoes
             try {
-                if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
-                    new ComandoCancelarPagamento(venda.getEcfPagamentos(), auto).executar();
-                }
+                new ComandoCancelarPagamento(venda.getEcfPagamentos(), auto).executar();
                 Caixa.getInstancia().modoDisponivel();
             } catch (OpenPdvException ex) {
                 log.error("Erro ao cancelar os cartoes.", ex);
@@ -232,7 +230,7 @@ public class ComandoCancelarVenda implements IComando {
         }
 
         // atualiza o status da venda
-        GrupoParametro gp = new GrupoParametro();
+        ParametroGrupo gp = new ParametroGrupo();
         FiltroNumero fn = new FiltroNumero("ecfVendaId", ECompara.IGUAL, venda.getId());
         if (!venda.getEcfVendaFechada()) {
             ParametroNumero pn1 = new ParametroNumero("ecfVendaBruto", valor);

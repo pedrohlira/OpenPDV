@@ -77,7 +77,7 @@ public abstract class ARest {
         try {
             FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, serie);
             FiltroBinario fb = new FiltroBinario("ecfImpressoraAtivo", ECompara.IGUAL, true);
-            GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft, fb});
+            FiltroGrupo gf = new FiltroGrupo(Filtro.E, ft, fb);
             return (EcfImpressora) service.selecionar(new EcfImpressora(), gf);
         } catch (Exception ex) {
             log.error(ex);

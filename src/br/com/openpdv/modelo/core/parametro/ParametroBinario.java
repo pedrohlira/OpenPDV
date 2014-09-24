@@ -1,39 +1,53 @@
 package br.com.openpdv.modelo.core.parametro;
 
+import br.com.openpdv.modelo.core.OpenPdvException;
+
 /**
  * Classe que define um parametro do tipo boleano.
  *
  * @author Pedro H. Lira
  */
-public class ParametroBinario extends AParametro<Boolean> {
+public class ParametroBinario extends AbstractParametro<Boolean> {
+
+    protected Boolean valor;
 
     /**
-     * @see AParametro#AParametro()
+     * @see AbstractParametro#AbstractParametro()
      */
     public ParametroBinario() {
         super();
     }
 
     /**
-     * @see AParametro#AParametro(String, String)
+     * @param campo o nome do campo.
+     * @param valor o valor do campo em Boolean.
+     * @see AbstractParametro#AbstractParametro(java.lang.String, java.io.Serializable)
+     */
+    public ParametroBinario(String campo, Boolean valor) {
+        super(campo, valor);
+    }
+
+    /**
+     * @param campo o nome do campo.
+     * @param valor o valor do campo em String.
+     * @see AbstractParametro#AbstractParametro(java.lang.String, java.lang.String)
      */
     public ParametroBinario(String campo, String valor) {
         super(campo, valor);
     }
 
-    /**
-     * @see AParametro#AParametro(String, Object)
-     */
-    public ParametroBinario(String campo, boolean valor) {
-        super(campo, valor);
+    @Override
+    public void setValorString(String valor) throws OpenPdvException {
+        setValor(valor != null && valor.equals("1"));
     }
 
     @Override
-    public void setValorString(String valor) {
-        if (valor == null || valor.equalsIgnoreCase("false")) {
-            super.setValor(false);
-        } else {
-            super.setValor(true);
-        }
+    public Boolean getValor() {
+        return this.valor;
+    }
+
+    @Override
+    public void setValor(Boolean valor) {
+        this.valor = valor;
     }
 }

@@ -51,7 +51,7 @@ public class ComandoSalvarPagamento implements IComando {
         // percorre os pagamentos para inserir no banco e imprimir cartoes
         ComandoImprimirCartao cmdCartao = new ComandoImprimirCartao();
         for (EcfPagamento pag : pagamentos) {
-            if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
+            if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef() && Boolean.valueOf(Util.getConfig().getProperty("pag.tef"))) {
                 cmdCartao.abrir(pag, valCard, total);
                 cmdCartao.executar();
                 impressos.add(new File(pag.getArquivo()));

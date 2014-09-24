@@ -48,6 +48,9 @@ public class Aguarde extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Processando...");
+        setAutoRequestFocus(false);
+        setFocusCycleRoot(false);
+        setFocusable(false);
         setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         setModal(true);
         setResizable(false);

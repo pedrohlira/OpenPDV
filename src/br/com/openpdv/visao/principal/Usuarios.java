@@ -127,26 +127,27 @@ public class Usuarios extends javax.swing.JDialog {
         });
         tabUsuarios.setRowHeight(20);
         tabUsuarios.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabUsuarios.setShowGrid(true);
         tabUsuarios.setShowVerticalLines(false);
         tabUsuarios.getTableHeader().setReorderingAllowed(false);
         spUsuarios.setViewportView(tabUsuarios);
         tabUsuarios.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabUsuarios.getColumnModel().getColumn(0).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tabUsuarios.getColumnModel().getColumn(1).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(1).setPreferredWidth(150);
-        tabUsuarios.getColumnModel().getColumn(2).setMinWidth(1);
-        tabUsuarios.getColumnModel().getColumn(2).setPreferredWidth(1);
-        tabUsuarios.getColumnModel().getColumn(2).setMaxWidth(1);
-        tabUsuarios.getColumnModel().getColumn(3).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(3).setPreferredWidth(50);
-        tabUsuarios.getColumnModel().getColumn(4).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tabUsuarios.getColumnModel().getColumn(5).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(5).setPreferredWidth(50);
-        tabUsuarios.getColumnModel().getColumn(6).setResizable(false);
-        tabUsuarios.getColumnModel().getColumn(6).setPreferredWidth(50);
+        if (tabUsuarios.getColumnModel().getColumnCount() > 0) {
+            tabUsuarios.getColumnModel().getColumn(0).setResizable(false);
+            tabUsuarios.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tabUsuarios.getColumnModel().getColumn(1).setResizable(false);
+            tabUsuarios.getColumnModel().getColumn(1).setPreferredWidth(150);
+            tabUsuarios.getColumnModel().getColumn(2).setMinWidth(1);
+            tabUsuarios.getColumnModel().getColumn(2).setPreferredWidth(1);
+            tabUsuarios.getColumnModel().getColumn(2).setMaxWidth(1);
+            tabUsuarios.getColumnModel().getColumn(3).setResizable(false);
+            tabUsuarios.getColumnModel().getColumn(3).setPreferredWidth(50);
+            tabUsuarios.getColumnModel().getColumn(4).setResizable(false);
+            tabUsuarios.getColumnModel().getColumn(4).setPreferredWidth(50);
+            tabUsuarios.getColumnModel().getColumn(5).setResizable(false);
+            tabUsuarios.getColumnModel().getColumn(5).setPreferredWidth(50);
+            tabUsuarios.getColumnModel().getColumn(6).setResizable(false);
+            tabUsuarios.getColumnModel().getColumn(6).setPreferredWidth(50);
+        }
 
         panUsuarios.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -334,11 +335,11 @@ public class Usuarios extends javax.swing.JDialog {
                     .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-653)/2, (screenSize.height-320)/2, 653, 320);
+        setSize(new java.awt.Dimension(647, 322));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed

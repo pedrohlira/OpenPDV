@@ -59,7 +59,7 @@ public abstract class ComandoReceberDados implements IComando {
      * @return o objeto que envia dados.
      */
     public static ComandoReceberDados getInstancia() {
-        ComandoReceberDados crd = Util.getConfig().get("sinc.tipo").equals("rest") ? new ComandoReceberDadosRemoto() : new ComandoReceberDadosLocal();
+        ComandoReceberDados crd = Util.getConfig().getProperty("sinc.tipo").equals("rest") ? new ComandoReceberDadosRemoto() : new ComandoReceberDadosLocal();
         return crd;
     }
 
@@ -73,20 +73,32 @@ public abstract class ComandoReceberDados implements IComando {
             throw new OpenPdvException("Nao consegui acesso ao banco.", ex);
         }
 
-        // atualiza os usuarios
-        usuarios();
-        // atualiza os clientes
-        clientes();
-        // atualiza os tipos de pagamento
-        pagamentos();
-        // atualiza as embalagens
-        embalagens();
-        // atualiza os tipos de grades
-        grades();
-        // recupera os novos produtos
-        produtosNovos();
-        // recupera os produtos atualizados
-        produtosAtualizados();
+        if (Util.getConfig().getProperty("sinc.usuario").equals("true")) {
+            // atualiza os usuarios
+            usuarios();
+        }
+        if (Util.getConfig().getProperty("sinc.pagamento").equals("true")) {
+            // atualiza os tipos de pagamento
+            pagamentos();
+        }
+        if (Util.getConfig().getProperty("sinc.embalagem").equals("true")) {
+            // atualiza as embalagens
+            embalagens();
+        }
+        if (Util.getConfig().getProperty("sinc.grade").equals("true")) {
+            // atualiza os tipos de grades
+            grades();
+        }
+        if (Util.getConfig().getProperty("sinc.produto").equals("true")) {
+            // recupera os novos produtos
+            produtosNovos();
+            // recupera os produtos atualizados
+            produtosAtualizados();
+        }
+        if (Util.getConfig().getProperty("sinc.cliente").equals("true")) {
+            // atualiza os clientes
+            clientes();
+        }
 
         // verifica se teve algum erro em produtos
         if (prodSinc == false) {
@@ -166,32 +178,6 @@ public abstract class ComandoReceberDados implements IComando {
     }
 
     /**
-     * Metodo que salva os clientes.
-     */
-    private void clientes() {
-        MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
-        try {
-            Date da = (Date) service.buscar(new SisCliente(), "sisClienteData", EBusca.MAXIMO, null);
-            mm.putSingle("data", da != null ? Util.getData(da) : "");
-            List<SisCliente> clientes = receber("cliente", new GenericType<List<SisCliente>>() {
-            }, mm);
-            em.getTransaction().begin();
-            for (SisCliente cli : clientes) {
-                cli.setSisClienteSinc(true);
-                service.salvar(em, cli);
-            }
-            em.getTransaction().commit();
-            log.info("Dados clientes recebidos -> " + clientes.size());
-        } catch (Exception ex) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            erros.append("Erro no recebimento dos Clientes.\n");
-            log.error("Erro no recebimento dos Clientes.", ex);
-        }
-    }
-
-    /**
      * Metodo que salva os pagamentos.
      */
     private void pagamentos() {
@@ -200,18 +186,21 @@ public abstract class ComandoReceberDados implements IComando {
             });
             em.getTransaction().begin();
             for (EcfPagamentoTipo tipo : tiposPagamento) {
-                // Identifica se a forma de pagamento e uma das 4 permitidas [Dinheiro, Cheque, Cartao ou Troca]
+                // Identifica se a forma de pagamento e uma das permitidas [Dinheiro, Cheque, Cartao, Cartao Presente, Troca]
                 if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("dinheiro")) {
-                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.dinheiro"));
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().getProperty("ecf.dinheiro"));
                     service.salvar(em, tipo);
                 } else if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("cheque")) {
-                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.cheque"));
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().getProperty("ecf.cheque"));
                     service.salvar(em, tipo);
                 } else if (tipo.isEcfPagamentoTipoTef()) {
-                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.cartao"));
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().getProperty("ecf.cartao"));
+                    service.salvar(em, tipo);
+                } else if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("cartao presente")) {
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().getProperty("ecf.presente"));
                     service.salvar(em, tipo);
                 } else if (tipo.getEcfPagamentoTipoDescricao().equalsIgnoreCase("troca")) {
-                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().get("ecf.troca"));
+                    tipo.setEcfPagamentoTipoCodigo(Util.getConfig().getProperty("ecf.troca"));
                     service.salvar(em, tipo);
                 }
             }
@@ -282,7 +271,7 @@ public abstract class ComandoReceberDados implements IComando {
      * Metodo que salva os produtos novos.
      */
     private void produtosNovos() {
-        int limite = Integer.valueOf(Util.getConfig().get("sinc.limite"));
+        int limite = Integer.valueOf(Util.getConfig().getProperty("sinc.limite"));
         int pagina = 0;
         List<ProdProduto> novos;
         MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
@@ -306,21 +295,22 @@ public abstract class ComandoReceberDados implements IComando {
                     comps.clear();
                     grades.clear();
 
+                    // guarda as sub listas
+                    for (ProdPreco pp : prod.getProdPrecos()) {
+                        pp.setProdProduto(prod);
+                        precos.add(pp);
+                    }
+                    for (ProdComposicao pc : prod.getProdComposicoes()) {
+                        pc.setProdProdutoPrincipal(prod);
+                        comps.add(pc);
+                    }
+                    for (ProdGrade pg : prod.getProdGrades()) {
+                        pg.setProdProduto(prod);
+                        grades.add(pg);
+                    }
+
                     try {
                         em.getTransaction().begin();
-                        // guarda as sub listas
-                        for (ProdPreco pp : prod.getProdPrecos()) {
-                            pp.setProdProduto(prod);
-                            precos.add(pp);
-                        }
-                        for (ProdComposicao pc : prod.getProdComposicoes()) {
-                            pc.setProdProdutoPrincipal(prod);
-                            comps.add(pc);
-                        }
-                        for (ProdGrade pg : prod.getProdGrades()) {
-                            pg.setProdProduto(prod);
-                            grades.add(pg);
-                        }
                         // salva o produto
                         prod.setProdPrecos(null);
                         prod.setProdComposicoes(null);
@@ -361,7 +351,7 @@ public abstract class ComandoReceberDados implements IComando {
      * Metodo que salva os produtos atualizados.
      */
     private void produtosAtualizados() {
-        int limite = Integer.valueOf(Util.getConfig().get("sinc.limite"));
+        int limite = Integer.valueOf(Util.getConfig().getProperty("sinc.limite"));
         int pagina = 0;
         List<ProdProduto> atualizados;
         MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
@@ -384,55 +374,57 @@ public abstract class ComandoReceberDados implements IComando {
                     comps.clear();
                     grades.clear();
 
+                    // guarda as sub listas
+                    for (ProdPreco pp : prod.getProdPrecos()) {
+                        pp.setProdProduto(prod);
+                        precos.add(pp);
+                    }
+                    for (ProdComposicao pc : prod.getProdComposicoes()) {
+                        pc.setProdProdutoPrincipal(prod);
+                        comps.add(pc);
+                    }
+                    for (ProdGrade pg : prod.getProdGrades()) {
+                        pg.setProdProduto(prod);
+                        grades.add(pg);
+                    }
+
                     try {
-                        em.getTransaction().begin();
-                        // guarda as sub listas
-                        for (ProdPreco pp : prod.getProdPrecos()) {
-                            pp.setProdProduto(prod);
-                            precos.add(pp);
-                        }
-                        for (ProdComposicao pc : prod.getProdComposicoes()) {
-                            pc.setProdProdutoPrincipal(prod);
-                            comps.add(pc);
-                        }
-                        for (ProdGrade pg : prod.getProdGrades()) {
-                            pg.setProdProduto(prod);
-                            grades.add(pg);
-                        }
                         // salva o produto
                         prod.setProdPrecos(null);
                         prod.setProdComposicoes(null);
                         prod.setProdGrades(null);
                         prod.setProdProdutoDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
-                        service.salvar(em, prod);
+                        service.salvar(prod);
+                    } catch (Exception ex) {
+                        prodSinc = false;
+                        log.error("Nao atualizou o produto com ID = " + prod.getProdProdutoId(), ex);
+                    }
+                    
+                    try {
                         // salva os precos
                         if (!precos.isEmpty()) {
                             FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
                             Sql sql = new Sql(new ProdPreco(), EComandoSQL.EXCLUIR, fo);
-                            service.executar(em, sql);
-                            service.salvar(em, precos);
+                            service.executar(sql);
+                            service.salvar(precos);
                         }
                         // salva os itens
                         if (!comps.isEmpty()) {
                             FiltroObjeto fo1 = new FiltroObjeto("prodProdutoPrincipal", ECompara.IGUAL, prod);
                             Sql sql = new Sql(new ProdComposicao(), EComandoSQL.EXCLUIR, fo1);
-                            service.executar(em, sql);
-                            service.salvar(em, comps);
+                            service.executar(sql);
+                            service.salvar(comps);
                         }
                         // salva as grades
                         if (!grades.isEmpty()) {
                             FiltroObjeto fo = new FiltroObjeto("prodProduto", ECompara.IGUAL, prod);
                             Sql sql = new Sql(new ProdGrade(), EComandoSQL.EXCLUIR, fo);
-                            service.executar(em, sql);
-                            service.salvar(em, grades);
+                            service.executar(sql);
+                            service.salvar(grades);
                         }
-                        em.getTransaction().commit();
                     } catch (Exception ex) {
-                        if (em != null && em.getTransaction().isActive()) {
-                            em.getTransaction().rollback();
-                        }
                         prodSinc = false;
-                        log.error("Nao atualizou o produto com ID = " + prod.getProdProdutoId(), ex);
+                        log.error("Nao atualizou as sub-tabelas do produto com ID = " + prod.getProdProdutoId(), ex);
                     }
                 }
                 log.info("Dados produtos atualizados recebidos -> " + atualizados.size());
@@ -441,6 +433,43 @@ public abstract class ComandoReceberDados implements IComando {
         } catch (Exception ex) {
             prodSinc = false;
             log.error("Nao conseguiu acessar os dados dos produtos atualizados.", ex);
+        }
+    }
+
+    /**
+     * Metodo que salva os clientes.
+     */
+    private void clientes() {
+        int limite = Integer.valueOf(Util.getConfig().getProperty("sinc.limite"));
+        int pagina = 0;
+        List<SisCliente> clientes;
+        MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
+
+        try {
+            Date da = (Date) service.buscar(new SisCliente(), "sisClienteData", EBusca.MAXIMO, null);
+            mm.putSingle("data", da != null ? Util.getData(da) : "");
+            mm.putSingle("limite", String.valueOf(limite));
+
+            do {
+                mm.putSingle("pagina", String.valueOf(pagina));
+                clientes = receber("cliente", new GenericType<List<SisCliente>>() {
+                }, mm);
+
+                em.getTransaction().begin();
+                for (SisCliente cli : clientes) {
+                    cli.setSisClienteSinc(true);
+                    service.salvar(em, cli);
+                }
+                em.getTransaction().commit();
+                log.info("Dados clientes recebidos -> " + clientes.size());
+                pagina++;
+            } while (clientes.size() == limite);
+        } catch (Exception ex) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            erros.append("Erro no recebimento dos Clientes.\n");
+            log.error("Erro no recebimento dos Clientes.", ex);
         }
     }
 

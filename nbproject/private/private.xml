@@ -6,27 +6,35 @@
             <line>264</line>
         </file>
     </editor-bookmarks>
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="10">
         <file>
-            <url>src/br/com/openpdv/controlador/comandos/ComandoGerarNFe.java</url>
-            <bookmark id="0">
+            <url>src/br/com/openpdv/visao/principal/Trocas.java</url>
+            <bookmark id="4">
                 <name/>
-                <line>271</line>
+                <line>721</line>
                 <key/>
             </bookmark>
         </file>
         <file>
-            <url>src/br/com/openpdv/visao/core/Caixa.java</url>
-            <bookmark id="2">
+            <url>src/br/com/openpdv/controlador/comandos/ComandoGerarNFe.java</url>
+            <bookmark id="0">
                 <name/>
-                <line>1487</line>
+                <line>269</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>src/br/com/openpdv/visao/venda/Fechamento.java</url>
+            <bookmark id="10">
+                <name/>
+                <line>1003</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
         <group name="OpenPDV"/>
         <group name="PDV"/>
+        <group/>
     </open-files>
 </project-private>

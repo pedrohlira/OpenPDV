@@ -88,11 +88,8 @@ public class Precos extends javax.swing.JDialog {
             }
         });
         tabPreco.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabPreco.setCellSelectionEnabled(false);
         tabPreco.setRowHeight(20);
-        tabPreco.setRowSelectionAllowed(true);
         tabPreco.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabPreco.setShowGrid(true);
         tabPreco.setShowVerticalLines(false);
         tabPreco.getTableHeader().setReorderingAllowed(false);
         tabPreco.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -107,21 +104,23 @@ public class Precos extends javax.swing.JDialog {
         });
         spPreco.setViewportView(tabPreco);
         tabPreco.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabPreco.getColumnModel().getColumn(0).setMinWidth(1);
-        tabPreco.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tabPreco.getColumnModel().getColumn(0).setMaxWidth(1);
-        tabPreco.getColumnModel().getColumn(1).setResizable(false);
-        tabPreco.getColumnModel().getColumn(1).setPreferredWidth(100);
-        tabPreco.getColumnModel().getColumn(2).setResizable(false);
-        tabPreco.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tabPreco.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabPreco.getColumnModel().getColumn(3).setResizable(false);
-        tabPreco.getColumnModel().getColumn(3).setPreferredWidth(200);
+        if (tabPreco.getColumnModel().getColumnCount() > 0) {
+            tabPreco.getColumnModel().getColumn(0).setMinWidth(1);
+            tabPreco.getColumnModel().getColumn(0).setPreferredWidth(1);
+            tabPreco.getColumnModel().getColumn(0).setMaxWidth(1);
+            tabPreco.getColumnModel().getColumn(1).setResizable(false);
+            tabPreco.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tabPreco.getColumnModel().getColumn(2).setResizable(false);
+            tabPreco.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tabPreco.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabPreco.getColumnModel().getColumn(3).setResizable(false);
+            tabPreco.getColumnModel().getColumn(3).setPreferredWidth(200);
+        }
 
         getContentPane().add(spPreco, java.awt.BorderLayout.CENTER);
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-438)/2, (screenSize.height-151)/2, 438, 151);
+        setSize(new java.awt.Dimension(428, 151));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void tabPrecoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tabPrecoKeyPressed

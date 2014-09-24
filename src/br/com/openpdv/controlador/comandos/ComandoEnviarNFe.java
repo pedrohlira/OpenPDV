@@ -5,8 +5,8 @@ import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
-import br.com.opensig.nfe.TNFe;
-import br.com.opensig.retenvinfe.TRetEnviNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe;
+import br.inf.portalfiscal.nfe.schema.retenvinfe.TRetEnviNFe;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -39,7 +39,7 @@ public class ComandoEnviarNFe implements IComando {
             int nfeINI = xml.indexOf("<NFe");
             int nfeFIM = xml.indexOf("</NFe>");
             xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><enviNFe xmlns=\"http://www.portalfiscal.inf.br/nfe\" versao=\""
-                    + Util.getConfig().get("nfe.versao") + "\"><idLote>" + new Date().getTime() + "</idLote>" + xml.substring(nfeINI, nfeFIM) + "</NFe></enviNFe>";
+                    + Util.getConfig().getProperty("nfe.versao") + "\"><idLote>" + new Date().getTime() + "</idLote>" + xml.substring(nfeINI, nfeFIM) + "</NFe></enviNFe>";
 
             // assinando o documento
             Document doc = NFe.getXml(xml);

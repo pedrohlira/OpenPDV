@@ -2,7 +2,6 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.core.NFe;
-import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
@@ -12,15 +11,7 @@ import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.opensig.nfe.TNFe;
-import br.com.opensig.nfe.TNFe.InfNFe.Det;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Imposto.PIS;
-import br.com.opensig.nfe.TNFe.InfNFe.Det.Prod;
-import br.com.opensig.nfe.TNFe.InfNFe.Ide;
-import br.com.opensig.nfe.TNFe.InfNFe.Total.ICMSTot;
-import br.com.opensig.nfe.TNFe.InfNFe.Transp;
+import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import br.com.phdss.modelo.sped.Sped;
 import br.com.phdss.modelo.sped.bloco0.*;
@@ -39,9 +30,19 @@ import br.com.phdss.modelo.sped.blocoG.BlocoG;
 import br.com.phdss.modelo.sped.blocoG.DadosG001;
 import br.com.phdss.modelo.sped.blocoG.DadosG990;
 import br.com.phdss.modelo.sped.blocoH.*;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.COFINS;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.ICMS;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Imposto.PIS;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det.Prod;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Ide;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Total.ICMSTot;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Transp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import javax.xml.bind.JAXBElement;
 
 /**
  * Classe que realiza a acao de gerar o SPED Fiscal.
@@ -76,7 +77,7 @@ public class ComandoGerarSped implements IComando {
         // recupera as nfes emitidas no periodo
         FiltroData fd1 = new FiltroData("ecfNotaEletronicaData", ECompara.MAIOR_IGUAL, inicio);
         FiltroData fd2 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR_IGUAL, fim);
-        GrupoFiltro gp1 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+        FiltroGrupo gp1 = new FiltroGrupo(Filtro.E, fd1, fd2);
         EcfNotaEletronica ene = new EcfNotaEletronica();
         ene.setOrdemDirecao(EDirecao.ASC);
         nfes = service.selecionar(ene, 0, 0, gp1);
@@ -84,7 +85,7 @@ public class ComandoGerarSped implements IComando {
         // recupera as notas emitidas no periodo
         FiltroData fd3 = new FiltroData("ecfNotaData", ECompara.MAIOR_IGUAL, inicio);
         FiltroData fd4 = new FiltroData("ecfNotaData", ECompara.MENOR_IGUAL, fim);
-        GrupoFiltro gp2 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
+        FiltroGrupo gp2 = new FiltroGrupo(Filtro.E, fd3, fd4);
         EcfNota en = new EcfNota();
         en.setOrdemDirecao(EDirecao.ASC);
         notas = service.selecionar(en, 0, 0, gp2);
@@ -92,7 +93,7 @@ public class ComandoGerarSped implements IComando {
         // recupera as leituras Z no periodo
         FiltroData fd7 = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
         FiltroData fd8 = new FiltroData("ecfZMovimento", ECompara.MENOR_IGUAL, fim);
-        GrupoFiltro gf4 = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd7, fd8});
+        FiltroGrupo gf4 = new FiltroGrupo(Filtro.E, fd7, fd8);
         EcfZ ez = new EcfZ();
         ez.setOrdemDirecao(EDirecao.ASC);
         zs = service.selecionar(ez, 0, 0, gf4);
@@ -255,7 +256,7 @@ public class ComandoGerarSped implements IComando {
 
     private Dados0000 getDados0() {
         Dados0000 d0 = new Dados0000();
-        d0.setCod_ver(Integer.valueOf(Util.getConfig().get("sped.layout")));
+        d0.setCod_ver(Integer.valueOf(Util.getConfig().getProperty("sped.layout")));
         d0.setCod_fin(finalidade);
         d0.setDt_ini(inicio);
         d0.setDt_fin(fim);
@@ -265,7 +266,7 @@ public class ComandoGerarSped implements IComando {
         d0.setIe(emp.getSisEmpresaIe());
         d0.setCod_mun(emp.getSisMunicipio().getSisMunicipioIbge());
         d0.setIm(emp.getSisEmpresaIm());
-        d0.setInd_perfil(Util.getConfig().get("sped.perfil"));
+        d0.setInd_perfil(Util.getConfig().getProperty("sped.perfil"));
         d0.setInd_ativ(1);
         Util.normaliza(d0);
         return d0;
@@ -414,7 +415,7 @@ public class ComandoGerarSped implements IComando {
             if (nfe.getEcfNotaEletronicaStatus().equals(ENotaStatus.INUTILIZADO.toString())) {
                 // Registro C100 para inutilizada
                 c100.setCod_sit("05");
-                c100.setSer(Util.getConfig().get("nfe.serie"));
+                c100.setSer(Util.getConfig().getProperty("nfe.serie"));
                 c100.setCod_mod("55");
                 c100.setNum_doc(nfe.getEcfNotaEletronicaNumero());
             } else {
@@ -433,14 +434,14 @@ public class ComandoGerarSped implements IComando {
 
                     // Registro C100
                     c100.setCod_sit(cod_sit);
-                    c100.setSer(Util.getConfig().get("nfe.serie"));
+                    c100.setSer(Util.getConfig().getProperty("nfe.serie"));
                     c100.setCod_mod("55");
                     c100.setNum_doc(nfe.getEcfNotaEletronicaNumero());
                     c100.setChv_nfe(nfe.getEcfNotaEletronicaChave());
                     if (cod_sit.equals("00")) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        c100.setDt_doc(sdf.parse(ide.getDEmi()));
-                        c100.setDt_e_s(sdf.parse(ide.getDEmi()));
+                        c100.setDt_doc(sdf.parse(ide.getDhEmi()));
+                        c100.setDt_e_s(sdf.parse(ide.getDhEmi()));
                         c100.setVl_doc(Double.valueOf(icms.getVNF()));
                         c100.setInd_pgto(ide.getIndPag());
                         c100.setVl_desc(Double.valueOf(icms.getVDesc()));
@@ -520,8 +521,9 @@ public class ComandoGerarSped implements IComando {
         c170.setCfop(Integer.valueOf(prod.getCFOP()));
 
         try {
-            ICMS icms = dados.getImposto().getICMS();
-            if (Util.getConfig().get("nfe.crt").equals("1")) {
+            JAXBElement<ICMS> icmsElement = (JAXBElement<ICMS>) dados.getImposto().getContent().get(0);
+            ICMS icms = icmsElement.getValue();
+            if (Util.getConfig().getProperty("nfe.crt").equals("1")) {
                 // verifica qual icms CSON foi usado
                 if (icms.getICMSSN101() != null) {
                     c170.setCst_icms(icms.getICMSSN101().getCSOSN());
@@ -629,7 +631,8 @@ public class ComandoGerarSped implements IComando {
         }
 
         // pis
-        PIS pis = dados.getImposto().getPIS();
+        JAXBElement<PIS> pisElement = (JAXBElement<PIS>) dados.getImposto().getContent().get(1);
+        PIS pis = pisElement.getValue();
         if (pis != null) {
             try {
                 if (pis.getPISAliq() != null) {
@@ -662,7 +665,8 @@ public class ComandoGerarSped implements IComando {
         }
 
         // cofins
-        COFINS cofins = dados.getImposto().getCOFINS();
+        JAXBElement<COFINS> cofinsElement = (JAXBElement<COFINS>) dados.getImposto().getContent().get(2);
+        COFINS cofins = cofinsElement.getValue();
         if (cofins != null) {
             try {
                 if (cofins.getCOFINSAliq() != null) {
@@ -870,8 +874,8 @@ public class ComandoGerarSped implements IComando {
                     c321.setVl_icms(c321.getVl_item() * np.getProdProduto().getProdProdutoIcms() / 100);
                 }
             }
-            c321.setVl_pis(c321.getVl_item() * Double.valueOf(Util.getConfig().get("nfe.pis")) / 100);
-            c321.setVl_cofins(c321.getVl_item() * Double.valueOf(Util.getConfig().get("nfe.cofins")) / 100);
+            c321.setVl_pis(c321.getVl_item() * Double.valueOf(Util.getConfig().getProperty("nfe.pis")) / 100);
+            c321.setVl_cofins(c321.getVl_item() * Double.valueOf(Util.getConfig().getProperty("nfe.cofins")) / 100);
 
             lc321.add(c321);
         }
@@ -1044,8 +1048,8 @@ public class ComandoGerarSped implements IComando {
         }
 
         DadosC410 c410 = new DadosC410();
-        c410.setVl_pis(liquido * Double.valueOf(Util.getConfig().get("nfe.pis")) / 100);
-        c410.setVl_cofins(liquido * Double.valueOf(Util.getConfig().get("nfe.cofins")) / 100);
+        c410.setVl_pis(liquido * Double.valueOf(Util.getConfig().getProperty("nfe.pis")) / 100);
+        c410.setVl_cofins(liquido * Double.valueOf(Util.getConfig().getProperty("nfe.cofins")) / 100);
         return c410;
     }
 
@@ -1063,7 +1067,7 @@ public class ComandoGerarSped implements IComando {
                     c420.setDescr_nr_tot("Tributado");
                 }
                 // Registro C425, somente para perfil B
-                if (Util.getConfig().get("sped.perfil").equals("B")) {
+                if (Util.getConfig().getProperty("sped.perfil").equals("B")) {
                     List<DadosC425> lc425 = getDadosC425(z);
                     c420.setdC425(lc425);
                     linhas += lc425.size();
@@ -1122,8 +1126,8 @@ public class ComandoGerarSped implements IComando {
                     c425.setQtd(vp.getEcfVendaProdutoQuantidade());
                     c425.setUnid(vp.getProdEmbalagem().getProdEmbalagemNome());
                     c425.setVl_item(vp.getEcfVendaProdutoTotal());
-                    c425.setVl_pis(vp.getEcfVendaProdutoTotal() * Double.valueOf(Util.getConfig().get("nfe.pis")) / 100);
-                    c425.setVl_cofins(vp.getEcfVendaProdutoTotal() * Double.valueOf(Util.getConfig().get("nfe.cofins")) / 100);
+                    c425.setVl_pis(vp.getEcfVendaProdutoTotal() * Double.valueOf(Util.getConfig().getProperty("nfe.pis")) / 100);
+                    c425.setVl_cofins(vp.getEcfVendaProdutoTotal() * Double.valueOf(Util.getConfig().getProperty("nfe.cofins")) / 100);
                     lc425.add(c425);
                 }
             }
@@ -1144,8 +1148,8 @@ public class ComandoGerarSped implements IComando {
             if (!venda.getEcfVendaCancelada()) {
                 c460.setDt_doc(venda.getEcfVendaData());
                 c460.setVl_doc(venda.getEcfVendaLiquido());
-                c460.setVl_pis(venda.getEcfVendaLiquido() * Double.valueOf(Util.getConfig().get("nfe.pis")) / 100);
-                c460.setVl_cofins(venda.getEcfVendaLiquido() * Double.valueOf(Util.getConfig().get("nfe.cofins")) / 100);
+                c460.setVl_pis(venda.getEcfVendaLiquido() * Double.valueOf(Util.getConfig().getProperty("nfe.pis")) / 100);
+                c460.setVl_cofins(venda.getEcfVendaLiquido() * Double.valueOf(Util.getConfig().getProperty("nfe.cofins")) / 100);
                 if (venda.getSisCliente() != null) {
                     c460.setCpf_cnpj(venda.getSisCliente().getSisClienteDoc());
                     c460.setNom_adq(venda.getSisCliente().getSisClienteNome());

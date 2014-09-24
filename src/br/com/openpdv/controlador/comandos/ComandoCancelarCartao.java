@@ -38,7 +38,7 @@ public class ComandoCancelarCartao implements IComando {
             try {
                 TEF.bloquear(true);
                 ecf.enviar(EComando.ECF_FechaRelatorio);
-                ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.reltef"));
+                ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().getProperty("ecf.reltef"));
                 TEF.imprimirVias(TEF.getDados(), EComando.ECF_LinhaRelatorioGerencial);
                 ecf.enviar(EComando.ECF_FechaRelatorio);
                 pag.setEcfPagamentoEstornoNsu(TEF.getDados().get("012-000"));

@@ -30,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
+import java.util.Properties;
 import javax.swing.*;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
@@ -178,33 +179,10 @@ public class Splash extends JFrame {
 
                     // realiza o backup do banco se preciso for
                     if (Conexao.DADOS.getProperty("eclipselink.jdbc.driver").contains("h2")) {
-                        String back = Util.getConfig().get("openpdv.backup");
-                        if (back == null || back.equals("")) {
-                            back = "db/";
-                        }
-
-                        String periodo = Util.getConfig().get("openpdv.backup.periodo");
-                        if (periodo == null || periodo.equals("")) {
-                            periodo = "mes";
-                        }
-
-                        SimpleDateFormat sdf;
-                        switch (periodo) {
-                            case "dia":
-                                sdf = new SimpleDateFormat("DDyyyy");
-                                break;
-                            case "semana":
-                                sdf = new SimpleDateFormat("wwyyyy");
-                                break;
-                            default:
-                                sdf = new SimpleDateFormat("MMyyyy");
-                                break;
-                        }
-                        back += String.format("backup_%s.zip", sdf.format(new Date()));
+                        String back = "db/backup.zip";
                         File arquivo = new File(back);
-                        if (!arquivo.exists()) {
-                            service.executar("BACKUP TO '" + back + "'");
-                        }
+                        arquivo.delete();
+                        service.executar("BACKUP TO '" + back + "'");
                     }
                     splash.pgBarra.setValue(10);
                 } catch (Exception ex) {
@@ -214,10 +192,10 @@ public class Splash extends JFrame {
                 }
 
                 // ativando o RESTful server, caso esteja configurado como localhost e rest
-                if (Util.getConfig().get("sinc.tipo").equals("rest") && Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+                if (Util.getConfig().getProperty("sinc.tipo").equals("rest") && Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
                     try {
                         splash.pgBarra.setString("Iniciando o serviço RESTful...");
-                        URI uri = UriBuilder.fromUri(Util.getConfig().get("sinc.servidor")).port(Integer.valueOf(Util.getConfig().get("sinc.porta"))).build();
+                        URI uri = UriBuilder.fromUri(Util.getConfig().getProperty("sinc.servidor")).port(Integer.valueOf(Util.getConfig().getProperty("sinc.porta"))).build();
                         ResourceConfig rc = new PackagesResourceConfig("br.com.openpdv.rest");
                         rc.getContainerRequestFilters().add(new GZIPContentEncodingFilter());
                         rc.getContainerResponseFilters().add(new GZIPContentEncodingFilter());
@@ -327,11 +305,11 @@ public class Splash extends JFrame {
                 // valida a comunicao e ativacao com o ECF
                 boolean ecfAtivo = false;
                 try {
-                    ECF.setInstancia(Util.getConfig().get("ecf.marca"));
+                    ECF.setInstancia(Util.getConfig().getProperty("ecf.marca"));
                     ecf = ECF.getInstancia();
-                    
+
                     splash.pgBarra.setString("Conectando no ECF...");
-                    ecf.conectar(Util.getConfig().get("ecf.porta"), Integer.valueOf(Util.getConfig().get("ecf.velocidade")), Integer.valueOf(Util.getConfig().get("ecf.modelo")));
+                    ecf.conectar(Util.getConfig().getProperty("ecf.porta"), Integer.valueOf(Util.getConfig().getProperty("ecf.velocidade")), Integer.valueOf(Util.getConfig().getProperty("ecf.modelo")));
 
                     splash.pgBarra.setString("Ativando o ECF...");
                     ecf.ativar();
@@ -343,15 +321,17 @@ public class Splash extends JFrame {
                 }
 
                 // validacao do TEF
-                if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
-                    TEF.setTEF(Util.getConfig());
+                if (Boolean.valueOf(Util.getConfig().getProperty("pag.tef"))) {
+                    Properties config = Util.getConfig();
+                    config.putAll(PAF.AUXILIAR);
+                    TEF.setTEF(config);
                     splash.pgBarra.setString("Validando o TEF...");
                     splash.pgBarra.setValue(60);
                     while (!TEF.gpAtivo()) {
                         JOptionPane.showMessageDialog(splash, "Gerenciador Padrão não está ativo!\nPor favor ative-o para continuar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     }
 
-                    if (Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
+                    if (Boolean.valueOf(Util.getConfig().getProperty("pag.tef"))) {
                         try {
                             String arquivo = TEF.lerArquivo(TEF.getRespIntPos001(), 0);
                             boolean pendente = false;
@@ -384,16 +364,16 @@ public class Splash extends JFrame {
                 try {
                     splash.pgBarra.setString("Recuperando impressora ativa...");
                     splash.pgBarra.setValue(70);
-                    GrupoFiltro gf = new GrupoFiltro();
+                    FiltroGrupo gf = new FiltroGrupo();
                     if (ecfAtivo) {
                         String[] resp = ecf.enviar(EComando.ECF_NumSerie);
                         if (IECF.OK.equals(resp[0])) {
                             FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, resp[1]);
-                            gf.add(ft, EJuncao.E);
+                            gf.add(ft, Filtro.E);
                         }
                     } else if (!PAF.AUXILIAR.isEmpty()) {
                         FiltroTexto ft = new FiltroTexto("ecfImpressoraSerie", ECompara.IGUAL, PAF.AUXILIAR.getProperty("ecf.serie").split(";")[0]);
-                        gf.add(ft, EJuncao.E);
+                        gf.add(ft, Filtro.E);
                     }
                     FiltroBinario fb = new FiltroBinario("ecfImpressoraAtivo", ECompara.IGUAL, true);
                     gf.add(fb);
@@ -521,7 +501,7 @@ public class Splash extends JFrame {
 
                     // verifica se precisa sincronizar
                     splash.pgBarra.setValue(100);
-                    if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+                    if (!Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
                         try {
                             Date recebimento = Util.getData(PAF.AUXILIAR.getProperty("out.recebimento", null)); // ultimo recebimento
                             if (recebimento == null || (atual.getTime() - recebimento.getTime()) / 86400000 > 0) { // maior que 1 dia em milisegundos

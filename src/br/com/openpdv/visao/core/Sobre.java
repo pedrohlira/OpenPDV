@@ -50,10 +50,10 @@ public class Sobre extends JDialog {
         }
 
         sobre.lblVersaoNome.setText(PAF.AUXILIAR.getProperty("paf.versao"));
-        sobre.lblSiteNome.setText(Util.getConfig().get("openpdv.site"));
-        sobre.lblEmailNome.setText(Util.getConfig().get("openpdv.email"));
-        sobre.lblTelefoneNome.setText(Util.getConfig().get("openpdv.telefone"));
-        sobre.lblSkypeNome.setText(Util.getConfig().get("openpdv.skype"));
+        sobre.lblSiteNome.setText(Util.getConfig().getProperty("openpdv.site"));
+        sobre.lblEmailNome.setText(Util.getConfig().getProperty("openpdv.email"));
+        sobre.lblTelefoneNome.setText(Util.getConfig().getProperty("openpdv.telefone"));
+        sobre.lblSkypeNome.setText(Util.getConfig().getProperty("openpdv.skype"));
         return sobre;
     }
 
@@ -320,12 +320,12 @@ public class Sobre extends JDialog {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(12, 12, 12)
-                .add(tabSobre)
+                .add(tabSobre, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-504)/2, (screenSize.height-353)/2, 504, 353);
+        setSize(new java.awt.Dimension(520, 361));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
@@ -360,7 +360,7 @@ public class Sobre extends JDialog {
                     if (local != null && !local.equals("")) {
                         // enviando o auxiliar local e recebendo o novo do servidor
                         Client c = Conexao.getClientRest();
-                        WebResource wr = c.resource(Util.getConfig().get("openpdv.url"));
+                        WebResource wr = c.resource(Util.getConfig().getProperty("openpdv.url"));
                         String remoto = wr.type(MediaType.TEXT_PLAIN).accept(MediaType.TEXT_PLAIN).put(String.class, local);
 
                         try (FileWriter fw = new FileWriter(aux, false)) {

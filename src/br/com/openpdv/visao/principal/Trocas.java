@@ -182,6 +182,7 @@ public class Trocas extends javax.swing.JDialog {
     /**
      * Metodo que retorna a instancia do componente.
      *
+     * @param async a acao a ser executada apos selecionar.
      * @return o objeto do componente.
      */
     public static Trocas getInstancia(AsyncCallback<EcfTroca> async) {
@@ -257,25 +258,26 @@ public class Trocas extends javax.swing.JDialog {
         tabTrocas.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabTrocas.setRowHeight(20);
         tabTrocas.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabTrocas.setShowGrid(true);
         tabTrocas.getTableHeader().setReorderingAllowed(false);
         spTrocas.setViewportView(tabTrocas);
-        tabTrocas.getColumnModel().getColumn(0).setMinWidth(0);
-        tabTrocas.getColumnModel().getColumn(0).setPreferredWidth(0);
-        tabTrocas.getColumnModel().getColumn(0).setMaxWidth(0);
-        tabTrocas.getColumnModel().getColumn(1).setResizable(false);
-        tabTrocas.getColumnModel().getColumn(1).setPreferredWidth(120);
-        tabTrocas.getColumnModel().getColumn(2).setResizable(false);
-        tabTrocas.getColumnModel().getColumn(2).setPreferredWidth(175);
-        tabTrocas.getColumnModel().getColumn(3).setResizable(false);
-        tabTrocas.getColumnModel().getColumn(3).setPreferredWidth(75);
-        tabTrocas.getColumnModel().getColumn(3).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabTrocas.getColumnModel().getColumn(4).setResizable(false);
-        tabTrocas.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tabTrocas.getColumnModel().getColumn(5).setResizable(false);
-        tabTrocas.getColumnModel().getColumn(5).setPreferredWidth(50);
-        tabTrocas.getColumnModel().getColumn(6).setResizable(false);
-        tabTrocas.getColumnModel().getColumn(6).setPreferredWidth(75);
+        if (tabTrocas.getColumnModel().getColumnCount() > 0) {
+            tabTrocas.getColumnModel().getColumn(0).setMinWidth(0);
+            tabTrocas.getColumnModel().getColumn(0).setPreferredWidth(0);
+            tabTrocas.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabTrocas.getColumnModel().getColumn(1).setResizable(false);
+            tabTrocas.getColumnModel().getColumn(1).setPreferredWidth(120);
+            tabTrocas.getColumnModel().getColumn(2).setResizable(false);
+            tabTrocas.getColumnModel().getColumn(2).setPreferredWidth(175);
+            tabTrocas.getColumnModel().getColumn(3).setResizable(false);
+            tabTrocas.getColumnModel().getColumn(3).setPreferredWidth(75);
+            tabTrocas.getColumnModel().getColumn(3).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabTrocas.getColumnModel().getColumn(4).setResizable(false);
+            tabTrocas.getColumnModel().getColumn(4).setPreferredWidth(50);
+            tabTrocas.getColumnModel().getColumn(5).setResizable(false);
+            tabTrocas.getColumnModel().getColumn(5).setPreferredWidth(50);
+            tabTrocas.getColumnModel().getColumn(6).setResizable(false);
+            tabTrocas.getColumnModel().getColumn(6).setPreferredWidth(75);
+        }
 
         lblCpfCnpj.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblCpfCnpj.setText("CPF/CNPJ:");
@@ -335,7 +337,6 @@ public class Trocas extends javax.swing.JDialog {
 
         spProdutos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         spProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        spProdutos.setRowHeaderView(null);
 
         tabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabProdutos.setModel(new javax.swing.table.DefaultTableModel(
@@ -364,31 +365,32 @@ public class Trocas extends javax.swing.JDialog {
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabProdutos.setRowHeight(20);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.setShowGrid(true);
         tabProdutos.getTableHeader().setReorderingAllowed(false);
         spProdutos.setViewportView(tabProdutos);
-        tabProdutos.getColumnModel().getColumn(0).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(0).setMaxWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
-        tabProdutos.getColumnModel().getColumn(2).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(250);
-        tabProdutos.getColumnModel().getColumn(3).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(4).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(5).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(6).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(100);
-        tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(7).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(7).setMaxWidth(0);
+        if (tabProdutos.getColumnModel().getColumnCount() > 0) {
+            tabProdutos.getColumnModel().getColumn(0).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
+            tabProdutos.getColumnModel().getColumn(2).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(250);
+            tabProdutos.getColumnModel().getColumn(3).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(4).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(5).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(6).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(100);
+            tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(7).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(7).setMaxWidth(0);
+        }
 
         btnSelecionar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnSelecionar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/ok.png"))); // NOI18N
@@ -554,8 +556,8 @@ public class Trocas extends javax.swing.JDialog {
                 .add(68, 68, 68))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-586)/2, (screenSize.height-485)/2, 586, 485);
+        setSize(new java.awt.Dimension(591, 478));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEcxluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEcxluirActionPerformed
@@ -720,7 +722,8 @@ public class Trocas extends javax.swing.JDialog {
                     service.salvar(em, produtos);
                     em.getTransaction().commit();
                     JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Trocas", JOptionPane.INFORMATION_MESSAGE);
-                    setLista();
+                    this.selecionado = troca;
+                    selecionar();
                 } else {
                     em.getTransaction().rollback();
                 }

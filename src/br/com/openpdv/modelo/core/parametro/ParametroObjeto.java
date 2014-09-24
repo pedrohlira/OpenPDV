@@ -7,17 +7,22 @@ import br.com.openpdv.modelo.core.Dados;
  *
  * @author Pedro H. Lira
  */
-public class ParametroObjeto extends AParametro<Dados> {
+public class ParametroObjeto extends AbstractParametro<Dados> {
+
+    protected Dados valor;
 
     /**
-     * @see AParametro#AParametro()
+     * @see AbstractParametro#AbstractParametro()
      */
     public ParametroObjeto() {
         super();
     }
 
     /**
-     * @see AParametro#AParametro(String, Object)
+     * @see AbstractParametro#AbstractParametro(java.lang.String,
+     * java.lang.Object)
+     * @param campo o nome do campo.
+     * @param valor o valor do filtro.
      */
     public ParametroObjeto(String campo, Dados valor) {
         super(campo, valor);
@@ -26,5 +31,15 @@ public class ParametroObjeto extends AParametro<Dados> {
     @Override
     public void setValorString(String valor) {
         throw new NullPointerException("Metodo nao permitido");
+    }
+
+    @Override
+    public Dados getValor() {
+        return valor;
+    }
+
+    @Override
+    public void setValor(Dados valor) {
+        this.valor = valor;
     }
 }

@@ -127,6 +127,7 @@ public class Pesquisa extends javax.swing.JDialog {
             }
         });
 
+        tabProdutos.setAutoCreateRowSorter(true);
         tabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabProdutos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -151,11 +152,9 @@ public class Pesquisa extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        tabProdutos.setAutoCreateRowSorter(true);
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabProdutos.setRowHeight(20);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.setShowGrid(true);
         tabProdutos.setShowVerticalLines(false);
         tabProdutos.getTableHeader().setReorderingAllowed(false);
         tabProdutos.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -170,32 +169,34 @@ public class Pesquisa extends javax.swing.JDialog {
         });
         spProdutos.setViewportView(tabProdutos);
         tabProdutos.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(125);
-        tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(300);
-        tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(80);
-        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(6).setMinWidth(1);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(1);
-        tabProdutos.getColumnModel().getColumn(6).setMaxWidth(1);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(80);
-        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(10).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(11).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(12).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(13).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(13).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(14).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(14).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(15).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(16).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(17).setPreferredWidth(150);
-        tabProdutos.getColumnModel().getColumn(18).setPreferredWidth(150);
-        tabProdutos.getColumnModel().getColumn(19).setPreferredWidth(50);
+        if (tabProdutos.getColumnModel().getColumnCount() > 0) {
+            tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(125);
+            tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(300);
+            tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(80);
+            tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(6).setMinWidth(1);
+            tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(1);
+            tabProdutos.getColumnModel().getColumn(6).setMaxWidth(1);
+            tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(80);
+            tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(10).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(11).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(12).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(13).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(13).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(14).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(14).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(15).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(16).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(17).setPreferredWidth(150);
+            tabProdutos.getColumnModel().getColumn(18).setPreferredWidth(150);
+            tabProdutos.getColumnModel().getColumn(19).setPreferredWidth(50);
+        }
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -204,15 +205,15 @@ public class Pesquisa extends javax.swing.JDialog {
             .add(layout.createSequentialGroup()
                 .add(6, 6, 6)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(spProdutos)
                     .add(layout.createSequentialGroup()
                         .add(lblFiltro)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(txtFiltro)
+                        .add(txtFiltro, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 616, Short.MAX_VALUE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnPesquisar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(4, 4, 4)
-                        .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(spProdutos, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 880, Short.MAX_VALUE))
+                        .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -230,15 +231,15 @@ public class Pesquisa extends javax.swing.JDialog {
                             .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
                 .add(7, 7, 7)
                 .add(spProdutos, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-892)/2, (screenSize.height-515)/2, 892, 515);
+        setSize(new java.awt.Dimension(892, 535));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
-        IFiltro filtro = pesquisar(txtFiltro.getText().toUpperCase());
+        Filtro filtro = pesquisar(txtFiltro.getText().toUpperCase());
         setLista(filtro);
     }//GEN-LAST:event_btnPesquisarActionPerformed
 
@@ -300,10 +301,10 @@ public class Pesquisa extends javax.swing.JDialog {
      * @param texto o valor a ser pesquisado.
      * @return um objeto de filtro.
      */
-    public static IFiltro pesquisar(String texto) {
-        GrupoFiltro filtro = new GrupoFiltro();
+    public static Filtro pesquisar(String texto) {
+        FiltroGrupo filtro = new FiltroGrupo();
         FiltroBinario fb = new FiltroBinario("prodProdutoAtivo", ECompara.IGUAL, true);
-        filtro.add(fb, EJuncao.E);
+        filtro.add(fb, Filtro.E);
         ECompara compara;
 
         if (texto.contains("/")) {
@@ -329,7 +330,7 @@ public class Pesquisa extends javax.swing.JDialog {
                 Date data = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(texto);
                 FiltroData fd1 = new FiltroData("prodProdutoCadastrado", compara, data);
                 FiltroData fd2 = new FiltroData("prodProdutoAlterado", compara, data);
-                filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2}));
+                filtro.add(new FiltroGrupo(Filtro.OU, fd1, fd2));
             } catch (ParseException ex) {
                 // verifica se e data simples
                 try {
@@ -346,17 +347,17 @@ public class Pesquisa extends javax.swing.JDialog {
                         // monta o grupo para cadastrado
                         FiltroData fd1 = new FiltroData("prodProdutoCadastrado", ECompara.MAIOR_IGUAL, inicio);
                         FiltroData fd2 = new FiltroData("prodProdutoCadastrado", ECompara.MENOR_IGUAL, fim);
-                        GrupoFiltro cad = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                        FiltroGrupo cad = new FiltroGrupo(Filtro.E, fd1, fd2);
                         // monta o grupo para alterado
                         FiltroData fd3 = new FiltroData("prodProdutoAlterado", ECompara.MAIOR_IGUAL, inicio);
                         FiltroData fd4 = new FiltroData("prodProdutoAlterado", ECompara.MENOR_IGUAL, fim);
-                        GrupoFiltro alt = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd3, fd4});
+                        FiltroGrupo alt = new FiltroGrupo(Filtro.E, fd3, fd4);
                         // combinando os filtros
-                        filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{cad, alt}));
+                        filtro.add(new FiltroGrupo(Filtro.OU, cad, alt));
                     } else {
                         FiltroData fd1 = new FiltroData("prodProdutoCadastrado", compara, inicio);
                         FiltroData fd2 = new FiltroData("prodProdutoAlterado", compara, inicio);
-                        filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fd1, fd2}));
+                        filtro.add(new FiltroGrupo(Filtro.OU, fd1, fd2));
                     }
                 } catch (ParseException ex1) {
                     pesquisa.log.debug("Nao filtrou por data.", ex1);
@@ -372,14 +373,12 @@ public class Pesquisa extends javax.swing.JDialog {
                 // barra
                 FiltroTexto ft = new FiltroTexto("prodProdutoBarra", ECompara.IGUAL, texto);
                 // barra do preco
-                FiltroTexto ft1 = new FiltroTexto("prodPrecoBarra", ECompara.IGUAL, texto);
-                ft1.setCampoPrefixo("t1.");
+                FiltroTexto ft1 = new FiltroTexto("t1.prodPrecoBarra", ECompara.IGUAL, texto);
                 // barra da grade
-                FiltroTexto ft2 = new FiltroTexto("prodGradeBarra", ECompara.IGUAL, texto);
-                ft2.setCampoPrefixo("t2.");
+                FiltroTexto ft2 = new FiltroTexto("t2.prodGradeBarra", ECompara.IGUAL, texto);
                 // referencia
                 FiltroTexto ft3 = new FiltroTexto("prodProdutoReferencia", ECompara.CONTEM, texto);
-                filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, ft, ft1, ft2, ft3}));
+                filtro.add(new FiltroGrupo(Filtro.OU, fn, ft, ft1, ft2, ft3));
             } catch (NumberFormatException ex) {
                 // verifica se e decimal
                 try {
@@ -389,9 +388,8 @@ public class Pesquisa extends javax.swing.JDialog {
                     // estoque
                     FiltroNumero fn1 = new FiltroNumero("prodProdutoEstoque", ECompara.IGUAL, valor);
                     // barra do preco
-                    FiltroNumero fn2 = new FiltroNumero("prodPrecoValor", ECompara.IGUAL, valor);
-                    fn2.setCampoPrefixo("t1.");
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{fn, fn1, fn2}));
+                    FiltroNumero fn2 = new FiltroNumero("t1.prodPrecoValor", ECompara.IGUAL, valor);
+                    filtro.add(new FiltroGrupo(Filtro.OU, fn, fn1, fn2));
                 } catch (NumberFormatException ex1) {
                     if (texto.startsWith("%")) {
                         compara = ECompara.CONTEM_FIM;
@@ -409,12 +407,10 @@ public class Pesquisa extends javax.swing.JDialog {
                     // barra
                     FiltroTexto ft3 = new FiltroTexto("prodProdutoBarra", compara, texto);
                     // barra do preco
-                    FiltroTexto ft4 = new FiltroTexto("prodPrecoBarra", compara, texto);
-                    ft4.setCampoPrefixo("t1.");
+                    FiltroTexto ft4 = new FiltroTexto("t1.prodPrecoBarra", compara, texto);
                     // barra da grade
-                    FiltroTexto ft5 = new FiltroTexto("prodGradeBarra", compara, texto);
-                    ft5.setCampoPrefixo("t2.");
-                    filtro.add(new GrupoFiltro(EJuncao.OU, new IFiltro[]{ft1, ft2, ft3, ft4, ft5}));
+                    FiltroTexto ft5 = new FiltroTexto("t2.prodGradeBarra", compara, texto);
+                    filtro.add(new FiltroGrupo(Filtro.OU, ft1, ft2, ft3, ft4, ft5));
                 }
             }
         }
@@ -424,7 +420,7 @@ public class Pesquisa extends javax.swing.JDialog {
     /**
      * Metodo que seta os valores da tabela vindas do banco de dados.
      */
-    private void setLista(IFiltro filtro) {
+    private void setLista(Filtro filtro) {
         try {
             DefaultTableModel dtmProduto = (DefaultTableModel) tabProdutos.getModel();
             while (dtmProduto.getRowCount() > 0) {
@@ -477,7 +473,7 @@ public class Pesquisa extends javax.swing.JDialog {
      *
      * @param filtro informa o filtro a ser usado.
      */
-    public void selecionar(IFiltro filtro) {
+    public void selecionar(Filtro filtro) {
         try {
             List<ProdProduto> lista = service.selecionar(new ProdProduto(), 0, 2, filtro);
             if (lista.isEmpty()) {

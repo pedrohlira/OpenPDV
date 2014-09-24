@@ -72,6 +72,7 @@ public class EcfVendaProduto extends Dados implements Serializable {
      *
      * @param produto referencia para o produto selecionado.
      * @param quantidade a quantidade total vendida.
+     * @param barra o codigo de barras do produto.
      */
     public EcfVendaProduto(ProdProduto produto, Double quantidade, String barra) {
         this(0);

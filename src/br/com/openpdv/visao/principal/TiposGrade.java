@@ -118,17 +118,18 @@ public class TiposGrade extends javax.swing.JDialog {
         });
         tabTipos.setRowHeight(20);
         tabTipos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabTipos.setShowGrid(true);
         tabTipos.setShowVerticalLines(false);
         tabTipos.getTableHeader().setReorderingAllowed(false);
         spTipos.setViewportView(tabTipos);
         tabTipos.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabTipos.getColumnModel().getColumn(0).setResizable(false);
-        tabTipos.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tabTipos.getColumnModel().getColumn(1).setResizable(false);
-        tabTipos.getColumnModel().getColumn(1).setPreferredWidth(50);
-        tabTipos.getColumnModel().getColumn(2).setResizable(false);
-        tabTipos.getColumnModel().getColumn(2).setPreferredWidth(400);
+        if (tabTipos.getColumnModel().getColumnCount() > 0) {
+            tabTipos.getColumnModel().getColumn(0).setResizable(false);
+            tabTipos.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tabTipos.getColumnModel().getColumn(1).setResizable(false);
+            tabTipos.getColumnModel().getColumn(1).setPreferredWidth(50);
+            tabTipos.getColumnModel().getColumn(2).setResizable(false);
+            tabTipos.getColumnModel().getColumn(2).setPreferredWidth(400);
+        }
 
         panTipos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -259,7 +260,7 @@ public class TiposGrade extends javax.swing.JDialog {
                         .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnCancelar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -274,11 +275,11 @@ public class TiposGrade extends javax.swing.JDialog {
                     .add(btnNovo, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnSalvar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-612)/2, (screenSize.height-321)/2, 612, 321);
+        setSize(new java.awt.Dimension(616, 327));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed

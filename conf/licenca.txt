@@ -1,4 +1,4 @@
-Copyright 2012 PhD - Systems Solutions
+Copyright 2014 PH Informática LTDA
 
 	Licenciado sob a Licença Apache, Versão 2.0 (a "Licença");
 	você não pode usar esse arquivo exceto em conformidade com a Licença.

@@ -1,5 +1,6 @@
 package br.com.openpdv.visao.core;
 
+import br.com.openpdv.visao.principal.Cat52;
 import br.com.openpdv.controlador.comandos.*;
 import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.AsyncDoubleBack;
@@ -8,11 +9,11 @@ import br.com.openpdv.controlador.permissao.Login;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
-import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
+import br.com.openpdv.modelo.core.filtro.Filtro;
+import br.com.openpdv.modelo.core.filtro.FiltroBinario;
+import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.ecf.EcfVenda;
@@ -23,6 +24,7 @@ import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
+import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.openpdv.visao.fiscal.*;
 import br.com.openpdv.visao.nota.NotaConsumidor;
 import br.com.openpdv.visao.nota.NotaEletronica;
@@ -38,18 +40,12 @@ import br.com.phdss.IECF;
 import br.com.phdss.TEF;
 import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
-import br.com.phdss.modelo.anexo.v.AnexoV;
-import br.com.phdss.modelo.anexo.v.P1;
-import br.com.phdss.modelo.anexo.v.P2;
-import br.com.phdss.modelo.anexo.v.P9;
 import java.awt.Cursor;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -330,6 +326,8 @@ public class Caixa extends JFrame {
         mnuSuprimento = new javax.swing.JMenuItem();
         mnuSangria = new javax.swing.JMenuItem();
         mnuReducaoZ = new javax.swing.JMenuItem();
+        mnuCat52 = new javax.swing.JMenuItem();
+        mnuTEF = new javax.swing.JMenuItem();
         separador1 = new javax.swing.JPopupMenu.Separator();
         mnuProdutos = new javax.swing.JMenuItem();
         mnuEmbalagens = new javax.swing.JMenuItem();
@@ -337,27 +335,20 @@ public class Caixa extends JFrame {
         mnuTipoGrades = new javax.swing.JMenuItem();
         mnuClientes = new javax.swing.JMenuItem();
         mnuUsuarios = new javax.swing.JMenuItem();
+        separador2 = new javax.swing.JPopupMenu.Separator();
         mnuTrocas = new javax.swing.JMenuItem();
         mnuLeiturasZ = new javax.swing.JMenuItem();
-        separador2 = new javax.swing.JPopupMenu.Separator();
-        mnuTEF = new javax.swing.JMenuItem();
         mnuSincronizacao = new javax.swing.JMenuItem();
         mnuFiscal = new javax.swing.JMenu();
         mnuLX = new javax.swing.JMenuItem();
-        mnuLMFC = new javax.swing.JMenuItem();
-        mnuLMFS = new javax.swing.JMenuItem();
-        mnuEspelho = new javax.swing.JMenuItem();
-        mnuArquivo = new javax.swing.JMenuItem();
-        mnuTabProdutos = new javax.swing.JMenuItem();
-        mnuEstoque = new javax.swing.JMenuItem();
-        mnuMovimento = new javax.swing.JMenuItem();
-        mnuPagamentos = new javax.swing.JMenuItem();
+        mnuLMF = new javax.swing.JMenuItem();
+        mnuMF = new javax.swing.JMenuItem();
+        mnuMFD = new javax.swing.JMenuItem();
         mnuPAF = new javax.swing.JMenuItem();
         mnuVendas = new javax.swing.JMenuItem();
         mnuIndice = new javax.swing.JMenuItem();
         mnuParamConfiguracao = new javax.swing.JMenuItem();
-        mnuCartao = new javax.swing.JMenuItem();
-        mnuCat52 = new javax.swing.JMenuItem();
+        mnuEstoque = new javax.swing.JMenuItem();
         mnuNota = new javax.swing.JMenu();
         mnuNotaConsumidor = new javax.swing.JMenuItem();
         mnuNotaEletronica = new javax.swing.JMenuItem();
@@ -370,6 +361,7 @@ public class Caixa extends JFrame {
         mnuCancelarVenda = new javax.swing.JMenuItem();
         separador3 = new javax.swing.JPopupMenu.Separator();
         mnuCupomPresente = new javax.swing.JMenuItem();
+        mnuCartaoPresente = new javax.swing.JMenuItem();
         mnuIdentificar = new javax.swing.JMenu();
         mnuSair = new javax.swing.JMenu();
 
@@ -378,7 +370,7 @@ public class Caixa extends JFrame {
         setMaximumSize(new java.awt.Dimension(1024, 746));
         setMinimumSize(new java.awt.Dimension(1024, 746));
         setName("OpenPDV"); // NOI18N
-        setUndecorated(Boolean.valueOf(Util.getConfig().get("openpdv.semborda")));
+        setUndecorated(Boolean.valueOf(Util.getConfig().getProperty("openpdv.semborda")));
         setResizable(false);
 
         lblLivre.setBackground(new java.awt.Color(255, 255, 255));
@@ -473,7 +465,6 @@ public class Caixa extends JFrame {
         txtQuantidade.setFocusable(false);
         txtQuantidade.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtQuantidade.setName("txtQuantidade"); // NOI18N
-        txtQuantidade.setOpaque(true);
         panCamadas.add(txtQuantidade);
         txtQuantidade.setBounds(490, 362, 200, 30);
 
@@ -485,7 +476,6 @@ public class Caixa extends JFrame {
         txtUnitario.setFocusable(false);
         txtUnitario.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtUnitario.setName("txtUnitario"); // NOI18N
-        txtUnitario.setOpaque(true);
         panCamadas.add(txtUnitario);
         txtUnitario.setBounds(490, 462, 200, 30);
 
@@ -497,7 +487,6 @@ public class Caixa extends JFrame {
         txtTotalItem.setFocusable(false);
         txtTotalItem.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtTotalItem.setName("txtTotalItem"); // NOI18N
-        txtTotalItem.setOpaque(true);
         panCamadas.add(txtTotalItem);
         txtTotalItem.setBounds(490, 560, 200, 30);
 
@@ -509,7 +498,6 @@ public class Caixa extends JFrame {
         txtSubTotal.setFocusable(false);
         txtSubTotal.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
         txtSubTotal.setName("txtSubTotal"); // NOI18N
-        txtSubTotal.setOpaque(true);
         panCamadas.add(txtSubTotal);
         txtSubTotal.setBounds(730, 560, 250, 30);
 
@@ -567,7 +555,6 @@ public class Caixa extends JFrame {
         mnuPrincipal.setEnabled(false);
         mnuPrincipal.setFocusable(false);
         mnuPrincipal.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuPrincipal.setRolloverEnabled(true);
 
         mnuSuprimento.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuSuprimento.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/valor.png"))); // NOI18N
@@ -604,6 +591,29 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuReducaoZ);
+
+        mnuCat52.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuCat52.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/padrao.png"))); // NOI18N
+        mnuCat52.setText("CAT52");
+        mnuCat52.setToolTipText("Gerar Arquivo Cat52");
+        mnuCat52.setEnabled(false);
+        mnuCat52.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCat52ActionPerformed(evt);
+            }
+        });
+        mnuPrincipal.add(mnuCat52);
+
+        mnuTEF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuTEF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cartao.png"))); // NOI18N
+        mnuTEF.setText("TEF");
+        mnuTEF.setEnabled(false);
+        mnuTEF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuTEFActionPerformed(evt);
+            }
+        });
+        mnuPrincipal.add(mnuTEF);
         mnuPrincipal.add(separador1);
 
         mnuProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -677,6 +687,7 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuUsuarios);
+        mnuPrincipal.add(separador2);
 
         mnuTrocas.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuTrocas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/padrao.png"))); // NOI18N
@@ -701,18 +712,6 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuLeiturasZ);
-        mnuPrincipal.add(separador2);
-
-        mnuTEF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuTEF.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cartao.png"))); // NOI18N
-        mnuTEF.setText("TEF");
-        mnuTEF.setEnabled(false);
-        mnuTEF.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuTEFActionPerformed(evt);
-            }
-        });
-        mnuPrincipal.add(mnuTEF);
 
         mnuSincronizacao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuSincronizacao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sincroniza.png"))); // NOI18N
@@ -734,7 +733,6 @@ public class Caixa extends JFrame {
         mnuFiscal.setEnabled(false);
         mnuFiscal.setFocusable(false);
         mnuFiscal.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuFiscal.setRolloverEnabled(true);
 
         mnuLX.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuLX.setText("LX");
@@ -747,93 +745,38 @@ public class Caixa extends JFrame {
         });
         mnuFiscal.add(mnuLX);
 
-        mnuLMFC.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuLMFC.setText("LMFC");
-        mnuLMFC.setToolTipText("Leitura Memória Fiscal Completa");
-        mnuLMFC.setEnabled(false);
-        mnuLMFC.addActionListener(new java.awt.event.ActionListener() {
+        mnuLMF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuLMF.setText("LMF");
+        mnuLMF.setToolTipText("Leitura Memória Fiscal");
+        mnuLMF.setEnabled(false);
+        mnuLMF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuLMFCActionPerformed(evt);
+                mnuLMFActionPerformed(evt);
             }
         });
-        mnuFiscal.add(mnuLMFC);
+        mnuFiscal.add(mnuLMF);
 
-        mnuLMFS.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuLMFS.setText("LMFS");
-        mnuLMFS.setToolTipText("Leitura Memória Fiscal Simplificada");
-        mnuLMFS.setEnabled(false);
-        mnuLMFS.addActionListener(new java.awt.event.ActionListener() {
+        mnuMF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuMF.setText("Arq. MF");
+        mnuMF.setToolTipText("Aruivo MF");
+        mnuMF.setEnabled(false);
+        mnuMF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuLMFSActionPerformed(evt);
+                mnuMFActionPerformed(evt);
             }
         });
-        mnuFiscal.add(mnuLMFS);
+        mnuFiscal.add(mnuMF);
 
-        mnuEspelho.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuEspelho.setText("Espelho MFD");
-        mnuEspelho.setToolTipText("Espelho MFD");
-        mnuEspelho.setEnabled(false);
-        mnuEspelho.addActionListener(new java.awt.event.ActionListener() {
+        mnuMFD.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuMFD.setText("Arq. MFD");
+        mnuMFD.setToolTipText("Arquivo MFD");
+        mnuMFD.setEnabled(false);
+        mnuMFD.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuEspelhoActionPerformed(evt);
+                mnuMFDActionPerformed(evt);
             }
         });
-        mnuFiscal.add(mnuEspelho);
-
-        mnuArquivo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuArquivo.setText("Arquivo MFD");
-        mnuArquivo.setToolTipText("Arquivo MFD");
-        mnuArquivo.setEnabled(false);
-        mnuArquivo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuArquivoActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuArquivo);
-
-        mnuTabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuTabProdutos.setText("Tabela de Produtos");
-        mnuTabProdutos.setToolTipText("Tabela de Produtos");
-        mnuTabProdutos.setEnabled(false);
-        mnuTabProdutos.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuTabProdutosActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuTabProdutos);
-
-        mnuEstoque.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuEstoque.setText("Estoque");
-        mnuEstoque.setToolTipText("Estoque");
-        mnuEstoque.setEnabled(false);
-        mnuEstoque.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuEstoqueActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuEstoque);
-
-        mnuMovimento.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuMovimento.setText("Movimento por ECF");
-        mnuMovimento.setToolTipText("Movimento por ECF");
-        mnuMovimento.setEnabled(false);
-        mnuMovimento.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuMovimentoActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuMovimento);
-
-        mnuPagamentos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuPagamentos.setText("Meios de Pagamento");
-        mnuPagamentos.setToolTipText("Meios de Pagamento");
-        mnuPagamentos.setEnabled(false);
-        mnuPagamentos.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuPagamentosActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuPagamentos);
+        mnuFiscal.add(mnuMFD);
 
         mnuPAF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuPAF.setText("Identificação do PAF-ECF");
@@ -879,27 +822,16 @@ public class Caixa extends JFrame {
         });
         mnuFiscal.add(mnuParamConfiguracao);
 
-        mnuCartao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuCartao.setText("Troco em Cartão");
-        mnuCartao.setToolTipText("Tabela Índice Técnico Produção");
-        mnuCartao.setEnabled(false);
-        mnuCartao.addActionListener(new java.awt.event.ActionListener() {
+        mnuEstoque.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuEstoque.setText("Registros do PAF-ECF");
+        mnuEstoque.setToolTipText("Registros do PAF-ECF");
+        mnuEstoque.setEnabled(false);
+        mnuEstoque.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuCartaoActionPerformed(evt);
+                mnuEstoqueActionPerformed(evt);
             }
         });
-        mnuFiscal.add(mnuCartao);
-
-        mnuCat52.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuCat52.setText("CAT52");
-        mnuCat52.setToolTipText("Gerar Arquivo Cat52");
-        mnuCat52.setEnabled(false);
-        mnuCat52.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuCat52ActionPerformed(evt);
-            }
-        });
-        mnuFiscal.add(mnuCat52);
+        mnuFiscal.add(mnuEstoque);
 
         barMenu.add(mnuFiscal);
 
@@ -1039,6 +971,18 @@ public class Caixa extends JFrame {
         });
         mnuVenda.add(mnuCupomPresente);
 
+        mnuCartaoPresente.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuCartaoPresente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cartao.png"))); // NOI18N
+        mnuCartaoPresente.setText("Cartão Presente");
+        mnuCartaoPresente.setToolTipText("Liberação e emissão do comprovante do Cartão Presente.");
+        mnuCartaoPresente.setEnabled(false);
+        mnuCartaoPresente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCartaoPresenteActionPerformed(evt);
+            }
+        });
+        mnuVenda.add(mnuCartaoPresente);
+
         barMenu.add(mnuVenda);
 
         mnuIdentificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cliente.png"))); // NOI18N
@@ -1150,28 +1094,31 @@ public class Caixa extends JFrame {
         }
     }//GEN-LAST:event_mnuSobreKeyPressed
 
-    private void mnuLMFCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLMFCActionPerformed
-        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Lmfc_Impressao);
+    private void mnuLMFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLMFActionPerformed
+        janela = PAF_LMF.getInstancia();
         janela.setVisible(true);
-    }//GEN-LAST:event_mnuLMFCActionPerformed
+    }//GEN-LAST:event_mnuLMFActionPerformed
 
-    private void mnuLMFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLMFSActionPerformed
-        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Lmfs_Impressao);
-        janela.setVisible(true);
-    }//GEN-LAST:event_mnuLMFSActionPerformed
-
-    private void mnuEspelhoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEspelhoActionPerformed
-        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Mfd_Espelho);
-        janela.setVisible(true);
-    }//GEN-LAST:event_mnuEspelhoActionPerformed
-
-    private void mnuArquivoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuArquivoActionPerformed
-        janela = PAF_MF.getInstancia(EComando.ECF_PafMf_Mfd_Cotepe1704);
-        janela.setVisible(true);
-    }//GEN-LAST:event_mnuArquivoActionPerformed
+    private void mnuMFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMFActionPerformed
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String path = PAF.gerarArqMF();
+                    Aguarde.getInstancia().setVisible(false);
+                    JOptionPane.showMessageDialog(caixa, "Arquivo gerado com sucesso em:\n" + path, "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    Aguarde.getInstancia().setVisible(false);
+                    log.error("Nao foi possivel gerar o arquivo -> ", ex);
+                    JOptionPane.showMessageDialog(caixa, "Não foi possível gerar o arquivo!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }).start();
+        Aguarde.getInstancia().setVisible(true);
+    }//GEN-LAST:event_mnuMFActionPerformed
 
     private void mnuSuprimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSuprimentoActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 ecf.enviar(EComando.ECF_AbreGaveta);
@@ -1181,7 +1128,7 @@ public class Caixa extends JFrame {
                     texto = texto.replace(".", "").replace(",", ".");
                     try {
                         double valor = Double.valueOf(texto);
-                        String[] param = new String[]{valor + "", "", Util.getConfig().get("ecf.suprimento"), "DINHEIRO"};
+                        String[] param = new String[]{valor + "", "", Util.getConfig().getProperty("ecf.suprimento"), "DINHEIRO"};
                         String[] resp = ecf.enviar(EComando.ECF_Suprimento, param);
 
                         if (IECF.OK.equals(resp[0])) {
@@ -1202,12 +1149,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuSuprimentoActionPerformed
 
     private void mnuSangriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSangriaActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 ecf.enviar(EComando.ECF_AbreGaveta);
@@ -1217,7 +1170,7 @@ public class Caixa extends JFrame {
                     texto = texto.replace(".", "").replace(",", ".");
                     try {
                         double valor = Double.valueOf(texto);
-                        String[] param = new String[]{valor + "", "", Util.getConfig().get("ecf.sangria"), "DINHEIRO"};
+                        String[] param = new String[]{valor + "", "", Util.getConfig().getProperty("ecf.sangria"), "DINHEIRO"};
                         String[] resp = ecf.enviar(EComando.ECF_Sangria, param);
 
                         if (IECF.OK.equals(resp[0])) {
@@ -1238,12 +1191,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuSangriaActionPerformed
 
     private void mnuReducaoZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuReducaoZActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 int escolha = JOptionPane.showOptionDialog(caixa, "Deseja emitir a ReduçãoZ?", "Redução Z",
@@ -1262,13 +1221,13 @@ public class Caixa extends JFrame {
                                 // verifica se tem vendas efetuadas no dia atual
                                 FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, dataMovimento);
                                 FiltroData fd2 = new FiltroData("ecfVendaData", ECompara.MENOR, cal.getTime());
-                                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                                FiltroGrupo gf = new FiltroGrupo(Filtro.E, fd1, fd2);
                                 List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 0, gf);
 
                                 // verifica se tem documentos efetuadas no dia atual
                                 fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
                                 fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());
-                                gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fd1, fd2});
+                                gf = new FiltroGrupo(Filtro.E, fd1, fd2);
                                 List<EcfDocumento> documentos = service.selecionar(new EcfDocumento(), 0, 0, gf);
 
                                 if (vendas.size() > 0 || documentos.size() > 0) {
@@ -1294,12 +1253,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuReducaoZActionPerformed
 
     private void mnuUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuUsuariosActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = Usuarios.getInstancia();
@@ -1310,12 +1275,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuUsuariosActionPerformed
 
     private void mnuClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuClientesActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = Clientes.getInstancia(null);
@@ -1326,12 +1297,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuClientesActionPerformed
 
     private void mnuEmbalagensActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEmbalagensActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = Embalagens.getInstancia();
@@ -1342,12 +1319,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuEmbalagensActionPerformed
 
     private void mnuProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuProdutosActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = Produtos.getInstancia();
@@ -1358,8 +1341,14 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuProdutosActionPerformed
 
     private void mnuPesquisaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_mnuPesquisaKeyPressed
@@ -1389,7 +1378,7 @@ public class Caixa extends JFrame {
                 @Override
                 public void run() {
                     try {
-                        PAF.emitirConfiguracao(Util.getConfig().get("ecf.relconfig"));
+                        PAF.emitirConfiguracao(Util.getConfig().getProperty("ecf.relconfig"));
                         new ComandoSalvarDocumento("RG").executar();
                         Aguarde.getInstancia().setVisible(false);
                     } catch (Exception ex) {
@@ -1412,7 +1401,7 @@ public class Caixa extends JFrame {
                 @Override
                 public void run() {
                     try {
-                        PAF.emitirIdentificaoPAF(Util.getConfig().get("ecf.relpaf"));
+                        PAF.emitirIdentificaoPAF(Util.getConfig().getProperty("ecf.relpaf"));
                         new ComandoSalvarDocumento("RG").executar();
                         Aguarde.getInstancia().setVisible(false);
                     } catch (Exception ex) {
@@ -1427,70 +1416,10 @@ public class Caixa extends JFrame {
         }
     }//GEN-LAST:event_mnuPAFActionPerformed
 
-    private void mnuTabProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTabProdutosActionPerformed
-        int escolha = JOptionPane.showOptionDialog(this, "Deseja gerar o arquivo com a tabela de produtos?", "Menu Fiscal",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
-        if (escolha == JOptionPane.YES_OPTION) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // recupera os produtos
-                        ProdProduto dados = new ProdProduto();
-                        dados.setCampoOrdem(dados.getCampoId());
-                        List<ProdProduto> listaProd = service.selecionar(dados, 0, 0, null);
-                        // cria o objeto modelo p1
-                        P1 p1 = new P1();
-                        p1.setCnpj(empresa.getSisEmpresaCnpj());
-                        p1.setIe(empresa.getSisEmpresaIe());
-                        p1.setIm(empresa.getSisEmpresaIm());
-                        p1.setRazao(Util.normaliza(empresa.getSisEmpresaRazao()));
-                        // cria a lista de p2
-                        List<P2> listaP2 = new ArrayList<>();
-                        for (ProdProduto prod : listaProd) {
-                            P2 p2 = new P2();
-                            p2.setAliquota(prod.getProdProdutoTributacao() == 'T' ? prod.getProdProdutoIcms() : prod.getProdProdutoIssqn());
-                            p2.setCnpj(empresa.getSisEmpresaCnpj());
-                            p2.setCodigo(prod.getProdProdutoBarra() == null ? prod.getProdProdutoId().toString() : prod.getProdProdutoBarra());
-                            p2.setDescricao(Util.normaliza(prod.getProdProdutoDescricao()));
-                            p2.setIat(prod.getProdProdutoIat());
-                            p2.setIppt(prod.getProdProdutoIppt());
-                            p2.setTributacao(prod.getProdProdutoTributacao());
-                            p2.setUnidade(prod.getProdEmbalagem().getProdEmbalagemNome());
-                            p2.setValor(prod.getProdProdutoPreco());
-                            listaP2.add(p2);
-                        }
-                        // cria o objeto modelo p9
-                        P9 p9 = new P9();
-                        p9.setCnpj(empresa.getSisEmpresaCnpj());
-                        p9.setIe(empresa.getSisEmpresaIe());
-                        p9.setTotal(listaP2.size());
-                        // gera o arquivo
-                        AnexoV anexoV = new AnexoV(p1, listaP2, p9);
-                        String path = PAF.gerarTabProdutos(anexoV);
-                        Aguarde.getInstancia().setVisible(false);
-                        JOptionPane.showMessageDialog(caixa, "Arquivo gerado com sucesso em:\n" + path, "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
-                    } catch (Exception ex) {
-                        Aguarde.getInstancia().setVisible(false);
-                        log.error("Não foi possivel gerar o arquivo -> ", ex);
-                        JOptionPane.showMessageDialog(caixa, "Não foi possível gerar o arquivo!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
-                    }
-                }
-            }).start();
-
-            Aguarde.getInstancia().setVisible(true);
-        }
-    }//GEN-LAST:event_mnuTabProdutosActionPerformed
-
     private void mnuEstoqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEstoqueActionPerformed
-        janela = PAF_Estoque.getInstancia();
+        janela = PAF_Registros.getInstancia();
         janela.setVisible(true);
     }//GEN-LAST:event_mnuEstoqueActionPerformed
-
-    private void mnuPagamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPagamentosActionPerformed
-        janela = PAF_Pagamento.getInstancia();
-        janela.setVisible(true);
-    }//GEN-LAST:event_mnuPagamentosActionPerformed
 
     private void mnuAbrirVendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuAbrirVendaActionPerformed
         boolean permite = true;
@@ -1526,7 +1455,7 @@ public class Caixa extends JFrame {
             AsyncCallback<SisCliente> async = new AsyncCallback<SisCliente>() {
                 @Override
                 public void sucesso(SisCliente resultado) {
-                    if (resultado != null && resultado.getSisClienteId() > 0 && resultado.isCpfCupom()) {
+                    if (resultado != null && resultado.isCpfCupom()) {
                         String[] resp = ecf.enviar(EComando.ECF_IdentificaConsumidor,
                                 resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
                         if (IECF.ERRO.equals(resp[0])) {
@@ -1608,13 +1537,18 @@ public class Caixa extends JFrame {
             }
         };
 
-        janela = gerente;
-        gerente.setAsync(async);
-        gerente.setVisible(true);
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            gerente.setSisGerente(Login.getOperador());
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = gerente;
+            gerente.setAsync(async);
+            gerente.setVisible(true);
+        }
     }//GEN-LAST:event_mnuCancelarVendaActionPerformed
 
     private void mnuCancelarItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCancelarItemActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 String texto = JOptionPane.showInputDialog(caixa, "Digite o número do item.", "Cancelar Item", JOptionPane.OK_CANCEL_OPTION);
@@ -1649,8 +1583,14 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuCancelarItemActionPerformed
 
     private void mnuFecharVendaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuFecharVendaActionPerformed
@@ -1663,7 +1603,7 @@ public class Caixa extends JFrame {
 
     private void mnuGavetaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuGavetaMouseClicked
         if (mnuGaveta.isEnabled() && janela == null) {
-            janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+            AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
                 @Override
                 public void sucesso(Integer resultado) {
                     String[] resp = ecf.enviar(EComando.ECF_AbreGaveta);
@@ -1677,8 +1617,14 @@ public class Caixa extends JFrame {
                 public void falha(Exception excecao) {
                     JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
                 }
-            });
-            janela.setVisible(true);
+            };
+
+            if (Login.getOperador().isSisUsuarioGerente()) {
+                async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+            } else {
+                janela = Gerente.getInstancia(async);
+                janela.setVisible(true);
+            }
         }
     }//GEN-LAST:event_mnuGavetaMouseClicked
 
@@ -1722,11 +1668,6 @@ public class Caixa extends JFrame {
         }
     }//GEN-LAST:event_mnuIdentificarMouseClicked
 
-    private void mnuMovimentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMovimentoActionPerformed
-        janela = PAF_MovimentosECF.getInstancia();
-        janela.setVisible(true);
-    }//GEN-LAST:event_mnuMovimentoActionPerformed
-
     private void mnuVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuVendasActionPerformed
         janela = PAF_VendasPeriodo.getInstancia();
         janela.setVisible(true);
@@ -1743,7 +1684,7 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuNotaEletronicaActionPerformed
 
     private void mnuTEFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTEFActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 new Thread(new Runnable() {
@@ -1765,7 +1706,7 @@ public class Caixa extends JFrame {
                                 try {
                                     TEF.bloquear(true);
                                     ecf.enviar(EComando.ECF_FechaRelatorio);
-                                    ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().get("ecf.reltef"));
+                                    ecf.enviar(EComando.ECF_AbreRelatorioGerencial, Util.getConfig().getProperty("ecf.reltef"));
                                     TEF.imprimirVias(TEF.getDados(), EComando.ECF_LinhaRelatorioGerencial);
                                     ecf.enviar(EComando.ECF_FechaRelatorio);
                                     TEF.bloquear(false);
@@ -1798,8 +1739,14 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuTEFActionPerformed
 
     private void mnuSincronizacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSincronizacaoActionPerformed
@@ -1834,7 +1781,7 @@ public class Caixa extends JFrame {
     }//GEN-LAST:event_mnuSincronizacaoActionPerformed
 
     private void mnuTipoPagamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoPagamentosActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = TiposPagamento.getInstancia();
@@ -1845,16 +1792,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+        
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuTipoPagamentosActionPerformed
 
-    private void mnuCartaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCartaoActionPerformed
-        JOptionPane.showMessageDialog(caixa, "Este PAF-ECF não executa funções de Troco em Cartão", "Troco em Cartão", JOptionPane.INFORMATION_MESSAGE);
-    }//GEN-LAST:event_mnuCartaoActionPerformed
-
     private void mnuTipoGradesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoGradesActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = TiposGrade.getInstancia();
@@ -1865,8 +1814,14 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+        
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuTipoGradesActionPerformed
 
     private void mnuCupomPresenteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCupomPresenteActionPerformed
@@ -1888,14 +1843,14 @@ public class Caixa extends JFrame {
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String texto = txtCodigo.getText().trim();
             if (!texto.equals("")) {
-                IFiltro filtro = Pesquisa.pesquisar(texto);
+                Filtro filtro = Pesquisa.pesquisar(texto);
                 Pesquisa.getInstancia(pesquisado).selecionar(filtro);
             }
         }
     }//GEN-LAST:event_txtCodigoKeyPressed
 
     private void mnuTrocasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTrocasActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = Trocas.getInstancia(null);
@@ -1906,12 +1861,18 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+        
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuTrocasActionPerformed
 
     private void mnuLeiturasZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuLeiturasZActionPerformed
-        janela = Gerente.getInstancia(new AsyncCallback<Integer>() {
+        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
             @Override
             public void sucesso(Integer resultado) {
                 janela = LeiturasZ.getInstancia();
@@ -1922,14 +1883,68 @@ public class Caixa extends JFrame {
             public void falha(Exception excecao) {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
-        });
-        janela.setVisible(true);
+        };
+        
+        if (Login.getOperador().isSisUsuarioGerente()) {
+            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
+        } else {
+            janela = Gerente.getInstancia(async);
+            janela.setVisible(true);
+        }
     }//GEN-LAST:event_mnuLeiturasZActionPerformed
 
     private void mnuCat52ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCat52ActionPerformed
-        janela = PAF_ArquivoCat52.getInstancia();
+        janela = Cat52.getInstancia();
         janela.setVisible(true);
     }//GEN-LAST:event_mnuCat52ActionPerformed
+
+    private void mnuCartaoPresenteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCartaoPresenteActionPerformed
+        Object codigo = JOptionPane.showInputDialog(this, "Digite o código do vendedor.", "CARTÃO PRESENTE",
+                JOptionPane.OK_CANCEL_OPTION, mnuCartaoPresente.getIcon(), null, null);
+        if (codigo != null) {
+            FiltroNumero fn = new FiltroNumero("sisUsuarioId", ECompara.IGUAL, codigo.toString());
+            FiltroBinario fb1 = new FiltroBinario("sisUsuarioAtivo", ECompara.IGUAL, true);
+            FiltroGrupo gf = new FiltroGrupo(Filtro.E, fn, fb1);
+
+            try {
+                SisUsuario vendedor = (SisUsuario) service.selecionar(new SisUsuario(), gf);
+                if (vendedor == null) {
+                    vendedor = Login.getOperador();
+                }
+                Object cartao = JOptionPane.showInputDialog(this, "Digite o número do cartão presente.", "CARTÃO PRESENTE",
+                        JOptionPane.OK_CANCEL_OPTION, mnuCartaoPresente.getIcon(), null, null);
+                if (cartao != null) {
+                    try {
+                        ComandoCartaoPresente ccp = new ComandoCartaoPresente("ativarCartao", cartao.toString(), vendedor);
+                        ccp.executar();
+                        ccp.recibo();
+                    } catch (OpenPdvException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage(), "CARTÃO PRESENTE", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+            } catch (OpenPdvException ex) {
+                JOptionPane.showMessageDialog(this, "Vendedor não encontrado!", "CARTÃO PRESENTE", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_mnuCartaoPresenteActionPerformed
+
+    private void mnuMFDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMFDActionPerformed
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String path = PAF.gerarArqMFD();
+                    Aguarde.getInstancia().setVisible(false);
+                    JOptionPane.showMessageDialog(caixa, "Arquivo gerado com sucesso em:\n" + path, "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    Aguarde.getInstancia().setVisible(false);
+                    log.error("Nao foi possivel gerar o arquivo -> ", ex);
+                    JOptionPane.showMessageDialog(caixa, "Não foi possível gerar o arquivo!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        }).start();
+        Aguarde.getInstancia().setVisible(true);
+    }//GEN-LAST:event_mnuMFDActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
@@ -1944,31 +1959,28 @@ public class Caixa extends JFrame {
     private javax.swing.JLabel lblTotal;
     private javax.swing.JList lstBobina;
     private javax.swing.JMenuItem mnuAbrirVenda;
-    private javax.swing.JMenuItem mnuArquivo;
     private javax.swing.JMenuItem mnuCancelarItem;
     private javax.swing.JMenuItem mnuCancelarVenda;
-    private javax.swing.JMenuItem mnuCartao;
+    private javax.swing.JMenuItem mnuCartaoPresente;
     private javax.swing.JMenuItem mnuCat52;
     private javax.swing.JMenuItem mnuClientes;
     private javax.swing.JMenuItem mnuCupomPresente;
     private javax.swing.JMenuItem mnuEmbalagens;
-    private javax.swing.JMenuItem mnuEspelho;
     private javax.swing.JMenuItem mnuEstoque;
     private javax.swing.JMenuItem mnuFecharVenda;
     private javax.swing.JMenu mnuFiscal;
     private javax.swing.JMenu mnuGaveta;
     private javax.swing.JMenu mnuIdentificar;
     private javax.swing.JMenuItem mnuIndice;
-    private javax.swing.JMenuItem mnuLMFC;
-    private javax.swing.JMenuItem mnuLMFS;
+    private javax.swing.JMenuItem mnuLMF;
     private javax.swing.JMenuItem mnuLX;
     private javax.swing.JMenuItem mnuLeiturasZ;
-    private javax.swing.JMenuItem mnuMovimento;
+    private javax.swing.JMenuItem mnuMF;
+    private javax.swing.JMenuItem mnuMFD;
     private javax.swing.JMenu mnuNota;
     private javax.swing.JMenuItem mnuNotaConsumidor;
     private javax.swing.JMenuItem mnuNotaEletronica;
     private javax.swing.JMenuItem mnuPAF;
-    private javax.swing.JMenuItem mnuPagamentos;
     private javax.swing.JMenuItem mnuParamConfiguracao;
     private javax.swing.JMenu mnuPesquisa;
     private javax.swing.JMenu mnuPrincipal;
@@ -1980,7 +1992,6 @@ public class Caixa extends JFrame {
     private javax.swing.JMenu mnuSobre;
     private javax.swing.JMenuItem mnuSuprimento;
     private javax.swing.JMenuItem mnuTEF;
-    private javax.swing.JMenuItem mnuTabProdutos;
     private javax.swing.JMenuItem mnuTipoGrades;
     private javax.swing.JMenuItem mnuTipoPagamentos;
     private javax.swing.JMenuItem mnuTrocas;
@@ -2121,6 +2132,7 @@ public class Caixa extends JFrame {
                 mnuNota.setEnabled(false);
                 mnuAbrirVenda.setEnabled(false);
                 mnuCupomPresente.setEnabled(false);
+                mnuCartaoPresente.setEnabled(false);
                 if (venda.getSisCliente() != null) {
                     mnuIdentificar.setEnabled(false);
                 }
@@ -2145,11 +2157,9 @@ public class Caixa extends JFrame {
                 mnuTEF.setEnabled(false);
                 // menu fical
                 mnuLX.setEnabled(false);
-                mnuLMFC.setEnabled(false);
-                mnuLMFS.setEnabled(false);
-                mnuEspelho.setEnabled(false);
-                mnuArquivo.setEnabled(false);
-                mnuPagamentos.setEnabled(false);
+                mnuLMF.setEnabled(false);
+                mnuMF.setEnabled(false);
+                mnuMFD.setEnabled(false);
                 mnuPAF.setEnabled(false);
                 mnuParamConfiguracao.setEnabled(false);
                 // outros
@@ -2159,17 +2169,17 @@ public class Caixa extends JFrame {
         }
 
         // somente habilita o sincronismo nas maquinas host
-        if (Util.getConfig().get("sinc.tipo").equals("rest") && Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+        if (Util.getConfig().getProperty("sinc.tipo").equals("rest") && Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
             mnuSincronizacao.setEnabled(false);
         }
 
         // somente habilita o ADM do TEF se tiver no conf
-        if (!Boolean.valueOf(Util.getConfig().get("pag.cartao"))) {
+        if (!Boolean.valueOf(Util.getConfig().getProperty("pag.tef"))) {
             mnuTEF.setEnabled(false);
         }
 
         // somente mostra o Cat52 caso esteja setado no config
-        if (Util.getConfig().get("ecf.cat52") == null) {
+        if (Util.getConfig().getProperty("ecf.cat52") == null) {
             mnuCat52.setVisible(false);
         }
     }
@@ -2329,11 +2339,11 @@ public class Caixa extends JFrame {
     }
 
     public JMenuItem getMnuArquivo() {
-        return mnuArquivo;
+        return mnuMFD;
     }
 
     public void setMnuArquivo(JMenuItem mnuArquivo) {
-        this.mnuArquivo = mnuArquivo;
+        this.mnuMFD = mnuArquivo;
     }
 
     public JMenuItem getMnuCancelarItem() {
@@ -2369,11 +2379,11 @@ public class Caixa extends JFrame {
     }
 
     public JMenuItem getMnuEspelho() {
-        return mnuEspelho;
+        return mnuMF;
     }
 
     public void setMnuEspelho(JMenuItem mnuEspelho) {
-        this.mnuEspelho = mnuEspelho;
+        this.mnuMF = mnuEspelho;
     }
 
     public JMenuItem getMnuEstoque() {
@@ -2416,20 +2426,12 @@ public class Caixa extends JFrame {
         this.mnuIndice = mnuIndice;
     }
 
-    public JMenuItem getMnuLMFC() {
-        return mnuLMFC;
+    public JMenuItem getMnuLMF() {
+        return mnuLMF;
     }
 
-    public void setMnuLMFC(JMenuItem mnuLMFC) {
-        this.mnuLMFC = mnuLMFC;
-    }
-
-    public JMenuItem getMnuLMFS() {
-        return mnuLMFS;
-    }
-
-    public void setMnuLMFS(JMenuItem mnuLMFS) {
-        this.mnuLMFS = mnuLMFS;
+    public void setMnuLMF(JMenuItem mnuLMF) {
+        this.mnuLMF = mnuLMF;
     }
 
     public JMenuItem getMnuLX() {
@@ -2438,14 +2440,6 @@ public class Caixa extends JFrame {
 
     public void setMnuLX(JMenuItem mnuLX) {
         this.mnuLX = mnuLX;
-    }
-
-    public JMenuItem getMnuMovimento() {
-        return mnuMovimento;
-    }
-
-    public void setMnuMovimento(JMenuItem mnuMovimento) {
-        this.mnuMovimento = mnuMovimento;
     }
 
     public JMenu getMnuNota() {
@@ -2462,14 +2456,6 @@ public class Caixa extends JFrame {
 
     public void setMnuPAF(JMenuItem mnuPAF) {
         this.mnuPAF = mnuPAF;
-    }
-
-    public JMenuItem getMnuPagamentos() {
-        return mnuPagamentos;
-    }
-
-    public void setMnuPagamentos(JMenuItem mnuPagamentos) {
-        this.mnuPagamentos = mnuPagamentos;
     }
 
     public JMenuItem getMnuParamConfiguracao() {
@@ -2550,14 +2536,6 @@ public class Caixa extends JFrame {
 
     public void setMnuSuprimento(JMenuItem mnuSuprimento) {
         this.mnuSuprimento = mnuSuprimento;
-    }
-
-    public JMenuItem getMnuTabProdutos() {
-        return mnuTabProdutos;
-    }
-
-    public void setMnuTabProdutos(JMenuItem mnuTabProdutos) {
-        this.mnuTabProdutos = mnuTabProdutos;
     }
 
     public JMenuItem getMnuUsuarios() {
@@ -2742,14 +2720,6 @@ public class Caixa extends JFrame {
 
     public void setBobina(DefaultListModel bobina) {
         this.bobina = bobina;
-    }
-
-    public JMenuItem getMnuCartao() {
-        return mnuCartao;
-    }
-
-    public void setMnuCartao(JMenuItem mnuCartao) {
-        this.mnuCartao = mnuCartao;
     }
 
     public JMenuItem getMnuCupomPresente() {

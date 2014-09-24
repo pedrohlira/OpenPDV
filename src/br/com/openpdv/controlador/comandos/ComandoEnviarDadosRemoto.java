@@ -16,8 +16,6 @@ import javax.ws.rs.core.MediaType;
  */
 public class ComandoEnviarDadosRemoto extends ComandoEnviarDados {
 
-    private WebResource wr;
-
     public ComandoEnviarDadosRemoto() {
         super();
     }
@@ -28,7 +26,7 @@ public class ComandoEnviarDadosRemoto extends ComandoEnviarDados {
 
     @Override
     protected <E extends Dados> List<E> enviar(String tipo, List<E> lista) throws Exception {
-        wr = Conexao.getRest(Util.getConfig().get("sinc.server") + "/" + tipo);
+        WebResource wr = Conexao.getRest(Util.getConfig().getProperty("sinc.server") + "/" + tipo);
         List<E> enviados = new ArrayList<>();
 
         for (E obj : lista) {

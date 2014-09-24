@@ -39,6 +39,7 @@ public class Cheque extends javax.swing.JDialog {
      * Metodo que retorna a instancia unica de Gerente.
      *
      * @param async objeto assincrono para resposta da acao.
+     * @param total o valor total do pagamento.
      * @return o objeto de Gerente.
      */
     public static Cheque getInstancia(AsyncCallback<EcfPagamento> async, double total) {
@@ -166,7 +167,7 @@ public class Cheque extends javax.swing.JDialog {
                         .add(lblBarra)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtBarra)))
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -187,11 +188,11 @@ public class Cheque extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(btnCancelar)
                     .add(btnOk, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-370)/2, (screenSize.height-157)/2, 370, 157);
+        setSize(new java.awt.Dimension(375, 153));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -263,7 +264,7 @@ public class Cheque extends javax.swing.JDialog {
             pag.setEcfPagamentoNsu(barra);
             // recupera o valor
             Double valor = Double.valueOf(txtValor.getValue().toString());
-            if (valor == 0.00 || valor.compareTo(total) > 0) {
+            if (valor <= 0.00 || valor.compareTo(total) > 0) {
                 throw new Exception();
             }
             pag.setEcfPagamentoValor(valor);

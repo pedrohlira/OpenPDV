@@ -5,10 +5,10 @@ import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.Dados;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
+import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
 import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfVenda;
@@ -58,7 +58,7 @@ public abstract class ComandoEnviarDados implements IComando {
      * @return o objeto que envia dados.
      */
     public static ComandoEnviarDados getInstancia() {
-        ComandoEnviarDados ced = Util.getConfig().get("sinc.tipo").equals("rest") ? new ComandoEnviarDadosRemoto() : new ComandoEnviarDadosLocal();
+        ComandoEnviarDados ced = Util.getConfig().getProperty("sinc.tipo").equals("rest") ? new ComandoEnviarDadosRemoto() : new ComandoEnviarDadosLocal();
         return ced;
     }
 
@@ -70,22 +70,32 @@ public abstract class ComandoEnviarDados implements IComando {
      * @return o objeto que envia dados.
      */
     public static ComandoEnviarDados getInstancia(Date inicio, Date fim) {
-        ComandoEnviarDados ced = Util.getConfig().get("sinc.tipo").equals("rest") ? new ComandoEnviarDadosRemoto(inicio, fim) : new ComandoEnviarDadosLocal(inicio, fim);
+        ComandoEnviarDados ced = Util.getConfig().getProperty("sinc.tipo").equals("rest") ? new ComandoEnviarDadosRemoto(inicio, fim) : new ComandoEnviarDadosLocal(inicio, fim);
         return ced;
     }
 
     @Override
     public void executar() throws OpenPdvException {
-        // enviando as notas
-        notas();
-        // enviando as nfes
-        nfes();
-        // enviando os clientes nao sincronizados
-        clientes();
-        // enviando as vendas nao sincronizadas
-        vendas();
-        // enviando as Z
-        zs();
+        if (Util.getConfig().getProperty("sinc.nota").equals("true")) {
+            // enviando as notas
+            notas();
+        }
+        if (Util.getConfig().getProperty("sinc.nfe").equals("true")) {
+            // enviando as nfes
+            nfes();
+        }
+        if (Util.getConfig().getProperty("sinc.cliente").equals("true")) {
+            // enviando os clientes nao sincronizados
+            clientes();
+        }
+        if (Util.getConfig().getProperty("sinc.venda").equals("true")) {
+            // enviando as vendas nao sincronizadas
+            vendas();
+        }
+        if (Util.getConfig().getProperty("sinc.reducaoZ").equals("true")) {
+            // enviando as Z
+            zs();
+        }
 
         // se sucesso atualiza no arquivo a data do ultimo envio
         if (erros.length() == 0) {
@@ -123,12 +133,12 @@ public abstract class ComandoEnviarDados implements IComando {
      */
     private void notas() {
         try {
-            GrupoFiltro filtro = new GrupoFiltro();
+            FiltroGrupo filtro = new FiltroGrupo();
             FiltroData fd = new FiltroData("ecfNotaData", ECompara.MAIOR_IGUAL, inicio);
-            filtro.add(fd, EJuncao.E);
+            filtro.add(fd, Filtro.E);
             if (fim != null) {
                 FiltroData fd1 = new FiltroData("ecfNotaData", ECompara.MENOR, fim);
-                filtro.add(fd1, EJuncao.E);
+                filtro.add(fd1, Filtro.E);
             }
             List<EcfNota> notas = service.selecionar(new EcfNota(), 0, 0, filtro);
             if (!notas.isEmpty()) {
@@ -146,12 +156,12 @@ public abstract class ComandoEnviarDados implements IComando {
      */
     private void nfes() {
         try {
-            GrupoFiltro filtro = new GrupoFiltro();
+            FiltroGrupo filtro = new FiltroGrupo();
             FiltroData fd = new FiltroData("ecfNotaEletronicaData", ECompara.MAIOR_IGUAL, inicio);
-            filtro.add(fd, EJuncao.E);
+            filtro.add(fd, Filtro.E);
             if (fim != null) {
                 FiltroData fd1 = new FiltroData("ecfNotaEletronicaData", ECompara.MENOR, fim);
-                filtro.add(fd1, EJuncao.E);
+                filtro.add(fd1, Filtro.E);
             }
             List<EcfNotaEletronica> nfes = service.selecionar(new EcfNotaEletronica(), 0, 0, filtro);
             if (!nfes.isEmpty()) {
@@ -213,12 +223,12 @@ public abstract class ComandoEnviarDados implements IComando {
      */
     private void zs() {
         try {
-            GrupoFiltro filtro = new GrupoFiltro();
+            FiltroGrupo filtro = new FiltroGrupo();
             FiltroData fd = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
-            filtro.add(fd, EJuncao.E);
+            filtro.add(fd, Filtro.E);
             if (fim != null) {
                 FiltroData fd1 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
-                filtro.add(fd1, EJuncao.E);
+                filtro.add(fd1, Filtro.E);
             }
             List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, filtro);
             if (!zs.isEmpty()) {

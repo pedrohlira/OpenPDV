@@ -14,7 +14,6 @@ import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.produto.ProdGrade;
-import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
 import br.com.phdss.EComando;
@@ -79,7 +78,7 @@ public class ComandoFecharVenda implements IComando {
             fecharVendaTela();
             TEF.bloquear(false);
             // atualizando o servidor
-            if (!Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+            if (!Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
                 new Thread(new Runnable() {
 
                     @Override
@@ -101,11 +100,8 @@ public class ComandoFecharVenda implements IComando {
                     }
                 }).start();
             }
-        } catch (OpenPdvException ex) {
-            TEF.bloquear(false);
-            throw ex;
         } finally {
-            Aguarde.getInstancia().setVisible(false);
+            TEF.bloquear(false);
         }
     }
 
@@ -154,16 +150,24 @@ public class ComandoFecharVenda implements IComando {
                 sb.append(Util.formataNumero(bruto + acres_desc, 0, 2, true).replace(",", "")).append(IECF.SL);
             } else if (PAF.AUXILIAR.getProperty("paf.cupom_mania").equalsIgnoreCase("SIM")) {
                 // caso seja no estado de RJ, colocar o cupom mania
-                sb.append("CUPOM MANIA - CONCORRA A PREMIOS").append(IECF.SL);
+                sb.append("CUPOM MANIA, CONCORRA A PRÊMIOS").append(IECF.SL);
                 sb.append("ENVIE SMS P/ 6789: ");
                 sb.append(Util.formataNumero(PAF.AUXILIAR.getProperty("cli.ie"), 8, 0, false));
-                sb.append(Util.formataData(venda.getEcfVendaData(), "ddMMyyyy"));
+                sb.append(Util.formataData(venda.getEcfVendaData(), "ddMMyy"));
                 sb.append(Util.formataNumero(venda.getEcfVendaCoo(), 6, 0, false));
                 sb.append(Util.formataNumero(Caixa.getInstancia().getImpressora().getEcfImpressoraCaixa(), 3, 0, false)).append(IECF.SL);
+            } else if (PAF.AUXILIAR.getProperty("paf.paraiba_legal").equalsIgnoreCase("SIM")) {
+                // caso seja no estado de PB, colocar o paraiba legal
+                sb.append("PARAÍBA LEGAL - RECEITA CIDADÃ").append(IECF.SL);
+                sb.append("TORPEDO PREMIADO:").append(IECF.SL);
+                sb.append(Util.formataNumero(PAF.AUXILIAR.getProperty("cli.ie"), 9, 0, false));
+                sb.append(Util.formataData(venda.getEcfVendaData(), "ddMMyyyy"));
+                sb.append(Util.formataNumero(venda.getEcfVendaCoo(), 6, 0, false));
+                sb.append(Util.formataNumero(bruto + acres_desc, 0, 2, true).replace(",", "")).append(IECF.SL);
             }
 
             // caso a opcao de mostrar os valores de impostos esteja ativa
-            boolean mostraIbpt = Boolean.valueOf(Util.getConfig().get("nfe.ibpt"));
+            boolean mostraIbpt = Boolean.valueOf(Util.getConfig().getProperty("nfe.ibpt"));
             if (mostraIbpt) {
                 double impostos = 0.00;
                 double porcent = acres_desc / bruto;
@@ -198,7 +202,7 @@ public class ComandoFecharVenda implements IComando {
                 }
             }
             // garante que o dinheiro é impressos primeiro
-            String dinheiro = Util.getConfig().get("ecf.dinheiro");
+            String dinheiro = Util.getConfig().getProperty("ecf.dinheiro");
             if (pags.containsKey(dinheiro)) {
                 String valor = Util.formataNumero(pags.remove(dinheiro), 1, 2, false).replace(",", ".");
                 resp = ecf.enviar(EComando.ECF_EfetuaPagamento, dinheiro, valor);
@@ -207,11 +211,31 @@ public class ComandoFecharVenda implements IComando {
                     throw new OpenPdvException(resp[1]);
                 }
             }
-            // garante que a troca é impressos em segundo se houver dinheiro
-            String troca = Util.getConfig().get("ecf.troca");
+            // garante que a troca é impresso antes de cartoes
+            String troca = Util.getConfig().getProperty("ecf.troca");
             if (pags.containsKey(troca)) {
                 String valor = Util.formataNumero(pags.remove(troca), 1, 2, false).replace(",", ".");
                 resp = ecf.enviar(EComando.ECF_EfetuaPagamento, troca, valor);
+                if (IECF.ERRO.equals(resp[0])) {
+                    log.error("Erro ao fechar a venda. -> " + resp[1]);
+                    throw new OpenPdvException(resp[1]);
+                }
+            }
+            // garante que o cartao presente é impresso antes de cartoes tef
+            String presente = Util.getConfig().getProperty("ecf.presente");
+            if (pags.containsKey(presente)) {
+                String valor = Util.formataNumero(pags.remove(presente), 1, 2, false).replace(",", ".");
+                resp = ecf.enviar(EComando.ECF_EfetuaPagamento, presente, valor);
+                if (IECF.ERRO.equals(resp[0])) {
+                    log.error("Erro ao fechar a venda. -> " + resp[1]);
+                    throw new OpenPdvException(resp[1]);
+                }
+            }
+            // garante que o cheque é impresso antes de cartoes tef
+            String cheque = Util.getConfig().getProperty("ecf.cheque");
+            if (pags.containsKey(cheque)) {
+                String valor = Util.formataNumero(pags.remove(cheque), 1, 2, false).replace(",", ".");
+                resp = ecf.enviar(EComando.ECF_EfetuaPagamento, cheque, valor);
                 if (IECF.ERRO.equals(resp[0])) {
                     log.error("Erro ao fechar a venda. -> " + resp[1]);
                     throw new OpenPdvException(resp[1]);
@@ -276,7 +300,7 @@ public class ComandoFecharVenda implements IComando {
         ParametroObjeto po2 = new ParametroObjeto("sisVendedor", venda.getSisVendedor());
         ParametroObjeto po3 = new ParametroObjeto("sisGerente", venda.getSisGerente());
         ParametroTexto pt = new ParametroTexto("ecfVendaObservacao", obs);
-        GrupoParametro gp = new GrupoParametro(new IParametro[]{pn1, pn2, pn3, pb, po1, po2, po3, pt});
+        ParametroGrupo gp = new ParametroGrupo(new Parametro[]{pn1, pn2, pn3, pb, po1, po2, po3, pt});
         Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
         sqls.add(sql);
 
@@ -286,7 +310,7 @@ public class ComandoFecharVenda implements IComando {
                 FiltroNumero fn1 = new FiltroNumero("ecfTrocaId", ECompara.IGUAL, troca.getEcfTrocaId());
                 ParametroBinario pb1 = new ParametroBinario("ecfTrocaAtivo", true);
                 ParametroObjeto po = new ParametroObjeto("ecfVenda", venda);
-                GrupoParametro gp1 = new GrupoParametro(new IParametro[]{pb1, po});
+                ParametroGrupo gp1 = new ParametroGrupo(new Parametro[]{pb1, po});
                 Sql sql1 = new Sql(troca, EComandoSQL.ATUALIZAR, fn1, gp1);
                 sqls.add(sql1);
 
@@ -329,7 +353,7 @@ public class ComandoFecharVenda implements IComando {
                 ParametroNumero vp_pn1 = new ParametroNumero(porcentagem > 0 ? "ecfVendaProdutoAcrescimo" : "ecfVendaProdutoDesconto", Math.abs(rateado));
                 ParametroNumero vp_pn2 = new ParametroNumero("ecfVendaProdutoLiquido", vp.getEcfVendaProdutoBruto() + rateado);
                 ParametroNumero vp_pn3 = new ParametroNumero("ecfVendaProdutoTotal", (vp.getEcfVendaProdutoBruto() + rateado) * vp.getEcfVendaProdutoQuantidade());
-                GrupoParametro vp_gp = new GrupoParametro(new IParametro[]{vp_pn1, vp_pn2, vp_pn3});
+                ParametroGrupo vp_gp = new ParametroGrupo(new Parametro[]{vp_pn1, vp_pn2, vp_pn3});
                 Sql sql1 = new Sql(new EcfVendaProduto(), EComandoSQL.ATUALIZAR, vp_fn, vp_gp);
                 sqls.add(sql1);
             }

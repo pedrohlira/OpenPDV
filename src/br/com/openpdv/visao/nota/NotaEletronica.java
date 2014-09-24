@@ -21,12 +21,12 @@ import br.com.openpdv.visao.core.Caixa;
 import br.com.openpdv.visao.principal.Pesquisa;
 import br.com.openpdv.visao.venda.Grades;
 import br.com.openpdv.visao.venda.Precos;
-import br.com.opensig.eventocancnfe.TEvento;
-import br.com.opensig.inutnfe.TInutNFe;
-import br.com.opensig.nfe.TNFe;
-import br.com.opensig.nfe.TNFe.InfNFe.Det;
-import br.com.opensig.nfe.TNfeProc;
 import br.com.phdss.Util;
+import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento;
+import br.inf.portalfiscal.nfe.schema.inutnfe.TInutNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe;
+import br.inf.portalfiscal.nfe.schema.nfe.TNFe.InfNFe.Det;
+import br.inf.portalfiscal.nfe.schema.nfe.TNfeProc;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -261,7 +261,6 @@ public class NotaEletronica extends javax.swing.JDialog {
 
         spProdutos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         spProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        spProdutos.setRowHeaderView(null);
 
         tabProdutos.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         tabProdutos.setModel(new javax.swing.table.DefaultTableModel(
@@ -290,37 +289,38 @@ public class NotaEletronica extends javax.swing.JDialog {
         tabProdutos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabProdutos.setRowHeight(20);
         tabProdutos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabProdutos.setShowGrid(true);
         tabProdutos.getTableHeader().setReorderingAllowed(false);
         spProdutos.setViewportView(tabProdutos);
-        tabProdutos.getColumnModel().getColumn(0).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(0).setMaxWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
-        tabProdutos.getColumnModel().getColumn(2).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(300);
-        tabProdutos.getColumnModel().getColumn(3).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(4).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
-        tabProdutos.getColumnModel().getColumn(5).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(6).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(7).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
-        tabProdutos.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(8).setResizable(false);
-        tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(100);
-        tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
-        tabProdutos.getColumnModel().getColumn(9).setMinWidth(0);
-        tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(0);
-        tabProdutos.getColumnModel().getColumn(9).setMaxWidth(0);
+        if (tabProdutos.getColumnModel().getColumnCount() > 0) {
+            tabProdutos.getColumnModel().getColumn(0).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(0).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(0).setMaxWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(1).setMaxWidth(0);
+            tabProdutos.getColumnModel().getColumn(2).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(2).setPreferredWidth(300);
+            tabProdutos.getColumnModel().getColumn(3).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(3).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(4).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(4).setPreferredWidth(50);
+            tabProdutos.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getNumberInstance()));
+            tabProdutos.getColumnModel().getColumn(5).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(5).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(6).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(6).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(7).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(7).setPreferredWidth(75);
+            tabProdutos.getColumnModel().getColumn(7).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(8).setResizable(false);
+            tabProdutos.getColumnModel().getColumn(8).setPreferredWidth(100);
+            tabProdutos.getColumnModel().getColumn(8).setCellRenderer(new TableCellRendererNumber(DecimalFormat.getCurrencyInstance()));
+            tabProdutos.getColumnModel().getColumn(9).setMinWidth(0);
+            tabProdutos.getColumnModel().getColumn(9).setPreferredWidth(0);
+            tabProdutos.getColumnModel().getColumn(9).setMaxWidth(0);
+        }
 
         btnGerar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         btnGerar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/salvar.png"))); // NOI18N
@@ -423,7 +423,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                             .add(lblTotalNota, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                             .add(lblTotal, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 158, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -444,11 +444,11 @@ public class NotaEletronica extends javax.swing.JDialog {
                     .add(btnGerar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnExcluir, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(btnInutilizar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-790)/2, (screenSize.height-430)/2, 790, 430);
+        setSize(new java.awt.Dimension(797, 441));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -499,12 +499,12 @@ public class NotaEletronica extends javax.swing.JDialog {
 
             if (chave.length() == 44) {
                 String obs = JOptionPane.showInputDialog(notaEletronica, "Digite o motivo do cancelamento, entre 15 e 255 letras.", "MOTIVO", JOptionPane.QUESTION_MESSAGE);
-                obs = obs.replaceAll(Util.getConfig().get("nfe.regexp"), "");
+                obs = obs.replaceAll(Util.getConfig().getProperty("nfe.regexp"), "");
 
                 if (obs.length() >= 15 && obs.length() <= 255) {
                     FiltroTexto ft = new FiltroTexto("ecfNotaEletronicaChave", ECompara.IGUAL, chave);
                     FiltroTexto ft1 = new FiltroTexto("ecfNotaEletronicaStatus", ECompara.IGUAL, ENotaStatus.AUTORIZADO.toString());
-                    GrupoFiltro gp = new GrupoFiltro(EJuncao.E, new IFiltro[]{ft, ft1});
+                    FiltroGrupo gp = new FiltroGrupo(Filtro.E, ft, ft1);
                     EcfNotaEletronica nota;
                     try {
                         nota = (EcfNotaEletronica) service.selecionar(new EcfNotaEletronica(), gp);
@@ -548,7 +548,7 @@ public class NotaEletronica extends javax.swing.JDialog {
 
             if (numero.length() > 0) {
                 String obs = JOptionPane.showInputDialog(notaEletronica, "Digite o motivo da inutilização, entre 15 e 255 letras.", "MOTIVO", JOptionPane.QUESTION_MESSAGE);
-                obs = obs.replaceAll(Util.getConfig().get("nfe.regexp"), "");
+                obs = obs.replaceAll(Util.getConfig().getProperty("nfe.regexp"), "");
 
                 if (obs.length() >= 15 && obs.length() <= 255) {
                     inutilizar(numero, obs);
@@ -679,7 +679,7 @@ public class NotaEletronica extends javax.swing.JDialog {
                     List<Sql> sqls = new ArrayList<>();
                     for (Det det : produtos.getNFe().getInfNFe().getDet()) {
                         // achando o produto
-                        IFiltro filtro;
+                        Filtro filtro;
                         if (det.getProd().getCEAN() == null) {
                             filtro = new FiltroNumero("prodProdutoId", ECompara.IGUAL, det.getProd().getCProd());
                         } else {

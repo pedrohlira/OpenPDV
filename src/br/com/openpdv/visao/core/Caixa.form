@@ -39,7 +39,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
             </Property>
-            <Property name="rolloverEnabled" type="boolean" value="true"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mnuSuprimento">
@@ -88,6 +87,37 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuReducaoZActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mnuCat52">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Serif" size="12" style="0"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/br/com/openpdv/imagens/padrao.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="CAT52"/>
+                <Property name="toolTipText" type="java.lang.String" value="Gerar Arquivo Cat52"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCat52ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mnuTEF">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Serif" size="12" style="0"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/br/com/openpdv/imagens/cartao.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="TEF"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuTEFActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="separador1">
@@ -188,6 +218,8 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuUsuariosActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="separador2">
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mnuTrocas">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -220,23 +252,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLeiturasZActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="separador2">
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuTEF">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/br/com/openpdv/imagens/cartao.png"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="TEF"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuTEFActionPerformed"/>
-              </Events>
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mnuSincronizacao">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -267,7 +282,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Serif" size="12" style="0"/>
             </Property>
-            <Property name="rolloverEnabled" type="boolean" value="true"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mnuLX">
@@ -283,108 +297,43 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLXActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuLMFC">
+            <MenuItem class="javax.swing.JMenuItem" name="mnuLMF">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Serif" size="12" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="LMFC"/>
-                <Property name="toolTipText" type="java.lang.String" value="Leitura Mem&#xf3;ria Fiscal Completa"/>
+                <Property name="text" type="java.lang.String" value="LMF"/>
+                <Property name="toolTipText" type="java.lang.String" value="Leitura Mem&#xf3;ria Fiscal"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLMFCActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLMFActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuLMFS">
+            <MenuItem class="javax.swing.JMenuItem" name="mnuMF">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Serif" size="12" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="LMFS"/>
-                <Property name="toolTipText" type="java.lang.String" value="Leitura Mem&#xf3;ria Fiscal Simplificada"/>
+                <Property name="text" type="java.lang.String" value="Arq. MF"/>
+                <Property name="toolTipText" type="java.lang.String" value="Aruivo MF"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuLMFSActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuMFActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuEspelho">
+            <MenuItem class="javax.swing.JMenuItem" name="mnuMFD">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Serif" size="12" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Espelho MFD"/>
-                <Property name="toolTipText" type="java.lang.String" value="Espelho MFD"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuEspelhoActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuArquivo">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Arquivo MFD"/>
+                <Property name="text" type="java.lang.String" value="Arq. MFD"/>
                 <Property name="toolTipText" type="java.lang.String" value="Arquivo MFD"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuArquivoActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuTabProdutos">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Tabela de Produtos"/>
-                <Property name="toolTipText" type="java.lang.String" value="Tabela de Produtos"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuTabProdutosActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuEstoque">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Estoque"/>
-                <Property name="toolTipText" type="java.lang.String" value="Estoque"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuEstoqueActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuMovimento">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Movimento por ECF"/>
-                <Property name="toolTipText" type="java.lang.String" value="Movimento por ECF"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuMovimentoActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuPagamentos">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Meios de Pagamento"/>
-                <Property name="toolTipText" type="java.lang.String" value="Meios de Pagamento"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuPagamentosActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuMFDActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mnuPAF">
@@ -439,30 +388,17 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuParamConfiguracaoActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuCartao">
+            <MenuItem class="javax.swing.JMenuItem" name="mnuEstoque">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Serif" size="12" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Troco em Cart&#xe3;o"/>
-                <Property name="toolTipText" type="java.lang.String" value="Tabela &#xcd;ndice T&#xe9;cnico Produ&#xe7;&#xe3;o"/>
+                <Property name="text" type="java.lang.String" value="Registros do PAF-ECF"/>
+                <Property name="toolTipText" type="java.lang.String" value="Registros do PAF-ECF"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCartaoActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mnuCat52">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Serif" size="12" style="0"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="CAT52"/>
-                <Property name="toolTipText" type="java.lang.String" value="Gerar Arquivo Cat52"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCat52ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuEstoqueActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -646,6 +582,22 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCupomPresenteActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mnuCartaoPresente">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Serif" size="12" style="0"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/br/com/openpdv/imagens/cartao.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Cart&#xe3;o Presente"/>
+                <Property name="toolTipText" type="java.lang.String" value="Libera&#xe7;&#xe3;o e emiss&#xe3;o do comprovante do Cart&#xe3;o Presente."/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mnuCartaoPresenteActionPerformed"/>
+              </Events>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="mnuIdentificar">
@@ -698,7 +650,7 @@
     </Property>
     <Property name="name" type="java.lang.String" value="OpenPDV" noResource="true"/>
     <Property name="undecorated" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-      <Connection code="Boolean.valueOf(Util.getConfig().get(&quot;openpdv.semborda&quot;))" type="code"/>
+      <Connection code="Boolean.valueOf(Util.getConfig().getProperty(&quot;openpdv.semborda&quot;))" type="code"/>
     </Property>
     <Property name="resizable" type="boolean" value="false"/>
   </Properties>
@@ -935,7 +887,6 @@
               <Font name="Serif" size="24" style="1"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtQuantidade" noResource="true"/>
-            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -959,7 +910,6 @@
               <Font name="Serif" size="24" style="1"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtUnitario" noResource="true"/>
-            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -983,7 +933,6 @@
               <Font name="Serif" size="24" style="1"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtTotalItem" noResource="true"/>
-            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -1007,7 +956,6 @@
               <Font name="Serif" size="24" style="1"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtSubTotal" noResource="true"/>
-            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">

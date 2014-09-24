@@ -7,12 +7,11 @@ import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.EJuncao;
 import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
-import br.com.openpdv.modelo.core.filtro.GrupoFiltro;
-import br.com.openpdv.modelo.core.filtro.IFiltro;
+import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
+import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
 import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfVenda;
@@ -55,14 +54,16 @@ public class ComandoEmitirReducaoZ implements IComando {
 
     @Override
     public void executar() throws OpenPdvException {
-        // verifica se e a primeira Z do mes
-        emitirLMFC();
+        // verifica se e a primeira Z do mes, caso o ecf nao faca por conta
+        if (PAF.AUXILIAR.getProperty("ecf.lmfc").equalsIgnoreCase("SIM")) {
+            emitirLMFC();
+        }
         // emite a reducao no ECF
         emitirReducaoZEcf();
         // salva os dados no banco com a reducao depois de impressao
         emitirReducaoZBanco();
         // atualizando o servidor
-        if (Util.getConfig().get("sinc.tipo").equals("arquivo") || !Util.getConfig().get("sinc.servidor").endsWith("localhost")) {
+        if (Util.getConfig().getProperty("sinc.tipo").equals("arquivo") || !Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
             try {
                 ComandoEnviarDados.getInstancia().executar();
             } catch (OpenPdvException ex) {
@@ -70,11 +71,11 @@ public class ComandoEmitirReducaoZ implements IComando {
             }
         }
         // gera o arquivo Movimento do ECF do dia
-        new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento).executar();
+        new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento, null, true).executar();
         // gera os totais dos pagamentos
         new ComandoTotalizarPagamentos(dataMovimento).executar();
         // gera o arquivo do cat52
-        if (Util.getConfig().get("ecf.cat52") != null) {
+        if (Util.getConfig().getProperty("ecf.cat52") != null) {
             new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();
         }
     }
@@ -94,8 +95,8 @@ public class ComandoEmitirReducaoZ implements IComando {
 
         // enquanto o estado nao for bloqueado(Z emitida) ou o limite superar 3 tentativas
         EEstado estado;
-        int tempo = Integer.valueOf(Util.getConfig().get("ecf.tempo"));
-        int tentativas = Integer.valueOf(Util.getConfig().get("ecf.tentativas"));
+        int tempo = Integer.valueOf(Util.getConfig().getProperty("ecf.tempo"));
+        int tentativas = Integer.valueOf(Util.getConfig().getProperty("ecf.tentativas"));
 
         do {
             // recupera o estado
@@ -180,7 +181,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 ParametroObjeto po = new ParametroObjeto("ecfZ", z);
                 FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, dataMovimento);
                 FiltroData fd2 = new FiltroData("ecfVendaData", ECompara.MENOR, cal.getTime());
-                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
+                FiltroGrupo gf = new FiltroGrupo(Filtro.E, fo, fd1, fd2);
                 Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(sql);
 
@@ -192,7 +193,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 // atualiza os documentos, marcando que pertence a esta Z
                 fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
                 fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());
-                gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
+                gf = new FiltroGrupo(Filtro.E, fo, fd1, fd2);
                 sql = new Sql(new EcfDocumento(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(sql);
 

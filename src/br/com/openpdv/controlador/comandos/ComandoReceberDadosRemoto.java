@@ -16,18 +16,16 @@ import javax.ws.rs.core.MultivaluedMap;
  */
 public class ComandoReceberDadosRemoto extends ComandoReceberDados {
 
-    private WebResource wr;
-
     @Override
     public <E extends Dados> List<E> receber(String tipo, GenericType<List<E>> classe) throws Exception {
-        wr = Conexao.getRest(Util.getConfig().get("sinc.host") + "/" + tipo);
+        WebResource wr = Conexao.getRest(Util.getConfig().getProperty("sinc.host") + "/" + tipo);
         List<E> lista = wr.accept(MediaType.APPLICATION_JSON).get(classe);
         return lista;
     }
 
     @Override
     public <E extends Dados> List<E> receber(String tipo, GenericType<List<E>> classe, MultivaluedMap<String, String> mm) throws Exception {
-        wr = Conexao.getRest(Util.getConfig().get("sinc.host") + "/" + tipo);
+        WebResource wr = Conexao.getRest(Util.getConfig().getProperty("sinc.host") + "/" + tipo);
         List<E> lista = wr.queryParams(mm).accept(MediaType.APPLICATION_JSON).get(classe);
         return lista;
     }

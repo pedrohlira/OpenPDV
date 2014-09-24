@@ -1,38 +1,48 @@
 package br.com.openpdv.modelo.core.filtro;
 
-import br.com.openpdv.modelo.core.parametro.ParametroException;
+import br.com.openpdv.modelo.core.OpenPdvException;
+import br.com.phdss.Util;
 
 /**
  * Classe que define um filtro do tipo texto.
  *
  * @author Pedro H. Lira
  */
-public class FiltroTexto extends AFiltro<String> {
+public class FiltroTexto extends AbstractFiltro<String> {
 
+    protected String valor;
+    
     /**
-     * @see AFiltro#AFiltro()
+     * @see AbstractFiltro#AbstractFiltro()
      */
     public FiltroTexto() {
         super();
     }
 
     /**
-     * @see AFiltro#AFiltro(String, ECompara, String)
+     * @param campo o nome do campo.
+     * @param compara o tipo de comparacao usada.
+     * @param valor o valor do filtro em String.
+     * @see AbstractFiltro#AbstractFiltro(java.lang.String, plugin.modelo.filtro.ECompara, java.lang.String) 
      */
     public FiltroTexto(String campo, ECompara compara, String valor) {
-        super.campo = campo;
-        super.compara = compara;
-        super.valor = valor;
+        this.campo = campo;
+        this.compara = compara;
+        this.valor = valor;
     }
 
     @Override
-    public String getSql() throws ParametroException {
+    public String getSql() throws OpenPdvException {
         if (compara != ECompara.MAIOR && compara != ECompara.MAIOR_IGUAL && compara != ECompara.MENOR && compara != ECompara.MENOR_IGUAL) {
-            tratarPrefixo();
-            return "UPPER(" + prefixo + campo + ") " + compara.toString() + " :" + getCampoId();
+            return "UPPER(" + Util.tratarPrefixo(campo) + ") " + compara.toString() + " :" + getCampoId();
         } else {
-            throw new ParametroException("Tipo de comparacao usada para este filtro nao suportada.");
+            throw new OpenPdvException("O tipo de comparacao usado nao e aceito!");
         }
+    }
+
+    @Override
+    public void setValorString(String valor) throws OpenPdvException {
+        this.valor = valor;
     }
 
     @Override
@@ -40,18 +50,14 @@ public class FiltroTexto extends AFiltro<String> {
         String retorno;
 
         if (valor != null) {
-            switch (compara) {
-                case CONTEM:
-                    retorno = ("%" + valor.toUpperCase() + "%");
-                    break;
-                case CONTEM_FIM:
-                    retorno = ("%" + valor.toUpperCase());
-                    break;
-                case CONTEM_INICIO:
-                    retorno = (valor.toUpperCase() + "%");
-                    break;
-                default:
-                    retorno = (valor.toUpperCase());
+            if (compara == ECompara.CONTEM) {
+                retorno = ("%" + valor.toUpperCase() + "%");
+            } else if (compara == ECompara.CONTEM_FIM) {
+                retorno = ("%" + valor.toUpperCase());
+            } else if (compara == ECompara.CONTEM_INICIO) {
+                retorno = (valor.toUpperCase() + "%");
+            } else {
+                retorno = (valor.toUpperCase());
             }
         } else {
             retorno = null;
@@ -61,7 +67,7 @@ public class FiltroTexto extends AFiltro<String> {
     }
 
     @Override
-    public void setValorString(String valor) {
-        super.valor = valor;
+    public void setValor(String valor) {
+        this.valor = valor;
     }
 }

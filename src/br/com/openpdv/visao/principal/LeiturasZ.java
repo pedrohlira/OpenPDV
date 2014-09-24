@@ -162,7 +162,6 @@ public class LeiturasZ extends javax.swing.JDialog {
         tabLeituras.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabLeituras.setRowHeight(20);
         tabLeituras.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        tabLeituras.setShowGrid(true);
         tabLeituras.setShowVerticalLines(false);
         tabLeituras.getTableHeader().setReorderingAllowed(false);
         spLeituras.setViewportView(tabLeituras);
@@ -244,7 +243,7 @@ public class LeiturasZ extends javax.swing.JDialog {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(txtCRO, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 39, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(txtCRZ, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 64, Short.MAX_VALUE))
+                        .add(txtCRZ))
                     .add(panLeituraLayout.createSequentialGroup()
                         .add(6, 6, 6)
                         .add(lblCOOinicio)
@@ -362,7 +361,6 @@ public class LeiturasZ extends javax.swing.JDialog {
         });
         tabTotal.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tabTotal.setRowHeight(20);
-        tabTotal.setShowGrid(true);
         tabTotal.setShowVerticalLines(false);
         tabTotal.getTableHeader().setReorderingAllowed(false);
         spTotais.setViewportView(tabTotal);
@@ -541,10 +539,10 @@ public class LeiturasZ extends javax.swing.JDialog {
                     .add(layout.createSequentialGroup()
                         .add(6, 6, 6)
                         .add(lblLimite)))
-                .addContainerGap(46, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(640, 531));
+        setSize(new java.awt.Dimension(645, 528));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -721,14 +719,14 @@ public class LeiturasZ extends javax.swing.JDialog {
                 FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
                 FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, z.getEcfZMovimento());
                 FiltroData fd2 = new FiltroData("ecfVendaData", ECompara.MENOR, cal.getTime());
-                GrupoFiltro gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
+                FiltroGrupo gf = new FiltroGrupo(Filtro.E, fo, fd1, fd2);
                 Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(em, sql);
 
                 // atualiza os documentos, marcando que pertence a esta Z
                 fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, z.getEcfZMovimento());
                 fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());
-                gf = new GrupoFiltro(EJuncao.E, new IFiltro[]{fo, fd1, fd2});
+                gf = new FiltroGrupo(Filtro.E, fo, fd1, fd2);
                 sql = new Sql(new EcfDocumento(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(em, sql);
 
