@@ -4,11 +4,13 @@ import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
+import br.com.openpdv.modelo.core.EDirecao;
 import br.com.phdss.Util;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
+import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.phdss.ECF;
 import br.com.phdss.EComando;
@@ -29,6 +31,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.swing.*;
@@ -409,15 +412,27 @@ public class Splash extends JFrame {
                         double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
                         double novoGT = ecf.validarGT(gt);
                         if (novoGT > 0.00) {
-                            PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
-                            Util.criptografar(null, PAF.AUXILIAR);
-                            JOptionPane.showMessageDialog(splash, "Valor do GT recomposto no arquivo auxiliar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                            EcfZ ultZ = new EcfZ();
+                            ultZ.setOrdemDirecao(EDirecao.DESC);
+                            FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, impressora);
+                            List<EcfZ> zs = service.selecionar(ultZ, 0, 1, fo);
+                            if (zs != null && !zs.isEmpty()) {
+                                ultZ = zs.get(0);
+                                if (ecf.validarGT(ultZ.getEcfZCrz(), ultZ.getEcfZCro(), ultZ.getEcfZBruto())) {
+                                    PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
+                                    Util.criptografar(null, PAF.AUXILIAR);
+                                    JOptionPane.showMessageDialog(splash, "Valor do GT recomposto no arquivo auxiliar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                                } else {
+                                    throw new Exception("Os dados de CRZ, CRO e Valor Bruto não estão iguais!");
+                                }
+                            } else {
+                                throw new Exception("Não existe Z no banco.");
+                            }
                         }
                     } catch (Exception ex) {
-                        String msg = PAF.AUXILIAR.size() == 0 ? "Valor do GT do arquivo auxiliar não reconhecido!" : ex.getMessage();
                         login = false;
                         log.error("Problemas ao validar o GT.", ex);
-                        JOptionPane.showMessageDialog(splash, msg, "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(splash, "Não foi possível recupara o GT! -> " + ex.getMessage(), "OpenPDV", JOptionPane.WARNING_MESSAGE);
                     }
                 }
 

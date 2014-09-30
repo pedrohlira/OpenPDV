@@ -17,6 +17,7 @@ import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.produto.ProdGrade;
+import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
@@ -174,10 +175,9 @@ public class ComandoCancelarVenda implements IComando {
                     qtd /= vp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
                 }
                 // atualiza o estoque
-                ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
-                FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, vp.getProdProduto().getId());
-                Sql sql1 = new Sql(vp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                sqls.add(sql1);
+                ProdProduto prod = vp.getProdProduto();
+                prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() + qtd);
+                service.salvar(prod);
                 // adiciona estoque da grade caso o produto tenha
                 for (ProdGrade grade : vp.getProdProduto().getProdGrades()) {
                     if (grade.getProdGradeBarra().equals(vp.getEcfVendaProdutoBarra())) {
@@ -209,10 +209,9 @@ public class ComandoCancelarVenda implements IComando {
                     }
 
                     // atualiza o estoque
-                    ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
-                    FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, tp.getProdProduto().getId());
-                    Sql sql1 = new Sql(tp.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                    sqls.add(sql1);
+                    ProdProduto prod = tp.getProdProduto();
+                    prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() - qtd);
+                    service.salvar(prod);
                     // remove estoque da grade caso o produto tenha
                     if (tp.getProdProduto().getProdGrades() != null) {
                         for (ProdGrade grade : tp.getProdProduto().getProdGrades()) {
@@ -230,23 +229,14 @@ public class ComandoCancelarVenda implements IComando {
         }
 
         // atualiza o status da venda
-        ParametroGrupo gp = new ParametroGrupo();
-        FiltroNumero fn = new FiltroNumero("ecfVendaId", ECompara.IGUAL, venda.getId());
         if (!venda.getEcfVendaFechada()) {
-            ParametroNumero pn1 = new ParametroNumero("ecfVendaBruto", valor);
-            gp.add(pn1);
-            ParametroNumero pn2 = new ParametroNumero("ecfVendaLiquido", valor);
-            gp.add(pn2);
+            venda.setEcfVendaBruto(valor);
+            venda.setEcfVendaLiquido(valor);
         }
-        ParametroBinario pb = new ParametroBinario("ecfVendaCancelada", true);
-        gp.add(pb);
-        ParametroBinario pb1 = new ParametroBinario("ecfVendaSinc", false);
-        gp.add(pb1);
-        ParametroObjeto po = new ParametroObjeto("sisGerente", venda.getSisGerente());
-        gp.add(po);
-        Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, fn, gp);
-        sqls.add(sql);
-
+        venda.setEcfVendaCancelada(true);
+        venda.setEcfVendaSinc(true);
+        service.salvar(venda);
+        
         // efetiva as instrucoes SQLs.
         service.executar(sqls.toArray(new Sql[]{}));
     }

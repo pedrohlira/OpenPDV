@@ -3,10 +3,10 @@ package br.com.openpdv.controlador.core;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.ecf.ENotaStatus;
 import br.com.phdss.Util;
+import br.inf.portalfiscal.www.nfe.wsdl.autoriazacao.NfeAutorizacaoStub;
 import br.inf.portalfiscal.www.nfe.wsdl.inutilizacao.NfeInutilizacao2Stub;
-import br.inf.portalfiscal.www.nfe.wsdl.recepcao.NfeRecepcao2Stub;
 import br.inf.portalfiscal.www.nfe.wsdl.recepcaoevento.RecepcaoEventoStub;
-import br.inf.portalfiscal.www.nfe.wsdl.retrecepcao.NfeRetRecepcao2Stub;
+import br.inf.portalfiscal.www.nfe.wsdl.retautoriazacao.NfeRetAutorizacaoStub;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.security.KeyStore;
@@ -32,7 +32,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -64,6 +63,10 @@ public class NFe {
     private static final List<String> SVAN = new ArrayList<>();
     // colecao de estados do ambiente virual do RS
     private static final List<String> SVRS = new ArrayList<>();
+    // colecao de estados da contigencia do ambiente virual nacional
+    private static final List<String> SVCAN = new ArrayList<>();
+    // colecao de estados da contigencia do ambiente virual do RS
+    private static final List<String> SVCRS = new ArrayList<>();
 
     // setando os configs da sefaz
     static {
@@ -80,6 +83,10 @@ public class NFe {
             SVAN.addAll(Arrays.asList(PRODUCAO.getProperty("SVAN_Estados").split(",")));
             // seta os estados do ambiente virtual RS
             SVRS.addAll(Arrays.asList(PRODUCAO.getProperty("SVRS_Estados").split(",")));
+            // seta os estados da contigencia do ambiente virtual nacional
+            SVCAN.addAll(Arrays.asList(PRODUCAO.getProperty("SVCAN_Estados").split(",")));
+            // seta os estados do ambiente virtual RS
+            SVCRS.addAll(Arrays.asList(PRODUCAO.getProperty("SVCRS_Estados").split(",")));
         } catch (Exception ex) {
             log.error("Erro ao ler config da sefaz", ex);
         }
@@ -142,6 +149,7 @@ public class NFe {
 
             // parse no xml e pega o id
             Element ele = (Element) doc.getElementsByTagName(status == ENotaStatus.AUTORIZANDO ? "infNFe" : tag).item(0);
+            ele.setIdAttribute("Id", true);
             String id = ele.getAttribute("Id");
             // adiciona a referencia
             Reference ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
@@ -173,21 +181,21 @@ public class NFe {
             String serie = getValorTag(doc.getDocumentElement(), "serie");
             String ambiente = getValorTag(doc.getDocumentElement(), "tpAmb");
             int iserie = Integer.valueOf(serie);
-            String url = identificarXml(uf, ambiente, "NfeRecepcao", iserie >= 900);
+            String url = identificarXml(uf, ambiente, "NFeAutorizacao", iserie >= 900);
 
             OMElement ome = AXIOMUtil.stringToOM(xml);
-            NfeRecepcao2Stub.NfeDadosMsg dadosMsg = new NfeRecepcao2Stub.NfeDadosMsg();
+            NfeAutorizacaoStub.NfeDadosMsg dadosMsg = new NfeAutorizacaoStub.NfeDadosMsg();
             dadosMsg.setExtraElement(ome);
 
-            NfeRecepcao2Stub.NfeCabecMsg nfeCabecMsg = new NfeRecepcao2Stub.NfeCabecMsg();
+            NfeAutorizacaoStub.NfeCabecMsg nfeCabecMsg = new NfeAutorizacaoStub.NfeCabecMsg();
             nfeCabecMsg.setCUF(uf);
             nfeCabecMsg.setVersaoDados(Util.getConfig().getProperty("nfe.versao"));
 
-            NfeRecepcao2Stub.NfeCabecMsgE nfeCabecMsgE = new NfeRecepcao2Stub.NfeCabecMsgE();
+            NfeAutorizacaoStub.NfeCabecMsgE nfeCabecMsgE = new NfeAutorizacaoStub.NfeCabecMsgE();
             nfeCabecMsgE.setNfeCabecMsg(nfeCabecMsg);
 
-            NfeRecepcao2Stub stub = new NfeRecepcao2Stub(url);
-            NfeRecepcao2Stub.NfeRecepcaoLote2Result result = stub.nfeRecepcaoLote2(dadosMsg, nfeCabecMsgE);
+            NfeAutorizacaoStub stub = new NfeAutorizacaoStub(url);
+            NfeAutorizacaoStub.NfeAutorizacaoLoteResult result = stub.nfeAutorizacaoLote(dadosMsg, nfeCabecMsgE);
 
             return result.getExtraElement().toString();
         } catch (NumberFormatException | OpenPdvException | XMLStreamException | RemoteException ex) {
@@ -209,21 +217,21 @@ public class NFe {
     public String retornoNFe(String xml, String uf, String ambiente, String serie) throws OpenPdvException {
         try {
             int iserie = Integer.valueOf(serie);
-            String url = identificarXml(uf, ambiente, "NfeRetRecepcao", iserie >= 900);
+            String url = identificarXml(uf, ambiente, "NFeRetAutorizacao", iserie >= 900);
 
             OMElement ome = AXIOMUtil.stringToOM(xml);
-            NfeRetRecepcao2Stub.NfeDadosMsg dadosMsg = new NfeRetRecepcao2Stub.NfeDadosMsg();
+            NfeRetAutorizacaoStub.NfeDadosMsg dadosMsg = new NfeRetAutorizacaoStub.NfeDadosMsg();
             dadosMsg.setExtraElement(ome);
 
-            NfeRetRecepcao2Stub.NfeCabecMsg nfeCabecMsg = new NfeRetRecepcao2Stub.NfeCabecMsg();
+            NfeRetAutorizacaoStub.NfeCabecMsg nfeCabecMsg = new NfeRetAutorizacaoStub.NfeCabecMsg();
             nfeCabecMsg.setCUF(uf);
             nfeCabecMsg.setVersaoDados(Util.getConfig().getProperty("nfe.versao"));
 
-            NfeRetRecepcao2Stub.NfeCabecMsgE nfeCabecMsgE = new NfeRetRecepcao2Stub.NfeCabecMsgE();
+            NfeRetAutorizacaoStub.NfeCabecMsgE nfeCabecMsgE = new NfeRetAutorizacaoStub.NfeCabecMsgE();
             nfeCabecMsgE.setNfeCabecMsg(nfeCabecMsg);
 
-            NfeRetRecepcao2Stub stub = new NfeRetRecepcao2Stub(url);
-            NfeRetRecepcao2Stub.NfeRetRecepcao2Result result = stub.nfeRetRecepcao2(dadosMsg, nfeCabecMsgE);
+            NfeRetAutorizacaoStub stub = new NfeRetAutorizacaoStub(url);
+            NfeRetAutorizacaoStub.NfeRetAutorizacaoLoteResult result = stub.nfeRetAutorizacaoLote(dadosMsg, nfeCabecMsgE);
 
             return result.getExtraElement().toString();
         } catch (NumberFormatException | OpenPdvException | XMLStreamException | RemoteException ex) {
@@ -381,9 +389,13 @@ public class NFe {
     private String identificarXml(String uf, String tipo, String servico, boolean scan) throws OpenPdvException {
         try {
             // identifica se o estado é virtual ou scan
-            String chave;
+            String chave = "";
             if (scan) {
-                chave = "SCAN_" + servico;
+                if (SVCAN.contains(uf)) {
+                    chave = "SVCAN_" + servico;
+                } else if (SVCRS.contains(uf)) {
+                    chave = "SVCRS_" + servico;
+                }
             } else if (SVAN.contains(uf)) {
                 chave = "SVAN_" + servico;
             } else if (SVRS.contains(uf)) {
@@ -444,6 +456,9 @@ public class NFe {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + sw.toString();
         xml = xml.replace("ns2:", "");
         xml = xml.replace(":ns2", "");
+        xml = xml.replace("ns3:", "");
+        xml = xml.replace(":ns3", "");
+        xml = xml.replace(" xmlns=\"\"", "");
         xml = xml.replace(" xmlns=\"http://www.w3.org/2000/09/xmldsig#\"", "");
         // retira as quebras de linhas
         xml = xml.replace("\r", "");
@@ -460,7 +475,8 @@ public class NFe {
      *
      * @param xml na forma de texto.
      * @return um DOM do xml ou null caso aconteca algum erro.
-     * @see #getXml(java.lang.String, java.lang.String, org.xml.sax.ErrorHandler)
+     * @see #getXml(java.lang.String, java.lang.String,
+     * org.xml.sax.ErrorHandler)
      */
     public static Document getXml(String xml) {
         return getXml(xml, null, null);
@@ -552,7 +568,7 @@ public class NFe {
             JasperPrint print = JasperFillManager.fillReport(jasper, param, ds);
             // exportando em pdf
             pdf = JasperExportManager.exportReportToPdf(print);
-        } catch (ParserConfigurationException | SAXException | IOException | JRException e) {
+        } catch (Exception e) {
             log.error("Nao gerou o Danfe", e);
             pdf = null;
         }

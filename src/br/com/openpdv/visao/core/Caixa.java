@@ -6,6 +6,7 @@ import br.com.openpdv.controlador.core.AsyncCallback;
 import br.com.openpdv.controlador.core.AsyncDoubleBack;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.controlador.permissao.Login;
+import br.com.openpdv.modelo.core.EDirecao;
 import br.com.openpdv.modelo.core.EModo;
 import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.filtro.ECompara;
@@ -14,10 +15,12 @@ import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
 import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
+import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
 import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfImpressora;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
+import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdPreco;
@@ -25,7 +28,9 @@ import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisEmpresa;
 import br.com.openpdv.modelo.sistema.SisUsuario;
-import br.com.openpdv.visao.fiscal.*;
+import br.com.openpdv.visao.fiscal.PAF_LMF;
+import br.com.openpdv.visao.fiscal.PAF_VendasPeriodo;
+import br.com.openpdv.visao.fiscal.PAF_Registros;
 import br.com.openpdv.visao.nota.NotaConsumidor;
 import br.com.openpdv.visao.nota.NotaEletronica;
 import br.com.openpdv.visao.principal.*;
@@ -1104,9 +1109,9 @@ public class Caixa extends JFrame {
             @Override
             public void run() {
                 try {
-                    String path = PAF.gerarArqMF();
+                    String[] path = PAF.gerarArqMF();
                     Aguarde.getInstancia().setVisible(false);
-                    JOptionPane.showMessageDialog(caixa, "Arquivo gerado com sucesso em:\n" + path, "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(caixa, "Arquivos gerados com sucesso em:\n" + path[0] + "\n" + path[1], "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     Aguarde.getInstancia().setVisible(false);
                     log.error("Nao foi possivel gerar o arquivo -> ", ex);
@@ -1235,8 +1240,13 @@ public class Caixa extends JFrame {
                                     Aguarde.getInstancia().setVisible(false);
                                     modoConsulta();
                                 } else {
-                                    Aguarde.getInstancia().setVisible(false);
-                                    JOptionPane.showMessageDialog(caixa, "Não houve movimento fiscal hoje, então não precisa emititr a Redução Z!", "Redução Z", JOptionPane.INFORMATION_MESSAGE);
+                                    int escolha = JOptionPane.showOptionDialog(caixa, "Não houve movimento fiscal hoje, então não precisa emititr a Redução Z!\nDeseja emitir mesmo assim?", "Redução Z",
+                                            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.NO_OPTION);
+                                    if (escolha == JOptionPane.YES_OPTION) {
+                                        new ComandoEmitirReducaoZ().executar();
+                                        Aguarde.getInstancia().setVisible(false);
+                                        modoConsulta();
+                                    }
                                 }
                             } catch (OpenPdvException ex) {
                                 Aguarde.getInstancia().setVisible(false);
@@ -1439,13 +1449,27 @@ public class Caixa extends JFrame {
             double gt = Double.valueOf(PAF.AUXILIAR.getProperty("ecf.gt").replace(",", "."));
             double novoGT = ecf.validarGT(gt);
             if (novoGT > 0.00) {
-                PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
-                Util.criptografar(null, PAF.AUXILIAR);
+                EcfZ ultZ = new EcfZ();
+                ultZ.setOrdemDirecao(EDirecao.DESC);
+                FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
+                List<EcfZ> zs = service.selecionar(ultZ, 0, 1, fo);
+                if (zs != null && !zs.isEmpty()) {
+                    ultZ = zs.get(0);
+                    if (ecf.validarGT(ultZ.getEcfZCrz(), ultZ.getEcfZCro(), ultZ.getEcfZBruto())) {
+                        PAF.AUXILIAR.setProperty("ecf.gt", Util.formataNumero(novoGT, 1, 2, false));
+                        Util.criptografar(null, PAF.AUXILIAR);
+                        JOptionPane.showMessageDialog(caixa, "Valor do GT recomposto no arquivo auxiliar.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        throw new Exception("Os dados de CRZ, CRO e Valor Bruto não estão iguais!");
+                    }
+                } else {
+                    throw new Exception("Não existe Z no banco.");
+                }
             }
         } catch (Exception ex) {
             permite = false;
             log.error("Problemas ao validar o GT.", ex);
-            erro.append(ex.getMessage()).append("\n");
+            erro.append("Não foi possível recupara o GT! -> ").append(ex.getMessage()).append("\n");
         }
 
         // se permitir abre a venda, solicita o cliente
@@ -1793,7 +1817,7 @@ public class Caixa extends JFrame {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
         } else {
@@ -1815,7 +1839,7 @@ public class Caixa extends JFrame {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
         } else {
@@ -1862,7 +1886,7 @@ public class Caixa extends JFrame {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
         } else {
@@ -1884,7 +1908,7 @@ public class Caixa extends JFrame {
                 JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
         } else {
@@ -1933,9 +1957,9 @@ public class Caixa extends JFrame {
             @Override
             public void run() {
                 try {
-                    String path = PAF.gerarArqMFD();
+                    String[] path = PAF.gerarArqMFD();
                     Aguarde.getInstancia().setVisible(false);
-                    JOptionPane.showMessageDialog(caixa, "Arquivo gerado com sucesso em:\n" + path, "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(caixa, "Arquivos gerados com sucesso em:\n" + path[0] + "\n" + path[1], "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     Aguarde.getInstancia().setVisible(false);
                     log.error("Nao foi possivel gerar o arquivo -> ", ex);
@@ -2181,6 +2205,11 @@ public class Caixa extends JFrame {
         // somente mostra o Cat52 caso esteja setado no config
         if (Util.getConfig().getProperty("ecf.cat52") == null) {
             mnuCat52.setVisible(false);
+        }
+
+        // somente mostra o Cartao Presente caso esteja setado no config como true
+        if (!Boolean.valueOf(Util.getConfig().getProperty("pag.presente"))) {
+            mnuCartaoPresente.setVisible(false);
         }
     }
 

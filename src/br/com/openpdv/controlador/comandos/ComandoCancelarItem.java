@@ -2,12 +2,7 @@ package br.com.openpdv.controlador.comandos;
 
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.phdss.Util;
-import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
-import br.com.openpdv.modelo.core.Sql;
-import br.com.openpdv.modelo.core.filtro.ECompara;
-import br.com.openpdv.modelo.core.filtro.FiltroNumero;
-import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
@@ -87,12 +82,9 @@ public class ComandoCancelarItem implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void cancelarItemBanco() throws OpenPdvException {
-        FiltroNumero fn = new FiltroNumero("ecfVendaProdutoId", ECompara.IGUAL, vendaProduto.getId());
-        ParametroBinario pb = new ParametroBinario("ecfVendaProdutoCancelado", true);
-        Sql sql = new Sql(new EcfVendaProduto(), EComandoSQL.ATUALIZAR, fn, pb);
-
+        vendaProduto.setEcfVendaProdutoCancelado(true);
         CoreService service = new CoreService<>();
-        service.executar(sql);
+        service.salvar(vendaProduto);
     }
 
     /**

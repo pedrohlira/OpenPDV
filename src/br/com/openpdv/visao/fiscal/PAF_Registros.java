@@ -1,4 +1,4 @@
-package br.com.openpdv.visao.fiscal;
+package br.com.openpdv.visao.fiscal;//GEN-LINE:variables
 
 import br.com.openpdv.controlador.comandos.ComandoEmitirMovimentoECF;
 import br.com.openpdv.controlador.core.CoreService;
@@ -51,7 +51,7 @@ public class PAF_Registros extends JDialog {
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
@@ -352,63 +352,63 @@ public class PAF_Registros extends JDialog {
 
         setSize(new java.awt.Dimension(449, 291));
         setLocationRelativeTo(null);
-    }// </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>                        
 
-    private void radCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCodigoActionPerformed
+    private void radCodigoActionPerformed(java.awt.event.ActionEvent evt) {                                          
         txtPrimeiro.setEnabled(true);
         txtUltimo.setEnabled(true);
         txtDescricao.setText(null);
         txtDescricao.setEnabled(false);
         txtPrimeiro.requestFocus();
-    }//GEN-LAST:event_radCodigoActionPerformed
+    }                                         
 
-    private void radDescricaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radDescricaoActionPerformed
+    private void radDescricaoActionPerformed(java.awt.event.ActionEvent evt) {                                             
         txtPrimeiro.setEnabled(false);
         txtPrimeiro.setText(null);
         txtUltimo.setEnabled(false);
         txtUltimo.setText(null);
         txtDescricao.setEnabled(true);
         txtDescricao.requestFocus();
-    }//GEN-LAST:event_radDescricaoActionPerformed
+    }                                            
 
-    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
+    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {                                      
         botaoOK();
-}//GEN-LAST:event_btnOkActionPerformed
+}                                     
 
-    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
+    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {                                            
         dispose();
         Caixa.getInstancia().setJanela(null);
-}//GEN-LAST:event_btnCancelarActionPerformed
+}                                           
 
-    private void btnOkKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnOkKeyPressed
+    private void btnOkKeyPressed(java.awt.event.KeyEvent evt) {                                 
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             botaoOK();
         }
-    }//GEN-LAST:event_btnOkKeyPressed
+    }                                
 
-    private void btnCancelarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnCancelarKeyPressed
+    private void btnCancelarKeyPressed(java.awt.event.KeyEvent evt) {                                       
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             dispose();
             Caixa.getInstancia().setJanela(null);
         }
-    }//GEN-LAST:event_btnCancelarKeyPressed
+    }                                      
 
-    private void radTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radTotalActionPerformed
+    private void radTotalActionPerformed(java.awt.event.ActionEvent evt) {                                         
         limpar();
-    }//GEN-LAST:event_radTotalActionPerformed
+    }                                        
 
-    private void radParcialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radParcialActionPerformed
+    private void radParcialActionPerformed(java.awt.event.ActionEvent evt) {                                           
         radCodigo.setSelected(true);
         radCodigo.setEnabled(true);
         radDescricao.setEnabled(true);
         radCodigo.doClick();
-    }//GEN-LAST:event_radParcialActionPerformed
+    }                                          
 
-    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {                                   
         Caixa.getInstancia().setJanela(null);
-    }//GEN-LAST:event_formWindowClosing
+    }                                  
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify                     
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnOk;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -432,7 +432,7 @@ public class PAF_Registros extends JDialog {
     private javax.swing.JFormattedTextField txtDtInicio;
     private javax.swing.JFormattedTextField txtPrimeiro;
     private javax.swing.JFormattedTextField txtUltimo;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration                   
 
     /**
      * Metodo que limpa os campos deixando no estado inicial.
@@ -473,7 +473,7 @@ public class PAF_Registros extends JDialog {
                         dados.setCampoOrdem(dados.getCampoId());
                         List<ProdProduto> listaProd = service.selecionar(dados, 0, 0, filtro);
                         // executa o comando
-                        ComandoEmitirMovimentoECF comando = new ComandoEmitirMovimentoECF(impressora, inicio, fim, listaProd, false);
+                        ComandoEmitirMovimentoECF comando = new ComandoEmitirMovimentoECF(impressora, inicio, fim, listaProd);
                         comando.executar();
                         Aguarde.getInstancia().setVisible(false);
                         JOptionPane.showMessageDialog(paf_registros, "Arquivo gerado com sucesso em:\n" + comando.getPath(), "Menu Fiscal", JOptionPane.INFORMATION_MESSAGE);

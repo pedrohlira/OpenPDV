@@ -676,7 +676,6 @@ public class NotaEletronica extends javax.swing.JDialog {
 
                     // atualiza o estoque
                     TNfeProc produtos = NFe.xmlToObj(nota2.getEcfNotaEletronicaXml(), TNfeProc.class);
-                    List<Sql> sqls = new ArrayList<>();
                     for (Det det : produtos.getNFe().getInfNFe().getDet()) {
                         // achando o produto
                         Filtro filtro;
@@ -698,12 +697,9 @@ public class NotaEletronica extends javax.swing.JDialog {
                         }
 
                         // atualiza o estoque
-                        ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
-                        FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, prod.getId());
-                        Sql sql = new Sql(prod, EComandoSQL.ATUALIZAR, fn1, pf);
-                        sqls.add(sql);
+                        prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() + qtd);
+                        service.salvar(prod);
                     }
-                    service.executar(sqls.toArray(new Sql[]{}));
 
                     // salva o xml no arquivo
                     File xml = new File("nfe/" + nota2.getEcfNotaEletronicaChave() + "-procCanNFe.xml");
@@ -800,7 +796,6 @@ public class NotaEletronica extends javax.swing.JDialog {
                     Aguarde.getInstancia().setVisible(false);
 
                     // atualiza o estoque
-                    List<Sql> sqls = new ArrayList<>();
                     for (EcfNotaProduto np : produtos) {
                         // fatorando a quantida no estoque
                         double qtd = np.getEcfNotaProdutoQuantidade();
@@ -810,12 +805,10 @@ public class NotaEletronica extends javax.swing.JDialog {
                         }
 
                         // atualiza o estoque
-                        ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
-                        FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, np.getProdProduto().getId());
-                        Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                        sqls.add(sql);
+                        ProdProduto prod = np.getProdProduto();
+                        prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() - qtd);
+                        service.salvar(prod);
                     }
-                    service.executar(sqls.toArray(new Sql[]{}));
 
                     // salva o xml no arquivo
                     File xml = new File("nfe/" + nota.getEcfNotaEletronicaChave() + "-procNFe.xml");

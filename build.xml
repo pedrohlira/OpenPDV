@@ -93,7 +93,7 @@
         </copy>
 
         <copy todir="${dist.jar.dir}/conf">
-            <fileset dir="conf" includes="**" excludes="auxiliar.properties"/>
+            <fileset dir="conf" includes="**" />
         </copy>
 
         <copy todir="${dist.jar.dir}/nfe">

@@ -42,7 +42,8 @@ CREATE TABLE ecf_documento (
     ecf_documento_grg integer NOT NULL,
     ecf_documento_cdc integer NOT NULL,
     ecf_documento_tipo character varying(2) NOT NULL,
-    ecf_documento_data timestamp without time zone NOT NULL
+    ecf_documento_data timestamp without time zone NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -83,7 +84,8 @@ CREATE TABLE ecf_impressora (
     ecf_impressora_marca character varying(20) NOT NULL,
     ecf_impressora_modelo character varying(20) NOT NULL,
     ecf_impressora_caixa integer NOT NULL,
-    ecf_impressora_ativo boolean NOT NULL
+    ecf_impressora_ativo boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -126,7 +128,8 @@ CREATE TABLE ecf_nota (
     ecf_nota_liquido numeric(10,2) NOT NULL,
     ecf_nota_pis numeric(10,2) NOT NULL,
     ecf_nota_cofins numeric(10,2) NOT NULL,
-    ecf_nota_cancelada boolean NOT NULL
+    ecf_nota_cancelada boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -173,7 +176,8 @@ CREATE TABLE ecf_nota_eletronica (
     ecf_nota_eletronica_xml text NOT NULL,
     ecf_nota_eletronica_protocolo_cancelado character varying(15) NOT NULL,
     ecf_nota_eletronica_xml_cancelado text NOT NULL,
-    ecf_nota_eletronica_recibo character varying(15) NOT NULL
+    ecf_nota_eletronica_recibo character varying(15) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -216,7 +220,8 @@ CREATE TABLE ecf_nota_produto (
     ecf_nota_produto_liquido numeric(10,2) NOT NULL,
     ecf_nota_produto_icms numeric(4,2) NOT NULL,
     ecf_nota_produto_ipi numeric(4,2) NOT NULL,
-    ecf_nota_produto_ordem integer NOT NULL
+    ecf_nota_produto_ordem integer NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -259,7 +264,8 @@ CREATE TABLE ecf_pagamento (
     ecf_pagamento_estorno_gnf integer,
     ecf_pagamento_estorno_data timestamp without time zone,
     ecf_pagamento_estorno_valor numeric(12,2) DEFAULT NULL::numeric,
-    ecf_pagamento_estorno_nsu character varying(12) DEFAULT NULL::character varying
+    ecf_pagamento_estorno_nsu character varying(12) DEFAULT NULL::character varying,
+    ead character varying(260) NULL
 );
 
 
@@ -295,7 +301,8 @@ CREATE TABLE ecf_pagamento_parcela (
     ecf_pagamento_id integer NOT NULL,
     ecf_pagamento_parcela_data date NOT NULL,
     ecf_pagamento_parcela_valor numeric(12,2) NOT NULL,
-    ecf_pagamento_parcela_nsu character varying(32) NOT NULL
+    ecf_pagamento_parcela_nsu character varying(32) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -333,7 +340,8 @@ CREATE TABLE ecf_pagamento_tipo (
     ecf_pagamento_tipo_tef boolean NOT NULL,
     ecf_pagamento_tipo_vinculado boolean NOT NULL,
     ecf_pagamento_tipo_debito boolean NOT NULL,
-    ecf_pagamento_tipo_rede character varying(20) NOT NULL
+    ecf_pagamento_tipo_rede character varying(20) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -369,7 +377,8 @@ CREATE TABLE ecf_pagamento_totais (
     ecf_pagamento_tipo_id integer NOT NULL,
     ecf_pagamento_totais_data date NOT NULL,
     ecf_pagamento_totais_documento character varying(20) NOT NULL,
-    ecf_pagamento_totais_valor numeric(12,2) NOT NULL
+    ecf_pagamento_totais_valor numeric(12,2) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -408,7 +417,8 @@ CREATE TABLE ecf_troca (
     ecf_troca_valor numeric(10,2) NOT NULL,
     ecf_troca_ecf integer NOT NULL,
     ecf_troca_coo integer NOT NULL,
-    ecf_troca_ativo boolean NOT NULL
+    ecf_troca_ativo boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -448,7 +458,8 @@ CREATE TABLE ecf_troca_produto (
     ecf_troca_produto_quantidade numeric(10,4) NOT NULL,
     ecf_troca_produto_valor numeric(10,2) NOT NULL,
     ecf_troca_produto_total numeric(10,2) NOT NULL,
-    ecf_troca_produto_ordem integer NOT NULL
+    ecf_troca_produto_ordem integer NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -497,7 +508,8 @@ CREATE TABLE ecf_venda (
     ecf_venda_fechada boolean NOT NULL,
     ecf_venda_cancelada boolean NOT NULL,
     ecf_venda_sinc boolean NOT NULL,
-    ecf_venda_observacao character varying(255)
+    ecf_venda_observacao character varying(255),
+    ead character varying(260) NULL
 );
 
 
@@ -545,7 +557,8 @@ CREATE TABLE ecf_venda_produto (
     ecf_venda_produto_liquido numeric(10,2) NOT NULL,
     ecf_venda_produto_total numeric(10,2) NOT NULL,
     ecf_venda_produto_cancelado boolean NOT NULL,
-    ecf_venda_produto_ordem integer NOT NULL
+    ecf_venda_produto_ordem integer NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -588,7 +601,8 @@ CREATE TABLE ecf_z (
     ecf_z_emissao timestamp without time zone NOT NULL,
     ecf_z_bruto numeric(14,2) NOT NULL,
     ecf_z_gt numeric(14,2) NOT NULL,
-    ecf_z_issqn boolean NOT NULL
+    ecf_z_issqn boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -623,7 +637,8 @@ CREATE TABLE ecf_z_totais (
     ecf_z_totais_id integer NOT NULL,
     ecf_z_id integer NOT NULL,
     ecf_z_totais_codigo character varying(7) NOT NULL,
-    ecf_z_totais_valor numeric(13,2) NOT NULL
+    ecf_z_totais_valor numeric(13,2) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -661,7 +676,8 @@ CREATE TABLE ibpt (
     ibpt_descricao character varying(500) NOT NULL,
     ibpt_aliqnac numeric(10,2) NOT NULL,
     ibpt_aliqimp numeric(10,2) NOT NULL,
-    ibpt_versao character varying(5)
+    ibpt_versao character varying(5),
+    ead character varying(260) NULL
 );
 
 
@@ -677,7 +693,8 @@ CREATE TABLE prod_composicao (
     prod_produto_id integer NOT NULL,
     prod_embalagem_id integer NOT NULL,
     prod_composicao_quantidade numeric(10,4) NOT NULL,
-    prod_composicao_valor numeric(10,2) NOT NULL
+    prod_composicao_valor numeric(10,2) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -712,7 +729,8 @@ CREATE TABLE prod_embalagem (
     prod_embalagem_id integer NOT NULL,
     prod_embalagem_nome character varying(6) NOT NULL,
     prod_embalagem_descricao character varying(100) NOT NULL,
-    prod_embalagem_unidade integer NOT NULL
+    prod_embalagem_unidade integer NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -750,7 +768,8 @@ CREATE TABLE prod_grade (
     prod_grade_tamanho character varying(50) NOT NULL,
     prod_grade_cor character varying(50) NOT NULL,
     prod_grade_opcao character varying(50) NOT NULL,
-    prod_grade_estoque numeric(10,4) NOT NULL
+    prod_grade_estoque numeric(10,4) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -784,7 +803,8 @@ ALTER SEQUENCE prod_grade_prod_grade_id_seq OWNED BY prod_grade.prod_grade_id;
 CREATE TABLE prod_grade_tipo (
     prod_grade_tipo_id integer NOT NULL,
     prod_grade_tipo_nome character varying(50) NOT NULL,
-    prod_grade_tipo_opcao character(1) NOT NULL
+    prod_grade_tipo_opcao character(1) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -820,7 +840,8 @@ CREATE TABLE prod_preco (
     prod_produto_id integer NOT NULL,
     prod_embalagem_id integer NOT NULL,
     prod_preco_valor numeric(10,2) NOT NULL,
-    prod_preco_barra character varying(14) DEFAULT NULL::character varying
+    prod_preco_barra character varying(14) DEFAULT NULL::character varying,
+    ead character varying(260) NULL
 );
 
 
@@ -870,7 +891,8 @@ CREATE TABLE prod_produto (
     prod_produto_ippt character(1) NOT NULL,
     prod_produto_cadastrado timestamp without time zone NOT NULL,
     prod_produto_alterado timestamp without time zone,
-    prod_produto_ativo boolean NOT NULL
+    prod_produto_ativo boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -914,7 +936,8 @@ CREATE TABLE sis_cliente (
     sis_cliente_cep character varying(9) NOT NULL,
     sis_cliente_telefone character varying(100) NOT NULL,
     sis_cliente_email character varying(100) NOT NULL,
-    sis_cliente_data timestamp without time zone NOT NULL
+    sis_cliente_data timestamp without time zone NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -961,7 +984,8 @@ CREATE TABLE sis_empresa (
     sis_empresa_responsavel character varying(50) NOT NULL,
     sis_empresa_fone character varying(10) NOT NULL,
     sis_empresa_email character varying(100) NOT NULL,
-    sis_empresa_contador boolean NOT NULL
+    sis_empresa_contador boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -996,7 +1020,8 @@ CREATE TABLE sis_estado (
     sis_estado_id integer NOT NULL,
     sis_estado_ibge integer NOT NULL,
     sis_estado_descricao character varying(100) NOT NULL,
-    sis_estado_sigla character(2) NOT NULL
+    sis_estado_sigla character(2) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -1031,7 +1056,8 @@ CREATE TABLE sis_municipio (
     sis_municipio_id integer NOT NULL,
     sis_estado_id integer NOT NULL,
     sis_municipio_ibge integer NOT NULL,
-    sis_municipio_descricao character varying(100) NOT NULL
+    sis_municipio_descricao character varying(100) NOT NULL,
+    ead character varying(260) NULL
 );
 
 
@@ -1069,7 +1095,8 @@ CREATE TABLE sis_usuario (
     sis_usuario_desconto integer NOT NULL,
     sis_usuario_ativo boolean NOT NULL,
     sis_usuario_caixa boolean NOT NULL,
-    sis_usuario_gerente boolean NOT NULL
+    sis_usuario_gerente boolean NOT NULL,
+    ead character varying(260) NULL
 );
 
 

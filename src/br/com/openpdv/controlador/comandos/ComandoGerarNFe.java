@@ -225,11 +225,13 @@ public class ComandoGerarNFe implements IComando {
         // numero nf
         ide.setNNF(Integer.valueOf(nNF) + "");
         // data emissao
-        ide.setDhEmi(Util.formataData(data, "yyyy-MM-dd"));
+        ide.setDhEmi(Util.formataData(data, "yyyy-MM-dd'T'HH:mm:ssz").replace("GMT", ""));
         // data saida
-        ide.setDhSaiEnt(Util.formataData(data, "yyyy-MM-dd"));
+        ide.setDhSaiEnt(Util.formataData(data, "yyyy-MM-dd'T'HH:mm:ssz").replace("GMT", ""));
         // operacao
         ide.setTpNF("1");
+        // tipo de destino
+        ide.setIdDest("1");
         // municipio
         ide.setCMunFG(empresa.getSisMunicipio().getSisMunicipioIbge() + "");
         // impressao
@@ -242,6 +244,10 @@ public class ComandoGerarNFe implements IComando {
         ide.setTpAmb(Util.getConfig().getProperty("nfe.tipoamb"));
         // finalidade
         ide.setFinNFe("1");
+        // consumidor final
+        ide.setIndFinal("1");
+        // consumidor presente
+        ide.setIndPres("1");
         // processo emissao
         ide.setProcEmi("0");
         // versao processo
@@ -304,15 +310,18 @@ public class ComandoGerarNFe implements IComando {
         if (Util.getConfig().getProperty("nfe.tipoamb").equals("2")) {
             dest.setCNPJ("99999999000191");
             dest.setXNome("NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL");
-            dest.setIE("");
+            dest.setIndIEDest("9");
         } else if (cliente.getSisClienteDoc().length() == 18) {
             dest.setCNPJ(cliente.getSisClienteDoc().replaceAll("\\D", ""));
             dest.setXNome(nome);
-            dest.setIE(cliente.getSisClienteDoc1().replaceAll("\\D", ""));
+            dest.setIndIEDest(cliente.getSisClienteDoc1().length() > 0 ? "1" : "2");
+            if (cliente.getSisClienteDoc1().length() > 0) {
+                dest.setIE(cliente.getSisClienteDoc1().replaceAll("\\D", ""));
+            }
         } else {
             dest.setCPF(cliente.getSisClienteDoc().replaceAll("\\D", ""));
             dest.setXNome(nome);
-            dest.setIE("");
+            dest.setIndIEDest("9");
         }
         // endereco
         TEndereco enderDest = new TEndereco();
@@ -350,13 +359,8 @@ public class ComandoGerarNFe implements IComando {
             det.setNItem((i++) + "");
             // cod produto
             Prod prod = new Prod();
-            if (pp.getProdProdutoBarra() == null) {
-                prod.setCProd(Util.formataNumero(pp.getProdProdutoId(), 6, 0, false));
-            } else {
-                prod.setCProd(pp.getProdProdutoBarra());
-            }
-            // barra
-            prod.setCEAN(np.getEcfVendaProdutoCodigo());
+            prod.setCProd(np.getEcfVendaProdutoCodigo() == null ? Util.formataNumero(pp.getProdProdutoId(), 6, 0, false) : np.getEcfVendaProdutoCodigo());
+            prod.setCEAN(pp.getProdProdutoBarra() == null ? "" : pp.getProdProdutoBarra());
             // descricao
             prod.setXProd(pp.getProdProdutoDescricao().trim());
             // ncm
@@ -375,7 +379,7 @@ public class ComandoGerarNFe implements IComando {
             valorProd += Double.valueOf(strProd);
             prod.setVProd(strProd);
             // barra do tributo
-            prod.setCEANTrib(np.getEcfVendaProdutoCodigo());
+            prod.setCEANTrib(pp.getProdProdutoBarra() == null ? "" : pp.getProdProdutoBarra());
             // unidade do tributo
             prod.setUTrib(pp.getProdEmbalagem().getProdEmbalagemNome());
             // quantidde do tributo
@@ -648,6 +652,7 @@ public class ComandoGerarNFe implements IComando {
         ICMSTot icmstot = new ICMSTot();
         icmstot.setVBC(getValorNfe(baseICMS, 2));
         icmstot.setVICMS(getValorNfe(valorICMS, 2));
+        icmstot.setVICMSDeson("0.00");
         icmstot.setVBCST(getValorNfe(baseST, 2));
         icmstot.setVST(getValorNfe(valorST, 2));
         icmstot.setVProd(getValorNfe(valorProd, 2));
@@ -672,7 +677,7 @@ public class ComandoGerarNFe implements IComando {
     private InfAdic getInformacoes() {
         StringBuilder sb = new StringBuilder();
         // adiciona o MD5 do auxiliar.txt
-        sb.append("MD5: ").append(PAF.AUXILIAR.getProperty("out.autenticado"));
+        sb.append("MD-5: ").append(PAF.AUXILIAR.getProperty("out.autenticado"));
         // uma mensagem padrao se precisar
         if (Util.getConfig().getProperty("nfe.info") != null) {
             sb.append("#").append(Util.getConfig().getProperty("nfe.info"));

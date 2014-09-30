@@ -17,6 +17,7 @@ import br.com.openpdv.modelo.ecf.EcfDocumento;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.ecf.EcfZTotais;
+import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.visao.core.Caixa;
 import br.com.phdss.ECF;
 import br.com.phdss.EComando;
@@ -70,10 +71,12 @@ public class ComandoEmitirReducaoZ implements IComando {
                 log.error("Nao enviou os dados para o servidor!", ex);
             }
         }
+        // recupera os produtos
+        ProdProduto dados = new ProdProduto();
+        dados.setCampoOrdem(dados.getCampoId());
+        List<ProdProduto> listaProd = service.selecionar(dados, 0, 0, null);
         // gera o arquivo Movimento do ECF do dia
-        new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento, null, true).executar();
-        // gera os totais dos pagamentos
-        new ComandoTotalizarPagamentos(dataMovimento).executar();
+        new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento, listaProd).executar();
         // gera o arquivo do cat52
         if (Util.getConfig().getProperty("ecf.cat52") != null) {
             new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();

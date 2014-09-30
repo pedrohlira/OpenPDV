@@ -12,6 +12,7 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.*;
+import br.com.phdss.controlador.PAF;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -52,8 +53,15 @@ public class ComandoTotalizarPagamentos implements IComando {
         FiltroData fdDel1 = new FiltroData("ecfPagamentoTotaisData", ECompara.MAIOR_IGUAL, data);
         FiltroData fdDel2 = new FiltroData("ecfPagamentoTotaisData", ECompara.MENOR, cal.getTime());
         FiltroGrupo gfDel = new FiltroGrupo(Filtro.E, fdDel1, fdDel2);
-        Sql sql = new Sql(new EcfPagamentoTotais(), EComandoSQL.EXCLUIR, gfDel);
-        service.executar(sql);
+        EcfPagamentoTotais totais = new EcfPagamentoTotais();
+        Sql sql = new Sql(totais, EComandoSQL.EXCLUIR, gfDel);
+        List<Integer> resps = service.executar(sql);
+        // atualiza contador
+        int tot = 0;
+        for(Integer resp : resps){
+            tot += resp;
+        }
+        PAF.validarPAF(totais, -1 * tot);
 
         // seleciona todas as formas de pagamentos
         List<EcfPagamentoTipo> tipos = service.selecionar(new EcfPagamentoTipo(), 0, 0, null);

@@ -3,8 +3,8 @@ package br.com.openpdv.visao.fiscal;
 import br.com.phdss.Util;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
-import br.com.phdss.fiscal.ACBR;
 import br.com.phdss.EComando;
+import br.com.phdss.IECF;
 import br.com.phdss.controlador.PAF;
 import java.awt.Cursor;
 import java.awt.event.KeyEvent;
@@ -400,7 +400,7 @@ public class PAF_LMF extends JDialog {
                     }
 
                     Aguarde.getInstancia().setVisible(false);
-                    if (ACBR.ERRO.equals(resp[0])) {
+                    if (IECF.ERRO.equals(resp[0])) {
                         log.error("Nao foi possivel emitir a leitura fiscal! -> " + resp[1]);
                         JOptionPane.showMessageDialog(paf_mf, "Não foi possível emitir a leitura!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
                     }

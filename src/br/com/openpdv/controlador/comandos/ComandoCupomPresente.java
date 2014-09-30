@@ -207,6 +207,7 @@ public class ComandoCupomPresente implements IComando {
             throw new OpenPdvException(resp[1]);
         } else {
             ecf.enviar(EComando.ECF_FechaRelatorio);
+            new ComandoSalvarDocumento("RG").executar();
         }
     }
 }

@@ -125,7 +125,7 @@ public class Sobre extends JDialog {
         lblEmpresaNome.setText("PhD - Systems Solutions");
 
         lblVersaoNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
-        lblVersaoNome.setText("1.00");
+        lblVersaoNome.setText("2.00");
 
         lblAutorNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblAutorNome.setText("Pedro Henrique de Lira");
@@ -146,7 +146,7 @@ public class Sobre extends JDialog {
         lblSiteNome.setText("http://phdss.com.br");
 
         lblEmailNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
-        lblEmailNome.setText("openpdv@phdss.com.br");
+        lblEmailNome.setText("suporte@phdss.com.br");
 
         lblTelefoneNome.setFont(new java.awt.Font("Serif", 1, 14)); // NOI18N
         lblTelefoneNome.setText("+55 (82) 3313-6532");

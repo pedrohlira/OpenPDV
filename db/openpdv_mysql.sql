@@ -32,6 +32,7 @@ CREATE TABLE `sis_usuario` (
   `sis_usuario_ativo` bit(1) NOT NULL,
   `sis_usuario_caixa` bit(1) NOT NULL,
   `sis_usuario_gerente` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`sis_usuario_id`),
   UNIQUE KEY `UK_sis_usuario_1` (`sis_usuario_login`)
 ) ENGINE=InnoDB;
@@ -61,7 +62,8 @@ CREATE TABLE `ibpt` (
   `ibpt_descricao` varchar(500) NOT NULL,
   `ibpt_aliqNac` decimal(10,2) NOT NULL,
   `ibpt_aliqImp` decimal(10,2) NOT NULL,
-  `ibpt_versao` varchar(5) DEFAULT NULL
+  `ibpt_versao` varchar(5) DEFAULT NULL,
+  `ead` varchar(260) NULL,
 ) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -93,6 +95,7 @@ CREATE TABLE `ecf_impressora` (
   `ecf_impressora_modelo` varchar(20) NOT NULL,
   `ecf_impressora_caixa` int(3) NOT NULL,
   `ecf_impressora_ativo` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_impressora_id`)
 ) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -118,6 +121,7 @@ CREATE TABLE `prod_grade_tipo` (
   `prod_grade_tipo_id` int(11) NOT NULL AUTO_INCREMENT,
   `prod_grade_tipo_nome` varchar(50) NOT NULL,
   `prod_grade_tipo_opcao` char(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`prod_grade_tipo_id`)
 ) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -148,6 +152,7 @@ CREATE TABLE `ecf_troca` (
   `ecf_troca_ecf` int(11) NOT NULL,
   `ecf_troca_coo` int(11) NOT NULL,
   `ecf_troca_ativo` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_troca_id`),
   CONSTRAINT `FK_ecf_troca_1` FOREIGN KEY (`ecf_venda_id`) REFERENCES `ecf_venda` (`ecf_venda_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB;
@@ -174,6 +179,7 @@ CREATE TABLE `sis_municipio` (
   `sis_estado_id` int(11) NOT NULL,
   `sis_municipio_ibge` int(11) NOT NULL,
   `sis_municipio_descricao` varchar(100) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`sis_municipio_id`),
   UNIQUE KEY `UK_sis_municipio_1` (`sis_municipio_ibge`),
   KEY `FK_sis_municipio_1` (`sis_estado_id`),
@@ -208,6 +214,7 @@ CREATE TABLE `ecf_troca_produto` (
   `ecf_troca_produto_valor` decimal(10,2) NOT NULL,
   `ecf_troca_produto_total` decimal(10,2) NOT NULL,
   `ecf_troca_produto_ordem` int(11) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_troca_produto_id`),
   KEY `FK_ecf_troca_produto_1` (`ecf_troca_id`),
   KEY `FK_ecf_troca_produto_2` (`prod_produto_id`),
@@ -239,6 +246,7 @@ CREATE TABLE `ecf_z_totais` (
   `ecf_z_id` int(11) NOT NULL,
   `ecf_z_totais_codigo` varchar(7) NOT NULL,
   `ecf_z_totais_valor` decimal(13,2) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_z_totais_id`),
   UNIQUE KEY `UK_ecf_z_totais_1` (`ecf_z_id`,`ecf_z_totais_codigo`),
   CONSTRAINT `FK_z_totais_1` FOREIGN KEY (`ecf_z_id`) REFERENCES `ecf_z` (`ecf_z_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -275,6 +283,7 @@ CREATE TABLE `ecf_pagamento` (
   `ecf_pagamento_estorno_data` datetime DEFAULT NULL,
   `ecf_pagamento_estorno_valor` decimal(12,2) DEFAULT NULL,
   `ecf_pagamento_estorno_nsu` varchar(12) DEFAULT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_pagamento_id`),
   KEY `FK_ecf_pagamento_1` (`ecf_venda_id`),
   KEY `FK_ecf_pagamento_2` (`ecf_pagamento_tipo_id`),
@@ -307,6 +316,7 @@ CREATE TABLE `prod_composicao` (
   `prod_embalagem_id` int(11) NOT NULL,
   `prod_composicao_quantidade` decimal(10,4) NOT NULL,
   `prod_composicao_valor` decimal(10,2) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`prod_composicao_id`),
   KEY `FK_prod_composicao_1` (`prod_produto_principal`),
   KEY `FK_prod_composicao_2` (`prod_produto_id`),
@@ -339,6 +349,7 @@ CREATE TABLE `prod_embalagem` (
   `prod_embalagem_nome` varchar(6) NOT NULL,
   `prod_embalagem_descricao` varchar(100) NOT NULL,
   `prod_embalagem_unidade` int(11) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`prod_embalagem_id`),
   UNIQUE KEY `UK_prod_embalagem_1` (`prod_embalagem_nome`)
 ) ENGINE=InnoDB;
@@ -367,6 +378,7 @@ CREATE TABLE `prod_preco` (
   `prod_embalagem_id` int(11) NOT NULL,
   `prod_preco_valor` decimal(10,2) NOT NULL,
   `prod_preco_barra` varchar(14) DEFAULT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`prod_preco_id`),
   KEY `FK_prod_preco_1` (`prod_produto_id`),
   KEY `FK_prod_preco_2` (`prod_embalagem_id`),
@@ -397,6 +409,7 @@ CREATE TABLE `sis_estado` (
   `sis_estado_ibge` int(11) NOT NULL,
   `sis_estado_descricao` varchar(100) NOT NULL,
   `sis_estado_sigla` char(2) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`sis_estado_id`),
   UNIQUE KEY `UK_sis_estado_1` (`sis_estado_ibge`)
 ) ENGINE=InnoDB;
@@ -432,6 +445,7 @@ CREATE TABLE `ecf_nota_produto` (
   `ecf_nota_produto_icms` decimal(4,2) NOT NULL,
   `ecf_nota_produto_ipi` decimal(4,2) NOT NULL,
   `ecf_nota_produto_ordem` int(11) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_nota_produto_id`),
   KEY `FK_ecf_nota_produto_1` (`ecf_nota_id`),
   KEY `FK_ecf_nota_produto_2` (`prod_produto_id`),
@@ -475,6 +489,7 @@ CREATE TABLE `ecf_nota_eletronica` (
   `ecf_nota_eletronica_protocolo_cancelado` varchar(15) NOT NULL,
   `ecf_nota_eletronica_xml_cancelado` text NOT NULL,
   `ecf_nota_eletronica_recibo` varchar(15) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_nota_eletronica_id`),
   UNIQUE KEY `UK_ecf_nota_eletronica_1` (`ecf_nota_eletronica_chave`),
   KEY `FK_ecf_nota_eletronica_1` (`sis_cliente_id`),
@@ -515,6 +530,7 @@ CREATE TABLE `sis_empresa` (
   `sis_empresa_fone` varchar(10) NOT NULL,
   `sis_empresa_email` varchar(100) NOT NULL,
   `sis_empresa_contador` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`sis_empresa_id`),
   KEY `FK_sis_empresa_1` (`sis_municipio_id`),
   CONSTRAINT `FK_sis_empresa_1` FOREIGN KEY (`sis_municipio_id`) REFERENCES `sis_municipio` (`sis_municipio_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -544,6 +560,7 @@ CREATE TABLE `ecf_pagamento_totais` (
   `ecf_pagamento_totais_data` date NOT NULL,
   `ecf_pagamento_totais_documento` varchar(20) NOT NULL,
   `ecf_pagamento_totais_valor` decimal(12,2) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_pagamento_totais_id`),
   KEY `FK_ecf_pagamento_totais_1` (`ecf_pagamento_tipo_id`),
   CONSTRAINT `FK_ecf_pagamento_totais_1` FOREIGN KEY (`ecf_pagamento_tipo_id`) REFERENCES `ecf_pagamento_tipo` (`ecf_pagamento_tipo_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -585,6 +602,7 @@ CREATE TABLE `ecf_venda_produto` (
   `ecf_venda_produto_total` decimal(10,2) NOT NULL,
   `ecf_venda_produto_cancelado` bit(1) NOT NULL,
   `ecf_venda_produto_ordem` int(11) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_venda_produto_id`),
   KEY `FK_ecf_venda_produto_1` (`ecf_venda_id`),
   KEY `FK_ecf_venda_produto_2` (`prod_embalagem_id`),
@@ -631,6 +649,7 @@ CREATE TABLE `ecf_venda` (
   `ecf_venda_cancelada` bit(1) NOT NULL,
   `ecf_venda_sinc` bit(1) NOT NULL,
   `ecf_venda_observacao` varchar(255) DEFAULT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_venda_id`),
   KEY `FK_ecf_venda_1` (`sis_usuario_id`),
   KEY `FK_ecf_venda_2` (`ecf_z_id`),
@@ -678,6 +697,7 @@ CREATE TABLE `sis_cliente` (
   `sis_cliente_telefone` varchar(100) NOT NULL,
   `sis_cliente_email` varchar(100) NOT NULL,
   `sis_cliente_data` datetime NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`sis_cliente_id`),
   KEY `FK_sis_cliente_1` (`sis_municipio_id`),
   CONSTRAINT `FK_sis_cliente_1` FOREIGN KEY (`sis_municipio_id`) REFERENCES `sis_municipio` (`sis_municipio_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -714,6 +734,7 @@ CREATE TABLE `ecf_z` (
   `ecf_z_bruto` decimal(14,2) NOT NULL,
   `ecf_z_gt` decimal(14,2) NOT NULL,
   `ecf_z_issqn` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_z_id`),
   KEY `FK_ecf_z_1` (`ecf_impressora_id`),
   CONSTRAINT `FK_ecf_z_1` FOREIGN KEY (`ecf_impressora_id`) REFERENCES `ecf_impressora` (`ecf_impressora_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -750,6 +771,7 @@ CREATE TABLE `ecf_nota` (
   `ecf_nota_pis` decimal(10,2) NOT NULL,
   `ecf_nota_cofins` decimal(10,2) NOT NULL,
   `ecf_nota_cancelada` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_nota_id`),
   UNIQUE KEY `UK_ecf_nota_1` (`ecf_nota_serie`,`ecf_nota_subserie`,`ecf_nota_numero`),
   KEY `FK_ecf_nota_1` (`sis_cliente_id`),
@@ -793,6 +815,7 @@ CREATE TABLE `prod_produto` (
   `prod_produto_cadastrado` datetime NOT NULL,
   `prod_produto_alterado` datetime DEFAULT NULL,
   `prod_produto_ativo` bit(1) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`prod_produto_id`),
   KEY `FK_prod_produto_1` (`prod_embalagem_id`),
   KEY `IK_prod_produto_1` (`prod_produto_barra`),
@@ -832,6 +855,7 @@ CREATE TABLE `prod_grade` (
   `prod_grade_cor` varchar(50) NOT NULL,
   `prod_grade_opcao` varchar(50) NOT NULL,
   `prod_grade_estoque` decimal(10,4) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`prod_grade_id`),
   KEY `FK_prod_grade_1` (`prod_produto_id`),
   CONSTRAINT `FK_prod_grade_1` FOREIGN KEY (`prod_produto_id`) REFERENCES `prod_produto` (`prod_produto_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -861,6 +885,7 @@ CREATE TABLE `ecf_pagamento_parcela` (
   `ecf_pagamento_parcela_data` date NOT NULL,
   `ecf_pagamento_parcela_valor` decimal(12,2) NOT NULL,
   `ecf_pagamento_parcela_nsu` varchar(32) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_pagamento_parcela_id`),
   KEY `FK_ecf_pagamento_parcela_1` (`ecf_pagamento_id`),
   CONSTRAINT `FK_ecf_pagamento_parcela_1` FOREIGN KEY (`ecf_pagamento_id`) REFERENCES `ecf_pagamento` (`ecf_pagamento_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -895,6 +920,7 @@ CREATE TABLE `ecf_documento` (
   `ecf_documento_cdc` int(11) NOT NULL,
   `ecf_documento_tipo` varchar(2) NOT NULL,
   `ecf_documento_data` datetime NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_documento_id`),
   KEY `FK_ecf_documento_1` (`ecf_impressora_id`),
   CONSTRAINT `FK_ecf_documento_1` FOREIGN KEY (`ecf_impressora_id`) REFERENCES `ecf_impressora` (`ecf_impressora_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -927,6 +953,7 @@ CREATE TABLE `ecf_pagamento_tipo` (
   `ecf_pagamento_tipo_vinculado` bit(1) NOT NULL,
   `ecf_pagamento_tipo_debito` bit(1) NOT NULL,
   `ecf_pagamento_tipo_rede` varchar(20) NOT NULL,
+  `ead` varchar(260) NULL,
   PRIMARY KEY (`ecf_pagamento_tipo_id`)
 ) ENGINE=InnoDB;
 /*!40101 SET character_set_client = @saved_cs_client */;

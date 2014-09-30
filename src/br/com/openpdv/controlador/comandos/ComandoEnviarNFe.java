@@ -39,7 +39,7 @@ public class ComandoEnviarNFe implements IComando {
             int nfeINI = xml.indexOf("<NFe");
             int nfeFIM = xml.indexOf("</NFe>");
             xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><enviNFe xmlns=\"http://www.portalfiscal.inf.br/nfe\" versao=\""
-                    + Util.getConfig().getProperty("nfe.versao") + "\"><idLote>" + new Date().getTime() + "</idLote>" + xml.substring(nfeINI, nfeFIM) + "</NFe></enviNFe>";
+                    + Util.getConfig().getProperty("nfe.versao") + "\"><idLote>" + new Date().getTime() + "</idLote><indSinc>0</indSinc>" + xml.substring(nfeINI, nfeFIM) + "</NFe></enviNFe>";
 
             // assinando o documento
             Document doc = NFe.getXml(xml);
@@ -88,7 +88,7 @@ public class ComandoEnviarNFe implements IComando {
         // recupera o numero
         String numero = NFe.getValorTag(doc.getDocumentElement(), "nNF");
         // recupera a data
-        String data = NFe.getValorTag(doc.getDocumentElement(), "dEmi");
+        String data = NFe.getValorTag(doc.getDocumentElement(), "dhEmi");
         Date dtData = Util.formataData(data, "yyyy-MM-dd");
         // recupera os totais
         Element total = (Element) doc.getElementsByTagName("total").item(0);

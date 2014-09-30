@@ -1,13 +1,10 @@
 package br.com.openpdv.visao.nota;
 
 import br.com.openpdv.controlador.core.*;
-import br.com.openpdv.modelo.core.EComandoSQL;
 import br.com.openpdv.modelo.core.OpenPdvException;
-import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.core.filtro.FiltroTexto;
-import br.com.openpdv.modelo.core.parametro.ParametroFormula;
 import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaProduto;
 import br.com.openpdv.modelo.produto.ProdComposicao;
@@ -780,18 +777,13 @@ public class NotaConsumidor extends javax.swing.JDialog {
                 nota.setEcfNotaPis((Double) txtPIS.getValue());
                 nota.setEcfNotaCofins((Double) txtCOFINS.getValue());
                 nota.setEcfNotaCancelada(false);
-
-                // recupera uma instancia do gerenciador de entidades
-                emf = Conexao.getInstancia();
-                em = emf.createEntityManager();
-                em.getTransaction().begin();
                 // salva
-                nota = (EcfNota) service.salvar(em, nota);
+                nota = (EcfNota) service.salvar(nota);
 
                 // valida sub-lista
                 List<EcfNotaProduto> produtos = new ArrayList<>();
                 if (validarProdutos(produtos, nota)) {
-                    service.salvar(em, produtos);
+                    service.salvar(produtos);
 
                     // atualiza o estoque
                     for (EcfNotaProduto np : produtos) {
@@ -803,27 +795,17 @@ public class NotaConsumidor extends javax.swing.JDialog {
                         }
 
                         // atualiza o estoque
-                        ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
-                        FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, np.getProdProduto().getId());
-                        Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                        service.executar(em, sql);
+                        ProdProduto prod = np.getProdProduto();
+                        prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() - qtd);
+                        service.salvar(prod);
                     }
 
-                    em.getTransaction().commit();
                     JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Nota Consumidor", JOptionPane.INFORMATION_MESSAGE);
                     setLista();
-                } else {
-                    em.getTransaction().rollback();
                 }
             } catch (Exception ex) {
-                if (em != null && em.getTransaction().isActive()) {
-                    em.getTransaction().rollback();
-                }
                 log.error("Erro ao salvar a nota.", ex);
                 JOptionPane.showMessageDialog(this, "Não foi possível salvar o registro!", "Nota Consumidor", JOptionPane.WARNING_MESSAGE);
-            } finally {
-                em.close();
-                emf.close();
             }
         }
     }
@@ -848,7 +830,6 @@ public class NotaConsumidor extends javax.swing.JDialog {
                     service.salvar(nota);
 
                     // atualiza o estoque
-                    List<Sql> sqls = new ArrayList<>();
                     for (EcfNotaProduto np : nota.getEcfNotaProdutos()) {
                         // fatorando a quantida no estoque
                         double qtd = np.getEcfNotaProdutoQuantidade();
@@ -858,12 +839,10 @@ public class NotaConsumidor extends javax.swing.JDialog {
                         }
 
                         // atualiza o estoque
-                        ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
-                        FiltroNumero fn1 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, np.getProdProduto().getId());
-                        Sql sql = new Sql(np.getProdProduto(), EComandoSQL.ATUALIZAR, fn1, pf);
-                        sqls.add(sql);
+                        ProdProduto prod = np.getProdProduto();
+                        prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() + qtd);
+                        service.salvar(prod);
                     }
-                    service.executar(sqls.toArray(new Sql[]{}));
                 } catch (OpenPdvException ex) {
                     log.error("Erro ao cancelar a nota.", ex);
                     JOptionPane.showMessageDialog(this, "Não foi possível cancelar o registro!", "Nota Consumidor", JOptionPane.WARNING_MESSAGE);

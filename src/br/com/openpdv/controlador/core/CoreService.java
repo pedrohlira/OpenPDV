@@ -4,8 +4,6 @@ import br.com.openpdv.modelo.core.*;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.core.parametro.Parametro;
-import br.com.openpdv.modelo.ecf.EcfDocumento;
-import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import java.lang.reflect.Method;
@@ -13,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
@@ -365,15 +362,15 @@ public class CoreService<E extends Dados> {
     public E salvar(EntityManager em, E unidade) throws OpenPdvException {
         try {
             padronizaLetras(unidade, unidade.getTipoLetra());
-            String ead = Util.encriptar(unidade);
+            String ead = Util.gerarEAD(unidade);
             unidade.setEad(ead);
             if (unidade.getId() == null || unidade.getId() == 0) {
                 unidade.setId(null);
                 em.persist(unidade);
+                PAF.validarPAF(unidade, 1);
             } else {
                 em.merge(unidade);
             }
-            PAF.validarPAF(unidade, 1);
             return unidade;
         } catch (Exception ex) {
             log.error("Erro ao salvar", ex);
@@ -746,7 +743,6 @@ public class CoreService<E extends Dados> {
         E dado = sql.getClasse();
         Collection<E> lista = selecionar(dado, 0, 0, sql.getFiltro());
         deletar(em, lista);
-
         return lista.size();
     }
 

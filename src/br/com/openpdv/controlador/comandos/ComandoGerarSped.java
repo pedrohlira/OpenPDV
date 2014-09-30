@@ -356,7 +356,7 @@ public class ComandoGerarSped implements IComando {
         List<Dados0450> l450 = new ArrayList<>();
         Dados0450 d450 = new Dados0450();
         d450.setCod_inf("1");
-        d450.setTxt("MD5 DO PAF-ECF GERADOR DA NFE");
+        d450.setTxt("MD-5 DO PAF-ECF GERADOR DA NFE");
         l450.add(d450);
         Util.normaliza(d450);
         return l450;

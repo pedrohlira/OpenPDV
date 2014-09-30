@@ -6,7 +6,6 @@ import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento;
 import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento.InfEvento;
 import br.inf.portalfiscal.nfe.schema.eventoCancNFe.TEvento.InfEvento.DetEvento;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.xml.bind.JAXBElement;
 
@@ -34,7 +33,7 @@ public class ComandoGerarNFeCancelada implements IComando {
             String chave = nota.getEcfNotaEletronicaChave();
             String uf = chave.substring(0, 2);
             String cnpj = chave.substring(6, 20);
-            String data = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").format(agora);
+            String data = Util.formataData(agora, "yyyy-MM-dd'T'HH:mm:ssz").replace("GMT", "");
             String tipo = "110111";
             String versao = Util.getConfig().getProperty("nfe.evento");
             String seq = "1";
@@ -46,7 +45,7 @@ public class ComandoGerarNFeCancelada implements IComando {
             infEvento.setTpAmb(Util.getConfig().getProperty("nfe.tipoamb"));
             infEvento.setCNPJ(cnpj);
             infEvento.setChNFe(chave);
-            infEvento.setDhEvento(data.replace("GMT", ""));
+            infEvento.setDhEvento(data);
             infEvento.setTpEvento(tipo);
             infEvento.setNSeqEvento(seq);
             infEvento.setVerEvento(versao);
