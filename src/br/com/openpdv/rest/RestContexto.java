@@ -4,11 +4,9 @@ import br.com.openpdv.modelo.ecf.*;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdGrade;
-import br.com.openpdv.modelo.produto.ProdGradeTipo;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.*;
-import java.util.List;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
@@ -26,7 +24,7 @@ public class RestContexto extends MOXyJsonProvider implements ContextResolver<JA
 
     private final JAXBContext context;
     private final Class[] types = {SisEmpresa.class, SisEstado.class, SisMunicipio.class, SisUsuario.class, SisCliente.class,
-        EcfPagamentoTipo.class, ProdEmbalagem.class, ProdProduto.class, ProdPreco.class, ProdComposicao.class, ProdGrade.class, ProdGradeTipo.class,
+        EcfPagamentoTipo.class, ProdEmbalagem.class, ProdProduto.class, ProdPreco.class, ProdComposicao.class, ProdGrade.class,
         EcfImpressora.class, EcfDocumento.class, EcfNota.class, EcfNotaProduto.class, EcfNotaEletronica.class, ENotaStatus.class,
         EcfZ.class, EcfZTotais.class, EcfVenda.class, EcfVendaProduto.class, EcfPagamentoTipo.class, EcfPagamento.class,
         EcfPagamentoParcela.class, EcfPagamentoTotais.class, EcfTroca.class, EcfTrocaProduto.class, String.class};

@@ -42,7 +42,7 @@ public class ComandoSalvarPagamento implements IComando {
         double valCard = 0.00;
         double total = 0.00;
         for (EcfPagamento pag : pagamentos) {
-            if (pag.getEcfPagamentoTipo().isEcfPagamentoTipoTef()) {
+            if (pag.getEcfPagamentoTipo().getEcfPagamentoTipoCodigo().equals(Util.getConfig().getProperty("ecf.cartao"))) {
                 valCard += pag.getEcfPagamentoValor();
             }
             total += pag.getEcfPagamentoValor();

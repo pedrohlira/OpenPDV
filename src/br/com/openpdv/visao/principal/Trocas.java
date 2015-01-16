@@ -129,7 +129,7 @@ public class Trocas extends javax.swing.JDialog {
             dtmProdutos.addRow(obj);
             totalizar();
         }
-        
+
         private void erro(Exception ex) {
             log.error(ex);
             JOptionPane.showMessageDialog(trocas, "Não foi possível adicionar o produto!", "Pesquisa", JOptionPane.WARNING_MESSAGE);
@@ -687,7 +687,9 @@ public class Trocas extends javax.swing.JDialog {
      */
     private void selecionar() {
         dispose();
-        async.sucesso(selecionado);
+        if (async != null) {
+            async.sucesso(selecionado);
+        }
     }
 
     /**
@@ -719,8 +721,9 @@ public class Trocas extends javax.swing.JDialog {
                 // valida sub-lista
                 List<EcfTrocaProduto> produtos = new ArrayList<>();
                 if (validarProdutos(produtos, troca)) {
-                    service.salvar(em, produtos);
+                    produtos = (List<EcfTrocaProduto>) service.salvar(em, produtos);
                     em.getTransaction().commit();
+                    troca.setEcfTrocaProdutos(produtos);
                     JOptionPane.showMessageDialog(this, "Registro salvo com sucesso.", "Trocas", JOptionPane.INFORMATION_MESSAGE);
                     this.selecionado = troca;
                     selecionar();

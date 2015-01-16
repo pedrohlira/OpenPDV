@@ -52,7 +52,7 @@ public class NotaConsumidor extends javax.swing.JDialog {
     /**
      * Variavel que responde de modo assincrono a pesquisa de produto.
      */
-    private AsyncCallback<ProdProduto> pesquisado = new AsyncCallback<ProdProduto>() {
+    private final AsyncCallback<ProdProduto> pesquisado = new AsyncCallback<ProdProduto>() {
         @Override
         public void sucesso(final ProdProduto prod) {
             if (prod == null) {
@@ -948,11 +948,11 @@ public class NotaConsumidor extends javax.swing.JDialog {
             txtNumero.setValue(tabNotas.getModel().getValueAt(rowModel, 3));
             txtData.setText(tabNotas.getModel().getValueAt(rowModel, 4).toString());
             txtCPF_CNPJ.setText(tabNotas.getModel().getValueAt(rowModel, 5).toString());
-            txtBruto.setValue(tabNotas.getModel().getValueAt(rowModel, 6));
-            txtDesconto.setValue(tabNotas.getModel().getValueAt(rowModel, 7));
-            txtLiquido.setValue(tabNotas.getModel().getValueAt(rowModel, 8));
-            txtPIS.setValue(tabNotas.getModel().getValueAt(rowModel, 9));
-            txtCOFINS.setValue(tabNotas.getModel().getValueAt(rowModel, 10));
+            txtBruto.setValue(tabNotas.getModel().getValueAt(rowModel, 7));
+            txtDesconto.setValue(tabNotas.getModel().getValueAt(rowModel, 8));
+            txtLiquido.setValue(tabNotas.getModel().getValueAt(rowModel, 9));
+            txtPIS.setValue(tabNotas.getModel().getValueAt(rowModel, 10));
+            txtCOFINS.setValue(tabNotas.getModel().getValueAt(rowModel, 11));
             btnAdicionar.setEnabled(false);
             btnRemover.setEnabled(false);
             btnSalvar.setEnabled(false);

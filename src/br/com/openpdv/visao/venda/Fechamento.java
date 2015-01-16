@@ -615,7 +615,10 @@ public class Fechamento extends javax.swing.JDialog {
             public void sucesso(Integer resultado) {
                 Caixa.getInstancia().getVenda().setSisGerente(gerente.getSisGerente());
                 String texto = JOptionPane.showInputDialog(fechamento, "Digite o valor.\nPara porcentagem coloque % no final.", "ACRESCIMO", JOptionPane.OK_CANCEL_OPTION);
-                acresdesc(resultado, "ACRESCIMO", texto);
+                if (acresdesc(resultado, "ACRESCIMO", texto) == false) {
+                    gerente.setAsync(this);
+                    gerente.setVisible(true);
+                }
             }
 
             @Override
@@ -623,7 +626,7 @@ public class Fechamento extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(fechamento, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             gerente.setSisGerente(Login.getOperador());
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
@@ -652,7 +655,10 @@ public class Fechamento extends javax.swing.JDialog {
             public void sucesso(Integer resultado) {
                 Caixa.getInstancia().getVenda().setSisGerente(gerente.getSisGerente());
                 String texto = JOptionPane.showInputDialog(fechamento, "Digite o valor.\nPara porcentagem coloque % no final.", "DESCONTO", JOptionPane.OK_CANCEL_OPTION);
-                acresdesc(resultado, "DESCONTO", texto);
+                if (acresdesc(resultado, "DESCONTO", texto) == false) {
+                    gerente.setAsync(this);
+                    gerente.setVisible(true);
+                }
             }
 
             @Override
@@ -660,7 +666,7 @@ public class Fechamento extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(fechamento, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             gerente.setSisGerente(Login.getOperador());
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
@@ -735,7 +741,7 @@ public class Fechamento extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(fechamento, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
             }
         };
-        
+
         if (Login.getOperador().isSisUsuarioGerente()) {
             gerente.setSisGerente(Login.getOperador());
             async.sucesso(Login.getOperador().getSisUsuarioDesconto());
@@ -1064,7 +1070,7 @@ public class Fechamento extends javax.swing.JDialog {
      * @param nome o nome de distingue o ACRESCIMO do DESCONTO.
      * @param texto o valor digitado pelo operador.
      */
-    private void acresdesc(int max, String nome, String texto) {
+    private boolean acresdesc(int max, String nome, String texto) {
         boolean porcento = false;
 
         if (texto != null) {
@@ -1096,12 +1102,14 @@ public class Fechamento extends javax.swing.JDialog {
                         atualizar();
                     } else {
                         JOptionPane.showMessageDialog(this, "Valor informado é maior que o permitido!\nPorcentagem máximo permitida pelo gerente [" + max + "%]", nome.toUpperCase(), JOptionPane.WARNING_MESSAGE);
+                        return false;
                     }
                 }
             } catch (NumberFormatException nfe) {
                 JOptionPane.showMessageDialog(this, "Valor informado inválido!", nome.toUpperCase(), JOptionPane.INFORMATION_MESSAGE);
             }
         }
+        return true;
     }
 
     /**

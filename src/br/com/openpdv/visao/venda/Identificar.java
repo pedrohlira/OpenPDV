@@ -14,6 +14,7 @@ import br.com.openpdv.visao.core.Caixa;
 import br.com.openpdv.visao.principal.Clientes;
 import java.awt.event.KeyEvent;
 import java.util.Date;
+import java.util.List;
 import javax.swing.*;
 import org.apache.log4j.Logger;
 
@@ -42,7 +43,7 @@ public class Identificar extends javax.swing.JDialog {
         initComponents();
 
         // colocando limites nos campos
-        txtCPF_CNPJ.setDocument(new TextFieldLimit(20));
+        txtCPF_CNPJ.setDocument(new TextFieldLimit(14, true));
         txtNome.setDocument(new TextFieldLimit(100));
         txtEndereco.setDocument(new TextFieldLimit(255));
     }
@@ -465,27 +466,26 @@ public class Identificar extends javax.swing.JDialog {
         if (validar()) {
             try {
                 if (cliente == null) {
-                    cliente = new SisCliente();
-                }
-                FiltroBinario fb = new FiltroBinario("sisEmpresaContador", ECompara.IGUAL, false);
-                SisEmpresa empresa = (SisEmpresa) service.selecionar(new SisEmpresa(), fb);
+                    FiltroBinario fb = new FiltroBinario("sisEmpresaContador", ECompara.IGUAL, false);
+                    SisEmpresa empresa = (SisEmpresa) service.selecionar(new SisEmpresa(), fb);
 
-                cliente.setSisClienteDoc(txtCPF_CNPJ.getText().replaceAll("\\D", ""));
-                cliente.setSisClienteNome(txtNome.getText());
-                cliente.setSisClienteDoc1("ISENTO");
-                cliente.setSisClienteEndereco(txtEndereco.getText());
-                cliente.setSisClienteNumero(0);
-                cliente.setSisClienteComplemento("");
-                cliente.setSisClienteBairro("NAO INFORMADO");
-                cliente.setSisClienteCep("00000-000");
-                cliente.setSisMunicipio(empresa.getSisMunicipio());
-                cliente.setSisClienteTelefone("(00) 0000-0000");
-                cliente.setSisClienteEmail("n@o.informado");
-                cliente.setSisClienteData(new Date());
-                cliente = (SisCliente) service.salvar(cliente);
+                    cliente = new SisCliente();
+                    cliente.setSisClienteDoc(txtCPF_CNPJ.getText().replaceAll("\\D", ""));
+                    cliente.setSisClienteNome(txtNome.getText());
+                    cliente.setSisClienteEndereco(txtEndereco.getText());
+                    cliente.setSisClienteDoc1("ISENTO");
+                    cliente.setSisClienteNumero(0);
+                    cliente.setSisClienteComplemento("");
+                    cliente.setSisClienteBairro("NAO INFORMADO");
+                    cliente.setSisClienteCep("00000-000");
+                    cliente.setSisMunicipio(empresa.getSisMunicipio());
+                    cliente.setSisClienteTelefone("(00) 0000-0000");
+                    cliente.setSisClienteEmail("n@o.informado");
+                    cliente.setSisClienteData(new Date());
+                    cliente = (SisCliente) service.salvar(cliente);
+                }
                 cliente.setVendedor(vendedor);
                 cliente.setCpfCupom(chkCPF.isSelected());
-
                 async.sucesso(cliente);
             } catch (OpenPdvException ex) {
                 async.falha(ex);
@@ -521,16 +521,19 @@ public class Identificar extends javax.swing.JDialog {
      */
     private void validarCliente() {
         try {
-            String texto = txtCPF_CNPJ.getText().replaceAll("\\D", "");
-            FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto);
-            cliente = (SisCliente) service.selecionar(new SisCliente(), ft);
+            if (validar()) {
+                String texto = txtCPF_CNPJ.getText().replaceAll("\\D", "");
+                FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, texto);
+                List<SisCliente> lista = (List<SisCliente>) service.selecionar(new SisCliente(), 0, 1, ft);
 
-            if (cliente != null) {
-                txtNome.setText(cliente.getSisClienteNome());
-                txtEndereco.setText(cliente.getSisClienteEndereco());
-            } else {
-                txtNome.setText("NAO INFORMADO");
-                txtEndereco.setText("NAO INFORMADO");
+                if (lista.size() > 0) {
+                    cliente = lista.get(0);
+                    txtNome.setText(cliente.getSisClienteNome());
+                    txtEndereco.setText(cliente.getSisClienteEndereco());
+                } else {
+                    txtNome.setText("NAO INFORMADO");
+                    txtEndereco.setText("NAO INFORMADO");
+                }
             }
         } catch (Exception ex) {
             cliente = null;
@@ -561,8 +564,7 @@ public class Identificar extends javax.swing.JDialog {
      * @return retorna verdadeiro se valido, falso caso contrario.
      */
     private boolean validar() {
-        String texto = txtCPF_CNPJ.getText();
-        texto = texto.replaceAll("\\D", "");
+        String texto = txtCPF_CNPJ.getText().replaceAll("\\D", "");
         if (!texto.equals("")) {
             if (texto.length() == 11) {
                 return Util.isCPF(texto);
@@ -570,7 +572,6 @@ public class Identificar extends javax.swing.JDialog {
                 return Util.isCNPJ(texto);
             }
         }
-
         return false;
     }
 

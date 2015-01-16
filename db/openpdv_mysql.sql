@@ -111,32 +111,6 @@ INSERT INTO `ecf_impressora` VALUES (1,'2D',' ','010100','EMULADOR','ECF-IF','BE
 UNLOCK TABLES;
 
 --
--- Table structure for table `prod_grade_tipo`
---
-
-DROP TABLE IF EXISTS `prod_grade_tipo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `prod_grade_tipo` (
-  `prod_grade_tipo_id` int(11) NOT NULL AUTO_INCREMENT,
-  `prod_grade_tipo_nome` varchar(50) NOT NULL,
-  `prod_grade_tipo_opcao` char(1) NOT NULL,
-  `ead` varchar(260) NULL,
-  PRIMARY KEY (`prod_grade_tipo_id`)
-) ENGINE=InnoDB;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `prod_grade_tipo`
---
-
-LOCK TABLES `prod_grade_tipo` WRITE;
-/*!40000 ALTER TABLE `prod_grade_tipo` DISABLE KEYS */;
-INSERT INTO `prod_grade_tipo` VALUES (1,'PADRAO','C'),(2,'PADRAO','T'),(3,'PADRAO','O');
-/*!40000 ALTER TABLE `prod_grade_tipo` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `ecf_troca`
 --
 
@@ -686,7 +660,7 @@ DROP TABLE IF EXISTS `sis_cliente`;
 CREATE TABLE `sis_cliente` (
   `sis_cliente_id` int(11) NOT NULL AUTO_INCREMENT,
   `sis_municipio_id` int(11) NOT NULL,
-  `sis_cliente_doc` varchar(20) NOT NULL,
+  `sis_cliente_doc` varchar(14) NOT NULL,
   `sis_cliente_doc1` varchar(20) NOT NULL,
   `sis_cliente_nome` varchar(60) NOT NULL,
   `sis_cliente_endereco` varchar(100) NOT NULL,

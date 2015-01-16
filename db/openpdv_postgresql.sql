@@ -797,41 +797,6 @@ ALTER SEQUENCE prod_grade_prod_grade_id_seq OWNED BY prod_grade.prod_grade_id;
 
 
 --
--- Name: prod_grade_tipo; Type: TABLE; Schema: public; Owner: openpdv; Tablespace: 
---
-
-CREATE TABLE prod_grade_tipo (
-    prod_grade_tipo_id integer NOT NULL,
-    prod_grade_tipo_nome character varying(50) NOT NULL,
-    prod_grade_tipo_opcao character(1) NOT NULL,
-    ead character varying(260) NULL
-);
-
-
-ALTER TABLE public.prod_grade_tipo OWNER TO openpdv;
-
---
--- Name: prod_grade_tipo_prod_grade_tipo_id_seq; Type: SEQUENCE; Schema: public; Owner: openpdv
---
-
-CREATE SEQUENCE prod_grade_tipo_prod_grade_tipo_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.prod_grade_tipo_prod_grade_tipo_id_seq OWNER TO openpdv;
-
---
--- Name: prod_grade_tipo_prod_grade_tipo_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: openpdv
---
-
-ALTER SEQUENCE prod_grade_tipo_prod_grade_tipo_id_seq OWNED BY prod_grade_tipo.prod_grade_tipo_id;
-
-
---
 -- Name: prod_preco; Type: TABLE; Schema: public; Owner: openpdv; Tablespace: 
 --
 
@@ -926,7 +891,7 @@ ALTER SEQUENCE prod_produto_prod_produto_id_seq OWNED BY prod_produto.prod_produ
 CREATE TABLE sis_cliente (
     sis_cliente_id integer NOT NULL,
     sis_municipio_id integer NOT NULL,
-    sis_cliente_doc character varying(20) NOT NULL,
+    sis_cliente_doc character varying(14) NOT NULL,
     sis_cliente_doc1 character varying(20) NOT NULL,
     sis_cliente_nome character varying(60) NOT NULL,
     sis_cliente_endereco character varying(100) NOT NULL,
@@ -1247,13 +1212,6 @@ ALTER TABLE ONLY prod_embalagem ALTER COLUMN prod_embalagem_id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY prod_grade ALTER COLUMN prod_grade_id SET DEFAULT nextval('prod_grade_prod_grade_id_seq'::regclass);
-
-
---
--- Name: prod_grade_tipo_id; Type: DEFAULT; Schema: public; Owner: openpdv
---
-
-ALTER TABLE ONLY prod_grade_tipo ALTER COLUMN prod_grade_tipo_id SET DEFAULT nextval('prod_grade_tipo_prod_grade_tipo_id_seq'::regclass);
 
 
 --
@@ -13239,24 +13197,6 @@ SELECT pg_catalog.setval('prod_grade_prod_grade_id_seq', 1, false);
 
 
 --
--- Data for Name: prod_grade_tipo; Type: TABLE DATA; Schema: public; Owner: openpdv
---
-
-COPY prod_grade_tipo (prod_grade_tipo_id, prod_grade_tipo_nome, prod_grade_tipo_opcao) FROM stdin;
-1	PADRAO	C
-2	PADRAO	T
-3	PADRAO	O
-\.
-
-
---
--- Name: prod_grade_tipo_prod_grade_tipo_id_seq; Type: SEQUENCE SET; Schema: public; Owner: openpdv
---
-
-SELECT pg_catalog.setval('prod_grade_tipo_prod_grade_tipo_id_seq', 1, false);
-
-
---
 -- Data for Name: prod_preco; Type: TABLE DATA; Schema: public; Owner: openpdv
 --
 
@@ -19104,14 +19044,6 @@ ALTER TABLE ONLY prod_embalagem
 
 ALTER TABLE ONLY prod_grade
     ADD CONSTRAINT prod_grade_pkey PRIMARY KEY (prod_grade_id);
-
-
---
--- Name: prod_grade_tipo_pkey; Type: CONSTRAINT; Schema: public; Owner: openpdv; Tablespace: 
---
-
-ALTER TABLE ONLY prod_grade_tipo
-    ADD CONSTRAINT prod_grade_tipo_pkey PRIMARY KEY (prod_grade_tipo_id);
 
 
 --

@@ -51,7 +51,7 @@ public class Login {
 
     // GETs e SETs
     public static SisUsuario getOperador() {
-        return operador;
+        return operador == null ? new SisUsuario() : operador;
     }
 
     public static void setOperador(SisUsuario operador) {

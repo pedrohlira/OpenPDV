@@ -68,7 +68,7 @@ public class Clientes extends javax.swing.JDialog {
         });
 
         // colocando limites nos campos
-        txtCPF_CNPJ.setDocument(new TextFieldLimit(20));
+        txtCPF_CNPJ.setDocument(new TextFieldLimit(14, true));
         txtNome.setDocument(new TextFieldLimit(100));
         txtRG_IE.setDocument(new TextFieldLimit(20));
         txtEndereco.setDocument(new TextFieldLimit(255));
@@ -210,9 +210,7 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
         tabClientes.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tabClientes.setCellSelectionEnabled(false);
         tabClientes.setRowHeight(20);
-        tabClientes.setRowSelectionAllowed(true);
         tabClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabClientes.setShowVerticalLines(false);
         tabClientes.getTableHeader().setReorderingAllowed(false);
@@ -801,8 +799,7 @@ public class Clientes extends javax.swing.JDialog {
      * @return retorna verdadeiro se valido, falso caso contrario.
      */
     private boolean validar() {
-        String texto = txtCPF_CNPJ.getText();
-        texto = texto.replaceAll("\\D", "");
+        String texto = txtCPF_CNPJ.getText().replaceAll("\\D", "");
         if (!texto.equals("")) {
             if (texto.length() == 11) {
                 return Util.isCPF(texto);
@@ -810,7 +807,6 @@ public class Clientes extends javax.swing.JDialog {
                 return Util.isCNPJ(texto);
             }
         }
-
         return false;
     }
 

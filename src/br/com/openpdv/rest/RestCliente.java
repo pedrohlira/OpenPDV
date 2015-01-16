@@ -7,7 +7,6 @@ import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
-import br.com.openpdv.modelo.produto.ProdGradeTipo;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
 import br.com.openpdv.modelo.sistema.SisUsuario;
@@ -122,25 +121,6 @@ public class RestCliente extends ARest {
         autorizar();
         try {
             return service.selecionar(new ProdEmbalagem(), 0, 0, null);
-        } catch (Exception ex) {
-            log.error(ex);
-            throw new RestException(ex);
-        }
-    }
-
-    /**
-     * Metodo que retorna a lista de tipos de grades cadastradas no sistema.
-     *
-     * @return uma lista de objetos tipo grade em formato JSON.
-     * @throws RestException em caso de nao conseguir acessar a informacao.
-     */
-    @Path("/tipo_grade")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<ProdGradeTipo> getGradeTipo() throws RestException {
-        autorizar();
-        try {
-            return service.selecionar(new ProdGradeTipo(), 0, 0, null);
         } catch (Exception ex) {
             log.error(ex);
             throw new RestException(ex);

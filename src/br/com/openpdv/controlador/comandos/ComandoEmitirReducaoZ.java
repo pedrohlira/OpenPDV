@@ -24,13 +24,11 @@ import br.com.phdss.EComando;
 import br.com.phdss.EEstado;
 import br.com.phdss.IECF;
 import br.com.phdss.controlador.PAF;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Map.Entry;
 import org.apache.log4j.Logger;
-import org.ini4j.Wini;
 
 /**
  * Classe responsavel por executar a reducao Z
@@ -130,49 +128,29 @@ public class ComandoEmitirReducaoZ implements IComando {
      * @exception OpenPdvException dispara caso nao consiga executar.
      */
     public void emitirReducaoZBanco() throws OpenPdvException {
-        String[] dados = ecf.enviar(EComando.ECF_DadosUltimaReducaoZ);
-        if (IECF.OK.equals(dados[0])) {
+        Map<String, Object> dados = ecf.getDadosZ();
+        if (dados != null) {
             try {
-                // pega os dados
-                InputStream stream = new ByteArrayInputStream(dados[1].replace(",", ".").getBytes("UTF-8"));
-                Wini ini = new Wini(stream);
-
                 // recuperando a ultima Z emitida desta impressora e pega o ultimo coo
-                int cooIni;
                 EcfZ ultZ = new EcfZ();
                 ultZ.setOrdemDirecao(EDirecao.DESC);
                 FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
                 List<EcfZ> zs = service.selecionar(ultZ, 0, 1, fo);
-                if (zs == null || zs.isEmpty()) {
-                    cooIni = 1;
-                } else {
-                    cooIni = zs.get(0).getEcfZCooFin() + 1;
-                }
 
                 // gera o registro EcfZ
                 EcfZ z = new EcfZ();
                 z.setEcfImpressora(Caixa.getInstancia().getImpressora());
                 z.setEcfZUsuario(1);
-                z.setEcfZCrz(ini.get("ECF", "NumCRZ", int.class));
-                z.setEcfZCooIni(cooIni);
-                z.setEcfZCooFin(ini.get("ECF", "NumCOO", int.class));
-                z.setEcfZCro(ini.get("ECF", "NumCRO", int.class));
-                try {
-                    String movimento = ini.get("ECF", "DataMovimento");
-                    if (movimento.equals("00/00/00")) {
-                        z.setEcfZMovimento(new Date());
-                    } else {
-                        z.setEcfZMovimento(new SimpleDateFormat("dd/MM/yy").parse(movimento));
-                    }
-                } catch (Exception ex) {
-                    z.setEcfZMovimento(new Date());
-                }
+                z.setEcfZCrz((int) dados.get("NumCRZ"));
+                z.setEcfZCooIni(zs == null || zs.isEmpty() ? 1 : zs.get(0).getEcfZCooFin() + 1);
+                z.setEcfZCooFin((int) dados.get("NumCOO"));
+                z.setEcfZCro((int) dados.get("NumCRO"));
+                z.setEcfZMovimento((Date) dados.get("DataMovimento"));
                 z.setEcfZEmissao(new Date());
-                z.setEcfZBruto(ini.get("Totalizadores", "VendaBruta", double.class));
-                z.setEcfZGt(ini.get("Totalizadores", "GrandeTotal", double.class));
+                z.setEcfZBruto((double) dados.get("VendaBruta"));
+                z.setEcfZGt((double) dados.get("GrandeTotal"));
                 String im = Caixa.getInstancia().getEmpresa().getSisEmpresaIm() == null ? "" : Caixa.getInstancia().getEmpresa().getSisEmpresaIm().replaceAll("\\D", "");
                 z.setEcfZIssqn(!im.equals(""));
-                // salva EcfZ
                 z = (EcfZ) service.salvar(z);
                 dataMovimento = z.getEcfZMovimento();
 
@@ -188,148 +166,45 @@ public class ComandoEmitirReducaoZ implements IComando {
                 Sql sql = new Sql(new EcfVenda(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(sql);
 
-                // recupera as vendas canceladas, mesmo que sem valor
-                FiltroBinario fb = new FiltroBinario("ecfVendaCancelada", ECompara.IGUAL, true);
-                gf.add(fb);
-                List<EcfVenda> vendasCanceladas = service.selecionar(new EcfVenda(), 0, 0, gf);
+                // gera os registros EcfZTotais
+                Map<String, Double> totalizadores = (Map<String, Double>) dados.get("Totalizadores");
+                List<EcfZTotais> totais = new ArrayList<>();
+                for (Entry<String, Double> tupla : totalizadores.entrySet()) {
+                    EcfZTotais total = new EcfZTotais();
+                    total.setEcfZ(z);
+                    total.setEcfZTotaisCodigo(tupla.getKey());
+                    total.setEcfZTotaisValor(tupla.getValue());
+                    totais.add(total);
+                }
 
+                // caso nao exista totalizador Can-T verifica se existe vendas canceladas
+                if (!totalizadores.containsKey("Can-T")) {
+                    FiltroBinario fb = new FiltroBinario("ecfVendaCancelada", ECompara.IGUAL, true);
+                    gf = new FiltroGrupo(Filtro.E, fo, fd1, fd2, fb);
+                    List<EcfVenda> canceladas = service.selecionar(new EcfVenda(), 0, 0, gf);
+                    if (canceladas != null && canceladas.size() > 0) {
+                        EcfZTotais total = new EcfZTotais();
+                        total.setEcfZ(z);
+                        total.setEcfZTotaisCodigo("Can-T");
+                        total.setEcfZTotaisValor(0.00);
+                        totais.add(total);
+                    }
+                }
+                // salva os totais do z
+                service.salvar(totais);
+                
                 // atualiza os documentos, marcando que pertence a esta Z
                 fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
                 fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());
                 gf = new FiltroGrupo(Filtro.E, fo, fd1, fd2);
                 sql = new Sql(new EcfDocumento(), EComandoSQL.ATUALIZAR, gf, po);
                 service.executar(sql);
-
-                // gera os registros EcfZTotais
-                Map<String, EcfZTotais> totais = new HashMap<>();
-                Map<String, String> aliq = ini.get("Aliquotas");
-                for (String chave : aliq.keySet()) {
-                    double valor = Double.valueOf(aliq.get(chave));
-                    if (valor > 0.00) {
-                        EcfZTotais total = new EcfZTotais();
-                        total.setEcfZ(z);
-                        total.setEcfZTotaisCodigo(chave);
-                        total.setEcfZTotaisValor(valor);
-                        if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                            totais.put(total.getEcfZTotaisCodigo(), total);
-                        }
-                    }
-                }
-
-                // outros icms
-                Map<String, String> outras = ini.get("OutrasICMS");
-                for (String chave : outras.keySet()) {
-                    double valor = Double.valueOf(outras.get(chave));
-                    if (valor > 0.00) {
-                        // valida qual o tipo
-                        String codigo = "";
-                        if (chave.contains("Substituicao")) {
-                            codigo = "F";
-                        } else if (chave.contains("NaoTributado")) {
-                            codigo = "N";
-                        } else if (chave.contains("Isencao")) {
-                            codigo = "I";
-                        }
-                        // se achou um tipo valido adiciona
-                        if (!codigo.equals("")) {
-                            codigo += chave.contains("ISSQN") ? "S1" : "1";
-                            EcfZTotais total = new EcfZTotais();
-                            total.setEcfZ(z);
-                            total.setEcfZTotaisCodigo(codigo);
-                            total.setEcfZTotaisValor(valor);
-                            if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                                totais.put(total.getEcfZTotaisCodigo(), total);
-                            }
-                        }
-                    }
-                }
-
-                // operacao nao fiscal
-                double opnf = ini.get("Totalizadores", "TotalNaoFiscal", double.class);
-                if (opnf > 0.00) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("OPNF");
-                    total.setEcfZTotaisValor(opnf);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-
-                // descontos
-                double descT = ini.get("Totalizadores", "TotalDescontos", double.class);
-                if (descT > 0.00) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("DT");
-                    total.setEcfZTotaisValor(descT);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-                double descS = ini.get("Totalizadores", "TotalDescontosISSQN", double.class);
-                if (descS > 0.00) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("DS");
-                    total.setEcfZTotaisValor(descS);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-
-                // acrescimos
-                double acresT = ini.get("Totalizadores", "TotalAcrescimos", double.class);
-                if (acresT > 0.00) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("AT");
-                    total.setEcfZTotaisValor(acresT);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-                double acresS = ini.get("Totalizadores", "TotalAcrescimosISSQN", double.class);
-                if (acresS > 0.00) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("AS");
-                    total.setEcfZTotaisValor(acresS);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-
-                // cancelamentos
-                double canT = ini.get("Totalizadores", "TotalCancelamentos", double.class);
-                if (canT > 0.00 || vendasCanceladas.size() > 0) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("Can-T");
-                    total.setEcfZTotaisValor(canT);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-                double canS = ini.get("Totalizadores", "TotalCancelamentosISSQN", double.class);
-                if (canS > 0.00) {
-                    EcfZTotais total = new EcfZTotais();
-                    total.setEcfZ(z);
-                    total.setEcfZTotaisCodigo("Can-S");
-                    total.setEcfZTotaisValor(canS);
-                    if (!totais.containsKey(total.getEcfZTotaisCodigo())) {
-                        totais.put(total.getEcfZTotaisCodigo(), total);
-                    }
-                }
-
-                // salva os totais do z
-                service.salvar(totais.values());
-            } catch (Exception ex) {
-                log.error("Erro ao gerar e salvar os dados da reducao Z -> " + dados[1], ex);
+            } catch (OpenPdvException | IllegalArgumentException ex) {
+                log.error("Erro ao gerar e salvar os dados da reducao Z.", ex);
                 throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
             }
         } else {
-            log.error("Erro ao pegar os dados da ultima reducao Z -> " + dados[1]);
+            log.error("Erro ao pegar os dados da ultima reducao Z.");
             throw new OpenPdvException("Nao foi possivel salvar os dados da Z no banco!\nAvise o administrador pra realizar manualmente!");
         }
     }

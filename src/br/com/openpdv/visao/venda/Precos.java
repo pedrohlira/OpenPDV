@@ -154,13 +154,13 @@ public class Precos extends javax.swing.JDialog {
         precoP.setProdEmbalagem(produto.getProdEmbalagem());
         precoP.setProdPrecoBarra(barra);
         precoP.setProdPrecoValor(produto.getProdProdutoPreco());
-        Object[] prod = new Object[]{precoP, produto.getProdEmbalagem().getId() + " - " + produto.getProdEmbalagem().getProdEmbalagemNome(),
+        Object[] prod = new Object[]{precoP, produto.getProdEmbalagem().getId() + " - [" + produto.getProdEmbalagem().getProdEmbalagemNome() + "]",
             produto.getProdProdutoPreco(), barra};
         dtm.addRow(prod);
 
         // adiciona outras opcoes
         for (ProdPreco preco : produto.getProdPrecos()) {
-            Object[] obj = new Object[]{preco, preco.getProdEmbalagem().getId() + " - " + preco.getProdEmbalagem().getProdEmbalagemNome(),
+            Object[] obj = new Object[]{preco, preco.getProdEmbalagem().getId() + " - [" + preco.getProdEmbalagem().getProdEmbalagemNome() + "]",
                 preco.getProdPrecoValor(), preco.getProdPrecoBarra()};
             dtm.addRow(obj);
         }

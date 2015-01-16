@@ -9,7 +9,6 @@ import br.com.openpdv.modelo.core.filtro.*;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdGrade;
-import br.com.openpdv.modelo.produto.ProdGradeTipo;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.visao.core.Caixa;
@@ -89,7 +88,6 @@ public class Produtos extends javax.swing.JDialog {
         }
 
         produtos.setEmbalagens();
-        produtos.setTipos();
         FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, 0);
         produtos.setLista(fn);
         return produtos;
@@ -800,8 +798,12 @@ public class Produtos extends javax.swing.JDialog {
             tabGrade.getColumnModel().getColumn(2).setMinWidth(100);
             tabGrade.getColumnModel().getColumn(2).setPreferredWidth(100);
             tabGrade.getColumnModel().getColumn(2).setMaxWidth(100);
+            tabGrade.getColumnModel().getColumn(3).setMinWidth(100);
             tabGrade.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tabGrade.getColumnModel().getColumn(3).setMaxWidth(100);
+            tabGrade.getColumnModel().getColumn(4).setMinWidth(100);
             tabGrade.getColumnModel().getColumn(4).setPreferredWidth(100);
+            tabGrade.getColumnModel().getColumn(4).setMaxWidth(100);
             tabGrade.getColumnModel().getColumn(5).setMinWidth(100);
             tabGrade.getColumnModel().getColumn(5).setPreferredWidth(100);
             tabGrade.getColumnModel().getColumn(5).setMaxWidth(100);
@@ -1569,13 +1571,13 @@ public class Produtos extends javax.swing.JDialog {
                 FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, cod);
                 prod = (ProdProduto) service.selecionar(prod, fn);
                 for (ProdPreco preco : prod.getProdPrecos()) {
-                    Object[] obj = new Object[]{preco.getId(), preco.getProdEmbalagem().getId() + " - " + preco.getProdEmbalagem().getProdEmbalagemNome(),
+                    Object[] obj = new Object[]{preco.getId(), preco.getProdEmbalagem().getId() + " - [" + preco.getProdEmbalagem().getProdEmbalagemNome() + "]",
                         preco.getProdPrecoValor(), preco.getProdPrecoBarra()};
                     dtmPreco.addRow(obj);
                 }
                 for (ProdComposicao item : prod.getProdComposicoes()) {
                     Object[] obj = new Object[]{item.getId(), item.getProdProduto().getId(), item.getProdProduto().getProdProdutoDescricao(),
-                        item.getProdEmbalagem().getId() + " - " + item.getProdEmbalagem().getProdEmbalagemNome(), item.getProdComposicaoQuantidade(), item.getProdComposicaoValor()};
+                        item.getProdEmbalagem().getId() + " - [" + item.getProdEmbalagem().getProdEmbalagemNome() + "]", item.getProdComposicaoQuantidade(), item.getProdComposicaoValor()};
                     dtmItem.addRow(obj);
                 }
                 for (ProdGrade grade : prod.getProdGrades()) {
@@ -1606,34 +1608,6 @@ public class Produtos extends javax.swing.JDialog {
         } finally {
             tabPreco.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(embalagem));
             tabItem.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(embalagem));
-        }
-    }
-
-    /**
-     * Metodo que carrega os valores dos tipo de grades.
-     */
-    private void setTipos() {
-        JComboBox tam = new JComboBox();
-        JComboBox cor = new JComboBox();
-        JComboBox opc = new JComboBox();
-
-        try {
-            List<ProdGradeTipo> lista = service.selecionar(new ProdGradeTipo(), 0, 0, null);
-            for (ProdGradeTipo tipo : lista) {
-                if (tipo.getProdGradeTipoOpcao() == 'T') {
-                    tam.addItem(tipo.getProdGradeTipoNome());
-                } else if (tipo.getProdGradeTipoOpcao() == 'C') {
-                    cor.addItem(tipo.getProdGradeTipoNome());
-                } else {
-                    opc.addItem(tipo.getProdGradeTipoNome());
-                }
-            }
-        } catch (OpenPdvException ex) {
-            log.error("Nao carregou os tipos.", ex);
-        } finally {
-            tabGrade.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(tam));
-            tabGrade.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(cor));
-            tabGrade.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(opc));
         }
     }
 

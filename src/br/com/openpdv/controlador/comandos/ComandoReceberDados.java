@@ -10,11 +10,11 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroObjeto;
+import br.com.openpdv.modelo.core.filtro.FiltroTexto;
 import br.com.openpdv.modelo.ecf.EcfPagamentoTipo;
 import br.com.openpdv.modelo.produto.ProdComposicao;
 import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdGrade;
-import br.com.openpdv.modelo.produto.ProdGradeTipo;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisCliente;
@@ -84,10 +84,6 @@ public abstract class ComandoReceberDados implements IComando {
         if (Util.getConfig().getProperty("sinc.embalagem").equals("true")) {
             // atualiza as embalagens
             embalagens();
-        }
-        if (Util.getConfig().getProperty("sinc.grade").equals("true")) {
-            // atualiza os tipos de grades
-            grades();
         }
         if (Util.getConfig().getProperty("sinc.produto").equals("true")) {
             // recupera os novos produtos
@@ -242,32 +238,6 @@ public abstract class ComandoReceberDados implements IComando {
     }
 
     /**
-     * Metodo que salva as grades.
-     */
-    private void grades() {
-        try {
-            Integer maxId = (Integer) service.buscar(new ProdGradeTipo(), "prodGradeTipoId", EBusca.MAXIMO, null);
-            MultivaluedMap<String, String> mm = new MultivaluedMapImpl();
-            mm.putSingle("id", maxId != null ? maxId.toString() : "0");
-            List<ProdGradeTipo> tipos = receber("tipo_grade", new GenericType<List<ProdGradeTipo>>() {
-            }, mm);
-
-            em.getTransaction().begin();
-            for (ProdGradeTipo tipo : tipos) {
-                service.salvar(em, tipo);
-            }
-            em.getTransaction().commit();
-            log.info("Dados tipos de grade recebidos -> " + tipos.size());
-        } catch (Exception ex) {
-            if (em != null && em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            erros.append("Erro no recebimento dos Tipos de Grades.\n");
-            log.error("Erro no recebimento dos Tipos de Grades.", ex);
-        }
-    }
-
-    /**
      * Metodo que salva os produtos novos.
      */
     private void produtosNovos() {
@@ -399,7 +369,7 @@ public abstract class ComandoReceberDados implements IComando {
                         prodSinc = false;
                         log.error("Nao atualizou o produto com ID = " + prod.getProdProdutoId(), ex);
                     }
-                    
+
                     try {
                         // salva os precos
                         if (!precos.isEmpty()) {
@@ -457,6 +427,11 @@ public abstract class ComandoReceberDados implements IComando {
 
                 em.getTransaction().begin();
                 for (SisCliente cli : clientes) {
+                    FiltroTexto ft = new FiltroTexto("sisClienteDoc", ECompara.IGUAL, cli.getSisClienteDoc().replaceAll("\\D", ""));
+                    List<SisCliente> lista = (List<SisCliente>) service.selecionar(cli, 0, 1, ft);
+                    SisCliente cliente = lista.size() > 0 ? lista.get(0) : null;
+                    cli.setSisClienteId(cliente != null ? cliente.getSisClienteId() : 0);
+                    cli.setSisClienteDoc(cli.getSisClienteDoc().replaceAll("\\D", ""));
                     cli.setSisClienteSinc(true);
                     service.salvar(em, cli);
                 }

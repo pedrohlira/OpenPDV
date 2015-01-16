@@ -337,7 +337,6 @@ public class Caixa extends JFrame {
         mnuProdutos = new javax.swing.JMenuItem();
         mnuEmbalagens = new javax.swing.JMenuItem();
         mnuTipoPagamentos = new javax.swing.JMenuItem();
-        mnuTipoGrades = new javax.swing.JMenuItem();
         mnuClientes = new javax.swing.JMenuItem();
         mnuUsuarios = new javax.swing.JMenuItem();
         separador2 = new javax.swing.JPopupMenu.Separator();
@@ -377,6 +376,11 @@ public class Caixa extends JFrame {
         setName("OpenPDV"); // NOI18N
         setUndecorated(Boolean.valueOf(Util.getConfig().getProperty("openpdv.semborda")));
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         lblLivre.setBackground(new java.awt.Color(255, 255, 255));
         lblLivre.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
@@ -656,18 +660,6 @@ public class Caixa extends JFrame {
             }
         });
         mnuPrincipal.add(mnuTipoPagamentos);
-
-        mnuTipoGrades.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        mnuTipoGrades.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/grade.png"))); // NOI18N
-        mnuTipoGrades.setText("Tipo Grades");
-        mnuTipoGrades.setToolTipText("Tipo Grades");
-        mnuTipoGrades.setEnabled(false);
-        mnuTipoGrades.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuTipoGradesActionPerformed(evt);
-            }
-        });
-        mnuPrincipal.add(mnuTipoGrades);
 
         mnuClientes.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuClientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/cliente.png"))); // NOI18N
@@ -1076,6 +1068,9 @@ public class Caixa extends JFrame {
             }
 
             if (escolha == JOptionPane.YES_OPTION) {
+                if (ecf != null) {
+                    ecf.desativar();
+                }
                 System.exit(0);
             } else if (escolha == JOptionPane.CANCEL_OPTION) {
                 modoOff();
@@ -1826,28 +1821,6 @@ public class Caixa extends JFrame {
         }
     }//GEN-LAST:event_mnuTipoPagamentosActionPerformed
 
-    private void mnuTipoGradesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoGradesActionPerformed
-        AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
-            @Override
-            public void sucesso(Integer resultado) {
-                janela = TiposGrade.getInstancia();
-                janela.setVisible(true);
-            }
-
-            @Override
-            public void falha(Exception excecao) {
-                JOptionPane.showMessageDialog(caixa, excecao.getMessage(), "Gerente", JOptionPane.INFORMATION_MESSAGE);
-            }
-        };
-
-        if (Login.getOperador().isSisUsuarioGerente()) {
-            async.sucesso(Login.getOperador().getSisUsuarioDesconto());
-        } else {
-            janela = Gerente.getInstancia(async);
-            janela.setVisible(true);
-        }
-    }//GEN-LAST:event_mnuTipoGradesActionPerformed
-
     private void mnuCupomPresenteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCupomPresenteActionPerformed
         try {
             List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 1, null);
@@ -1970,6 +1943,12 @@ public class Caixa extends JFrame {
         Aguarde.getInstancia().setVisible(true);
     }//GEN-LAST:event_mnuMFDActionPerformed
 
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        if (ecf != null) {
+            ecf.desativar();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
     private javax.swing.JLabel lblCaixa;
@@ -2016,7 +1995,6 @@ public class Caixa extends JFrame {
     private javax.swing.JMenu mnuSobre;
     private javax.swing.JMenuItem mnuSuprimento;
     private javax.swing.JMenuItem mnuTEF;
-    private javax.swing.JMenuItem mnuTipoGrades;
     private javax.swing.JMenuItem mnuTipoPagamentos;
     private javax.swing.JMenuItem mnuTrocas;
     private javax.swing.JMenuItem mnuUsuarios;
@@ -2193,8 +2171,13 @@ public class Caixa extends JFrame {
         }
 
         // somente habilita o sincronismo nas maquinas host
-        if (Util.getConfig().getProperty("sinc.tipo").equals("rest") && Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
+        if (Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
             mnuSincronizacao.setEnabled(false);
+        } else {
+            mnuProdutos.setEnabled(false);
+            mnuEmbalagens.setEnabled(false);
+            mnuTipoPagamentos.setEnabled(false);
+            mnuUsuarios.setEnabled(false);
         }
 
         // somente habilita o ADM do TEF se tiver no conf
@@ -2765,14 +2748,6 @@ public class Caixa extends JFrame {
 
     public void setMnuTEF(JMenuItem mnuTEF) {
         this.mnuTEF = mnuTEF;
-    }
-
-    public JMenuItem getMnuTipoGrades() {
-        return mnuTipoGrades;
-    }
-
-    public void setMnuTipoGrades(JMenuItem mnuTipoGrades) {
-        this.mnuTipoGrades = mnuTipoGrades;
     }
 
     public JMenuItem getMnuTipoPagamentos() {

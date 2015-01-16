@@ -1,6 +1,8 @@
 package br.com.openpdv.visao.core;
 
+import br.com.openpdv.controlador.comandos.ComandoValidarSistema;
 import br.com.openpdv.controlador.core.Conexao;
+import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.phdss.Util;
 import br.com.phdss.controlador.PAF;
 import com.sun.jersey.api.client.Client;
@@ -8,6 +10,7 @@ import com.sun.jersey.api.client.WebResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.util.logging.Level;
 import javax.swing.*;
 import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
@@ -337,50 +340,11 @@ public class Sobre extends JDialog {
     }//GEN-LAST:event_formWindowActivated
 
     private void btnValidarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnValidarActionPerformed
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    // recuperando os dados do auxiliar local
-                    File aux = new File("conf" + System.getProperty("file.separator") + "auxiliar.txt");
-                    String local = null;
-                    byte[] bytes;
-
-                    if (aux.exists()) {
-                        try (FileInputStream inArquivo = new FileInputStream(aux)) {
-                            bytes = new byte[inArquivo.available()];
-                            inArquivo.read(bytes);
-                            local = new String(bytes);
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(sobre, "Atenção: Arquivo nao existe -> " + aux.getAbsolutePath(), "Sobre", JOptionPane.WARNING_MESSAGE);
-                    }
-
-                    if (local != null && !local.equals("")) {
-                        // enviando o auxiliar local e recebendo o novo do servidor
-                        Client c = Conexao.getClientRest();
-                        WebResource wr = c.resource(Util.getConfig().getProperty("openpdv.url"));
-                        String remoto = wr.type(MediaType.TEXT_PLAIN).accept(MediaType.TEXT_PLAIN).put(String.class, local);
-
-                        try (FileWriter fw = new FileWriter(aux, false)) {
-                            fw.write(remoto);
-                            fw.flush();
-
-                            Aguarde.getInstancia().setVisible(false);
-                            JOptionPane.showMessageDialog(sobre, "Arquivo salvo com sucesso, abra novamente o OpenPDV para ativá-lo,", "Sobre", JOptionPane.INFORMATION_MESSAGE);
-                            System.exit(0);
-                        }
-                    }
-                } catch (Exception ex) {
-                    Aguarde.getInstancia().setVisible(false);
-                    log.error("Problemas na validacao.", ex);
-                    JOptionPane.showMessageDialog(sobre, "Atenção: Problemas ao tentar atualizar a validade!", "Sobre", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        }).start();
-
-        Aguarde.getInstancia().setVisible(true);
+        try{
+            new ComandoValidarSistema().executar();
+        } catch (OpenPdvException ex) {
+            log.error("Erro ao tentar validar.", ex);
+        }
     }//GEN-LAST:event_btnValidarActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnValidar;

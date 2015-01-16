@@ -179,7 +179,6 @@
               </Table>
             </Property>
             <Property name="autoResizeMode" type="int" value="0"/>
-            <Property name="cellSelectionEnabled" type="boolean" value="false"/>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="1">
                 <Column maxWidth="-1" minWidth="-1" prefWidth="50" resizable="false">
@@ -255,7 +254,6 @@
               </TableColumnModel>
             </Property>
             <Property name="rowHeight" type="int" value="20"/>
-            <Property name="rowSelectionAllowed" type="boolean" value="true"/>
             <Property name="selectionModel" type="javax.swing.ListSelectionModel" editor="org.netbeans.modules.form.editors2.JTableSelectionModelEditor">
               <JTableSelectionModel selectionMode="0"/>
             </Property>

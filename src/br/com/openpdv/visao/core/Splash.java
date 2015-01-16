@@ -2,6 +2,7 @@ package br.com.openpdv.visao.core;
 
 import br.com.openpdv.controlador.comandos.ComandoEmitirReducaoZ;
 import br.com.openpdv.controlador.comandos.ComandoReceberDados;
+import br.com.openpdv.controlador.comandos.ComandoValidarSistema;
 import br.com.openpdv.controlador.core.Conexao;
 import br.com.openpdv.controlador.core.CoreService;
 import br.com.openpdv.modelo.core.EDirecao;
@@ -102,8 +103,13 @@ public class Splash extends JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("OpenPDV");
-        setName("OpenPDV");
+        setName("OpenPDV"); // NOI18N
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         lblPhd.setBackground(java.awt.Color.white);
@@ -149,9 +155,16 @@ public class Splash extends JFrame {
         gridBagConstraints.insets = new java.awt.Insets(30, 6, 0, 6);
         getContentPane().add(pgBarra, gridBagConstraints);
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-652)/2, (screenSize.height-419)/2, 652, 419);
+        setSize(new java.awt.Dimension(652, 419));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        if (ecf != null) {
+            ecf.desativar();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblOpenPDV;
     private javax.swing.JLabel lblPhd;
@@ -464,24 +477,40 @@ public class Splash extends JFrame {
                 boolean autorizado = true;
                 if (validade == null || validade.compareTo(atual) < 0) {
                     login = false;
-                    autorizado = false;
                     caixa.modoIndisponivel();
                     caixa.getMnuPrincipal().setEnabled(false);
                     caixa.getMnuNota().setEnabled(false);
                     caixa.getMnuPesquisa().setEnabled(false);
                     JOptionPane.showMessageDialog(splash, "ATENCÃO: O OpenPDV está com a data de validade vencida!\n\n"
-                            + "Favor entre no menu Sobre - F1 e clique no botão Validar Sistema.\n\n"
-                            + "Entrando automaticamente no Modo Indisponível / PED.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
-                }
-
-                // verifica se ecf + login + autorizado ok
-                if (ecfAtivo && login && autorizado) {
+                            + "O sistema irá fazer uma tentativa de validar on-line.\n\n"
+                            + "Caso não seja possível, tente manualmente pelo menu Ajuda - F1.", "OpenPDV", JOptionPane.WARNING_MESSAGE);
+                    try {
+                        new ComandoValidarSistema().executar();
+                    } catch (OpenPdvException ex) {
+                        log.error("Erro ao tentar validar.", ex);
+                    }
+                    // verifica se ecf + login + autorizado ok
+                } else if (ecfAtivo && login && autorizado) {
                     // valida o estado do ECF
                     try {
                         caixa.statusMenus(EModo.OFF);
                         caixa.setJanela(Autenticacao.getInstancia());
 
                         switch (ecf.validarEstado()) {
+                            case estLivre:
+                                // Verifica se a ultima Z salva no banco e a mesma emitida pelo ECF
+                                EcfZ ultZ = new EcfZ();
+                                ultZ.setOrdemDirecao(EDirecao.DESC);
+                                FiltroObjeto fo = new FiltroObjeto("ecfImpressora", ECompara.IGUAL, Caixa.getInstancia().getImpressora());
+                                List<EcfZ> zs = service.selecionar(ultZ, 0, 1, fo);
+                                if (!zs.isEmpty()) {
+                                    // caso seja diferente pega os dados da ultima Z e salva
+                                    if (Integer.valueOf(ecf.enviar(EComando.ECF_NumCRZ)[1]) != zs.get(0).getEcfZCrz()) {
+                                        new ComandoEmitirReducaoZ().emitirReducaoZBanco();
+                                    }
+                                }
+
+                                break;
                             case estNaoInicializada:
                             case estDesconhecido:
                                 throw new OpenPdvException("Estado do ECF não inicializado ou desconhecido.");
@@ -506,6 +535,7 @@ public class Splash extends JFrame {
                                 Autenticacao.getInstancia().getBtnConsulta().setEnabled(false);
                                 Autenticacao.getInstancia().getBtnFiscal().setEnabled(false);
                                 JOptionPane.showMessageDialog(splash, "Atenção: Existe uma venda em aberto!\n\nPor favor efetue login para recuperar a venda\nou para cancelar a mesma.", "Venda Aberta", JOptionPane.WARNING_MESSAGE);
+                                break;
                         }
                     } catch (Exception ex) {
                         login = false;
