@@ -71,24 +71,26 @@ public class EcfVendaProduto extends Dados implements Serializable {
      * Costrutor informando os dados do produto e quantidade.
      *
      * @param produto referencia para o produto selecionado.
+     * @param embalagem referencia para a embalagem do produto usado.
+     * @param preco o preco selecionado.
      * @param quantidade a quantidade total vendida.
      * @param barra o codigo de barras do produto.
      */
-    public EcfVendaProduto(ProdProduto produto, Double quantidade, String barra) {
+    public EcfVendaProduto(ProdProduto produto, ProdEmbalagem embalagem, double preco, Double quantidade, String barra) {
         this(0);
         this.prodProduto = produto;
-        this.prodEmbalagem = produto.getProdEmbalagem();
+        this.prodEmbalagem = embalagem;
         this.ecfVendaProdutoBarra = barra;
         this.ecfVendaProdutoCstCson = produto.getProdProdutoCstCson();
         this.ecfVendaProdutoTributacao = produto.getProdProdutoTributacao();
         this.ecfVendaProdutoIcms = produto.getProdProdutoIcms();
         this.ecfVendaProdutoIssqn = produto.getProdProdutoIssqn();
         this.ecfVendaProdutoQuantidade = quantidade;
-        this.ecfVendaProdutoBruto = produto.getProdProdutoPreco();
+        this.ecfVendaProdutoBruto = preco;
         this.ecfVendaProdutoDesconto = 0.00;
         this.ecfVendaProdutoAcrescimo = 0.00;
-        this.ecfVendaProdutoLiquido = produto.getProdProdutoPreco();
-        this.ecfVendaProdutoTotal = quantidade * produto.getProdProdutoPreco();
+        this.ecfVendaProdutoLiquido = preco;
+        this.ecfVendaProdutoTotal = quantidade * preco;
     }
 
     /**

@@ -69,14 +69,14 @@ public class Clientes extends javax.swing.JDialog {
 
         // colocando limites nos campos
         txtCPF_CNPJ.setDocument(new TextFieldLimit(14, true));
-        txtNome.setDocument(new TextFieldLimit(100));
-        txtRG_IE.setDocument(new TextFieldLimit(20));
-        txtEndereco.setDocument(new TextFieldLimit(255));
+        txtNome.setDocument(new TextFieldLimit(60));
+        txtRG_IE.setDocument(new TextFieldLimit(14));
+        txtEndereco.setDocument(new TextFieldLimit(60));
         txtNumero.setDocument(new TextFieldLimit(11, true));
-        txtComplemento.setDocument(new TextFieldLimit(100));
-        txtBairro.setDocument(new TextFieldLimit(100));
-        txtCEP.setDocument(new TextFieldLimit(9));
-        txtTelefone.setDocument(new TextFieldLimit(100));
+        txtComplemento.setDocument(new TextFieldLimit(60));
+        txtBairro.setDocument(new TextFieldLimit(60));
+        txtCEP.setDocument(new TextFieldLimit(8, true));
+        txtTelefone.setDocument(new TextFieldLimit(14, true));
         txtEmail.setDocument(new TextFieldLimit(100));
         taObs.setDocument(new TextFieldLimit(255));
     }
@@ -293,10 +293,11 @@ public class Clientes extends javax.swing.JDialog {
         lblCEP.setText("CEP:");
 
         try {
-            txtCEP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("#####-###")));
+            txtCEP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
+        txtCEP.setText("");
         txtCEP.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
         lblUF.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N

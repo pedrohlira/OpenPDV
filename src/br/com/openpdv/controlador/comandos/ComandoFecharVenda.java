@@ -315,7 +315,7 @@ public class ComandoFecharVenda implements IComando {
                 for (EcfTrocaProduto tp : troca.getEcfTrocaProdutos()) {
                     // fatorando a quantida no estoque
                     double qtd = tp.getEcfTrocaProdutoQuantidade();
-                    if (tp.getProdEmbalagem().getProdEmbalagemId() != tp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                    if (tp.getProdEmbalagem().getProdEmbalagemId() != tp.getProdProduto().getProdEmbalagem().getProdEmbalagemId().intValue()) {
                         qtd *= tp.getProdEmbalagem().getProdEmbalagemUnidade();
                         qtd /= tp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
                     }
@@ -358,7 +358,7 @@ public class ComandoFecharVenda implements IComando {
             if (!vp.getEcfVendaProdutoCancelado()) {
                 // fatorando a quantida no estoque
                 double qtd = vp.getEcfVendaProdutoQuantidade();
-                if (vp.getProdEmbalagem().getProdEmbalagemId() != vp.getProdProduto().getProdEmbalagem().getProdEmbalagemId()) {
+                if (vp.getProdEmbalagem().getProdEmbalagemId() != vp.getProdProduto().getProdEmbalagem().getProdEmbalagemId().intValue()) {
                     qtd *= vp.getProdEmbalagem().getProdEmbalagemUnidade();
                     qtd /= vp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
                 }

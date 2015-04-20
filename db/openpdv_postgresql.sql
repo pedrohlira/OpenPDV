@@ -412,7 +412,7 @@ ALTER SEQUENCE ecf_pagamento_totais_ecf_pagamento_totais_id_seq OWNED BY ecf_pag
 CREATE TABLE ecf_troca (
     ecf_troca_id integer NOT NULL,
     ecf_venda_id integer,
-    ecf_troca_cliente character varying(18) NOT NULL,
+    ecf_troca_cliente character varying(14) NOT NULL,
     ecf_troca_data timestamp without time zone NOT NULL,
     ecf_troca_valor numeric(10,2) NOT NULL,
     ecf_troca_ecf integer NOT NULL,
@@ -892,16 +892,17 @@ CREATE TABLE sis_cliente (
     sis_cliente_id integer NOT NULL,
     sis_municipio_id integer NOT NULL,
     sis_cliente_doc character varying(14) NOT NULL,
-    sis_cliente_doc1 character varying(20) NOT NULL,
+    sis_cliente_doc1 character varying(14) NOT NULL,
     sis_cliente_nome character varying(60) NOT NULL,
-    sis_cliente_endereco character varying(100) NOT NULL,
+    sis_cliente_endereco character varying(60) NOT NULL,
     sis_cliente_numero integer NOT NULL,
-    sis_cliente_complemento character varying(100) NOT NULL,
-    sis_cliente_bairro character varying(100) NOT NULL,
-    sis_cliente_cep character varying(9) NOT NULL,
-    sis_cliente_telefone character varying(100) NOT NULL,
+    sis_cliente_complemento character varying(60) NOT NULL,
+    sis_cliente_bairro character varying(60) NOT NULL,
+    sis_cliente_cep character varying(8) NOT NULL,
+    sis_cliente_telefone character varying(14) NOT NULL,
     sis_cliente_email character varying(100) NOT NULL,
     sis_cliente_data timestamp without time zone NOT NULL,
+	sis_cliente_observacao character varying(255) NOT NULL,
     ead character varying(260) NULL
 );
 

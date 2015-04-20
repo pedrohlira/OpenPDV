@@ -86,7 +86,7 @@ public abstract class ComandoEnviarDados implements IComando {
         }
         if (Util.getConfig().getProperty("sinc.cliente").equals("true")) {
             // enviando os clientes nao sincronizados
-            clientes();
+            //clientes();
         }
         if (Util.getConfig().getProperty("sinc.venda").equals("true")) {
             // enviando as vendas nao sincronizadas
@@ -94,7 +94,7 @@ public abstract class ComandoEnviarDados implements IComando {
         }
         if (Util.getConfig().getProperty("sinc.reducaoZ").equals("true")) {
             // enviando as Z
-            zs();
+            //zs();
         }
 
         // se sucesso atualiza no arquivo a data do ultimo envio

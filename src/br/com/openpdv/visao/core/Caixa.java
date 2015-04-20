@@ -22,6 +22,7 @@ import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.produto.ProdComposicao;
+import br.com.openpdv.modelo.produto.ProdEmbalagem;
 import br.com.openpdv.modelo.produto.ProdGrade;
 import br.com.openpdv.modelo.produto.ProdPreco;
 import br.com.openpdv.modelo.produto.ProdProduto;
@@ -83,10 +84,8 @@ public class Caixa extends JFrame {
     private AsyncDoubleBack<ProdProduto, ProdPreco> asyncPreco = new AsyncDoubleBack<ProdProduto, ProdPreco>() {
         @Override
         public void sucesso(ProdProduto prod, ProdPreco preco) {
-            prod.setProdEmbalagem(preco.getProdEmbalagem());
-            prod.setProdProdutoPreco(preco.getProdPrecoValor());
             try {
-                adicionar(prod, Double.valueOf(txtQuantidade.getText()), preco.getProdPrecoBarra());
+                adicionar(prod, preco.getProdEmbalagem(), preco.getProdPrecoValor(), Double.valueOf(txtQuantidade.getText()), preco.getProdPrecoBarra());
             } catch (OpenPdvException ex) {
                 falha(ex);
             }
@@ -105,7 +104,7 @@ public class Caixa extends JFrame {
         @Override
         public void sucesso(ProdProduto prod, ProdGrade grade) {
             try {
-                adicionar(prod, Double.valueOf(txtQuantidade.getText()), grade.getProdGradeBarra());
+                adicionar(prod, prod.getProdEmbalagem(), prod.getProdProdutoPreco(), Double.valueOf(txtQuantidade.getText()), grade.getProdGradeBarra());
             } catch (OpenPdvException ex) {
                 falha(ex);
             }
@@ -148,12 +147,11 @@ public class Caixa extends JFrame {
                             // percorre os itens do produto
                             for (ProdComposicao comp : prod.getProdComposicoes()) {
                                 ProdProduto prod = comp.getProdProduto();
-                                prod.setProdEmbalagem(comp.getProdEmbalagem());
-                                prod.setProdProdutoPreco(comp.getProdComposicaoValor() / comp.getProdComposicaoQuantidade());
+                                double preco = comp.getProdComposicaoValor() / comp.getProdComposicaoQuantidade();
                                 double qtd = comp.getProdComposicaoQuantidade() * Double.valueOf(txtQuantidade.getText());
 
                                 try {
-                                    adicionar(prod, qtd, prod.getProdProdutoBarra());
+                                    adicionar(prod, comp.getProdEmbalagem(), preco, qtd, prod.getProdProdutoBarra());
                                 } catch (OpenPdvException ex) {
                                     log.error(ex);
                                     JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar um item!\nCancele os itens adicionados.", "Venda", JOptionPane.WARNING_MESSAGE);
@@ -181,7 +179,7 @@ public class Caixa extends JFrame {
                     }
                 } else {
                     try {
-                        adicionar(prod, Double.valueOf(txtQuantidade.getText()), prod.getProdProdutoBarra());
+                        adicionar(prod, prod.getProdEmbalagem(), prod.getProdProdutoPreco(), Double.valueOf(txtQuantidade.getText()), prod.getProdProdutoBarra());
                     } catch (OpenPdvException ex) {
                         log.error(ex);
                         JOptionPane.showMessageDialog(caixa, "Não foi possível adicionar o produto!", "Venda", JOptionPane.WARNING_MESSAGE);
@@ -1235,13 +1233,7 @@ public class Caixa extends JFrame {
                                     Aguarde.getInstancia().setVisible(false);
                                     modoConsulta();
                                 } else {
-                                    int escolha = JOptionPane.showOptionDialog(caixa, "Não houve movimento fiscal hoje, então não precisa emititr a Redução Z!\nDeseja emitir mesmo assim?", "Redução Z",
-                                            JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.NO_OPTION);
-                                    if (escolha == JOptionPane.YES_OPTION) {
-                                        new ComandoEmitirReducaoZ().executar();
-                                        Aguarde.getInstancia().setVisible(false);
-                                        modoConsulta();
-                                    }
+                                    JOptionPane.showMessageDialog(caixa, "Não houve movimento fiscal hoje, então não precisa emititr a Redução Z!", "Redução Z", JOptionPane.WARNING_MESSAGE);
                                 }
                             } catch (OpenPdvException ex) {
                                 Aguarde.getInstancia().setVisible(false);
@@ -1499,7 +1491,7 @@ public class Caixa extends JFrame {
                                 // percorre os produtos da venda recuperada
                                 for (EcfVendaProduto vp : ident.getVenda().getEcfVendaProdutos()) {
                                     try {
-                                        adicionar(vp.getProdProduto(), vp.getEcfVendaProdutoQuantidade(), vp.getEcfVendaProdutoBarra());
+                                        adicionar(vp.getProdProduto(), vp.getProdEmbalagem(), vp.getEcfVendaProdutoLiquido(), vp.getEcfVendaProdutoQuantidade(), vp.getEcfVendaProdutoBarra());
                                     } catch (OpenPdvException ex) {
                                         JOptionPane.showMessageDialog(caixa, "Erro ao adicionar o item com codigo -> " + vp.getProdProduto().getId(), "Venda", JOptionPane.WARNING_MESSAGE);
                                     }
@@ -2176,7 +2168,6 @@ public class Caixa extends JFrame {
         } else {
             mnuProdutos.setEnabled(false);
             mnuEmbalagens.setEnabled(false);
-            mnuTipoPagamentos.setEnabled(false);
             mnuUsuarios.setEnabled(false);
         }
 
@@ -2200,12 +2191,14 @@ public class Caixa extends JFrame {
      * Metodo que adiciona um produto a venda nas operacoes necessarias.
      *
      * @param prod o produto vendido.
+     * @param emb referencia para a embalagem do produto usado.
+     * @param preco o preco selecionado.
      * @param qtd a quantidade vendida.
      * @throws OpenPdvException dispara caso aconteca algum erro.
      */
-    private void adicionar(ProdProduto prod, double qtd, String barra) throws OpenPdvException {
+    private void adicionar(ProdProduto prod, ProdEmbalagem emb, double preco, double qtd, String barra) throws OpenPdvException {
         // fluxo de adicao ecf, bd e tela
-        EcfVendaProduto vp = new EcfVendaProduto(prod, qtd, barra);
+        EcfVendaProduto vp = new EcfVendaProduto(prod, emb, preco, qtd, barra);
         ComandoAdicionarItem adicionarItem = new ComandoAdicionarItem();
         adicionarItem.setVendaProduto(vp);
         adicionarItem.executar();

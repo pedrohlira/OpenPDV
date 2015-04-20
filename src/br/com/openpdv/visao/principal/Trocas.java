@@ -174,9 +174,9 @@ public class Trocas extends javax.swing.JDialog {
         });
 
         // colocando limites nos campos
-        txtCpfCnpj.setDocument(new TextFieldLimit(18));
+        txtCpfCnpj.setDocument(new TextFieldLimit(14, true));
         txtECF.setDocument(new TextFieldLimit(3, true));
-        txtCOO.setDocument(new TextFieldLimit(11, true));
+        txtCOO.setDocument(new TextFieldLimit(6, true));
     }
 
     /**
