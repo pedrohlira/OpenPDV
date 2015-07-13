@@ -3,13 +3,13 @@ OpenPDV
 
 Sistema PAF-ECF OpenSource
 
-Este sistema implementa as funcionalidades exigidas pelo PAF-ECF, o qual é usado para vendas com cupom fiscal, sua estratégia é ser
-simples, com o mínimo de funcionalidades necessárias, onde o foco é realizar a venda e enviar os dados para outro sistema que possa
-fazer a gestão.
+Este sistema implementa as funcionalidades exigidas pelo PAF-ECF, o qual é usado para vendas com cupom fiscal, sua estratégia é ser simples, com o mínimo de funcionalidades necessárias, onde o foco é realizar a venda e enviar os dados para outro sistema que possa fazer a gestão.
 
 Caso deseje ver seu funcionamento tem um vídeo neste link https://www.youtube.com/watch?v=NeWf8h-Lri8
 
 Abaixo estão os links para baixar a VM de desenvolvimento do sistema OpenSIG e OpenPDV.
+
+usuario = PHD, senha = phdss
 
 DevPHD.ova.7z.001 https://mega.nz/#!MBpCUZ4R!1FSp3D-RMGheMIPDtmnT1Vh30ouBGOMnJ1lKNrVrcAs
 
