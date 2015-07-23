@@ -6,7 +6,16 @@ import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
 import java.awt.event.KeyEvent;
 import java.util.Date;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSeparator;
 import org.apache.log4j.Logger;
 
 /**
@@ -421,4 +430,182 @@ public class PAF_VendasPeriodo extends javax.swing.JDialog {
             Aguarde.getInstancia().setVisible(true);
         }
     }
+    
+     //GETs e SETs
+    public Date getParam1() {
+        return param1;
+    }
+
+    public void setParam1(Date param1) {
+        this.param1 = param1;
+    }
+
+    public Date getParam2() {
+        return param2;
+    }
+
+    public void setParam2(Date param2) {
+        this.param2 = param2;
+    }
+
+    public JButton getBtnCancelar() {
+        return btnCancelar;
+    }
+
+    public void setBtnCancelar(JButton btnCancelar) {
+        this.btnCancelar = btnCancelar;
+    }
+
+    public JButton getBtnOk() {
+        return btnOk;
+    }
+
+    public void setBtnOk(JButton btnOk) {
+        this.btnOk = btnOk;
+    }
+
+    public JCheckBox getChkSubstituto() {
+        return chkSubstituto;
+    }
+
+    public void setChkSubstituto(JCheckBox chkSubstituto) {
+        this.chkSubstituto = chkSubstituto;
+    }
+
+    public JComboBox getCmbConvenio() {
+        return cmbConvenio;
+    }
+
+    public void setCmbConvenio(JComboBox cmbConvenio) {
+        this.cmbConvenio = cmbConvenio;
+    }
+
+    public JComboBox getCmbFinalidade() {
+        return cmbFinalidade;
+    }
+
+    public void setCmbFinalidade(JComboBox cmbFinalidade) {
+        this.cmbFinalidade = cmbFinalidade;
+    }
+
+    public JComboBox getCmbNatureza() {
+        return cmbNatureza;
+    }
+
+    public void setCmbNatureza(JComboBox cmbNatureza) {
+        this.cmbNatureza = cmbNatureza;
+    }
+
+    public ButtonGroup getGrpOpcao() {
+        return grpOpcao;
+    }
+
+    public void setGrpOpcao(ButtonGroup grpOpcao) {
+        this.grpOpcao = grpOpcao;
+    }
+
+    public JLabel getLblConvenio() {
+        return lblConvenio;
+    }
+
+    public void setLblConvenio(JLabel lblConvenio) {
+        this.lblConvenio = lblConvenio;
+    }
+
+    public JLabel getLblDtFim() {
+        return lblDtFim;
+    }
+
+    public void setLblDtFim(JLabel lblDtFim) {
+        this.lblDtFim = lblDtFim;
+    }
+
+    public JLabel getLblDtInicio() {
+        return lblDtInicio;
+    }
+
+    public void setLblDtInicio(JLabel lblDtInicio) {
+        this.lblDtInicio = lblDtInicio;
+    }
+
+    public JLabel getLblFinalidade() {
+        return lblFinalidade;
+    }
+
+    public void setLblFinalidade(JLabel lblFinalidade) {
+        this.lblFinalidade = lblFinalidade;
+    }
+
+    public JLabel getLblNatureza() {
+        return lblNatureza;
+    }
+
+    public void setLblNatureza(JLabel lblNatureza) {
+        this.lblNatureza = lblNatureza;
+    }
+
+    public JPanel getPanPeriodo() {
+        return panPeriodo;
+    }
+
+    public void setPanPeriodo(JPanel panPeriodo) {
+        this.panPeriodo = panPeriodo;
+    }
+
+    public JPanel getPanSintegra() {
+        return panSintegra;
+    }
+
+    public void setPanSintegra(JPanel panSintegra) {
+        this.panSintegra = panSintegra;
+    }
+
+    public JRadioButton getRadSintegra() {
+        return radSintegra;
+    }
+
+    public void setRadSintegra(JRadioButton radSintegra) {
+        this.radSintegra = radSintegra;
+    }
+
+    public JRadioButton getRadSped() {
+        return radSped;
+    }
+
+    public void setRadSped(JRadioButton radSped) {
+        this.radSped = radSped;
+    }
+
+    public JSeparator getSeparador1() {
+        return separador1;
+    }
+
+    public void setSeparador1(JSeparator separador1) {
+        this.separador1 = separador1;
+    }
+
+    public JSeparator getSeparador2() {
+        return separador2;
+    }
+
+    public void setSeparador2(JSeparator separador2) {
+        this.separador2 = separador2;
+    }
+
+    public JFormattedTextField getTxtDtFim() {
+        return txtDtFim;
+    }
+
+    public void setTxtDtFim(JFormattedTextField txtDtFim) {
+        this.txtDtFim = txtDtFim;
+    }
+
+    public JFormattedTextField getTxtDtInicio() {
+        return txtDtInicio;
+    }
+
+    public void setTxtDtInicio(JFormattedTextField txtDtInicio) {
+        this.txtDtInicio = txtDtInicio;
+    }
+    
 }

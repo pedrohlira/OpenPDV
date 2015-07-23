@@ -340,7 +340,9 @@ public class Caixa extends JFrame {
         separador2 = new javax.swing.JPopupMenu.Separator();
         mnuTrocas = new javax.swing.JMenuItem();
         mnuLeiturasZ = new javax.swing.JMenuItem();
-        mnuSincronizacao = new javax.swing.JMenuItem();
+        mnuSincronizacao = new javax.swing.JMenu();
+        mnuReceber = new javax.swing.JMenuItem();
+        mnuEnviar = new javax.swing.JMenuItem();
         mnuFiscal = new javax.swing.JMenu();
         mnuLX = new javax.swing.JMenuItem();
         mnuLMF = new javax.swing.JMenuItem();
@@ -708,16 +710,30 @@ public class Caixa extends JFrame {
         });
         mnuPrincipal.add(mnuLeiturasZ);
 
-        mnuSincronizacao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         mnuSincronizacao.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/sincroniza.png"))); // NOI18N
         mnuSincronizacao.setText("Sincronização");
         mnuSincronizacao.setToolTipText("Sincroniza os PDVs");
         mnuSincronizacao.setEnabled(false);
-        mnuSincronizacao.addActionListener(new java.awt.event.ActionListener() {
+
+        mnuReceber.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        mnuReceber.setText("Receber");
+        mnuReceber.setToolTipText("Receber dados do servidor.");
+        mnuReceber.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuSincronizacaoActionPerformed(evt);
+                mnuReceberActionPerformed(evt);
             }
         });
+        mnuSincronizacao.add(mnuReceber);
+
+        mnuEnviar.setText("Enviar");
+        mnuEnviar.setToolTipText("Enviar dados ao servidor.");
+        mnuEnviar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuEnviarActionPerformed(evt);
+            }
+        });
+        mnuSincronizacao.add(mnuEnviar);
+
         mnuPrincipal.add(mnuSincronizacao);
 
         barMenu.add(mnuPrincipal);
@@ -1760,36 +1776,28 @@ public class Caixa extends JFrame {
         }
     }//GEN-LAST:event_mnuTEFActionPerformed
 
-    private void mnuSincronizacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuSincronizacaoActionPerformed
-        final int escolha = JOptionPane.showOptionDialog(this, "O que deseja sincronizar?", "OpenPDV",
-                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[]{"Receber", "Enviar", "Cancelar"}, JOptionPane.YES_OPTION);
+    private void mnuReceberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuReceberActionPerformed
+        new Thread(new Runnable() {
 
-        if (escolha != JOptionPane.CANCEL_OPTION) {
-            try {
-                caixa.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                if (escolha == JOptionPane.YES_OPTION) {
+            @Override
+            public void run() {
+                try {
                     ComandoReceberDados.getInstancia().executar();
-                    JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    String valor = JOptionPane.showInputDialog(caixa, "<html>Informe a data inicio no formato <b>dd/MM/aaaa</b></html>", "Data Inicial", JOptionPane.INFORMATION_MESSAGE);
-                    Date inicio = Util.formataData(valor, "dd/MM/yyyy");
-                    String valor1 = JOptionPane.showInputDialog(caixa, "<html>Informe a data fim no formato <b>dd/MM/aaaa</b></html>", "Data Final", JOptionPane.INFORMATION_MESSAGE);
-                    Date fim = Util.formataData(valor1, "dd/MM/yyyy");
-                    if (inicio != null && fim != null) {
-                        ComandoEnviarDados.getInstancia(inicio, fim).executar();
-                        JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(caixa, "Data informada inválida!.", "Sincronismo", JOptionPane.WARNING_MESSAGE);
-                    }
+                    Aguarde.getInstancia().setVisible(false);
+                    JOptionPane.showMessageDialog(caixa, "Realizado com sucesso.", "Sincronismo - Receber", JOptionPane.INFORMATION_MESSAGE);
+                } catch (OpenPdvException ex) {
+                    log.error("Não conseguiu receber dados do servidor.", ex);
+                    Aguarde.getInstancia().setVisible(false);
+                    JOptionPane.showMessageDialog(caixa, ex.getMessage(), "Sincronismo - Receber", JOptionPane.WARNING_MESSAGE);
+                } finally {
+                    caixa.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 }
-            } catch (OpenPdvException ex) {
-                log.error("Não conseguiu sincronizar com o servidor.", ex);
-                JOptionPane.showMessageDialog(caixa, ex.getMessage(), "Sincronismo", JOptionPane.WARNING_MESSAGE);
-            } finally {
-                caixa.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             }
-        }
-    }//GEN-LAST:event_mnuSincronizacaoActionPerformed
+        }).start();
+
+        caixa.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        Aguarde.getInstancia().setVisible(true);
+    }//GEN-LAST:event_mnuReceberActionPerformed
 
     private void mnuTipoPagamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTipoPagamentosActionPerformed
         AsyncCallback<Integer> async = new AsyncCallback<Integer>() {
@@ -1941,6 +1949,11 @@ public class Caixa extends JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void mnuEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEnviarActionPerformed
+        janela = Sincronismo.getInstancia();
+        janela.setVisible(true);
+    }//GEN-LAST:event_mnuEnviarActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuBar barMenu;
     private javax.swing.JLabel lblCaixa;
@@ -1961,6 +1974,7 @@ public class Caixa extends JFrame {
     private javax.swing.JMenuItem mnuClientes;
     private javax.swing.JMenuItem mnuCupomPresente;
     private javax.swing.JMenuItem mnuEmbalagens;
+    private javax.swing.JMenuItem mnuEnviar;
     private javax.swing.JMenuItem mnuEstoque;
     private javax.swing.JMenuItem mnuFecharVenda;
     private javax.swing.JMenu mnuFiscal;
@@ -1980,10 +1994,11 @@ public class Caixa extends JFrame {
     private javax.swing.JMenu mnuPesquisa;
     private javax.swing.JMenu mnuPrincipal;
     private javax.swing.JMenuItem mnuProdutos;
+    private javax.swing.JMenuItem mnuReceber;
     private javax.swing.JMenuItem mnuReducaoZ;
     private javax.swing.JMenu mnuSair;
     private javax.swing.JMenuItem mnuSangria;
-    private javax.swing.JMenuItem mnuSincronizacao;
+    private javax.swing.JMenu mnuSincronizacao;
     private javax.swing.JMenu mnuSobre;
     private javax.swing.JMenuItem mnuSuprimento;
     private javax.swing.JMenuItem mnuTEF;
@@ -2520,11 +2535,11 @@ public class Caixa extends JFrame {
     }
 
     public JMenuItem getMnuSincronizacao() {
-        return mnuSincronizacao;
+        return mnuReceber;
     }
 
     public void setMnuSincronizacao(JMenuItem mnuSincronizacao) {
-        this.mnuSincronizacao = mnuSincronizacao;
+        this.mnuReceber = mnuSincronizacao;
     }
 
     public JMenu getMnuSobre() {

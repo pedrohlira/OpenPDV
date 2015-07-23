@@ -507,14 +507,16 @@ public class ComandoEmitirMovimentoECF implements IComando {
 
     // valida se o ead no objeto e o mesmo que o gerado com seus dados atuais.
     private String validarEAD(Dados dado, String valor, int tamanho) {
-        try {
-            String ead = Util.gerarEAD(dado);
-            if (!ead.equals(dado.getEad())) {
-                String invalido = Util.formataTexto(valor, "?", tamanho, Util.EDirecao.DIREITA);
-                return invalido.replace(" ", "?");
+        if (PAF.AUXILIAR.getProperty("ecf.ead").equalsIgnoreCase("SIM")) {
+            try {
+                String ead = Util.gerarEAD(dado);
+                if (!ead.equals(dado.getEad())) {
+                    String invalido = Util.formataTexto(valor, "?", tamanho, Util.EDirecao.DIREITA);
+                    return invalido.replace(" ", "?");
+                }
+            } catch (Exception ex) {
+                log.error("Erro ao gerar o EAD do objeto.", ex);
             }
-        } catch (Exception ex) {
-            log.error("Erro ao gerar o EAD do objeto.", ex);
         }
         return valor;
     }

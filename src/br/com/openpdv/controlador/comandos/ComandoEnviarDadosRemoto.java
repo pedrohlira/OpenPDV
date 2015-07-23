@@ -23,6 +23,10 @@ public class ComandoEnviarDadosRemoto extends ComandoEnviarDados {
     public ComandoEnviarDadosRemoto(Date inicio, Date fim) {
         super(inicio, fim);
     }
+    
+    public ComandoEnviarDadosRemoto(int primeiro, int ultimo) {
+        super(primeiro, ultimo);
+    }
 
     @Override
     protected <E extends Dados> List<E> enviar(String tipo, List<E> lista) throws Exception {

@@ -327,7 +327,8 @@ public class ComandoGerarCat52 implements IComando {
                 cat52.setListaE21(listaE21);
 
                 // gera o arquivo
-                path = PAF.gerarArquivoCat52(cat52, Util.getConfig().getProperty("ecf.cat52"));
+                String arquivo = impressora.getEcfImpressoraSerie().substring(0, 2) + impressora.getEcfImpressoraSerie().substring(13);
+                path = PAF.gerarArquivoCat52(cat52, arquivo);
             }
         } catch (Exception ex) {
             log.error("Erro ao gerar o arquivo cat52 do ECF.", ex);

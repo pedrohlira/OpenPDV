@@ -44,8 +44,8 @@ public class Identificar extends javax.swing.JDialog {
 
         // colocando limites nos campos
         txtCPF_CNPJ.setDocument(new TextFieldLimit(14, true));
-        txtNome.setDocument(new TextFieldLimit(100));
-        txtEndereco.setDocument(new TextFieldLimit(255));
+        txtNome.setDocument(new TextFieldLimit(60));
+        txtEndereco.setDocument(new TextFieldLimit(60));
     }
 
     /**
@@ -477,9 +477,9 @@ public class Identificar extends javax.swing.JDialog {
                     cliente.setSisClienteNumero(0);
                     cliente.setSisClienteComplemento("");
                     cliente.setSisClienteBairro("NAO INFORMADO");
-                    cliente.setSisClienteCep("00000-000");
+                    cliente.setSisClienteCep("00000000");
                     cliente.setSisMunicipio(empresa.getSisMunicipio());
-                    cliente.setSisClienteTelefone("(00) 0000-0000");
+                    cliente.setSisClienteTelefone("00000000");
                     cliente.setSisClienteEmail("n@o.informado");
                     cliente.setSisClienteData(new Date());
                     cliente = (SisCliente) service.salvar(cliente);

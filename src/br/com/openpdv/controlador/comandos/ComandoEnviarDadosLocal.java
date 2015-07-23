@@ -28,6 +28,10 @@ public class ComandoEnviarDadosLocal extends ComandoEnviarDados {
         super(inicio, fim);
     }
 
+    public ComandoEnviarDadosLocal(int primeiro, int ultimo) {
+        super(primeiro, ultimo);
+    }
+
     @Override
     protected <E extends Dados> List<E> enviar(String tipo, List<E> lista) throws Exception {
         StringBuilder sb = new StringBuilder(Util.getPathArquivos());

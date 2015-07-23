@@ -54,30 +54,38 @@ public class ComandoEmitirReducaoZ implements IComando {
     @Override
     public void executar() throws OpenPdvException {
         // verifica se e a primeira Z do mes, caso o ecf nao faca por conta
-        if (PAF.AUXILIAR.getProperty("ecf.lmfc").equalsIgnoreCase("SIM")) {
+        if (Util.getConfig().getProperty("ecf.lmfc").equalsIgnoreCase("SIM")) {
             emitirLMFC();
+            log.debug("Emitiu a LMFC");
         }
         // emite a reducao no ECF
         emitirReducaoZEcf();
+        log.debug("Emitiu a Z na ECF");
         // salva os dados no banco com a reducao depois de impressao
         emitirReducaoZBanco();
+        log.debug("Salvou a Z no banco de dados");
         // atualizando o servidor
         if (Util.getConfig().getProperty("sinc.tipo").equals("arquivo") || !Util.getConfig().getProperty("sinc.servidor").endsWith("localhost")) {
             try {
                 ComandoEnviarDados.getInstancia().executar();
+                log.debug("Enviou os dados para o sistema on-line");
             } catch (OpenPdvException ex) {
                 log.error("Nao enviou os dados para o servidor!", ex);
             }
         }
-        // recupera os produtos
-        ProdProduto dados = new ProdProduto();
-        dados.setCampoOrdem(dados.getCampoId());
-        List<ProdProduto> listaProd = service.selecionar(dados, 0, 0, null);
         // gera o arquivo Movimento do ECF do dia
-        new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento, listaProd).executar();
+        if (Util.getConfig().getProperty("ecf.movimento").equalsIgnoreCase("SIM")) {
+            // recupera os produtos
+            ProdProduto dados = new ProdProduto();
+            dados.setCampoOrdem(dados.getCampoId());
+            List<ProdProduto> listaProd = service.selecionar(dados, 0, 0, null);
+            new ComandoEmitirMovimentoECF(Caixa.getInstancia().getImpressora(), dataMovimento, dataMovimento, listaProd).executar();
+            log.debug("Gerou o arquivo de movimento do dia");
+        }
         // gera o arquivo do cat52
         if (Util.getConfig().getProperty("ecf.cat52") != null) {
             new ComandoGerarCat52(Caixa.getInstancia().getEmpresa(), Caixa.getInstancia().getImpressora(), dataMovimento).executar();
+            log.debug("Gerou o arquivo CAT52");
         }
     }
 
@@ -192,7 +200,7 @@ public class ComandoEmitirReducaoZ implements IComando {
                 }
                 // salva os totais do z
                 service.salvar(totais);
-                
+
                 // atualiza os documentos, marcando que pertence a esta Z
                 fd1 = new FiltroData("ecfDocumentoData", ECompara.MAIOR_IGUAL, dataMovimento);
                 fd2 = new FiltroData("ecfDocumentoData", ECompara.MENOR, cal.getTime());

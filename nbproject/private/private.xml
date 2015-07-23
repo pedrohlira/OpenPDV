@@ -10,6 +10,8 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="OpenPDV"/>
         <group name="PDV"/>
-        <group/>
+        <group>
+            <file>file:/C:/Users/PHD/Documents/Projetos/OpenPDV/src/br/com/openpdv/visao/principal/Sincronismo.java</file>
+        </group>
     </open-files>
 </project-private>

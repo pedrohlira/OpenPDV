@@ -362,8 +362,10 @@ public class CoreService<E extends Dados> {
     public E salvar(EntityManager em, E unidade) throws OpenPdvException {
         try {
             padronizaLetras(unidade, unidade.getTipoLetra());
-            String ead = Util.gerarEAD(unidade);
-            unidade.setEad(ead);
+            if (Util.getConfig().getProperty("ecf.ead").equalsIgnoreCase("SIM")) {
+                String ead = Util.gerarEAD(unidade);
+                unidade.setEad(ead);
+            }
             if (unidade.getId() == null || unidade.getId() == 0) {
                 unidade.setId(null);
                 em.persist(unidade);

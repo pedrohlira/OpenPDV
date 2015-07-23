@@ -14,6 +14,13 @@ ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_bairro varchar(60) NOT NULL;
 ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_cep varchar(8) NOT NULL;
 ALTER TABLE sis_cliente ALTER COLUMN sis_cliente_telefone varchar(14) NOT NULL;
 ALTER TABLE ecf_troca ALTER COLUMN ecf_troca_cliente varchar(14) NOT NULL;
+ALTER TABLE prod_preco ALTER COLUMN prod_preco_barra varchar(30) NOT NULL;
+ALTER TABLE prod_grade ALTER COLUMN prod_grade_barra varchar(30) NOT NULL;
+ALTER TABLE ecf_nota_produto ALTER COLUMN ecf_nota_produto_barra varchar(30) NULL;
+ALTER TABLE ecf_troca_produto ALTER COLUMN ecf_troca_produto_barra varchar(30) NULL;
+ALTER TABLE ecf_venda_produto ALTER COLUMN ecf_venda_produto_barra varchar(30) NULL;
+ALTER TABLE prod_produto ALTER COLUMN prod_produto_descricao varchar(120) NOT NULL;
+ALTER TABLE prod_produto ALTER COLUMN prod_produto_referencia varchar(60) NOT NULL;
 /* Adicionando alguns campos nas tabelas */
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_observacao varchar(255) NOT NULL BEFORE ead;
 /* Remove a tabela prod_grade_tipo, nao sera mais usada */

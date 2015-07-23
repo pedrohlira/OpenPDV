@@ -194,12 +194,22 @@ public class Splash extends JFrame {
                     service = new CoreService();
 
                     // realiza o backup do banco se preciso for
-                    if (Conexao.DADOS.getProperty("eclipselink.jdbc.driver").contains("h2")) {
-                        String back = "db/backup.zip";
-                        File arquivo = new File(back);
-                        arquivo.delete();
-                        service.executar("BACKUP TO '" + back + "'");
-                    }
+//                    if (Conexao.DADOS.getProperty("eclipselink.jdbc.driver").contains("h2")) {
+//                        service.selecionar(new EcfImpressora(), 0, 0, null);
+//                        new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                try {
+//                                    String back = "db/backup.zip";
+//                                    File arquivo = new File(back);
+//                                    arquivo.delete();
+//                                    service.executar("BACKUP TO '" + back + "'");
+//                                } catch (Exception ex) {
+//                                    log.error("Nao conseguiu fazer o backup do banco.", ex);
+//                                }
+//                            }
+//                        }).start();
+//                    }
                     splash.pgBarra.setValue(10);
                 } catch (Exception ex) {
                     log.error("Nao conseguiu conectar ao banco de dados.", ex);
@@ -251,10 +261,10 @@ public class Splash extends JFrame {
                             if (sql != null && !sql.equals("") && !sql.startsWith("/") && !sql.startsWith("#")) {
                                 try {
                                     Integer resp = service.executar(sql);
-                                    log.info("Sql executdo: " + sql);
+                                    log.info("Sql executado: " + sql);
                                     log.info("Registros atingidos: " + resp);
                                 } catch (Exception ex) {
-                                    log.error("Sql executdo: " + sql);
+                                    log.error("Sql executado: " + sql);
                                     log.error("Erro retornado: ", ex);
                                 }
                             }

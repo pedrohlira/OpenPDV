@@ -1,6 +1,8 @@
-package br.com.openpdv.visao.fiscal;
+package br.com.openpdv.visao.principal;
 
+import br.com.openpdv.controlador.comandos.ComandoEnviarDados;
 import br.com.openpdv.controlador.core.TextFieldLimit;
+import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.phdss.Util;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
@@ -18,9 +20,9 @@ import org.apache.log4j.Logger;
  *
  * @author Pedro H. Lira
  */
-public class PAF_LMF extends JDialog {
+public class Sincronismo extends JDialog {
 
-    private static PAF_LMF paf_mf;
+    private static Sincronismo sinc;
     private Logger log;
     private String param1;
     private String param2;
@@ -28,9 +30,9 @@ public class PAF_LMF extends JDialog {
     /**
      * Construtor padrao.
      */
-    private PAF_LMF() {
+    private Sincronismo() {
         super(Caixa.getInstancia());
-        log = Logger.getLogger(PAF_LMF.class);
+        log = Logger.getLogger(Sincronismo.class);
         initComponents();
         
         // colocando limites nos campos
@@ -43,13 +45,13 @@ public class PAF_LMF extends JDialog {
      *
      * @return o objeto de PAF_MF.
      */
-    public static PAF_LMF getInstancia() {
-        if (paf_mf == null) {
-            paf_mf = new PAF_LMF();
+    public static Sincronismo getInstancia() {
+        if (sinc == null) {
+            sinc = new Sincronismo();
         }
 
-        paf_mf.limpar();
-        return paf_mf;
+        sinc.limpar();
+        return sinc;
     }
 
     @SuppressWarnings("unchecked")
@@ -59,8 +61,8 @@ public class PAF_LMF extends JDialog {
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
         panOpcao = new javax.swing.JPanel();
-        radCompleta = new javax.swing.JRadioButton();
-        radSimples = new javax.swing.JRadioButton();
+        radReducao = new javax.swing.JRadioButton();
+        radVenda = new javax.swing.JRadioButton();
         panFiltro = new javax.swing.JPanel();
         radData = new javax.swing.JRadioButton();
         radIntervalo = new javax.swing.JRadioButton();
@@ -74,11 +76,11 @@ public class PAF_LMF extends JDialog {
         lblUltimo = new javax.swing.JLabel();
         txtUltimo = new javax.swing.JFormattedTextField();
         separador = new javax.swing.JSeparator();
-        btnOk = new javax.swing.JButton();
+        btnEnviar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Leitura de Memoria Fiscal");
+        setTitle("Sincronismo - Enviar");
         setFont(new java.awt.Font("Serif", 0, 10)); // NOI18N
         setIconImage(null);
         setModal(true);
@@ -92,16 +94,16 @@ public class PAF_LMF extends JDialog {
         panOpcao.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Tipo:", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Serif", 1, 12))); // NOI18N
         panOpcao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
 
-        radCompleta.setBackground(getBackground());
-        buttonGroup2.add(radCompleta);
-        radCompleta.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        radCompleta.setSelected(true);
-        radCompleta.setText("Completa");
+        radReducao.setBackground(getBackground());
+        buttonGroup2.add(radReducao);
+        radReducao.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        radReducao.setSelected(true);
+        radReducao.setText("Redução Z");
 
-        radSimples.setBackground(getBackground());
-        buttonGroup2.add(radSimples);
-        radSimples.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        radSimples.setText("Simples");
+        radVenda.setBackground(getBackground());
+        buttonGroup2.add(radVenda);
+        radVenda.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        radVenda.setText("Vendas");
 
         javax.swing.GroupLayout panOpcaoLayout = new javax.swing.GroupLayout(panOpcao);
         panOpcao.setLayout(panOpcaoLayout);
@@ -109,16 +111,16 @@ public class PAF_LMF extends JDialog {
             panOpcaoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panOpcaoLayout.createSequentialGroup()
                 .addGroup(panOpcaoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(radCompleta)
-                    .addComponent(radSimples))
+                    .addComponent(radReducao)
+                    .addComponent(radVenda))
                 .addGap(0, 105, Short.MAX_VALUE))
         );
         panOpcaoLayout.setVerticalGroup(
             panOpcaoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panOpcaoLayout.createSequentialGroup()
-                .addComponent(radCompleta)
+                .addComponent(radReducao)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(radSimples))
+                .addComponent(radVenda))
         );
 
         panFiltro.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filtro:", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Serif", 1, 12))); // NOI18N
@@ -136,7 +138,7 @@ public class PAF_LMF extends JDialog {
 
         buttonGroup1.add(radIntervalo);
         radIntervalo.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        radIntervalo.setText("Intervalo de CRZ");
+        radIntervalo.setText("Intervalo de CRZ ou CCF");
         radIntervalo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radIntervaloActionPerformed(evt);
@@ -231,20 +233,20 @@ public class PAF_LMF extends JDialog {
                     .addComponent(txtUltimo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
-        btnOk.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
-        btnOk.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/ok.png"))); // NOI18N
-        btnOk.setText("OK");
-        btnOk.setMaximumSize(new java.awt.Dimension(100, 30));
-        btnOk.setMinimumSize(new java.awt.Dimension(100, 30));
-        btnOk.setPreferredSize(new java.awt.Dimension(100, 30));
-        btnOk.addActionListener(new java.awt.event.ActionListener() {
+        btnEnviar.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        btnEnviar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/openpdv/imagens/ok.png"))); // NOI18N
+        btnEnviar.setText("Enviar");
+        btnEnviar.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnEnviar.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnEnviar.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnEnviar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnOkActionPerformed(evt);
+                btnEnviarActionPerformed(evt);
             }
         });
-        btnOk.addKeyListener(new java.awt.event.KeyAdapter() {
+        btnEnviar.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                btnOkKeyPressed(evt);
+                btnEnviarKeyPressed(evt);
             }
         });
 
@@ -276,7 +278,7 @@ public class PAF_LMF extends JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                 .addGroup(layout.createSequentialGroup()
-                                    .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnEnviar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addComponent(separador, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -288,7 +290,7 @@ public class PAF_LMF extends JDialog {
                         .addComponent(panOpcao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(panFiltro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(15, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -303,7 +305,7 @@ public class PAF_LMF extends JDialog {
                 .addComponent(separador, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnEnviar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -326,20 +328,20 @@ public class PAF_LMF extends JDialog {
         txtDtFim.setEnabled(false);
     }//GEN-LAST:event_radIntervaloActionPerformed
 
-    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
-        botaoOK();
-}//GEN-LAST:event_btnOkActionPerformed
+    private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarActionPerformed
+        botaoEnviar();
+}//GEN-LAST:event_btnEnviarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
         dispose();
         Caixa.getInstancia().setJanela(null);
 }//GEN-LAST:event_btnCancelarActionPerformed
 
-    private void btnOkKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnOkKeyPressed
+    private void btnEnviarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnEnviarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            botaoOK();
+            botaoEnviar();
         }
-    }//GEN-LAST:event_btnOkKeyPressed
+    }//GEN-LAST:event_btnEnviarKeyPressed
 
     private void btnCancelarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnCancelarKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -353,7 +355,7 @@ public class PAF_LMF extends JDialog {
     }//GEN-LAST:event_formWindowClosing
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnOk;
+    private javax.swing.JButton btnEnviar;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JLabel lblDtFim;
@@ -363,10 +365,10 @@ public class PAF_LMF extends JDialog {
     private javax.swing.JPanel panFiltro;
     private javax.swing.JPanel panOpcao;
     private javax.swing.JPanel panPeriodo;
-    private javax.swing.JRadioButton radCompleta;
     private javax.swing.JRadioButton radData;
     private javax.swing.JRadioButton radIntervalo;
-    private javax.swing.JRadioButton radSimples;
+    private javax.swing.JRadioButton radReducao;
+    private javax.swing.JRadioButton radVenda;
     private javax.swing.JSeparator separador;
     private javax.swing.JFormattedTextField txtDtFim;
     private javax.swing.JFormattedTextField txtDtInicio;
@@ -384,30 +386,39 @@ public class PAF_LMF extends JDialog {
         txtDtFim.setText(null);
         txtPrimeiro.setText(null);
         txtUltimo.setText(null);
-        btnOk.setEnabled(true);
+        btnEnviar.setEnabled(true);
         btnCancelar.setEnabled(true);
     }
 
     /**
      * Metodo que tem a acao do botao OK.
      */
-    private void botaoOK() {
+    private void botaoEnviar() {
         if (validar()) {
             new Thread(new Runnable() {
 
                 @Override
                 public void run() {
-                    String[] resp;
-                    if (radCompleta.isSelected()) {
-                        resp = PAF.leituraMF(EComando.ECF_PafMf_Lmfc_Impressao, new String[]{param1, param2});
+                    ComandoEnviarDados comando;
+                    if (radData.isSelected()) {
+                        comando = ComandoEnviarDados.getInstancia(Util.getData(param1), Util.getData(param2));
                     } else {
-                        resp = PAF.leituraMF(EComando.ECF_PafMf_Lmfs_Impressao, new String[]{param1, param2});
+                        comando = ComandoEnviarDados.getInstancia(Integer.valueOf(param1), Integer.valueOf(param2));
+                    }
+                    if (radReducao.isSelected()) {
+                        comando.zs(false);
+                    } else {
+                        comando.vendas(false);
                     }
 
                     Aguarde.getInstancia().setVisible(false);
-                    if (IECF.ERRO.equals(resp[0])) {
-                        log.error("Nao foi possivel emitir a leitura fiscal! -> " + resp[1]);
-                        JOptionPane.showMessageDialog(paf_mf, "Não foi possível emitir a leitura!", "Menu Fiscal", JOptionPane.WARNING_MESSAGE);
+                    Caixa.getInstancia().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    try {
+                        comando.analisar();
+                        JOptionPane.showMessageDialog(Caixa.getInstancia(), "Realizado com sucesso.", "Sincronismo - Enviar", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (OpenPdvException ex) {
+                        log.error("Não conseguiu enviar dados ao servidor.", ex);
+                        JOptionPane.showMessageDialog(Caixa.getInstancia(), ex.getMessage(), "Sincronismo - Enviar", JOptionPane.WARNING_MESSAGE);
                     }
                 }
             }).start();
@@ -450,16 +461,16 @@ public class PAF_LMF extends JDialog {
                 retorno = false;
             }
         } else {
-            long crz1 = Long.valueOf(param1);
-            long crz2 = Long.valueOf(param2);
-            if (crz1 < 1) {
-                JOptionPane.showMessageDialog(this, "Primeiro CRZ inválido!", getTitle(), JOptionPane.WARNING_MESSAGE);
+            int valor1 = Integer.valueOf(param1);
+            int valor2 = Integer.valueOf(param2);
+            if (valor1 < 1) {
+                JOptionPane.showMessageDialog(this, "Primeiro CRZ ou CCF não pode ser menor que 1!", getTitle(), JOptionPane.WARNING_MESSAGE);
                 retorno = false;
-            } else if (crz2 < 1) {
-                JOptionPane.showMessageDialog(this, "Último CRZ inválido!", getTitle(), JOptionPane.WARNING_MESSAGE);
+            } else if (valor2 < 1) {
+                JOptionPane.showMessageDialog(this, "Último CRZ ou CCF não pode ser menor que 1!", getTitle(), JOptionPane.WARNING_MESSAGE);
                 retorno = false;
-            } else if (crz1 > crz2) {
-                JOptionPane.showMessageDialog(this, "Último CRZ menor que o primeiro CRZ!", getTitle(), JOptionPane.WARNING_MESSAGE);
+            } else if (valor1 > valor2) {
+                JOptionPane.showMessageDialog(this, "Último CRZ ou CCF menor que o primeiro CRZ ou CCF!", getTitle(), JOptionPane.WARNING_MESSAGE);
                 retorno = false;
             }
         }
@@ -492,12 +503,12 @@ public class PAF_LMF extends JDialog {
         this.btnCancelar = btnCancelar;
     }
 
-    public JButton getBtnOk() {
-        return btnOk;
+    public JButton getBtnEnviar() {
+        return btnEnviar;
     }
 
-    public void setBtnOk(JButton btnOk) {
-        this.btnOk = btnOk;
+    public void setBtnEnviar(JButton btnEnviar) {
+        this.btnEnviar = btnEnviar;
     }
 
     public ButtonGroup getButtonGroup1() {
@@ -572,14 +583,6 @@ public class PAF_LMF extends JDialog {
         this.panPeriodo = panPeriodo;
     }
 
-    public JRadioButton getRadCompleta() {
-        return radCompleta;
-    }
-
-    public void setRadCompleta(JRadioButton radCompleta) {
-        this.radCompleta = radCompleta;
-    }
-
     public JRadioButton getRadData() {
         return radData;
     }
@@ -596,12 +599,20 @@ public class PAF_LMF extends JDialog {
         this.radIntervalo = radIntervalo;
     }
 
-    public JRadioButton getRadSimples() {
-        return radSimples;
+    public JRadioButton getRadReducao() {
+        return radReducao;
     }
 
-    public void setRadSimples(JRadioButton radSimples) {
-        this.radSimples = radSimples;
+    public void setRadReducao(JRadioButton radReducao) {
+        this.radReducao = radReducao;
+    }
+
+    public JRadioButton getRadVenda() {
+        return radVenda;
+    }
+
+    public void setRadVenda(JRadioButton radVenda) {
+        this.radVenda = radVenda;
     }
 
     public JSeparator getSeparador() {
@@ -643,5 +654,5 @@ public class PAF_LMF extends JDialog {
     public void setTxtUltimo(JFormattedTextField txtUltimo) {
         this.txtUltimo = txtUltimo;
     }
-    
+
 }

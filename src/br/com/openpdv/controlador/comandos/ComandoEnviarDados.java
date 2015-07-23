@@ -9,6 +9,7 @@ import br.com.openpdv.modelo.core.filtro.Filtro;
 import br.com.openpdv.modelo.core.filtro.FiltroBinario;
 import br.com.openpdv.modelo.core.filtro.FiltroData;
 import br.com.openpdv.modelo.core.filtro.FiltroGrupo;
+import br.com.openpdv.modelo.core.filtro.FiltroNumero;
 import br.com.openpdv.modelo.ecf.EcfNota;
 import br.com.openpdv.modelo.ecf.EcfNotaEletronica;
 import br.com.openpdv.modelo.ecf.EcfVenda;
@@ -33,6 +34,8 @@ public abstract class ComandoEnviarDados implements IComando {
     protected Logger log;
     protected Date inicio;
     protected Date fim;
+    protected int primeiro;
+    protected int ultimo;
     protected StringBuilder erros;
 
     public ComandoEnviarDados() {
@@ -49,6 +52,14 @@ public abstract class ComandoEnviarDados implements IComando {
             cal.add(Calendar.DAY_OF_MONTH, 1);
             this.fim = cal.getTime();
         }
+        this.erros = new StringBuilder();
+    }
+
+    public ComandoEnviarDados(int primeiro, int ultimo) {
+        this.service = new CoreService();
+        this.log = Logger.getLogger(ComandoEnviarDados.class);
+        this.primeiro = primeiro;
+        this.ultimo = ultimo;
         this.erros = new StringBuilder();
     }
 
@@ -74,6 +85,18 @@ public abstract class ComandoEnviarDados implements IComando {
         return ced;
     }
 
+    /**
+     * Metodo estatico para criar uma instancia de acordo com o config.
+     *
+     * @param primeiro o CRZ ou CCF de inicio.
+     * @param ultimo o CRZ ou CCF de fim.
+     * @return o objeto que envia dados.
+     */
+    public static ComandoEnviarDados getInstancia(int primeiro, int ultimo) {
+        ComandoEnviarDados ced = Util.getConfig().getProperty("sinc.tipo").equals("rest") ? new ComandoEnviarDadosRemoto(primeiro, ultimo) : new ComandoEnviarDadosLocal(primeiro, ultimo);
+        return ced;
+    }
+
     @Override
     public void executar() throws OpenPdvException {
         if (Util.getConfig().getProperty("sinc.nota").equals("true")) {
@@ -86,30 +109,18 @@ public abstract class ComandoEnviarDados implements IComando {
         }
         if (Util.getConfig().getProperty("sinc.cliente").equals("true")) {
             // enviando os clientes nao sincronizados
-            //clientes();
+            clientes();
         }
         if (Util.getConfig().getProperty("sinc.venda").equals("true")) {
             // enviando as vendas nao sincronizadas
-            vendas();
+            vendas(true);
         }
         if (Util.getConfig().getProperty("sinc.reducaoZ").equals("true")) {
             // enviando as Z
-            //zs();
+            zs(true);
         }
 
-        // se sucesso atualiza no arquivo a data do ultimo envio
-        if (erros.length() == 0) {
-            salvar();
-        } else {
-            int escolha = JOptionPane.showOptionDialog(Caixa.getInstancia(), "Ocorreu algum problema no sincronismo.\nDeseja ignorar este erro?", "Sincronismo",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
-            if (escolha == JOptionPane.YES_OPTION) {
-                salvar();
-            } else {
-                erros.append("Verifique o log do sistema.");
-                throw new OpenPdvException(erros.toString());
-            }
-        }
+        analisar();
     }
 
     @Override
@@ -198,11 +209,32 @@ public abstract class ComandoEnviarDados implements IComando {
 
     /**
      * Metodo que envia as vendas.
+     *
+     * @param auto informa se o sincronismo e automatico.
      */
-    private void vendas() {
+    public void vendas(boolean auto) {
         try {
-            FiltroBinario fb = new FiltroBinario("ecfVendaSinc", ECompara.IGUAL, false);
-            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 0, fb);
+            FiltroGrupo filtro = new FiltroGrupo();
+            if (auto) {
+                FiltroBinario fb = new FiltroBinario("ecfVendaSinc", ECompara.IGUAL, false);
+                filtro.add(fb, Filtro.E);
+            } else {
+                if (primeiro > 0 && ultimo > 0) {
+                    FiltroNumero fn = new FiltroNumero("ecfVendaCcf", ECompara.MAIOR_IGUAL, primeiro);
+                    filtro.add(fn, Filtro.E);
+                    FiltroNumero fn1 = new FiltroNumero("ecfVendaCcf", ECompara.MENOR_IGUAL, ultimo);
+                    filtro.add(fn1, Filtro.E);
+                } else if (inicio != null) {
+                    FiltroData fd = new FiltroData("ecfVendaData", ECompara.MAIOR_IGUAL, inicio);
+                    filtro.add(fd, Filtro.E);
+                    if (fim != null) {
+                        FiltroData fd1 = new FiltroData("ecfVendaData", ECompara.MENOR, fim);
+                        filtro.add(fd1, Filtro.E);
+                    }
+                }
+            }
+
+            List<EcfVenda> vendas = service.selecionar(new EcfVenda(), 0, 0, filtro);
             if (!vendas.isEmpty()) {
                 vendas = enviar("venda", vendas);
                 for (EcfVenda venda : vendas) {
@@ -220,15 +252,24 @@ public abstract class ComandoEnviarDados implements IComando {
 
     /**
      * Metodo que envia as Zs.
+     *
+     * @param auto informa se o sincronismo e automatico.
      */
-    private void zs() {
+    public void zs(boolean auto) {
         try {
             FiltroGrupo filtro = new FiltroGrupo();
-            FiltroData fd = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
-            filtro.add(fd, Filtro.E);
-            if (fim != null) {
-                FiltroData fd1 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
-                filtro.add(fd1, Filtro.E);
+            if (auto || inicio != null) {
+                FiltroData fd = new FiltroData("ecfZMovimento", ECompara.MAIOR_IGUAL, inicio);
+                filtro.add(fd, Filtro.E);
+                if (fim != null) {
+                    FiltroData fd1 = new FiltroData("ecfZMovimento", ECompara.MENOR, fim);
+                    filtro.add(fd1, Filtro.E);
+                }
+            } else {
+                FiltroNumero fn = new FiltroNumero("ecfZCrz", ECompara.MAIOR_IGUAL, primeiro);
+                filtro.add(fn, Filtro.E);
+                FiltroNumero fn1 = new FiltroNumero("ecfZCrz", ECompara.MENOR_IGUAL, ultimo);
+                filtro.add(fn1, Filtro.E);
             }
             List<EcfZ> zs = service.selecionar(new EcfZ(), 0, 0, filtro);
             if (!zs.isEmpty()) {
@@ -238,6 +279,27 @@ public abstract class ComandoEnviarDados implements IComando {
         } catch (Exception ex) {
             erros.append("Erro no envio de algumas Zs.\n");
             log.error("Erro no envio de algumas Zs.", ex);
+        }
+    }
+
+    /**
+     * Metodo que analisa o resultado final da sincronizacao.
+     *
+     * @throws OpenPdvException dispara em caso de erro.
+     */
+    public void analisar() throws OpenPdvException {
+        // se sucesso atualiza no arquivo a data do ultimo envio
+        if (erros.length() == 0) {
+            salvar();
+        } else {
+            int escolha = JOptionPane.showOptionDialog(Caixa.getInstancia(), "Ocorreu algum problema no sincronismo.\nDeseja ignorar este erro?", "Sincronismo",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, Util.OPCOES, JOptionPane.YES_OPTION);
+            if (escolha == JOptionPane.YES_OPTION) {
+                salvar();
+            } else {
+                erros.append("Verifique o log do sistema.");
+                throw new OpenPdvException(erros.toString());
+            }
         }
     }
 
