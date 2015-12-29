@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.swing.*;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -192,29 +193,22 @@ public class Splash extends JFrame {
                     splash.pgBarra.setString("Conectando ao banco de dados...");
                     Conexao.getInstancia();
                     service = new CoreService();
-
-                    // realiza o backup do banco se preciso for
-//                    if (Conexao.DADOS.getProperty("eclipselink.jdbc.driver").contains("h2")) {
-//                        service.selecionar(new EcfImpressora(), 0, 0, null);
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    String back = "db/backup.zip";
-//                                    File arquivo = new File(back);
-//                                    arquivo.delete();
-//                                    service.executar("BACKUP TO '" + back + "'");
-//                                } catch (Exception ex) {
-//                                    log.error("Nao conseguiu fazer o backup do banco.", ex);
-//                                }
-//                            }
-//                        }).start();
-//                    }
                     splash.pgBarra.setValue(10);
                 } catch (Exception ex) {
                     log.error("Nao conseguiu conectar ao banco de dados.", ex);
                     JOptionPane.showMessageDialog(splash, "Problemas com acesso ao banco de dados.\nInforme ao administrador do sistema!", "OpenPDV", JOptionPane.ERROR_MESSAGE);
                     System.exit(0);
+                }
+
+                // realiza a limpeza do banco de dados deixando sempre o ultimo e atual mes
+                try {
+                    if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == 1) {
+                        File origem = new File("C:\\OpenPDV\\db\\limpeza.txt");
+                        File destino = new File("C:\\OpenPDV\\db\\limpeza.sql");
+                        FileUtils.copyFile(origem, destino);
+                    }
+                } catch (Exception ex) {
+                    log.error("Nao conseguiu fazer a limpeza mensal do banco de dados.", ex);
                 }
 
                 // ativando o RESTful server, caso esteja configurado como localhost e rest

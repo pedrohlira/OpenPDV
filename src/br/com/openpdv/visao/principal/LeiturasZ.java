@@ -13,6 +13,7 @@ import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfZ;
 import br.com.openpdv.modelo.ecf.EcfZTotais;
 import br.com.openpdv.visao.core.Caixa;
+import br.com.phdss.Util;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -160,6 +161,7 @@ public class LeiturasZ extends javax.swing.JDialog {
             }
         });
         tabLeituras.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabLeituras.setColumnSelectionAllowed(true);
         tabLeituras.setRowHeight(20);
         tabLeituras.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabLeituras.setShowVerticalLines(false);
@@ -690,7 +692,7 @@ public class LeiturasZ extends javax.swing.JDialog {
                 z.setEcfZCooFin(Integer.valueOf(txtCOOfim.getText()));
                 z.setEcfZCro(Integer.valueOf(txtCRO.getText()));
                 z.setEcfZCrz(Integer.valueOf(txtCRZ.getText()));
-                z.setEcfZMovimento(new SimpleDateFormat("dd/MM/yyyy").parse(txtData.getText()));
+                z.setEcfZMovimento(Util.getData(txtData.getText()));
                 z.setEcfZEmissao(new Date());
                 z.setEcfZBruto(Double.valueOf(txtBruto.getText().replace(",", ".")));
                 z.setEcfZGt(Double.valueOf(txtTotal.getText().replace(",", ".")));
@@ -803,8 +805,7 @@ public class LeiturasZ extends javax.swing.JDialog {
             }
 
             for (EcfZ z : lista) {
-                String data = new SimpleDateFormat("dd/MM/yyyy").format(z.getEcfZMovimento());
-                Object[] obj = new Object[]{z.getId(), z.getEcfZCooIni(), z.getEcfZCooFin(), z.getEcfZCro(), z.getEcfZCrz(), data, z.getEcfZBruto(), z.getEcfZGt(), z.getEcfZIssqn()};
+                Object[] obj = new Object[]{z.getId(), z.getEcfZCooIni(), z.getEcfZCooFin(), z.getEcfZCro(), z.getEcfZCrz(), Util.getData(z.getEcfZMovimento()), z.getEcfZBruto(), z.getEcfZGt(), z.getEcfZIssqn()};
                 dtmZ.addRow(obj);
             }
 

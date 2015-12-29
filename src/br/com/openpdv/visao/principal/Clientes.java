@@ -134,6 +134,8 @@ public class Clientes extends javax.swing.JDialog {
         txtTelefone = new javax.swing.JTextField();
         lblEmail = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
+        lblAniversario = new javax.swing.JLabel();
+        txtDtAniversario = new javax.swing.JFormattedTextField();
         lblObs = new javax.swing.JLabel();
         spObs = new javax.swing.JScrollPane();
         taObs = new javax.swing.JTextArea();
@@ -191,14 +193,14 @@ public class Clientes extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Cod", "CPF/CNPJ", "Nome", "IE", "Endereço", "Nº", "Complemento", "Bairro", "CEP", "Município", "Telefone", "E-mail", "OBS", "Sinc"
+                "Cod", "CPF/CNPJ", "Nome", "IE", "Endereço", "Nº", "Complemento", "Bairro", "CEP", "Município", "Telefone", "E-mail", "Aniversário", "OBS", "Sinc"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -210,6 +212,7 @@ public class Clientes extends javax.swing.JDialog {
             }
         });
         tabClientes.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tabClientes.setColumnSelectionAllowed(true);
         tabClientes.setRowHeight(20);
         tabClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tabClientes.setShowVerticalLines(false);
@@ -242,9 +245,11 @@ public class Clientes extends javax.swing.JDialog {
             tabClientes.getColumnModel().getColumn(11).setResizable(false);
             tabClientes.getColumnModel().getColumn(11).setPreferredWidth(200);
             tabClientes.getColumnModel().getColumn(12).setResizable(false);
-            tabClientes.getColumnModel().getColumn(12).setPreferredWidth(200);
+            tabClientes.getColumnModel().getColumn(12).setPreferredWidth(100);
             tabClientes.getColumnModel().getColumn(13).setResizable(false);
-            tabClientes.getColumnModel().getColumn(13).setPreferredWidth(50);
+            tabClientes.getColumnModel().getColumn(13).setPreferredWidth(200);
+            tabClientes.getColumnModel().getColumn(14).setResizable(false);
+            tabClientes.getColumnModel().getColumn(14).setPreferredWidth(50);
         }
 
         painel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -331,6 +336,12 @@ public class Clientes extends javax.swing.JDialog {
         txtEmail.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         txtEmail.setToolTipText("Nome ou Razão Social.");
 
+        lblAniversario.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        lblAniversario.setText("Aniversário:");
+
+        txtDtAniversario.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
+        txtDtAniversario.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+
         lblObs.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
         lblObs.setText("OBS:");
 
@@ -349,61 +360,64 @@ public class Clientes extends javax.swing.JDialog {
                 .addContainerGap()
                 .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, painelLayout.createSequentialGroup()
-                        .add(lblUF)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(cmbUF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 85, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(lblMunicipio)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(cmbMunicipio, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(lblTelefone)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 104, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(lblEmail)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(txtEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 162, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(1, 1, 1))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, painelLayout.createSequentialGroup()
-                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(lblEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 59, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(lblCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 63, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(painelLayout.createSequentialGroup()
-                                .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 121, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblNome)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtNome)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblRG_IE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtRG_IE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 102, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblCEP)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
-                            .add(painelLayout.createSequentialGroup()
-                                .add(txtEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 232, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblNumero)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 54, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblComplemento)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(txtComplemento)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblBairro)
-                                .add(9, 9, 9)))
-                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                            .add(txtBairro)
-                            .add(txtCEP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)))
-                    .add(painelLayout.createSequentialGroup()
                         .add(lblObs)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(spObs)))
+                        .add(spObs))
+                    .add(painelLayout.createSequentialGroup()
+                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(lblEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 59, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(lblCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 63, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(lblUF)
+                            .add(lblTelefone))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(painelLayout.createSequentialGroup()
+                                .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 104, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblEmail)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtEmail)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblAniversario)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(txtDtAniversario, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 84, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(painelLayout.createSequentialGroup()
+                                .add(cmbUF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 232, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(lblMunicipio)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(cmbMunicipio, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .add(painelLayout.createSequentialGroup()
+                                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(painelLayout.createSequentialGroup()
+                                        .add(txtCPF_CNPJ, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 121, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblNome)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(txtNome)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblRG_IE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(txtRG_IE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 102, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblCEP)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED))
+                                    .add(painelLayout.createSequentialGroup()
+                                        .add(txtEndereco, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 232, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblNumero)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(txtNumero, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 54, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblComplemento)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(txtComplemento)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblBairro)
+                                        .add(9, 9, 9)))
+                                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                                    .add(txtBairro)
+                                    .add(txtCEP, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE))))))
                 .addContainerGap())
         );
         painelLayout.setVerticalGroup(
@@ -434,15 +448,19 @@ public class Clientes extends javax.swing.JDialog {
                     .add(lblUF)
                     .add(cmbUF, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(lblMunicipio)
-                    .add(cmbMunicipio, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(cmbMunicipio, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(lblTelefone)
                     .add(lblEmail)
                     .add(txtEmail, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(txtTelefone, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblAniversario)
+                    .add(txtDtAniversario, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(painelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(lblObs)
-                    .add(spObs, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(spObs, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 45, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(lblObs))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -680,6 +698,7 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JButton btnSalvar;
     private javax.swing.JComboBox cmbMunicipio;
     private javax.swing.JComboBox cmbUF;
+    private javax.swing.JLabel lblAniversario;
     private javax.swing.JLabel lblBairro;
     private javax.swing.JLabel lblCEP;
     private javax.swing.JLabel lblCPF_CNPJ;
@@ -704,6 +723,7 @@ public class Clientes extends javax.swing.JDialog {
     private javax.swing.JFormattedTextField txtCEP;
     private javax.swing.JTextField txtCPF_CNPJ;
     private javax.swing.JTextField txtComplemento;
+    private javax.swing.JFormattedTextField txtDtAniversario;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtEndereco;
     private javax.swing.JTextField txtFiltro;
@@ -742,6 +762,7 @@ public class Clientes extends javax.swing.JDialog {
             cliente.setSisClienteTelefone(txtTelefone.getText());
             cliente.setSisClienteEmail(txtEmail.getText());
             cliente.setSisClienteData(new Date());
+            cliente.setSisClienteAniversario(Util.getData(txtDtAniversario.getText()));
             cliente.setSisClienteObservacao(taObs.getText());
             cliente.setSisClienteSinc(false);
 
@@ -825,7 +846,7 @@ public class Clientes extends javax.swing.JDialog {
             for (SisCliente cli : clis) {
                 Object[] obj = new Object[]{cli.getSisClienteId(), cli.getSisClienteDoc(), cli.getSisClienteNome(), cli.getSisClienteDoc1(), cli.getSisClienteEndereco(),
                     cli.getSisClienteNumero(), cli.getSisClienteComplemento(), cli.getSisClienteBairro(), cli.getSisClienteCep(),
-                    cli.getSisMunicipio(), cli.getSisClienteTelefone(), cli.getSisClienteEmail(), cli.getSisClienteObservacao(), cli.isSisClienteSinc()
+                    cli.getSisMunicipio(), cli.getSisClienteTelefone(), cli.getSisClienteEmail(), Util.getData(cli.getSisClienteAniversario()), cli.getSisClienteObservacao(), cli.isSisClienteSinc()
                 };
                 dtm.addRow(obj);
             }
@@ -855,6 +876,7 @@ public class Clientes extends javax.swing.JDialog {
             Util.selecionarCombo(cmbMunicipio, Caixa.getInstancia().getEmpresa().getSisMunicipio().getSisMunicipioDescricao());
             txtTelefone.setText("");
             txtEmail.setText("");
+            txtDtAniversario.setText(null);
             taObs.setText("");
         } else {
             int rowModel = tabClientes.convertRowIndexToModel(row);
@@ -872,7 +894,8 @@ public class Clientes extends javax.swing.JDialog {
             Util.selecionarCombo(cmbMunicipio, mun.getSisMunicipioDescricao());
             txtTelefone.setText(tabClientes.getModel().getValueAt(rowModel, 10).toString());
             txtEmail.setText(tabClientes.getModel().getValueAt(rowModel, 11).toString());
-            taObs.setText(tabClientes.getModel().getValueAt(rowModel, 12).toString());
+            txtDtAniversario.setText(tabClientes.getModel().getValueAt(rowModel, 12) != null ? tabClientes.getModel().getValueAt(rowModel, 12).toString() : null);
+            taObs.setText(tabClientes.getModel().getValueAt(rowModel, 13).toString());
         }
     }
 

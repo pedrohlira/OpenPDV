@@ -85,7 +85,7 @@
         <mkdir dir="${dist.jar.dir}/nfe"/>
 
         <copy todir="${dist.jar.dir}/db">
-            <fileset dir="db" includes="openpdv.h2.db,banco.txt"/>
+            <fileset dir="db" includes="banco.txt,backup.bat,backup.xml,limpeza.txt,mysqldump.exe"/>
         </copy>
         
         <copy todir="${dist.jar.dir}/dlls">

@@ -902,7 +902,9 @@ CREATE TABLE sis_cliente (
     sis_cliente_telefone character varying(14) NOT NULL,
     sis_cliente_email character varying(100) NOT NULL,
     sis_cliente_data timestamp without time zone NOT NULL,
-	sis_cliente_observacao character varying(255) NOT NULL,
+    sis_cliente_aniversario date NULL,
+    sis_cliente_sinc boolean NOT NULL,
+    sis_cliente_observacao character varying(255) NOT NULL,
     ead character varying(260) NULL
 );
 

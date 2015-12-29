@@ -1,0 +1,1 @@
+C:\OpenPDV\db\mysqldump -h localhost -u openpdv --password=openpdv openpdv --result-file=C:\OpenPDV\db\backup.sql --add-locks --extended-insert --lock-tables --dump-date --disable-keys --tz-utc --comments --create-options --quote-names

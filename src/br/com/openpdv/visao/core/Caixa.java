@@ -1482,18 +1482,19 @@ public class Caixa extends JFrame {
             AsyncCallback<SisCliente> async = new AsyncCallback<SisCliente>() {
                 @Override
                 public void sucesso(SisCliente resultado) {
-                    if (resultado != null && resultado.isCpfCupom()) {
-                        String[] resp = ecf.enviar(EComando.ECF_IdentificaConsumidor,
-                                resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
-                        if (IECF.ERRO.equals(resp[0])) {
-                            falha(new Exception(resp[1]));
-                        }
-                    }
-
                     try {
+                        if (resultado != null && resultado.isCpfCupom()) {
+                            String[] resp = ecf.enviar(EComando.ECF_IdentificaConsumidor,
+                                    resultado.getSisClienteDoc(), resultado.getSisClienteNome(), resultado.getSisClienteEndereco());
+                            if (IECF.ERRO.equals(resp[0])) {
+                                falha(new Exception(resp[1]));
+                            }
+                        }
+
                         new ComandoAbrirVenda(resultado).executar();
+                        venda.setEcfVendaObservacao(ident.getTxtObservacao().getText());
                         modoAberto();
-                    } catch (OpenPdvException ex) {
+                    } catch (Exception ex) {
                         statusMenus(modo);
                         log.error(ex);
                         JOptionPane.showMessageDialog(caixa, "Erro ao abrir a venda.", "Venda", JOptionPane.ERROR_MESSAGE);
@@ -1670,7 +1671,8 @@ public class Caixa extends JFrame {
     private void mnuIdentificarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mnuIdentificarMouseClicked
         if (mnuIdentificar.isEnabled()) {
             statusMenus(EModo.OFF);
-            Identificar ident = Identificar.getInstancia(new AsyncCallback<SisCliente>() {
+            final Identificar ident = Identificar.getInstancia(null);
+            AsyncCallback<SisCliente> async = new AsyncCallback<SisCliente>() {
                 @Override
                 public void sucesso(SisCliente resultado) {
                     if (resultado != null) {
@@ -1680,6 +1682,7 @@ public class Caixa extends JFrame {
                         }
                         venda.setSisVendedor(resultado.getVendedor());
                     }
+                    venda.setEcfVendaObservacao(ident.getTxtObservacao().getText());
                     statusMenus(modo);
                 }
 
@@ -1689,7 +1692,9 @@ public class Caixa extends JFrame {
                     log.error("Erro na identificacao do cliente.", excecao);
                     JOptionPane.showMessageDialog(caixa, "Não foi possível identificar o cliente.", "Identificar", JOptionPane.WARNING_MESSAGE);
                 }
-            });
+            };
+
+            ident.setAsync(async);
             ident.getChkRecuperar().setEnabled(false);
             ident.setVisible(true);
         }

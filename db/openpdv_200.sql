@@ -52,6 +52,9 @@ CREATE TABLE sis_cliente (
   sis_cliente_telefone varchar(100) NOT NULL,
   sis_cliente_email varchar(100) NOT NULL,
   sis_cliente_data datetime NOT NULL,
+  sis_cliente_aniversario date NULL,
+  sis_cliente_sinc bit(1) NOT NULL,
+  sis_cliente_observacao varchar(255) NOT NULL,
   ead varchar(260) NULL,
   PRIMARY KEY (sis_cliente_id),
   CONSTRAINT FK_sis_cliente_1 FOREIGN KEY (sis_municipio_id) REFERENCES sis_municipio (sis_municipio_id) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -119,14 +122,6 @@ CREATE TABLE prod_produto (
   CONSTRAINT FK_prod_produto_1 FOREIGN KEY (prod_embalagem_id) REFERENCES prod_embalagem (prod_embalagem_id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-DROP INDEX IF EXISTS IK_prod_produto_1;
-DROP INDEX IF EXISTS IK_prod_produto_2;
-DROP INDEX IF EXISTS IK_prod_produto_3;
-DROP INDEX IF EXISTS IK_prod_produto_4;
-DROP INDEX IF EXISTS IK_prod_produto_5;
-DROP INDEX IF EXISTS IK_prod_produto_6;
-DROP INDEX IF EXISTS IK_prod_produto_7;
-DROP INDEX IF EXISTS IK_prod_produto_8;
 CREATE INDEX IK_prod_produto_1 ON prod_produto (prod_produto_barra);
 CREATE INDEX IK_prod_produto_2 ON prod_produto (prod_produto_descricao);
 CREATE INDEX IK_prod_produto_3 ON prod_produto (prod_produto_referencia);

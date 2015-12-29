@@ -56,7 +56,6 @@ public class Fechamento extends javax.swing.JDialog {
     private int tefs;
     private int limite;
     private EModo modo;
-    private String obs;
 
     /**
      * Construtor padrao.
@@ -1016,7 +1015,7 @@ public class Fechamento extends javax.swing.JDialog {
                             // caso o pagamento seja menor que o total restante, podendo ter outro cartao
                             if (total.compareTo(apagar.subtract(pago)) < 0) {
                                 // confirma e gera o backup
-                                FileUtils.copy(arquivo, arquivo.replace("pendente", "backup"));
+                                FileUtils.move(arquivo, arquivo.replace("pendente", "backup"));
                                 arquivo = arquivo.replace("pendente", "backup");
                                 TEF.confirmarTransacao(id, true);
                                 lblTEF.setText("TEF [" + msg + "]");
@@ -1237,7 +1236,7 @@ public class Fechamento extends javax.swing.JDialog {
                     if (pagDinheiro) {
                         ECF.getInstancia().enviar(EComando.ECF_AbreGaveta);
                     }
-                    new ComandoFecharVenda(getPagamentos(), total.doubleValue(), acres.subtract(desc).doubleValue(), troco.doubleValue(), obs).executar();
+                    new ComandoFecharVenda(getPagamentos(), total.doubleValue(), acres.subtract(desc).doubleValue(), troco.doubleValue()).executar();
                 } catch (OpenPdvException ex) {
                     log.error("Erro ao fechar a venda.", ex);
                     cancelar();
@@ -1595,14 +1594,6 @@ public class Fechamento extends javax.swing.JDialog {
 
     public void setBtnTroca(JButton btnTroca) {
         this.btnTroca = btnTroca;
-    }
-
-    public String getObs() {
-        return obs;
-    }
-
-    public void setObs(String obs) {
-        this.obs = obs;
     }
 
     public BigDecimal getFalta() {

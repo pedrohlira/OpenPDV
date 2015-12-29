@@ -52,6 +52,7 @@ CREATE TABLE sis_cliente (
   sis_cliente_telefone varchar(14) NOT NULL,
   sis_cliente_email varchar(100) NOT NULL,
   sis_cliente_data datetime NOT NULL,
+  sis_cliente_aniversario date NULL,
   sis_cliente_observacao varchar(255) NOT NULL,
   ead varchar(260) NULL,
   PRIMARY KEY (sis_cliente_id),

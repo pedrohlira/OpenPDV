@@ -1,0 +1,8 @@
+Migracao H2 para MySQL
+
+1 - Instalar o MySQL + WordBench;
+2 - Criar o banco de dados com nome openpdv, criar usuario com nome openpdv com senha openpdv e dar permissao completa ao banco openpdv;
+3 - Executar a importacao do openpdv_mysql.sql para criacao das tabelas;
+4 - Cadastrar a empresa, contador, impressora e ultima Z com os totalizadores;
+5 - Copiar as novas LIBs de acesso ao banco, arquivos de conf e de banco alem do OpenPDV.jar;
+6 - Agendar nas tarefas do windows o backup do mysql, usando o backup.bat

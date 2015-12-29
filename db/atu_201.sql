@@ -23,5 +23,6 @@ ALTER TABLE prod_produto ALTER COLUMN prod_produto_descricao varchar(120) NOT NU
 ALTER TABLE prod_produto ALTER COLUMN prod_produto_referencia varchar(60) NOT NULL;
 /* Adicionando alguns campos nas tabelas */
 ALTER TABLE sis_cliente ADD COLUMN sis_cliente_observacao varchar(255) NOT NULL BEFORE ead;
+ALTER TABLE sis_cliente ADD COLUMN sis_cliente_aniversario DATE NULL BEFORE sis_cliente_sinc;
 /* Remove a tabela prod_grade_tipo, nao sera mais usada */
 DROP TABLE prod_grade_tipo;

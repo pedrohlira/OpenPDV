@@ -44,6 +44,9 @@ public class SisCliente extends Dados implements Serializable {
     @Column(name = "sis_cliente_data")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sisClienteData;
+    @Column(name = "sis_cliente_aniversario")
+    @Temporal(TemporalType.DATE)
+    private Date sisClienteAniversario;
     @Column(name = "sis_cliente_observacao")
     private String sisClienteObservacao;
     @Column(name = "sis_cliente_sinc")
@@ -187,6 +190,14 @@ public class SisCliente extends Dados implements Serializable {
 
     public void setSisClienteData(Date sisClienteData) {
         this.sisClienteData = sisClienteData;
+    }
+
+    public Date getSisClienteAniversario() {
+        return sisClienteAniversario;
+    }
+
+    public void setSisClienteAniversario(Date sisClienteAniversario) {
+        this.sisClienteAniversario = sisClienteAniversario;
     }
 
     public String getSisClienteObservacao() {

@@ -7,17 +7,12 @@ import br.com.openpdv.modelo.core.OpenPdvException;
 import br.com.openpdv.modelo.core.Sql;
 import br.com.openpdv.modelo.core.filtro.ECompara;
 import br.com.openpdv.modelo.core.filtro.FiltroNumero;
-import br.com.openpdv.modelo.core.parametro.ParametroGrupo;
-import br.com.openpdv.modelo.core.parametro.ParametroBinario;
 import br.com.openpdv.modelo.core.parametro.ParametroFormula;
-import br.com.openpdv.modelo.core.parametro.ParametroNumero;
-import br.com.openpdv.modelo.core.parametro.ParametroObjeto;
 import br.com.openpdv.modelo.ecf.EcfTroca;
 import br.com.openpdv.modelo.ecf.EcfTrocaProduto;
 import br.com.openpdv.modelo.ecf.EcfVenda;
 import br.com.openpdv.modelo.ecf.EcfVendaProduto;
 import br.com.openpdv.modelo.produto.ProdGrade;
-import br.com.openpdv.modelo.produto.ProdProduto;
 import br.com.openpdv.modelo.sistema.SisUsuario;
 import br.com.openpdv.visao.core.Aguarde;
 import br.com.openpdv.visao.core.Caixa;
@@ -101,13 +96,10 @@ public class ComandoCancelarVenda implements IComando {
                         public void run() {
                             try {
                                 List<EcfVenda> lista = new ArrayList<>();
-                                venda.setEcfVendaCancelada(true);
-                                venda.setEcfTrocas(null);
                                 lista.add(venda);
                                 lista = ComandoEnviarDados.getInstancia().enviar("venda", lista);
                                 // marca a venda como sincronizada
                                 if (!lista.isEmpty()) {
-                                    CoreService service = new CoreService();
                                     venda.setEcfVendaSinc(true);
                                     service.salvar(venda);
                                 }
@@ -175,9 +167,10 @@ public class ComandoCancelarVenda implements IComando {
                     qtd /= vp.getProdProduto().getProdEmbalagem().getProdEmbalagemUnidade();
                 }
                 // atualiza o estoque
-                ProdProduto prod = vp.getProdProduto();
-                prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() + qtd);
-                service.salvar(prod);
+                ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", qtd);
+                FiltroNumero fn = new FiltroNumero("prodProdutoId", ECompara.IGUAL, vp.getProdProduto().getId());
+                Sql sql = new Sql(vp.getProdProduto(), EComandoSQL.ATUALIZAR, fn, pf);
+                sqls.add(sql);
                 // adiciona estoque da grade caso o produto tenha
                 for (ProdGrade grade : vp.getProdProduto().getProdGrades()) {
                     if (grade.getProdGradeBarra().equals(vp.getEcfVendaProdutoBarra())) {
@@ -209,17 +202,18 @@ public class ComandoCancelarVenda implements IComando {
                     }
 
                     // atualiza o estoque
-                    ProdProduto prod = tp.getProdProduto();
-                    prod.setProdProdutoEstoque(prod.getProdProdutoEstoque() - qtd);
-                    service.salvar(prod);
+                    ParametroFormula pf = new ParametroFormula("prodProdutoEstoque", -1 * qtd);
+                    FiltroNumero fn2 = new FiltroNumero("prodProdutoId", ECompara.IGUAL, tp.getProdProduto().getId());
+                    Sql sql2 = new Sql(tp.getProdProduto(), EComandoSQL.ATUALIZAR, fn2, pf);
+                    sqls.add(sql2);
                     // remove estoque da grade caso o produto tenha
                     if (tp.getProdProduto().getProdGrades() != null) {
                         for (ProdGrade grade : tp.getProdProduto().getProdGrades()) {
                             if (grade.getProdGradeBarra().equals(tp.getEcfTrocaProdutoBarra())) {
                                 ParametroFormula pf2 = new ParametroFormula("prodGradeEstoque", -1 * qtd);
-                                FiltroNumero fn2 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
-                                Sql sql2 = new Sql(grade, EComandoSQL.ATUALIZAR, fn2, pf2);
-                                sqls.add(sql2);
+                                FiltroNumero fn3 = new FiltroNumero("prodGradeId", ECompara.IGUAL, grade.getId());
+                                Sql sql3 = new Sql(grade, EComandoSQL.ATUALIZAR, fn3, pf2);
+                                sqls.add(sql3);
                                 break;
                             }
                         }
@@ -228,17 +222,19 @@ public class ComandoCancelarVenda implements IComando {
             }
         }
 
+        // efetiva as instrucoes SQLs.
+        service.executar(sqls.toArray(new Sql[]{}));
+        
         // atualiza o status da venda
         if (!venda.getEcfVendaFechada()) {
             venda.setEcfVendaBruto(valor);
             venda.setEcfVendaLiquido(valor);
         }
+        venda.setEcfTrocas(null);
         venda.setEcfVendaCancelada(true);
-        venda.setEcfVendaSinc(true);
-        service.salvar(venda);
-        
-        // efetiva as instrucoes SQLs.
-        service.executar(sqls.toArray(new Sql[]{}));
+        venda.setEcfVendaSinc(false);
+        // recupera a venda do banco completa e atualizada
+        this.venda = (EcfVenda) service.salvar(venda);
     }
 
     /**
